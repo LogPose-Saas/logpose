@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LogPose — Pilotez votre rentabilité</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ════════════════════════════════════════════
+// CONFIGURATION SUPABASE — remplace par tes clés
+// ════════════════════════════════════════════
+const SUPABASE_URL  = 'https://ppmdabvtdoaodzzjqqsc.supabase.co'; // ← ta Project URL
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.XXXXXXXXsb_publishable_Bx3WGtuoNlSlQU5MBtJsnQ_Fljdsow1'; // ← ta anon/public key
+// ════════════════════════════════════════════
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+<style>
+:root{
+  --font-body:'Plus Jakarta Sans',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius:14px;--radius-sm:9px;--radius-xs:6px;
+  --tr:0.2s cubic-bezier(.4,0,.2,1);
+  --sw:240px;
+}
+[data-theme="dark"]{
+  --bg:#06080f;--bg-s:#0b0f1c;--bg-c:#101624;--bg-h:#16202e;
+  --bd:#18253a;--bd-s:#223050;--bd-f:#3b7eff;
+  --t1:#dde6f5;--t2:#6b85a8;--t3:#2e4460;
+  --ac:#3b7eff;--ag:rgba(59,126,255,.12);
+  --gr:#0ea572;--gr-b:rgba(14,165,114,.11);
+  --rd:#f43f5e;--rd-b:rgba(244,63,94,.11);
+  --am:#f59e0b;--am-b:rgba(245,158,11,.11);
+  --pu:#9b87f5;--pu-b:rgba(155,135,245,.11);
+  --tl:#22d3c8;--tl-b:rgba(34,211,200,.11);
+  --pk:#f472b6;--pk-b:rgba(244,114,182,.11);
+  --in:#070b14;--sh:0 8px 32px rgba(0,0,0,.45);
+  --cg:rgba(255,255,255,.04);
+}
+[data-theme="light"]{
+  --bg:#f2f6fc;--bg-s:#eaf0f9;--bg-c:#fff;--bg-h:#f7faff;
+  --bd:#dce6f5;--bd-s:#c2d2ea;--bd-f:#2563eb;
+  --t1:#0c1828;--t2:#4e6480;--t3:#9eb3ce;
+  --ac:#2563eb;--ag:rgba(37,99,235,.08);
+  --gr:#059669;--gr-b:rgba(5,150,105,.09);
+  --rd:#e11d48;--rd-b:rgba(225,29,72,.09);
+  --am:#d97706;--am-b:rgba(217,119,6,.09);
+  --pu:#7c3aed;--pu-b:rgba(124,58,237,.09);
+  --tl:#0d9488;--tl-b:rgba(13,148,136,.09);
+  --pk:#db2777;--pk-b:rgba(219,39,119,.09);
+  --in:#f8faff;--sh:0 4px 20px rgba(0,0,0,.07);
+  --cg:rgba(0,0,0,.05);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-height:100vh;transition:background var(--tr),color var(--tr);font-size:14px;line-height:1.55}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd-s);border-radius:99px}
+
+/* ─ ONBOARDING ─ */
+.onb{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center}
+.onb-card{background:var(--bg-c);border:1px solid var(--bd);border-radius:20px;padding:40px;max-width:520px;width:90%;box-shadow:var(--sh)}
+.onb-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.onb-icon{width:40px;height:40px;background:var(--ac);border-radius:11px;display:flex;align-items:center;justify-content:center}
+.onb-brand{font-weight:800;font-size:20px;letter-spacing:-.5px}
+.onb-brand-sub{font-size:10px;color:var(--t2);font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase}
+.onb-steps{display:flex;gap:6px;margin-bottom:28px}
+.onb-step{flex:1;height:3px;border-radius:99px;background:var(--bd);transition:background var(--tr)}
+.onb-step.done{background:var(--ac)}
+.onb-title{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:8px}
+.onb-desc{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:24px}
+.onb-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.onb-lbl{font-size:11px;font-weight:600;color:var(--t2);letter-spacing:.04em;text-transform:uppercase}
+.onb-input,.onb-sel{background:var(--in);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:10px 14px;color:var(--t1);font-family:var(--font-body);font-size:13px;outline:none;width:100%;transition:border-color var(--tr);-webkit-appearance:none}
+.onb-input:focus,.onb-sel:focus{border-color:var(--bd-f);box-shadow:0 0 0 3px var(--ag)}
+.onb-sel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b85a8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;cursor:pointer}
+.onb-sel option{background:var(--bg-c)}
+.onb-actions{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.onb-skip{font-size:12px;color:var(--t3);cursor:pointer;text-decoration:underline}
+.onb-skip:hover{color:var(--t2)}
+.onb-feature{display:flex;align-items:flex-start;gap:11px;padding:11px 14px;background:var(--bg-s);border-radius:var(--radius-sm);border:1px solid var(--bd);margin-bottom:8px}
+.onb-feat-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.onb-feat-title{font-size:12.5px;font-weight:600;margin-bottom:1px}
+.onb-feat-desc{font-size:11px;color:var(--t2);line-height:1.5}
+
+/* ─ LAYOUT ─ */
+.app{display:flex;min-height:100vh}
+.sb{width:var(--sw);background:var(--bg-s);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:all var(--tr);overflow-y:auto;overflow-x:hidden}
+.main{margin-left:var(--sw);flex:1;padding:24px 28px 88px;transition:margin-left var(--tr)}
+.savebar{transition:left var(--tr)}
+
+/* ─ SIDEBAR COLLAPSED ─ */
+.sb.collapsed{width:56px}
+.sb.collapsed .sb-name,.sb.collapsed .sb-sub,.sb.collapsed .sb-lbl,
+.sb.collapsed .sb-item span:not(.sb-item-icon),.sb.collapsed .sb-badge,
+.sb.collapsed .theme-txt,.sb.collapsed .tog,
+.sb.collapsed .sb-sect > .sb-lbl{display:none}
+.sb.collapsed .sb-logo{padding:16px 12px;justify-content:center}
+.sb.collapsed .sb-icon{margin:0}
+.sb.collapsed .sb-sect{padding:0 6px}
+.sb.collapsed .sb-item{padding:9px;justify-content:center;gap:0}
+.sb.collapsed .sb-item-icon{opacity:.7;width:20px;height:20px}
+.sb.collapsed .sb-item.active .sb-item-icon{opacity:1}
+.sb.collapsed .sb-bottom{padding:10px 6px;align-items:center}
+.sb.collapsed .theme-btn{padding:9px;justify-content:center;border:none;background:transparent}
+.sb.collapsed .sb-toggle-btn{justify-content:center}
+.app.sb-collapsed .main{margin-left:56px}
+.app.sb-collapsed .savebar{left:56px}
+
+/* ─ SIDEBAR TOGGLE BUTTON ─ */
+.sb-toggle-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;color:var(--t2);font-size:12px;font-weight:500;transition:all var(--tr);margin:4px 10px 0;border:1px solid var(--bd);background:transparent;width:calc(100% - 20px)}
+.sb-toggle-btn:hover{background:var(--bg-c);color:var(--t1);border-color:var(--bd-s)}
+.sb.collapsed .sb-toggle-btn{width:36px;margin:4px auto 0;padding:8px;justify-content:center;border-radius:var(--radius-sm)}
+
+/* ─ MOBILE HEADER ─ */
+.mob-header{display:none;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-s);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:99}
+.mob-menu-btn{width:36px;height:36px;border-radius:8px;background:var(--bg-c);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.mob-title{font-weight:700;font-size:16px}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+
+/* ─ SIDEBAR ─ */
+.sb-logo{padding:18px 16px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.sb-icon{width:32px;height:32px;background:var(--ac);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-name{font-weight:800;font-size:16px;letter-spacing:-.4px}
+.sb-sub{font-size:9px;color:var(--t3);font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;margin-top:1px}
+.sb-sect{padding:0 10px;margin-top:4px}
+.sb-lbl{font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);padding:10px 8px 3px;font-family:var(--font-mono)}
+.sb-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;color:var(--t2);font-size:13px;font-weight:400;transition:all var(--tr);margin-bottom:1px;user-select:none}
+.sb-item:hover{background:var(--bg-c);color:var(--t1)}
+.sb-item.active{background:var(--ag);color:var(--ac);font-weight:600}
+.sb-item-icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:.6}
+.sb-item.active .sb-item-icon{opacity:1}
+.sb-badge{margin-left:auto;font-size:9px;font-weight:700;background:var(--rd-b);color:var(--rd);padding:1px 6px;border-radius:99px;font-family:var(--font-mono)}
+.sb-bottom{margin-top:auto;padding:12px 10px;border-top:1px solid var(--bd)}
+.theme-btn{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg-c);border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--bd);transition:all var(--tr)}
+.theme-btn:hover{border-color:var(--bd-s)}
+.theme-txt{font-size:12px;font-weight:500;color:var(--t2)}
+.tog{width:32px;height:18px;background:var(--bd-s);border-radius:99px;position:relative;transition:background var(--tr)}
+[data-theme="light"] .tog{background:var(--ac)}
+.tog-k{width:14px;height:14px;background:var(--t1);border-radius:50%;position:absolute;top:2px;left:2px;transition:all var(--tr)}
+[data-theme="light"] .tog-k{transform:translateX(14px);background:#fff}
+
+/* ─ TOPBAR ─ */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:14px;flex-wrap:wrap}
+.page-title{font-size:20px;font-weight:700;letter-spacing:-.4px}
+.page-sub{font-size:12px;color:var(--t2);margin-top:2px}
+.page-actions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
+
+/* ─ PANELS ─ */
+.panel{display:none}.panel.active{display:block}
+
+/* ─ BUTTONS ─ */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all var(--tr);border:none;white-space:nowrap;letter-spacing:-.1px}
+.btn-primary{background:var(--ac);color:#fff}.btn-primary:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 4px 14px rgba(59,126,255,.35)}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--bd)}.btn-ghost:hover{border-color:var(--bd-s);color:var(--t1);background:var(--bg-c)}
+.btn-sm{padding:6px 13px;font-size:12px}
+.btn-xs{padding:4px 9px;font-size:11px}
+
+/* ─ CARDS ─ */
+.card{background:var(--bg-c);border:1px solid var(--bd);border-radius:var(--radius);padding:20px;margin-bottom:14px;transition:all var(--tr)}
+.card-title{font-size:14px;font-weight:700;letter-spacing:-.2px;margin-bottom:3px}
+.card-sub{font-size:11.5px;color:var(--t2);line-height:1.5}
+
+/* ─ SEC LABEL ─ */
+.slbl{font-size:10px;font-weight:700;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+
+/* ─ TABS ─ */
+.tabs{display:flex;gap:3px;background:var(--bg-s);border:1px solid var(--bd);border-radius:10px;padding:3px;margin-bottom:20px;width:fit-content;flex-wrap:wrap}
+.tab{padding:7px 16px;border-radius:7px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all var(--tr)}
+.tab:hover{color:var(--t1)}
+.tab.active{background:var(--bg-c);color:var(--t1);font-weight:700;box-shadow:0 1px 5px rgba(0,0,0,.12)}
+
+/* ─ KPI ─ */
+.kpi-grid{display:grid;gap:12px;margin-bottom:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.kpi-card{background:var(--bg-c);border:1px solid var(--bd);border-radius:var(--radius);padding:16px 18px;position:relative;overflow:hidden;transition:all var(--tr)}
+.kpi-card:hover{border-color:var(--bd-s);box-shadow:var(--sh);transform:translateY(-1px)}
+.kpi-acc{position:absolute;top:0;left:0;right:0;height:2.5px;border-radius:var(--radius) var(--radius) 0 0}
+.kpi-lbl{font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t2);margin-bottom:9px;font-family:var(--font-mono)}
+.kpi-val{font-size:24px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:6px}
+.kpi-d{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px}
+.du{background:var(--gr-b);color:var(--gr)}.dd{background:var(--rd-b);color:var(--rd)}.dn{background:var(--am-b);color:var(--am)}
+.kpi-sub{font-size:10.5px;color:var(--t3);margin-top:4px}
+
+/* ─ ALERTS ─ */
+.alerts{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.alrt{display:flex;align-items:center;gap:7px;padding:6px 13px;border-radius:99px;font-size:12px;font-weight:600}
+.alrt-r{background:var(--rd-b);color:var(--rd);border:1px solid rgba(244,63,94,.2)}
+.alrt-a{background:var(--am-b);color:var(--am);border:1px solid rgba(245,158,11,.2)}
+.alrt-g{background:var(--gr-b);color:var(--gr);border:1px solid rgba(14,165,114,.2)}
+.alrt-dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 1.8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ─ CHARTS ─ */
+.cg2{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:14px}
+.cg3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.cgeq{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.cwrap{position:relative;height:190px}
+.cwrap-sm{position:relative;height:120px}
+.cwrap-lg{position:relative;height:230px}
+
+/* ─ FORM ─ */
+.fg{display:grid;gap:14px;margin-bottom:14px}
+.fg3{grid-template-columns:repeat(3,1fr)}
+.fg2{grid-template-columns:repeat(2,1fr)}
+.fg4{grid-template-columns:repeat(4,1fr)}
+.fld{display:flex;flex-direction:column;gap:5px}
+.flbl{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--t2);font-family:var(--font-mono)}
+.finp,.fsel{background:var(--in);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:9px 13px;color:var(--t1);font-family:var(--font-body);font-size:13px;font-weight:400;transition:all var(--tr);outline:none;width:100%;-webkit-appearance:none;appearance:none}
+.finp:focus,.fsel:focus{border-color:var(--bd-f);box-shadow:0 0 0 3px var(--ag)}
+.fsel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b85a8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:32px;cursor:pointer}
+.fsel option{background:var(--bg-c)}
+.ppreview{background:var(--ag);border:1px solid rgba(59,126,255,.2);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ppreview-lbl{font-size:11px;color:var(--t2)}
+.ppreview-val{font-family:var(--font-mono);font-size:12px;color:var(--ac);font-weight:600}
+
+/* ─ TABLE ─ */
+.tbl-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.dtbl{width:100%;border-collapse:collapse}
+.dtbl th{font-size:9.5px;font-weight:700;font-family:var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:7px 11px;text-align:left;border-bottom:1px solid var(--bd)}
+.dtbl td{padding:9px 11px;border-bottom:1px solid var(--bd);font-size:13px;vertical-align:middle}
+.dtbl tr:last-child td{border-bottom:none}
+.dtbl tr:hover td{background:var(--bg-h)}
+.tdinp,.tdsel{background:transparent;border:1px solid transparent;border-radius:5px;padding:4px 8px;color:var(--t1);font-family:var(--font-body);font-size:13px;transition:all var(--tr);outline:none;width:100%;-webkit-appearance:none;appearance:none}
+.tdinp:focus,.tdsel:focus{background:var(--in);border-color:var(--bd-f);box-shadow:0 0 0 2px var(--ag)}
+.tdsel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b85a8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;padding-right:22px;cursor:pointer}
+.tdsel option{background:var(--bg-c)}
+.delbtn{width:26px;height:26px;border-radius:5px;background:transparent;border:1px solid transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all var(--tr);font-family:var(--font-body)}
+.delbtn:hover{background:var(--rd-b);border-color:rgba(244,63,94,.2);color:var(--rd)}
+.addrow{display:flex;gap:7px;padding:10px;background:var(--bg-s);border-radius:var(--radius-sm);border:1px dashed var(--bd);margin-top:8px;flex-wrap:wrap;align-items:center}
+.addrow input,.addrow select{flex:1;min-width:80px;background:var(--in);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:7px 10px;color:var(--t1);font-family:var(--font-body);font-size:13px;outline:none;transition:all var(--tr);-webkit-appearance:none;appearance:none}
+.addrow input:focus,.addrow select:focus{border-color:var(--bd-f);box-shadow:0 0 0 2px var(--ag)}
+.addrow select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b85a8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:22px;cursor:pointer}
+.addrow select option{background:var(--bg-c)}
+
+/* ─ BADGES ─ */
+.bdg{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:99px;letter-spacing:.02em}
+.bdg-gr{background:var(--gr-b);color:var(--gr)}.bdg-am{background:var(--am-b);color:var(--am)}.bdg-rd{background:var(--rd-b);color:var(--rd)}.bdg-pu{background:var(--pu-b);color:var(--pu)}.bdg-tl{background:var(--tl-b);color:var(--tl)}.bdg-ac{background:var(--ag);color:var(--ac)}
+
+/* ─ SAISIE ─ */
+.stbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.stbl th{font-size:9.5px;font-weight:700;font-family:var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:6px 8px;text-align:center;border-bottom:1px solid var(--bd);white-space:nowrap}
+.stbl th:first-child,.stbl th:nth-child(2){text-align:left}
+.stbl td{padding:7px 8px;border-bottom:1px solid var(--bd);text-align:center;vertical-align:middle}
+.stbl tr:last-child td{border-bottom:none;background:var(--bg-s);font-weight:700}
+.stbl tr:hover td{background:var(--bg-h)}
+.stbl tr:last-child:hover td{background:var(--bg-s)}
+.sinp{width:68px;background:transparent;border:1px solid transparent;border-radius:5px;padding:4px 6px;color:var(--t1);font-family:var(--font-mono);font-size:12px;text-align:center;outline:none;transition:all var(--tr)}
+.sinp:focus{background:var(--in);border-color:var(--bd-f);box-shadow:0 0 0 2px var(--ag)}
+.stot{font-family:var(--font-mono);font-size:12px;color:var(--ac);font-weight:700}
+
+/* ─ PROGRESS ─ */
+.pw{background:var(--bd);border-radius:99px;height:6px;overflow:hidden;margin:6px 0}
+.pb{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+
+/* ─ TOP LIST ─ */
+.toplist{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.topitem{display:flex;align-items:center;gap:9px}
+.toprank{width:20px;height:20px;border-radius:50%;background:var(--bg-s);border:1px solid var(--bd);font-size:9.5px;font-family:var(--font-mono);font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--t3);flex-shrink:0}
+.topname{flex:1;font-size:12.5px;font-weight:500}
+.topbarw{width:70px;height:4px;background:var(--bd);border-radius:99px}
+.topbar{height:100%;border-radius:99px}
+.topval{font-size:11.5px;font-family:var(--font-mono);color:var(--t2);min-width:58px;text-align:right}
+
+/* ─ TRESO / PREV ─ */
+.ptbl{width:100%;border-collapse:collapse;font-size:12px}
+.ptbl th{font-size:9px;font-weight:700;font-family:var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:6px 10px;text-align:right;border-bottom:1px solid var(--bd)}
+.ptbl th:first-child{text-align:left}
+.ptbl td{padding:7px 10px;border-bottom:1px solid var(--bd);text-align:right;font-family:var(--font-mono)}
+.ptbl td:first-child{text-align:left;font-family:var(--font-body);font-weight:500;color:var(--t1)}
+.ptbl tr:last-child td{border-bottom:none;font-weight:700;color:var(--ac)}
+.ptbl tr:hover td{background:var(--bg-h)}
+.ppos{color:var(--gr)}.pneg{color:var(--rd)}.pneu{color:var(--t2)}
+
+/* ─ ALERT BOX ─ */
+.abox{padding:12px 14px;border-radius:var(--radius-sm);font-size:12.5px;margin-bottom:9px;display:flex;align-items:flex-start;gap:10px;border-left:3px solid}
+.abox-r{background:var(--rd-b);color:var(--rd);border-color:var(--rd)}
+.abox-a{background:var(--am-b);color:var(--am);border-color:var(--am)}
+.abox-g{background:var(--gr-b);color:var(--gr);border-color:var(--gr)}
+.abox-b{background:var(--ag);color:var(--ac);border-color:var(--ac)}
+.abox-ico{font-size:15px;flex-shrink:0;margin-top:1px}
+.abox-title{font-weight:700;margin-bottom:2px;letter-spacing:-.1px}
+.abox-desc{font-size:11px;opacity:.82;line-height:1.5}
+
+/* ─ MARGE ─ */
+.mrgrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd)}
+.mrgrow:last-child{border-bottom:none}
+.mrgname{flex:1;font-size:13px;font-weight:500}
+.mrgtaux{font-family:var(--font-mono);font-size:13px;font-weight:700}
+
+/* ─ TVA ─ */
+.tvarow{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;background:var(--bg-s);border-radius:var(--radius-sm);border:1px solid var(--bd);margin-bottom:8px}
+.tvarow-lbl{font-size:12.5px;font-weight:500;color:var(--t2)}
+.tvarow-val{font-size:13.5px;font-family:var(--font-mono);font-weight:700}
+.tvanet{padding:15px;border-radius:var(--radius-sm);text-align:center;margin-top:12px}
+.tvanet-lbl{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.tvanet-val{font-size:28px;font-weight:800;letter-spacing:-1.5px}
+
+/* ─ CTRL ─ */
+.ctrlgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.ctrlitem{background:var(--bg-s);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:12px 14px}
+.ctrlval{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.ctrllbl{font-size:11px;font-weight:500;color:var(--t2);margin-top:2px}
+.ctrlst{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;margin-top:6px;font-family:var(--font-mono)}
+
+/* ─ SCENARIO ─ */
+.sccard{background:var(--bg-c);border:1px solid var(--bd);border-radius:var(--radius);padding:18px;margin-bottom:10px;transition:all var(--tr)}
+.sccard:hover{border-color:var(--bd-s)}
+.scc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.scc-name{font-weight:700;font-size:13.5px}
+.scc-res{font-size:22px;font-weight:800;letter-spacing:-.8px}
+
+/* ─ RADIO ─ */
+.rdopt{display:flex;align-items:center;gap:11px;cursor:pointer;padding:10px 13px;border:1px solid var(--bd);border-radius:var(--radius-sm);transition:all var(--tr);margin-bottom:8px}
+.rdopt:has(input:checked){border-color:var(--bd-f);background:var(--ag)}
+.rdopt input{accent-color:var(--ac)}
+.rdopt-title{font-size:13px;font-weight:600}
+.rdopt-sub{font-size:11px;color:var(--t2)}
+
+/* ─ SAVE BAR ─ */
+.savebar{position:fixed;bottom:0;left:var(--sw);right:0;background:var(--bg-s);border-top:1px solid var(--bd);padding:11px 26px;display:flex;align-items:center;justify-content:space-between;z-index:50;transition:all var(--tr)}
+.save-st{font-size:12px;font-weight:500;color:var(--t2);display:flex;align-items:center;gap:8px}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--am);animation:blink 1.8s infinite;flex-shrink:0}
+.sdot.saved{background:var(--gr);animation:none}
+
+/* ─ RESPONSIVE ─ */
+@media(max-width:860px){
+  .sb{transform:translateX(-100%)}
+  .sb.open{transform:translateX(0)}
+  .sb-overlay.open{display:block}
+  .main{margin-left:0;padding:16px 16px 88px}
+  .mob-header{display:flex}
+  .savebar{left:0}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(2,1fr)}
+  .cg2,.cgeq{grid-template-columns:1fr}
+  .cg3{grid-template-columns:1fr}
+  .fg3,.fg4{grid-template-columns:1fr 1fr}
+  .tabs{overflow-x:auto;max-width:100%}
+  .ctrlgrid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:520px){
+  .g4,.g3,.g2{grid-template-columns:1fr}
+  .fg3,.fg4,.fg2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ AUTH ══ -->
+<div id="auth-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:2000;display:flex;align-items:center;justify-content:center">
+  <div style="background:var(--bg-c);border:1px solid var(--bd);border-radius:20px;padding:40px;max-width:420px;width:90%;box-shadow:var(--sh)">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px">
+      <div style="width:38px;height:38px;background:var(--ac);border-radius:10px;display:flex;align-items:center;justify-content:center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      </div>
+      <div>
+        <div style="font-weight:800;font-size:18px;letter-spacing:-.4px">LogPose</div>
+        <div style="font-size:9px;color:var(--t3);font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase">Financial OS</div>
+      </div>
+    </div>
+
+    <!-- Tabs login/register -->
+    <div style="display:flex;background:var(--bg-s);border:1px solid var(--bd);border-radius:9px;padding:3px;margin-bottom:24px">
+      <div id="auth-tab-login" onclick="switchAuthTab('login')" style="flex:1;text-align:center;padding:7px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;background:var(--bg-c);color:var(--t1);box-shadow:0 1px 4px rgba(0,0,0,.12);transition:all .2s">Connexion</div>
+      <div id="auth-tab-register" onclick="switchAuthTab('register')" style="flex:1;text-align:center;padding:7px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;color:var(--t2);transition:all .2s">Créer un compte</div>
+    </div>
+
+    <div id="auth-error" style="display:none;padding:10px 14px;background:var(--rd-b);border:1px solid rgba(244,63,94,.2);border-radius:8px;font-size:12.5px;color:var(--rd);margin-bottom:16px;font-weight:500"></div>
+    <div id="auth-success" style="display:none;padding:10px 14px;background:var(--gr-b);border:1px solid rgba(14,165,114,.2);border-radius:8px;font-size:12.5px;color:var(--gr);margin-bottom:16px;font-weight:500"></div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:10.5px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;font-family:var(--font-mono);display:block;margin-bottom:5px">Adresse e-mail</label>
+        <input id="auth-email" type="email" placeholder="vous@exemple.com" style="width:100%;background:var(--in);border:1px solid var(--bd);border-radius:9px;padding:10px 14px;color:var(--t1);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--bd-f)'" onblur="this.style.borderColor='var(--bd)'">
+      </div>
+      <div>
+        <label style="font-size:10.5px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;font-family:var(--font-mono);display:block;margin-bottom:5px">Mot de passe</label>
+        <input id="auth-password" type="password" placeholder="8 caractères minimum" style="width:100%;background:var(--in);border:1px solid var(--bd);border-radius:9px;padding:10px 14px;color:var(--t1);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--bd-f)'" onblur="this.style.borderColor='var(--bd)'" onkeydown="if(event.key==='Enter')authSubmit()">
+      </div>
+    </div>
+
+    <button onclick="authSubmit()" id="auth-btn" style="width:100%;margin-top:20px;padding:12px;background:var(--ac);color:#fff;border:none;border-radius:9px;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:-.1px">
+      Se connecter
+    </button>
+
+    <div style="text-align:center;margin-top:16px">
+      <span id="auth-forgot" onclick="authForgot()" style="font-size:12px;color:var(--t2);cursor:pointer;text-decoration:underline">Mot de passe oublié ?</span>
+    </div>
+
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--bd);text-align:center;font-size:11px;color:var(--t3)">
+      Vos données sont chiffrées et sécurisées · LogPose 2026
+    </div>
+  </div>
+</div>
+
+<!-- ══ ONBOARDING ══ -->
+<div class="onb" id="onb">
+  <div class="onb-card">
+    <div class="onb-logo">
+      <div class="onb-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+      </div>
+      <div><div class="onb-brand">LogPose</div><div class="onb-brand-sub">Financial OS</div></div>
+    </div>
+    <div class="onb-steps"><div class="onb-step done" id="os1"></div><div class="onb-step" id="os2"></div><div class="onb-step" id="os3"></div></div>
+    <div id="onb-content"></div>
+  </div>
+</div>
+
+<div class="app" style="display:none" id="main-app">
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sb-overlay" id="sb-overlay" onclick="closeMobile()"></div>
+<aside class="sb" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+    </div>
+    <div><div class="sb-name">LogPose</div><div class="sb-sub">Financial OS</div></div>
+  </div>
+
+  <div class="sb-sect">
+    <div class="sb-lbl">Pilotage</div>
+    <div class="sb-item active" onclick="nav('dashboard',this)">
+      <span class="sb-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+      Vue d'ensemble
+    </div>
+    <div class="sb-item" onclick="nav('alertes',this)">
+      <span class="sb-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+      Alertes
+      <span class="sb-badge" id="alert-count">3</span>
+    </div>
+  </div>
+
+  <div class="sb-sect">
+    <div class="sb-lbl">Saisie</div>
+    <div class="sb-item" onclick="nav('ca',this)">
+      <span class="sb-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+      Chiffre d'affaires
+    </div>
+    <div class="sb-item" onclick="nav('charges',this)">
+      <span class="sb-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>
+      Charges
+    </div>
+  </div>
+
+  <div class="sb-sect">
+    <div class="sb-lbl">Analyse</div>
+    <div class="sb-item" onclick="nav('marge',this)">
+      <span class="sb-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>
+      Marge & rentabilité
+    </div>
+    <div class="sb-item" onclick="nav('tva',this)">
+      <span class="sb-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
+      TVA
+    </div>
+    <div class="sb-item" onclick="nav('treso',this)">
+      <span class="sb-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16.1A5 5 0 0 1 5.5 8h.08A5 5 0 0 1 17 4.79"/><path d="M22 12A10 10 0 1 1 12 2"/><path d="M12 12v4"/><path d="M12 8v.01"/></svg></span>
+      Trésorerie
+    </div>
+    <div class="sb-item" onclick="nav('previsionnel',this)">
+      <span class="sb-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+      Prévisionnel
+    </div>
+    <div class="sb-item" onclick="nav('scenarios',this)">
+      <span class="sb-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg></span>
+      Scénarios
+    </div>
+  </div>
+
+  <div class="sb-sect">
+    <div class="sb-lbl">Configuration</div>
+    <div class="sb-item" onclick="nav('parametres',this)">
+      <span class="sb-item-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg></span>
+      Paramètres
+    </div>
+  </div>
+
+  <div class="sb-bottom">
+    <!-- User info -->
+    <div id="sb-user-info" style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg-c);border-radius:var(--radius-sm);border:1px solid var(--bd);margin-bottom:8px;cursor:default">
+      <div id="sb-avatar" style="width:24px;height:24px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">?</div>
+      <div style="flex:1;overflow:hidden">
+        <div id="sb-user-email" style="font-size:11px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">...</div>
+        <div id="sb-plan-badge" style="font-size:9px;font-weight:700;color:var(--gr);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.05em">Gratuit</div>
+      </div>
+      <div onclick="authLogout()" title="Se déconnecter" style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);border-radius:5px;transition:all .2s;flex-shrink:0" onmouseover="this.style.color='var(--rd)'" onmouseout="this.style.color='var(--t3)'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+    </div>
+    <button class="sb-toggle-btn" onclick="toggleSidebar()" id="sb-toggle-btn" title="Réduire / Agrandir le menu">
+      <svg id="sb-toggle-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19l-7-7 7-7"/><path d="M21 19l-7-7 7-7"/></svg>
+      <span id="sb-toggle-txt" style="font-size:12px;font-weight:500">Réduire</span>
+    </button>
+    <div class="theme-btn" onclick="toggleTheme()" style="margin-top:8px">
+      <span class="theme-txt" id="theme-lbl">🌙 Thème sombre</span>
+      <div class="tog"><div class="tog-k"></div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MOBILE HEADER -->
+<div class="mob-header">
+  <div class="mob-menu-btn" onclick="openMobile()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </div>
+  <div class="mob-title">LogPose</div>
+  <div onclick="toggleTheme()" style="cursor:pointer;font-size:18px" id="mob-theme-icon">🌙</div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+
+<!-- ── DASHBOARD ── -->
+<div id="panel-dashboard" class="panel active">
+  <div class="topbar">
+    <div><div class="page-title" id="db-company-name">Mon Entreprise</div><div class="page-sub" id="db-period">Janvier → Décembre 2026 · Données de démonstration</div></div>
+    <div class="page-actions">
+      <select class="fsel" style="width:auto;font-size:12px" onchange="switchPeriod(this.value)">
+        <option value="year">Année complète</option>
+        <option value="q1">T1 — Jan à Mar</option>
+        <option value="q2">T2 — Avr à Jun</option>
+        <option value="q3">T3 — Jul à Sep</option>
+        <option value="q4">T4 — Oct à Déc</option>
+      </select>
+    </div>
+  </div>
+  <div class="alerts">
+    <div class="alrt alrt-r"><div class="alrt-dot"></div>Marge en baisse 2 mois consécutifs</div>
+    <div class="alrt alrt-a"><div class="alrt-dot"></div>TVA à déclarer dans 18 jours — 4 320 €</div>
+    <div class="alrt alrt-a"><div class="alrt-dot"></div>Août historiquement faible</div>
+  </div>
+  <div class="slbl">Résultats clés</div>
+  <div class="kpi-grid g4">
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--ac)"></div><div class="kpi-lbl">Chiffre d'affaires HT</div><div class="kpi-val">105 600 €</div><span class="kpi-d du">↑ +12,4 % vs N-1</span><div class="kpi-sub">Objectif : 120 000 €</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--gr)"></div><div class="kpi-lbl">Marge brute</div><div class="kpi-val">54 800 €</div><span class="kpi-d du">↑ +8,1 % vs N-1</span><div class="kpi-sub">Taux de marge : 51,9 %</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--pu)"></div><div class="kpi-lbl">Résultat net estimé</div><div class="kpi-val">18 240 €</div><span class="kpi-d dd">↓ −3,2 % vs N-1</span><div class="kpi-sub">Après toutes charges</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--rd)"></div><div class="kpi-lbl">TVA nette à reverser</div><div class="kpi-val">4 320 €</div><span class="kpi-d dn">→ Stable vs N-1</span><div class="kpi-sub">Échéance : 20 jan.</div></div>
+  </div>
+  <div class="kpi-grid g4">
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--tl)"></div><div class="kpi-lbl">Marge sur coûts variables</div><div class="kpi-val">36 560 €</div><span class="kpi-d du">↑ +5,4 %</span><div class="kpi-sub">Taux MCV : 34,6 %</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--am)"></div><div class="kpi-lbl">Total charges</div><div class="kpi-val">36 560 €</div><span class="kpi-d dd">↑ +14,2 %</span><div class="kpi-sub">Fixes : 18 320 € · Variables : 18 240 €</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--pk)"></div><div class="kpi-lbl">Panier moyen</div><div class="kpi-val">22,40 €</div><span class="kpi-d du">↑ +4,6 %</span><div class="kpi-sub">4 712 unités vendues</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--gr)"></div><div class="kpi-lbl">Point mort mensuel</div><div class="kpi-val">4 440 €</div><span class="kpi-d dn">→ Stable</span><div class="kpi-sub">CA moyen : 8 800 € / mois</div></div>
+  </div>
+  <div class="cg2">
+    <div class="card"><div class="card-title">CA HT vs Charges — évolution mensuelle</div><div class="card-sub">2026 comparé à N-1</div><div class="cwrap-lg"><canvas id="c-ca-charges"></canvas></div></div>
+    <div class="card"><div class="card-title">Répartition des charges</div><div class="card-sub">Fixe vs Variable</div><div class="cwrap"><canvas id="c-charges-rep"></canvas></div></div>
+  </div>
+  <div class="cg3">
+    <div class="card">
+      <div class="card-title">Seuil de rentabilité</div><div class="card-sub">Point mort annuel : 53 280 €</div>
+      <div class="pw" style="height:8px;margin:14px 0 6px"><div class="pb" style="width:75%;background:linear-gradient(90deg,var(--gr),#34d399)"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--t3)"><span>0 €</span><span style="color:var(--gr);font-weight:700">75 % atteint</span><span>53 280 €</span></div>
+      <div style="margin-top:12px;padding:10px 13px;background:var(--gr-b);border-radius:var(--radius-sm);border:1px solid rgba(14,165,114,.18);text-align:center;font-size:12.5px;color:var(--gr);font-weight:700">📅 Jour de libération : le 15 du mois</div>
+      <div style="margin-top:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--font-mono)">Taux de marge vs taux de marque</div>
+        <div class="tvarow"><span class="tvarow-lbl">Taux de marge global</span><div style="display:flex;align-items:center;gap:7px"><span class="tvarow-val" style="color:var(--gr)">51,9 %</span><span class="bdg bdg-ac" style="font-size:9px">Marge / Coût achat</span></div></div>
+        <div class="tvarow" style="margin-bottom:0"><span class="tvarow-lbl">Taux de marque global</span><div style="display:flex;align-items:center;gap:7px"><span class="tvarow-val" style="color:var(--ac)">34,2 %</span><span class="bdg bdg-ac" style="font-size:9px">Marge / PV HT</span></div></div>
+        <div class="abox abox-b" style="margin-top:10px;margin-bottom:0"><div class="abox-ico">💡</div><div><div class="abox-desc">La grande distribution raisonne en <strong>taux de marque</strong>, l'industrie en <strong>taux de marge</strong>. Les deux sont affichés pour comparer avec votre secteur.</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top articles par CA</div><div class="card-sub">Classement sur la période sélectionnée</div>
+      <div class="toplist">
+        <div class="topitem"><div class="toprank">1</div><div class="topname">Veste légère</div><div class="topbarw"><div class="topbar" style="width:100%;background:var(--ac)"></div></div><div class="topval">26 400 €</div></div>
+        <div class="topitem"><div class="toprank">2</div><div class="topname">Hoodie</div><div class="topbarw"><div class="topbar" style="width:75%;background:var(--pu)"></div></div><div class="topval">19 800 €</div></div>
+        <div class="topitem"><div class="toprank">3</div><div class="topname">Pantalon cargo</div><div class="topbarw"><div class="topbar" style="width:62%;background:var(--tl)"></div></div><div class="topval">16 500 €</div></div>
+        <div class="topitem"><div class="toprank">4</div><div class="topname">T-shirt oversize</div><div class="topbarw"><div class="topbar" style="width:50%;background:var(--gr)"></div></div><div class="topval">13 200 €</div></div>
+        <div class="topitem"><div class="toprank">5</div><div class="topname">Tote bag</div><div class="topbarw"><div class="topbar" style="width:37%;background:var(--am)"></div></div><div class="topval">9 900 €</div></div>
+      </div>
+      <div style="margin-top:12px;padding:9px 12px;background:var(--am-b);border:1px solid rgba(245,158,11,.2);border-radius:var(--radius-sm);font-size:11.5px;color:var(--am);font-weight:600">⚠ Top 3 = 59,4 % du CA — risque de dépendance</div>
+    </div>
+    <div class="card">
+      <div class="card-title">TVA nette</div><div class="card-sub">Période en cours · Solde à reverser</div>
+      <div style="margin-top:12px">
+        <div class="tvarow"><span class="tvarow-lbl">TVA collectée (ventes)</span><span class="tvarow-val" style="color:var(--gr)">+21 120 €</span></div>
+        <div class="tvarow"><span class="tvarow-lbl">TVA déductible (charges)</span><span class="tvarow-val" style="color:var(--ac)">−16 800 €</span></div>
+        <div class="tvanet" style="background:var(--rd-b);border:1px solid rgba(244,63,94,.2)"><div class="tvanet-lbl">À reverser à l'État</div><div class="tvanet-val" style="color:var(--rd)">4 320 €</div></div>
+      </div>
+      <div style="margin-top:14px"><div class="card-sub" style="margin-bottom:8px;font-weight:700">Trésorerie prévisionnelle</div><div class="cwrap-sm"><canvas id="c-treso-mini"></canvas></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SUIVI CA ── -->
+<div id="panel-ca" class="panel">
+  <div class="topbar">
+    <div><div class="page-title">Chiffre d'affaires</div><div class="page-sub">Saisie des quantités vendues · Calcul automatique du CA HT</div></div>
+    <div class="page-actions"><button class="btn btn-ghost btn-sm" onclick="exportCA()">↓ Export CSV</button><button class="btn btn-primary btn-sm" onclick="saveAll()">Enregistrer</button></div>
+  </div>
+  <div class="kpi-grid g4">
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--ac)"></div><div class="kpi-lbl">CA HT total</div><div class="kpi-val">105 600 €</div><span class="kpi-d du">↑ +12,4 %</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--gr)"></div><div class="kpi-lbl">Quantités vendues</div><div class="kpi-val">4 712</div><span class="kpi-d du">↑ +8,2 %</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--pu)"></div><div class="kpi-lbl">Meilleur mois</div><div class="kpi-val">Décembre</div><span class="kpi-d du">10 800 €</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--am)"></div><div class="kpi-lbl">Mois le plus faible</div><div class="kpi-val">Août</div><span class="kpi-d dd">6 400 €</span></div>
+  </div>
+  <div class="card"><div class="tbl-hdr"><div class="card-title">Saisie des quantités vendues</div><div style="font-size:11.5px;color:var(--t2)">Cliquez sur une cellule pour modifier · Le CA HT se calcule automatiquement</div></div><div style="overflow-x:auto"><table class="stbl" id="ca-table"></table></div></div>
+  <div class="cgeq">
+    <div class="card"><div class="card-title">CA HT mensuel 2026</div><div class="card-sub">Évolution sur la période</div><div class="cwrap"><canvas id="c-ca-monthly"></canvas></div></div>
+    <div class="card"><div class="card-title">CA par catégorie</div><div class="card-sub">Répartition du chiffre d'affaires</div><div class="cwrap"><canvas id="c-ca-cat"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ── SUIVI CHARGES ── -->
+<div id="panel-charges" class="panel">
+  <div class="topbar">
+    <div><div class="page-title">Charges</div><div class="page-sub">Saisie des montants mensuels · Distinction Fixe / Variable</div></div>
+    <div class="page-actions"><button class="btn btn-ghost btn-sm" onclick="exportChargesData()">↓ Export CSV</button><button class="btn btn-primary btn-sm" onclick="saveAll()">Enregistrer</button></div>
+  </div>
+  <div class="kpi-grid g4">
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--am)"></div><div class="kpi-lbl">Total charges</div><div class="kpi-val">36 560 €</div><span class="kpi-d dd">↑ +14,2 %</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--pu)"></div><div class="kpi-lbl">Charges fixes</div><div class="kpi-val">18 320 €</div><span class="kpi-d dn">→ Stable</span><div class="kpi-sub">50,1 % du total</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--tl)"></div><div class="kpi-lbl">Charges variables</div><div class="kpi-val">18 240 €</div><span class="kpi-d dd">↑ +22 %</span><div class="kpi-sub">49,9 % du total</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--rd)"></div><div class="kpi-lbl">Poste principal</div><div class="kpi-val">Marchandise</div><span class="kpi-d dn">30 000 €</span></div>
+  </div>
+  <div class="card"><div class="tbl-hdr"><div class="card-title">Saisie des charges mensuelles (€ HT)</div><div style="font-size:11.5px;color:var(--t2)">Cliquez sur une cellule pour modifier</div></div><div style="overflow-x:auto"><table class="stbl" id="charges-table"></table></div></div>
+  <div class="cgeq">
+    <div class="card"><div class="card-title">Évolution des charges</div><div class="card-sub">Fixe vs Variable par mois</div><div class="cwrap"><canvas id="c-charges-monthly"></canvas></div></div>
+    <div class="card"><div class="card-title">Classement des charges</div><div class="card-sub">Par coût total sur la période</div>
+      <div class="toplist" style="margin-top:14px">
+        <div class="topitem"><div class="toprank">1</div><div class="topname">Marchandise</div><div class="topbarw"><div class="topbar" style="width:100%;background:var(--am)"></div></div><div class="topval">30 000 €</div></div>
+        <div class="topitem"><div class="toprank">2</div><div class="topname">Loyer</div><div class="topbarw"><div class="topbar" style="width:40%;background:var(--pu)"></div></div><div class="topval">12 000 €</div></div>
+        <div class="topitem"><div class="toprank">3</div><div class="topname">Publicité</div><div class="topbarw"><div class="topbar" style="width:16%;background:var(--tl)"></div></div><div class="topval">4 800 €</div></div>
+        <div class="topitem"><div class="toprank">4</div><div class="topname">Électricité</div><div class="topbarw"><div class="topbar" style="width:8%;background:var(--gr)"></div></div><div class="topval">2 400 €</div></div>
+        <div class="topitem"><div class="toprank">5</div><div class="topname">Eau</div><div class="topbarw"><div class="topbar" style="width:4%;background:var(--ac)"></div></div><div class="topval">1 200 €</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MARGE ── -->
+<div id="panel-marge" class="panel">
+  <div class="topbar"><div><div class="page-title">Marge & Rentabilité</div><div class="page-sub">Analyse complète · Coût de revient analytique · Comparaison N/N-1</div></div></div>
+  <div class="kpi-grid g4">
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--gr)"></div><div class="kpi-lbl">Marge brute</div><div class="kpi-val">54 800 €</div><span class="kpi-d du">↑ +8,1 %</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--tl)"></div><div class="kpi-lbl">Marge sur coûts variables</div><div class="kpi-val">36 560 €</div><span class="kpi-d du">34,6 % du CA</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--pu)"></div><div class="kpi-lbl">Résultat net estimé</div><div class="kpi-val">18 240 €</div><span class="kpi-d dd">↓ −3,2 %</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--pk)"></div><div class="kpi-lbl">Croissance 3 mois glissants</div><div class="kpi-val">+8,4 %</div><span class="kpi-d du">Tendance haussière</span></div>
+  </div>
+  <div class="cgeq">
+    <div class="card">
+      <div class="card-title">Marge brute par article</div><div class="card-sub">Taux de marge (marge / PV HT) · code couleur automatique</div>
+      <div style="margin-top:14px">
+        <div class="mrgrow"><div class="mrgname">Veste légère</div><div style="flex:1;margin:0 10px"><div class="pw" style="margin:0"><div class="pb" style="width:51.4%;background:var(--gr)"></div></div></div><span class="mrgtaux" style="color:var(--gr)">51,4 %</span></div>
+        <div class="mrgrow"><div class="mrgname">Hoodie</div><div style="flex:1;margin:0 10px"><div class="pw" style="margin:0"><div class="pb" style="width:42.8%;background:var(--gr)"></div></div></div><span class="mrgtaux" style="color:var(--gr)">42,8 %</span></div>
+        <div class="mrgrow"><div class="mrgname">Pantalon cargo</div><div style="flex:1;margin:0 10px"><div class="pw" style="margin:0"><div class="pb" style="width:38.2%;background:var(--gr)"></div></div></div><span class="mrgtaux" style="color:var(--gr)">38,2 %</span></div>
+        <div class="mrgrow"><div class="mrgname">T-shirt oversize</div><div style="flex:1;margin:0 10px"><div class="pw" style="margin:0"><div class="pb" style="width:24.1%;background:var(--am)"></div></div></div><span class="mrgtaux" style="color:var(--am)">24,1 %</span></div>
+        <div class="mrgrow"><div class="mrgname">Tote bag</div><div style="flex:1;margin:0 10px"><div class="pw" style="margin:0"><div class="pb" style="width:16.3%;background:var(--rd)"></div></div></div><span class="mrgtaux" style="color:var(--rd)">16,3 %</span></div>
+        <div class="mrgrow"><div class="mrgname">Casquette</div><div style="flex:1;margin:0 10px"><div class="pw" style="margin:0"><div class="pb" style="width:12%;background:var(--rd)"></div></div></div><span class="mrgtaux" style="color:var(--rd)">12,0 %</span></div>
+        <div class="mrgrow" style="border:none"><div class="mrgname">Ceinture</div><div style="flex:1;margin:0 10px"><div class="pw" style="margin:0"><div class="pb" style="width:10%;background:var(--rd)"></div></div></div><span class="mrgtaux" style="color:var(--rd)">10,0 %</span></div>
+      </div>
+    </div>
+    <div class="card"><div class="card-title">Marge brute mensuelle</div><div class="card-sub">Évolution sur la période</div><div class="cwrap-lg"><canvas id="c-marge-monthly"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Coût de revient analytique</div>
+    <div class="card-sub">Coût d'achat + quote-part charges fixes au prorata des quantités vendues</div>
+    <div style="overflow-x:auto"><table class="dtbl" style="margin-top:14px">
+      <thead><tr><th>Article</th><th>Coût d'achat</th><th>Quote-part CF</th><th>Coût de revient</th><th>Prix vente HT</th><th>Marge réelle</th><th>Taux réel</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:600">Veste légère</td><td style="font-family:var(--font-mono)">19,00 €</td><td style="font-family:var(--font-mono);color:var(--t2)">3,89 €</td><td style="font-family:var(--font-mono);font-weight:700">22,89 €</td><td style="font-family:var(--font-mono)">40,00 €</td><td style="font-family:var(--font-mono);color:var(--gr);font-weight:700">17,11 €</td><td><span class="bdg bdg-gr">42,8 %</span></td></tr>
+        <tr><td style="font-weight:600">Hoodie</td><td style="font-family:var(--font-mono)">17,00 €</td><td style="font-family:var(--font-mono);color:var(--t2)">3,89 €</td><td style="font-family:var(--font-mono);font-weight:700">20,89 €</td><td style="font-family:var(--font-mono)">30,00 €</td><td style="font-family:var(--font-mono);color:var(--gr);font-weight:700">9,11 €</td><td><span class="bdg bdg-gr">30,4 %</span></td></tr>
+        <tr><td style="font-weight:600">Pantalon cargo</td><td style="font-family:var(--font-mono)">15,00 €</td><td style="font-family:var(--font-mono);color:var(--t2)">3,89 €</td><td style="font-family:var(--font-mono);font-weight:700">18,89 €</td><td style="font-family:var(--font-mono)">25,00 €</td><td style="font-family:var(--font-mono);color:var(--gr);font-weight:700">6,11 €</td><td><span class="bdg bdg-gr">24,4 %</span></td></tr>
+        <tr><td style="font-weight:600">T-shirt oversize</td><td style="font-family:var(--font-mono)">12,00 €</td><td style="font-family:var(--font-mono);color:var(--t2)">3,89 €</td><td style="font-family:var(--font-mono);font-weight:700">15,89 €</td><td style="font-family:var(--font-mono)">20,00 €</td><td style="font-family:var(--font-mono);color:var(--am);font-weight:700">4,11 €</td><td><span class="bdg bdg-am">20,6 %</span></td></tr>
+        <tr><td style="font-weight:600">Tote bag</td><td style="font-family:var(--font-mono)">9,00 €</td><td style="font-family:var(--font-mono);color:var(--t2)">3,89 €</td><td style="font-family:var(--font-mono);font-weight:700">12,89 €</td><td style="font-family:var(--font-mono)">15,00 €</td><td style="font-family:var(--font-mono);color:var(--rd);font-weight:700">2,11 €</td><td><span class="bdg bdg-rd">14,1 %</span></td></tr>
+        <tr><td style="font-weight:600">Casquette</td><td style="font-family:var(--font-mono)">5,00 €</td><td style="font-family:var(--font-mono);color:var(--t2)">3,89 €</td><td style="font-family:var(--font-mono);font-weight:700">8,89 €</td><td style="font-family:var(--font-mono)">10,00 €</td><td style="font-family:var(--font-mono);color:var(--rd);font-weight:700">1,11 €</td><td><span class="bdg bdg-rd">11,1 %</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="abox abox-a" style="margin-top:12px"><div class="abox-ico">⚠</div><div><div class="abox-title">Tote bag & Casquette à surveiller</div><div class="abox-desc">Marge réelle sous 15 % une fois les charges fixes imputées. Envisagez une révision du pricing ou du coût d'achat.</div></div></div>
+  </div>
+</div>
+
+<!-- ── TVA ── -->
+<div id="panel-tva" class="panel">
+  <div class="topbar"><div><div class="page-title">TVA</div><div class="page-sub">TVA collectée · TVA déductible · Solde à décaisser · Provisionnement mensuel</div></div></div>
+  <div class="kpi-grid g3">
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--gr)"></div><div class="kpi-lbl">TVA collectée (ventes)</div><div class="kpi-val" style="color:var(--gr)">21 120 €</div><span class="kpi-d du">Ventes HT × taux TVA</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--ac)"></div><div class="kpi-lbl">TVA déductible (charges)</div><div class="kpi-val" style="color:var(--ac)">16 800 €</div><span class="kpi-d dn">Charges éligibles × TVA</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--rd)"></div><div class="kpi-lbl">TVA nette à reverser</div><div class="kpi-val" style="color:var(--rd)">4 320 €</div><span class="kpi-d dd">Collectée − Déductible</span></div>
+  </div>
+  <div class="cgeq">
+    <div class="card"><div class="card-title">Évolution mensuelle de la TVA</div><div class="card-sub">Collectée vs déductible vs nette</div><div class="cwrap-lg"><canvas id="c-tva-monthly"></canvas></div></div>
+    <div class="card">
+      <div class="card-title">Provisionnement TVA</div><div class="card-sub">Montant à mettre de côté chaque mois</div>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:7px" id="tva-prov"></div>
+      <div class="abox abox-b" style="margin-top:12px"><div class="abox-ico">💡</div><div><div class="abox-title">Conseil</div><div class="abox-desc">Provisionnez la TVA nette dès réception des paiements pour éviter les mauvaises surprises à la déclaration.</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TRESORERIE ── -->
+<div id="panel-treso" class="panel">
+  <div class="topbar"><div><div class="page-title">Trésorerie</div><div class="page-sub">Budget de trésorerie · Solde prévisionnel mois par mois · Alertes automatiques</div></div><div class="page-actions"><button class="btn btn-ghost btn-sm" onclick="exportTreso()">↓ Export CSV</button></div></div>
+  <div class="kpi-grid g4">
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--gr)"></div><div class="kpi-lbl">Solde initial</div><div class="kpi-val">5 000 €</div><span class="kpi-d dn">Début de période</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--ac)"></div><div class="kpi-lbl">Total encaissements</div><div class="kpi-val">105 600 €</div><span class="kpi-d du">↑ +12,4 %</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--am)"></div><div class="kpi-lbl">Total décaissements</div><div class="kpi-val">55 000 €</div><span class="kpi-d dd">↑ +14,2 %</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--gr)"></div><div class="kpi-lbl">Solde de fin de période</div><div class="kpi-val">55 600 €</div><span class="kpi-d du">↑ Positif</span></div>
+  </div>
+  <div class="card"><div class="card-title">Solde de trésorerie cumulé</div><div class="card-sub">Évolution mois par mois · La ligne rouge symbolise le seuil zéro</div><div class="cwrap-lg"><canvas id="c-treso-main"></canvas></div></div>
+  <div class="cgeq">
+    <div class="card"><div class="card-title">Détail mensuel</div><div class="card-sub">Encaissements · Décaissements · Solde</div><div style="overflow-x:auto"><table class="ptbl" style="margin-top:12px"><thead><tr><th>Mois</th><th>Encaissements</th><th>Décaissements</th><th>Solde du mois</th><th>Solde cumulé</th></tr></thead><tbody id="treso-tbody"></tbody></table></div></div>
+    <div class="card">
+      <div class="card-title">Alertes trésorerie</div><div class="card-sub">Détection automatique des risques</div>
+      <div style="margin-top:12px">
+        <div class="abox abox-g"><div class="abox-ico">✅</div><div><div class="abox-title">Aucun mois en négatif</div><div class="abox-desc">Le solde reste positif sur toute la période analysée.</div></div></div>
+        <div class="abox abox-a"><div class="abox-ico">⚠</div><div><div class="abox-title">Août sous surveillance</div><div class="abox-desc">Mois historiquement faible. Surveillez si les charges augmentent.</div></div></div>
+        <div class="abox abox-b"><div class="abox-ico">💡</div><div><div class="abox-title">TVA trimestrielle : 4 320 €</div><div class="abox-desc">À décaisser le 20 du mois prochain. Prévoir l'impact.</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PREVISIONNEL ── -->
+<div id="panel-previsionnel" class="panel">
+  <div class="topbar"><div><div class="page-title">Prévisionnel N+1</div><div class="page-sub">Budget prévisionnel basé sur l'historique · Ajustement par coefficient de croissance</div></div><div class="page-actions"><button class="btn btn-primary btn-sm" onclick="recalcPrev()">↻ Recalculer</button></div></div>
+  <div class="kpi-grid g3">
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--ac)"></div><div class="kpi-lbl">CA prévisionnel N+1</div><div class="kpi-val" id="prev-ca">118 272 €</div><span class="kpi-d du">↑ +12 % vs N</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--gr)"></div><div class="kpi-lbl">Marge prévisionnelle</div><div class="kpi-val" id="prev-mb">61 376 €</div><span class="kpi-d du">+12 % estimé</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--pu)"></div><div class="kpi-lbl">Résultat prévisionnel</div><div class="kpi-val" id="prev-rn">22 656 €</div><span class="kpi-d du">+24,2 % estimé</span></div>
+  </div>
+  <div class="card">
+    <div class="tbl-hdr">
+      <div><div class="card-title">Budget mensuel N+1</div><div class="card-sub">Basé sur N × coefficient de croissance</div></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:12px;font-weight:600;color:var(--t2)">Croissance estimée</span>
+        <input type="range" id="growth-slider" min="0" max="50" value="12" style="width:100px;accent-color:var(--ac)" oninput="updateGrowth(this.value)">
+        <span class="bdg bdg-gr" id="growth-val">+12 %</span>
+      </div>
+    </div>
+    <div style="overflow-x:auto"><table class="ptbl" id="prev-table"><thead><tr><th>Indicateur</th><th>Jan</th><th>Fév</th><th>Mar</th><th>Avr</th><th>Mai</th><th>Jun</th><th>Jul</th><th>Aoû</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Déc</th><th>Total N+1</th></tr></thead><tbody id="prev-tbody"></tbody></table></div>
+  </div>
+  <div class="card"><div class="card-title">Comparaison N vs N+1 prévisionnel</div><div class="card-sub">CA · Marge brute · Résultat net</div><div class="cwrap-lg"><canvas id="c-prev-compare"></canvas></div></div>
+</div>
+
+<!-- ── SCENARIOS ── -->
+<div id="panel-scenarios" class="panel">
+  <div class="topbar"><div><div class="page-title">Scénarios</div><div class="page-sub">Simulations what-if · Impact instantané sur la marge et la rentabilité</div></div></div>
+  <div class="kpi-grid g3">
+    <div class="sccard">
+      <div class="scc-hdr"><span class="scc-name">📉 Scénario pessimiste</span><span class="bdg bdg-rd">−20 % CA</span></div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:10px">Baisse du CA de 20 % — charges stables</div>
+      <div class="scc-res" style="color:var(--rd)">−686 €</div>
+      <div style="font-size:11px;color:var(--t2);margin-top:3px">Résultat net estimé</div>
+      <div class="abox abox-r" style="margin-top:10px"><div class="abox-ico">⚠</div><div><div class="abox-desc">Résultat négatif — les charges fixes ne sont plus couvertes. Action urgente requise.</div></div></div>
+    </div>
+    <div class="sccard" style="border-color:var(--ac);background:var(--ag)">
+      <div class="scc-hdr"><span class="scc-name">📊 Situation actuelle</span><span class="bdg bdg-ac">Référence</span></div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:10px">Données réelles de la période</div>
+      <div class="scc-res" style="color:var(--ac)">18 240 €</div>
+      <div style="font-size:11px;color:var(--t2);margin-top:3px">Résultat net estimé</div>
+      <div class="abox abox-b" style="margin-top:10px"><div class="abox-ico">✅</div><div><div class="abox-desc">Situation saine. Marge brute à 51,9 %. Maintenez le cap.</div></div></div>
+    </div>
+    <div class="sccard">
+      <div class="scc-hdr"><span class="scc-name">📈 Scénario optimiste</span><span class="bdg bdg-gr">+20 % CA</span></div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:10px">Hausse du CA de 20 % — charges +5 %</div>
+      <div class="scc-res" style="color:var(--gr)">37 452 €</div>
+      <div style="font-size:11px;color:var(--t2);margin-top:3px">Résultat net estimé</div>
+      <div class="abox abox-g" style="margin-top:10px"><div class="abox-ico">🚀</div><div><div class="abox-desc">Excellent résultat. Taux de marge net à 29,6 %. Réinvestissez.</div></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Simulateur personnalisé</div><div class="card-sub">Ajustez les paramètres pour voir l'impact en temps réel</div>
+    <div class="fg fg4" style="margin-top:16px">
+      <div class="fld"><label class="flbl">Variation CA (%)</label><input class="finp" type="number" id="sim-ca" value="0" step="1" oninput="runSim()"></div>
+      <div class="fld"><label class="flbl">Charges fixes (%)</label><input class="finp" type="number" id="sim-cf" value="0" step="1" oninput="runSim()"></div>
+      <div class="fld"><label class="flbl">Charges variables (%)</label><input class="finp" type="number" id="sim-cv" value="0" step="1" oninput="runSim()"></div>
+      <div class="fld"><label class="flbl">Coûts d'achat (%)</label><input class="finp" type="number" id="sim-cout" value="0" step="1" oninput="runSim()"></div>
+    </div>
+    <div class="kpi-grid g4" style="margin-bottom:0">
+      <div class="kpi-card"><div class="kpi-acc" style="background:var(--ac)"></div><div class="kpi-lbl">CA simulé</div><div class="kpi-val" id="sim-ca-val">105 600 €</div></div>
+      <div class="kpi-card"><div class="kpi-acc" style="background:var(--gr)"></div><div class="kpi-lbl">Marge brute simulée</div><div class="kpi-val" id="sim-mb-val">54 800 €</div></div>
+      <div class="kpi-card"><div class="kpi-acc" style="background:var(--pu)"></div><div class="kpi-lbl">Résultat net simulé</div><div class="kpi-val" id="sim-rn-val">18 240 €</div></div>
+      <div class="kpi-card"><div class="kpi-acc" style="background:var(--am)"></div><div class="kpi-lbl">Point mort simulé</div><div class="kpi-val" id="sim-pm-val">53 280 €</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ALERTES ── -->
+<div id="panel-alertes" class="panel">
+  <div class="topbar"><div><div class="page-title">Alertes</div><div class="page-sub">Détection automatique des anomalies et risques financiers</div></div><div class="page-actions"><button class="btn btn-ghost btn-sm" onclick="document.querySelectorAll('.abox').forEach(a=>a.style.display='none')">Tout marquer lu</button></div></div>
+  <div class="kpi-grid g4" style="margin-bottom:20px">
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--rd)"></div><div class="kpi-lbl">Alertes critiques</div><div class="kpi-val" style="color:var(--rd)">1</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--am)"></div><div class="kpi-lbl">Avertissements</div><div class="kpi-val" style="color:var(--am)">2</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--gr)"></div><div class="kpi-lbl">Informations</div><div class="kpi-val" style="color:var(--gr)">2</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--t3)"></div><div class="kpi-lbl">Résolues ce mois</div><div class="kpi-val">0</div></div>
+  </div>
+  <div class="slbl">Critiques</div>
+  <div class="abox abox-r"><div class="abox-ico">🔴</div><div><div class="abox-title">Marge en baisse 2 mois consécutifs (Oct. → Nov.)</div><div class="abox-desc">La marge brute est passée de 4 800 € en septembre à 3 900 € en novembre. Vérifiez vos coûts d'achat et votre politique de prix.</div></div></div>
+  <div class="slbl" style="margin-top:16px">Avertissements</div>
+  <div class="abox abox-a"><div class="abox-ico">🟡</div><div><div class="abox-title">TVA à déclarer dans 18 jours — 4 320 €</div><div class="abox-desc">Prochaine déclaration de TVA : 20 janvier 2027. Vérifiez votre solde de trésorerie.</div></div></div>
+  <div class="abox abox-a"><div class="abox-ico">🟡</div><div><div class="abox-title">Août historiquement faible — anticipez</div><div class="abox-desc">Sur N-1, le CA d'août était inférieur de 28 % à la moyenne mensuelle. Provisionnez les charges fixes de ce mois à l'avance.</div></div></div>
+  <div class="slbl" style="margin-top:16px">Informations</div>
+  <div class="abox abox-g"><div class="abox-ico">🟢</div><div><div class="abox-title">Objectif CA annuel à 87,9 %</div><div class="abox-desc">105 600 € réalisés sur 120 000 € d'objectif. Il reste 14 400 € à générer. Rythme actuel : suffisant.</div></div></div>
+  <div class="abox abox-b"><div class="abox-ico">💡</div><div><div class="abox-title">Tote bag & Casquette — marge réelle sous 15 %</div><div class="abox-desc">Une révision du prix de vente ou du coût d'achat est recommandée pour ces deux articles.</div></div></div>
+</div>
+
+<!-- ── PARAMETRES ── -->
+<div id="panel-parametres" class="panel">
+  <div class="topbar"><div><div class="page-title">Paramètres</div><div class="page-sub">Configuration partagée par tous les modules · Données de base</div></div><div class="page-actions"><button class="btn btn-primary" onclick="saveAll()">💾 Enregistrer tout</button></div></div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('periode',this)">📅 Période</div>
+    <div class="tab" onclick="switchTab('articles',this)">📦 Articles</div>
+    <div class="tab" onclick="switchTab('ch-param',this)">💸 Charges</div>
+    <div class="tab" onclick="switchTab('entreprise',this)">🏢 Entreprise</div>
+  </div>
+
+  <div id="tab-periode" class="panel active">
+    <div class="slbl">Période analysée</div>
+    <div class="card">
+      <div class="fg fg3">
+        <div class="fld"><label class="flbl">Année analysée</label><input class="finp" type="number" id="p-annee" value="2026" oninput="updPeriod();markUnsaved()"></div>
+        <div class="fld"><label class="flbl">Mois de début</label><select class="fsel" id="p-debut" onchange="updPeriod();markUnsaved()"><option value="1" selected>Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option></select></div>
+        <div class="fld"><label class="flbl">Mois de fin</label><select class="fsel" id="p-fin" onchange="updPeriod();markUnsaved()"><option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12" selected>Décembre</option></select></div>
+      </div>
+      <div class="ppreview"><span class="ppreview-lbl">Période :</span><span class="ppreview-val" id="p-prev">Janvier 2026 → Décembre 2026</span><span class="ppreview-lbl" style="margin-left:auto" id="p-nb">12 mois analysés</span></div>
+    </div>
+    <div class="slbl" style="margin-top:16px">Contrôle de cohérence</div>
+    <div class="card"><div class="ctrlgrid">
+      <div class="ctrlitem"><div class="ctrlval" id="ctrl-art">8</div><div class="ctrllbl">Articles configurés</div><div class="ctrlst bdg-gr">✓ Prêt</div></div>
+      <div class="ctrlitem"><div class="ctrlval" id="ctrl-actif">8</div><div class="ctrllbl">Articles actifs</div><div class="ctrlst bdg-gr">✓ OK</div></div>
+      <div class="ctrlitem"><div class="ctrlval" id="ctrl-ch">5</div><div class="ctrllbl">Charges configurées</div><div class="ctrlst bdg-gr">✓ Prêt</div></div>
+      <div class="ctrlitem"><div class="ctrlval" id="ctrl-anom">0</div><div class="ctrllbl">Anomalies détectées</div><div class="ctrlst bdg-gr" id="ctrl-anom-st">✓ Aucune</div></div>
+    </div></div>
+  </div>
+
+  <div id="tab-articles" class="panel">
+    <div class="card">
+      <div class="tbl-hdr"><div><div class="card-title">Table articles</div><div class="card-sub">Utilisée par : CA · Marge · Coût de revient analytique</div></div><button class="btn btn-ghost btn-sm" onclick="exportArticles()">↓ CSV</button></div>
+      <div style="overflow-x:auto"><table class="dtbl"><thead><tr><th>Code</th><th>Nom article</th><th>Catégorie</th><th>Prix HT (€)</th><th>Coût achat (€)</th><th>TVA %</th><th>Taux marge</th><th>Actif</th><th></th></tr></thead><tbody id="art-tbody"></tbody></table></div>
+      <div class="addrow">
+        <input type="text" id="na-code" placeholder="Code ex: REF09" style="max-width:110px">
+        <input type="text" id="na-nom" placeholder="Nom de l'article" style="flex:2">
+        <input type="text" id="na-cat" placeholder="Catégorie" style="max-width:110px">
+        <input type="number" id="na-pv" placeholder="Prix HT" style="max-width:90px" step="0.01">
+        <input type="number" id="na-ca" placeholder="Coût achat" style="max-width:90px" step="0.01">
+        <select id="na-tva" style="max-width:90px"><option value="0.20">TVA 20 %</option><option value="0.10">TVA 10 %</option><option value="0.055">TVA 5,5 %</option><option value="0">Exonéré</option></select>
+        <button class="btn btn-primary btn-sm" onclick="addArticle()">+ Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-ch-param" class="panel">
+    <div class="card">
+      <div class="tbl-hdr"><div><div class="card-title">Table charges</div><div class="card-sub">Utilisée par : Charges · TVA · Trésorerie · Point mort</div></div><button class="btn btn-ghost btn-sm" onclick="exportChParam()">↓ CSV</button></div>
+      <div style="overflow-x:auto"><table class="dtbl"><thead><tr><th>Code</th><th>Nom charge</th><th>Catégorie</th><th>TVA %</th><th>Type</th><th>Actif</th><th></th></tr></thead><tbody id="ch-tbody"></tbody></table></div>
+      <div class="addrow">
+        <input type="number" id="nc-code" placeholder="Code" style="max-width:72px">
+        <input type="text" id="nc-nom" placeholder="Nom de la charge" style="flex:2">
+        <input type="text" id="nc-cat" placeholder="Catégorie">
+        <select id="nc-tva" style="max-width:92px"><option value="0.20">TVA 20 %</option><option value="0.10">TVA 10 %</option><option value="0.055">TVA 5,5 %</option><option value="0">Exonéré</option></select>
+        <select id="nc-type" style="max-width:105px"><option value="Fixe">Fixe</option><option value="Variable">Variable</option></select>
+        <button class="btn btn-primary btn-sm" onclick="addCharge()">+ Ajouter</button>
+      </div>
+      <div style="margin-top:14px;padding:13px;background:var(--bg-s);border-radius:var(--radius-sm);border:1px solid var(--bd)">
+        <div class="slbl" style="margin-bottom:8px">Répartition Fixe / Variable</div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--t2);margin-bottom:5px"><span id="rep-f">Fixe : 1</span><span id="rep-v">Variable : 4</span></div>
+        <div class="pw" style="margin:0"><div class="pb" id="rep-bar" style="width:20%;background:linear-gradient(90deg,var(--pu),var(--tl))"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-entreprise" class="panel">
+    <div class="slbl">Informations générales</div>
+    <div class="card">
+      <div class="fg fg3">
+        <div class="fld"><label class="flbl">Nom de l'entreprise</label><input class="finp" type="text" id="ent-nom" placeholder="Mon Entreprise SARL" onchange="markUnsaved();document.getElementById('db-company-name').textContent=this.value||'Mon Entreprise'"></div>
+        <div class="fld"><label class="flbl">Secteur d'activité</label><select class="fsel" onchange="markUnsaved()"><option>Commerce de détail</option><option>E-commerce</option><option>Prestation de service</option><option>Restauration / Food</option><option>BTP / Artisanat</option><option>Autre</option></select></div>
+        <div class="fld"><label class="flbl">Devise</label><select class="fsel" onchange="markUnsaved()"><option>€ Euro</option><option>$ Dollar</option><option>£ Livre sterling</option></select></div>
+      </div>
+      <div class="fg fg3" style="margin-top:12px">
+        <div class="fld"><label class="flbl">Régime TVA</label><select class="fsel" onchange="markUnsaved()"><option>TVA réelle mensuelle</option><option>TVA réelle trimestrielle</option><option>Franchise en base de TVA</option></select></div>
+        <div class="fld"><label class="flbl">Régime fiscal</label><select class="fsel" onchange="markUnsaved()"><option>IS — Impôt sur les sociétés</option><option>IR — Impôt sur le revenu</option><option>Micro-entreprise</option></select></div>
+        <div class="fld"><label class="flbl">Objectif CA annuel (€)</label><input class="finp" type="number" placeholder="120000" onchange="markUnsaved()"></div>
+      </div>
+    </div>
+    <div class="slbl" style="margin-top:16px">Clé de répartition des charges fixes</div>
+    <div class="card">
+      <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1;min-width:240px">
+          <div class="rdopt"><input type="radio" name="cle" checked onchange="markUnsaved()"><div><div class="rdopt-title">Prorata des quantités vendues</div><div class="rdopt-sub">Recommandé · Simple et universel pour tous secteurs</div></div></div>
+          <div class="rdopt"><input type="radio" name="cle" onchange="markUnsaved()"><div><div class="rdopt-title">Prorata du CA HT</div><div class="rdopt-sub">Adapté si les prix varient beaucoup entre articles</div></div></div>
+          <div class="rdopt" style="opacity:.5"><input type="radio" name="cle" disabled><div><div class="rdopt-title">Clé personnalisée <span class="bdg bdg-am" style="font-size:9px">V2</span></div><div class="rdopt-sub">Définir un pourcentage par article manuellement</div></div></div>
+        </div>
+        <div style="min-width:200px;max-width:220px;background:var(--bg-s);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:14px">
+          <div style="font-size:10px;font-weight:700;font-family:var(--font-mono);color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">💡 Comment ça marche</div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.6">Si vous vendez 100 unités au total et que l'article A en représente 30, il absorbe 30 % des charges fixes dans son coût de revient.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- SAVE BAR -->
+<div class="savebar">
+  <div class="save-st"><div class="sdot" id="sdot"></div><span id="stxt">Modifications non enregistrées</span></div>
+  <div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" onclick="location.reload()">Annuler</button><button class="btn btn-primary btn-sm" onclick="saveAll()">💾 Enregistrer</button></div>
+</div>
+
+<script>
+// ── DATA ──
+const MOIS=['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const MS=['','Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
+let articles=[
+  {code:'REF01',nom:'T-shirt oversize',cat:'Textile',pv:20,ca:12,tva:.2,actif:true},
+  {code:'REF02',nom:'Casquette',cat:'Accessoire',pv:10,ca:5,tva:.2,actif:true},
+  {code:'REF03',nom:'Hoodie',cat:'Textile',pv:30,ca:17,tva:.2,actif:true},
+  {code:'REF04',nom:'Tote bag',cat:'Accessoire',pv:15,ca:9,tva:.2,actif:true},
+  {code:'REF05',nom:'Pantalon cargo',cat:'Textile',pv:25,ca:15,tva:.2,actif:true},
+  {code:'REF06',nom:'Ceinture',cat:'Accessoire',pv:10,ca:5,tva:.2,actif:true},
+  {code:'REF07',nom:'Veste légère',cat:'Textile',pv:40,ca:19,tva:.2,actif:true},
+  {code:'REF08',nom:'Chaussettes',cat:'Accessoire',pv:10,ca:5,tva:.2,actif:true},
+];
+let charges=[
+  {code:1,nom:'Électricité',cat:'Énergie',tva:.2,type:'Variable',actif:true},
+  {code:2,nom:'Publicité',cat:'Publicité',tva:.2,type:'Variable',actif:true},
+  {code:3,nom:'Eau',cat:'Énergie',tva:.2,type:'Variable',actif:true},
+  {code:4,nom:'Marchandise',cat:'Marchandise',tva:.2,type:'Variable',actif:true},
+  {code:5,nom:'Loyer',cat:'Loyer',tva:.2,type:'Fixe',actif:true},
+];
+const caD=[7200,8800,9600,8000,8800,9600,8000,6400,9600,8800,9600,10800];
+const chD=[3600,4200,4200,3800,4200,4200,3800,3200,4200,4200,4200,4600];
+const caN1=[6400,7600,8400,7200,7800,8800,7200,5800,8800,8200,8800,9800];
+const fixD=[1527,1527,1527,1527,1527,1527,1527,1527,1527,1527,1527,1527];
+const varD=chD.map((c,i)=>c-fixD[i]);
+const mrgD=caD.map(c=>Math.round(c*.519));
+const trD=[7400,14000,21400,27600,34200,41600,47800,50800,58200,64800,72200,80600];
+const tvaColl=caD.map(c=>Math.round(c*.2));
+const tvaDed=chD.map(c=>Math.round(c*.2));
+const tvaN=tvaColl.map((c,i)=>c-tvaDed[i]);
+const qty={
+  'REF01':[50,55,60,50,55,60,50,55,60,50,55,60],
+  'REF02':[50,55,60,50,55,60,50,55,60,50,55,60],
+  'REF03':[50,55,60,50,55,60,50,55,60,50,55,60],
+  'REF04':[50,55,60,50,55,60,50,55,60,50,55,60],
+  'REF05':[50,55,60,50,55,60,50,55,60,50,55,60],
+  'REF06':[50,55,60,50,55,60,50,55,60,50,55,60],
+  'REF07':[50,55,60,50,55,60,50,55,60,50,55,60],
+  'REF08':[50,55,60,50,55,60,50,55,60,50,55,60],
+};
+const chMD={
+  1:[200,200,200,200,200,200,200,200,200,200,200,200],
+  2:[400,400,400,400,400,400,400,400,400,400,400,400],
+  3:[100,100,100,100,100,100,100,100,100,100,100,100],
+  4:[2500,2500,2500,2500,2500,2500,2500,2500,2500,2500,2500,2500],
+  5:[1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000],
+};
+
+// ── ONBOARDING ──
+let onbStep=1;
+const onbData={};
+
+function renderOnb(){
+  const steps=[
+    {
+      title:'Bienvenue sur LogPose 🧭',
+      desc:'En moins de 2 minutes, configurez votre espace de pilotage financier. Vous pourrez modifier ces informations à tout moment dans les paramètres.',
+      content:`
+        <div class="onb-feature"><div class="onb-feat-icon" style="background:rgba(59,126,255,.15)">📊</div><div><div class="onb-feat-title">Tableau de bord en temps réel</div><div class="onb-feat-desc">CA, marge, TVA, trésorerie — tous vos chiffres clés en un coup d'œil.</div></div></div>
+        <div class="onb-feature"><div class="onb-feat-icon" style="background:rgba(14,165,114,.15)">💡</div><div><div class="onb-feat-title">Indicateurs intelligents</div><div class="onb-feat-desc">Coût de revient analytique, point mort, jour de libération, alertes automatiques.</div></div></div>
+        <div class="onb-feature"><div class="onb-feat-icon" style="background:rgba(245,158,11,.15)">🔄</div><div><div class="onb-feat-title">Plus jamais de copier-coller Excel</div><div class="onb-feat-desc">Saisissez une fois, tout se propage automatiquement à tous les modules.</div></div></div>
+        <div class="onb-actions"><span class="onb-skip" onclick="skipOnb()">Passer l'introduction</span><button class="btn btn-primary" onclick="nextOnb()">Commencer →</button></div>`
+    },
+    {
+      title:'Votre entreprise',
+      desc:'Ces informations personnalisent votre tableau de bord et les calculs fiscaux.',
+      content:`
+        <div class="onb-field"><label class="onb-lbl">Nom de votre entreprise</label><input class="onb-input" type="text" id="ob-nom" placeholder="ex : Ma Boutique SARL" oninput="onbData.nom=this.value"></div>
+        <div class="onb-field"><label class="onb-lbl">Secteur d'activité</label><select class="onb-sel" id="ob-sect" onchange="onbData.sect=this.value"><option>Commerce de détail</option><option>E-commerce</option><option>Prestation de service</option><option>Restauration / Food</option><option>BTP / Artisanat</option><option>Autre</option></select></div>
+        <div class="onb-field"><label class="onb-lbl">Régime TVA</label><select class="onb-sel" onchange="onbData.tva=this.value"><option>TVA réelle mensuelle</option><option>TVA réelle trimestrielle</option><option>Franchise en base de TVA</option></select></div>
+        <div class="onb-field"><label class="onb-lbl">Objectif CA annuel (€)</label><input class="onb-input" type="number" placeholder="ex : 120000" oninput="onbData.obj=this.value"></div>
+        <div class="onb-actions"><button class="btn btn-ghost" onclick="prevOnb()">← Retour</button><button class="btn btn-primary" onclick="nextOnb()">Suivant →</button></div>`
+    },
+    {
+      title:'Votre première période',
+      desc:'Définissez la période que vous souhaitez analyser en priorité.',
+      content:`
+        <div class="onb-field"><label class="onb-lbl">Année analysée</label><input class="onb-input" type="number" value="2026" oninput="onbData.annee=this.value"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="onb-field"><label class="onb-lbl">Mois de début</label><select class="onb-sel" onchange="onbData.debut=this.value"><option value="1" selected>Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option></select></div>
+          <div class="onb-field"><label class="onb-lbl">Mois de fin</label><select class="onb-sel" onchange="onbData.fin=this.value"><option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12" selected>Décembre</option></select></div>
+        </div>
+        <div style="margin-top:6px;padding:10px 13px;background:var(--ag);border-radius:8px;font-size:12px;color:var(--ac);font-weight:600">Vous pourrez ajouter vos articles et charges directement dans les Paramètres.</div>
+        <div class="onb-actions" style="margin-top:16px"><button class="btn btn-ghost" onclick="prevOnb()">← Retour</button><button class="btn btn-primary" onclick="finishOnb()">Accéder à LogPose 🧭</button></div>`
+    }
+  ];
+  const s=steps[onbStep-1];
+  document.getElementById('onb-content').innerHTML=`<h2 class="onb-title">${s.title}</h2><p class="onb-desc">${s.desc}</p>${s.content}`;
+  [1,2,3].forEach(i=>{ const el=document.getElementById('os'+i); if(el) el.classList.toggle('done',i<=onbStep); });
+}
+function nextOnb(){if(onbStep<3){onbStep++;renderOnb();}}
+function prevOnb(){if(onbStep>1){onbStep--;renderOnb();}}
+function skipOnb(){finishOnb();}
+function finishOnb(){
+  if(onbData.nom){document.getElementById('db-company-name').textContent=onbData.nom;const el=document.getElementById('ent-nom');if(el)el.value=onbData.nom;}
+  document.getElementById('onb').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+  initAll();
+  setTimeout(saveAll,600);
+}
+
+// ── NAV ──
+function nav(id,el){
+  document.querySelectorAll('.panel.active[id^="panel-"]').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  closeMobile();
+}
+function openMobile(){document.getElementById('sidebar').classList.add('open');document.getElementById('sb-overlay').classList.add('open');}
+function closeMobile(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-overlay').classList.remove('open');}
+
+// ── SIDEBAR COLLAPSE ──
+let sbCollapsed=false;
+function toggleSidebar(){
+  sbCollapsed=!sbCollapsed;
+  const sb=document.getElementById('sidebar');
+  const app=document.querySelector('.app');
+  const icon=document.getElementById('sb-toggle-icon');
+  const txt=document.getElementById('sb-toggle-txt');
+  sb.classList.toggle('collapsed',sbCollapsed);
+  app.classList.toggle('sb-collapsed',sbCollapsed);
+  icon.innerHTML=sbCollapsed
+    ?'<path d="M13 5l7 7-7 7"/><path d="M3 5l7 7-7 7"/>'
+    :'<path d="M11 19l-7-7 7-7"/><path d="M21 19l-7-7 7-7"/>';
+  if(txt) txt.textContent=sbCollapsed?'Agrandir':'Réduire';
+  setTimeout(()=>Object.values(charts).forEach(c=>c&&c.resize()),220);
+}
+
+// ── THEME ──
+function toggleTheme(){
+  const html=document.documentElement;
+  const isDark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',isDark?'light':'dark');
+  document.getElementById('theme-lbl').textContent=isDark?'☀️ Thème clair':'🌙 Thème sombre';
+  document.getElementById('mob-theme-icon').textContent=isDark?'☀️':'🌙';
+  updCharts();
+}
+
+// ── TABS ──
+function switchTab(id,el){
+  document.querySelectorAll('#panel-parametres .panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── PERIOD ──
+function updPeriod(){
+  const a=parseInt(document.getElementById('p-annee').value)||2026;
+  const d=parseInt(document.getElementById('p-debut').value);
+  const f=parseInt(document.getElementById('p-fin').value);
+  const nb=f>=d?f-d+1:12-d+f+1;
+  const a2=f<d?a+1:a;
+  document.getElementById('p-prev').textContent=`${MOIS[d]} ${a} → ${MOIS[f]} ${a2}`;
+  document.getElementById('p-nb').textContent=`${nb} mois analysés`;
+  document.getElementById('db-period').textContent=`${MOIS[d]} → ${MOIS[f]} ${a} · Données de démonstration`;
+}
+function switchPeriod(v){const m={year:'Année complète 2026',q1:'T1 2026 (Jan–Mar)',q2:'T2 2026 (Avr–Jun)',q3:'T3 2026 (Jul–Sep)',q4:'T4 2026 (Oct–Déc)'};document.getElementById('db-period').textContent=m[v]+' · Données de démonstration';}
+
+// ── FMT ──
+function fmt(n){return new Intl.NumberFormat('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n)}
+function mcol(m){return m>=40?'var(--gr)':m>=20?'var(--am)':'var(--rd)'}
+
+// ── ARTICLES ──
+function renderArt(){
+  const tb=document.getElementById('art-tbody');if(!tb)return;
+  tb.innerHTML='';
+  articles.forEach((a,i)=>{
+    const mg=a.pv>0?(a.pv-a.ca)/a.pv*100:0;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><input class="tdinp" value="${a.code}" onchange="articles[${i}].code=this.value;markUnsaved()" style="max-width:88px"></td>
+      <td><input class="tdinp" value="${a.nom}" onchange="articles[${i}].nom=this.value;markUnsaved()"></td>
+      <td><input class="tdinp" value="${a.cat}" onchange="articles[${i}].cat=this.value;markUnsaved()" style="max-width:105px"></td>
+      <td><input class="tdinp" type="number" value="${a.pv}" step="0.01" onchange="articles[${i}].pv=parseFloat(this.value)||0;renderArt();markUnsaved()" style="max-width:82px"></td>
+      <td><input class="tdinp" type="number" value="${a.ca}" step="0.01" onchange="articles[${i}].ca=parseFloat(this.value)||0;renderArt();markUnsaved()" style="max-width:82px"></td>
+      <td><select class="tdsel" onchange="articles[${i}].tva=parseFloat(this.value);markUnsaved()" style="max-width:82px"><option value="0.20" ${a.tva==.2?'selected':''}>20 %</option><option value="0.10" ${a.tva==.1?'selected':''}>10 %</option><option value="0.055" ${a.tva==.055?'selected':''}>5,5 %</option><option value="0" ${a.tva==0?'selected':''}>0 %</option></select></td>
+      <td><span style="font-family:var(--font-mono);font-size:12.5px;color:${mcol(mg)};font-weight:700">${fmt(mg)} %</span></td>
+      <td><select class="tdsel" onchange="articles[${i}].actif=this.value==='true';renderArt();markUnsaved()" style="max-width:72px"><option value="true" ${a.actif?'selected':''}>Oui</option><option value="false" ${!a.actif?'selected':''}>Non</option></select></td>
+      <td><button class="delbtn" onclick="delArt(${i})">×</button></td>`;
+    tb.appendChild(tr);
+  });
+  updCtrl();
+}
+function addArticle(){
+  const nom=document.getElementById('na-nom').value.trim();if(!nom)return;
+  articles.push({code:document.getElementById('na-code').value||`REF${String(articles.length+1).padStart(2,'0')}`,nom,cat:document.getElementById('na-cat').value||'Divers',pv:parseFloat(document.getElementById('na-pv').value)||0,ca:parseFloat(document.getElementById('na-ca').value)||0,tva:parseFloat(document.getElementById('na-tva').value),actif:true});
+  ['na-code','na-nom','na-cat','na-pv','na-ca'].forEach(id=>document.getElementById(id).value='');
+  renderArt();markUnsaved();
+}
+function delArt(i){if(confirm(`Supprimer "${articles[i].nom}" ?`)){articles.splice(i,1);renderArt();markUnsaved();}}
+
+// ── CHARGES ──
+function renderCh(){
+  const tb=document.getElementById('ch-tbody');if(!tb)return;
+  tb.innerHTML='';
+  charges.forEach((c,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><input class="tdinp" type="number" value="${c.code}" onchange="charges[${i}].code=parseInt(this.value);markUnsaved()" style="max-width:62px"></td>
+      <td><input class="tdinp" value="${c.nom}" onchange="charges[${i}].nom=this.value;markUnsaved()"></td>
+      <td><input class="tdinp" value="${c.cat}" onchange="charges[${i}].cat=this.value;markUnsaved()" style="max-width:115px"></td>
+      <td><select class="tdsel" onchange="charges[${i}].tva=parseFloat(this.value);markUnsaved()" style="max-width:82px"><option value="0.20" ${c.tva==.2?'selected':''}>20 %</option><option value="0.10" ${c.tva==.1?'selected':''}>10 %</option><option value="0.055" ${c.tva==.055?'selected':''}>5,5 %</option><option value="0" ${c.tva==0?'selected':''}>0 %</option></select></td>
+      <td><select class="tdsel" onchange="charges[${i}].type=this.value;renderCh();markUnsaved()" style="max-width:105px"><option value="Fixe" ${c.type==='Fixe'?'selected':''}>Fixe</option><option value="Variable" ${c.type==='Variable'?'selected':''}>Variable</option></select></td>
+      <td><select class="tdsel" onchange="charges[${i}].actif=this.value==='true';markUnsaved()" style="max-width:72px"><option value="true" ${c.actif?'selected':''}>Oui</option><option value="false" ${!c.actif?'selected':''}>Non</option></select></td>
+      <td><button class="delbtn" onclick="delCh(${i})">×</button></td>`;
+    tb.appendChild(tr);
+  });
+  const f=charges.filter(c=>c.type==='Fixe').length,tot=charges.length||1;
+  const rf=document.getElementById('rep-f');const rv=document.getElementById('rep-v');const rb=document.getElementById('rep-bar');
+  if(rf)rf.textContent=`Fixe : ${f} charge${f>1?'s':''}`;
+  if(rv)rv.textContent=`Variable : ${tot-f} charge${tot-f>1?'s':''}`;
+  if(rb)rb.style.width=`${f/tot*100}%`;
+  updCtrl();
+}
+function addCharge(){
+  const nom=document.getElementById('nc-nom').value.trim();if(!nom)return;
+  charges.push({code:parseInt(document.getElementById('nc-code').value)||charges.length+1,nom,cat:document.getElementById('nc-cat').value||'Divers',tva:parseFloat(document.getElementById('nc-tva').value),type:document.getElementById('nc-type').value,actif:true});
+  ['nc-code','nc-nom','nc-cat'].forEach(id=>document.getElementById(id).value='');
+  renderCh();markUnsaved();
+}
+function delCh(i){if(confirm(`Supprimer "${charges[i].nom}" ?`)){charges.splice(i,1);renderCh();markUnsaved();}}
+
+// ── SAISIE CA ──
+function renderSaisieCA(){
+  const t=document.getElementById('ca-table');if(!t)return;
+  let h=`<thead><tr><th>Code</th><th>Article</th>`;
+  MS.slice(1).forEach(m=>h+=`<th>${m}</th>`);
+  h+=`<th>Total</th><th>CA HT</th></tr></thead><tbody>`;
+  articles.forEach(a=>{
+    const q=qty[a.code]||Array(12).fill(0);
+    const tot=q.reduce((s,v)=>s+v,0);
+    h+=`<tr><td style="color:var(--t2);font-family:var(--font-mono);font-size:11px">${a.code}</td><td style="font-weight:600">${a.nom}</td>`;
+    q.forEach((v,m)=>h+=`<td><input class="sinp" type="number" value="${v}" min="0" onchange="qty['${a.code}'][${m}]=parseInt(this.value)||0;renderSaisieCA()"></td>`);
+    h+=`<td class="stot">${tot}</td><td class="stot" style="color:var(--gr)">${fmt(tot*a.pv)} €</td></tr>`;
+  });
+  const tots=Array(12).fill(0);articles.forEach(a=>(qty[a.code]||[]).forEach((v,m)=>tots[m]+=v));
+  h+=`<tr><td colspan="2" style="text-align:left;font-weight:700">Total mensuel</td>`;
+  tots.forEach((t2,m)=>h+=`<td class="stot">${fmt(articles.reduce((s,a)=>(s+(qty[a.code]?.[m]||0)*a.pv),0))} €</td>`);
+  h+=`<td class="stot">${tots.reduce((s,v)=>s+v,0)}</td><td class="stot" style="color:var(--ac)">${fmt(articles.reduce((s,a)=>s+(qty[a.code]||[]).reduce((ss,q2)=>ss+q2,0)*a.pv,0))} €</td></tr></tbody>`;
+  t.innerHTML=h;
+}
+
+// ── SAISIE CHARGES ──
+function renderSaisieCh(){
+  const t=document.getElementById('charges-table');if(!t)return;
+  let h=`<thead><tr><th>Code</th><th>Charge</th><th>Type</th>`;
+  MS.slice(1).forEach(m=>h+=`<th>${m}</th>`);
+  h+=`<th>Total</th></tr></thead><tbody>`;
+  charges.forEach(c=>{
+    const d=chMD[c.code]||Array(12).fill(0);
+    const tot=d.reduce((s,v)=>s+v,0);
+    const tb=c.type==='Fixe'?'bdg-pu':'bdg-tl';
+    h+=`<tr><td style="color:var(--t2);font-family:var(--font-mono);font-size:11px">${c.code}</td><td style="font-weight:600">${c.nom}</td><td><span class="bdg ${tb}">${c.type}</span></td>`;
+    d.forEach((v,m)=>h+=`<td><input class="sinp" type="number" value="${v}" min="0" onchange="chMD[${c.code}][${m}]=parseInt(this.value)||0;renderSaisieCh()"></td>`);
+    h+=`<td class="stot" style="color:var(--am)">${fmt(tot)} €</td></tr>`;
+  });
+  const tots=Array(12).fill(0);charges.forEach(c=>(chMD[c.code]||[]).forEach((v,m)=>tots[m]+=v));
+  h+=`<tr><td colspan="3" style="text-align:left;font-weight:700">Total mensuel</td>`;
+  tots.forEach(v=>h+=`<td class="stot">${fmt(v)} €</td>`);
+  h+=`<td class="stot" style="color:var(--rd)">${fmt(tots.reduce((s,v)=>s+v,0))} €</td></tr></tbody>`;
+  t.innerHTML=h;
+}
+
+// ── TVA PROV ──
+function renderTVAProv(){
+  const el=document.getElementById('tva-prov');if(!el)return;
+  el.innerHTML=tvaN.map((v,i)=>`<div class="tvarow"><span class="tvarow-lbl">${MOIS[i+1]}</span><span class="tvarow-val" style="color:${v>0?'var(--rd)':v<0?'var(--gr)':'var(--t2)'}">${v>0?'+':''}${fmt(v)} €</span></div>`).join('');
+}
+
+// ── TRESO ──
+function renderTresoTable(){
+  const tb=document.getElementById('treso-tbody');if(!tb)return;
+  let s=5000,h='';
+  caD.forEach((ca,i)=>{const dec=chD[i];const sm=ca-dec;s+=sm;const c=sm>=0?'ppos':'pneg';h+=`<tr><td>${MOIS[i+1]}</td><td class="ppos">${fmt(ca)} €</td><td class="pneg">${fmt(dec)} €</td><td class="${c}">${sm>=0?'+':''}${fmt(sm)} €</td><td class="ppos">${fmt(s)} €</td></tr>`;});
+  tb.innerHTML=h;
+}
+
+// ── PREV ──
+function renderPrev(){
+  const tb=document.getElementById('prev-tbody');if(!tb)return;
+  const g=parseFloat(document.getElementById('growth-slider').value)/100;
+  const rows=[{l:'CA HT',d:caD,c:'ppos'},{l:'Charges totales',d:chD,c:'pneg'},{l:'Marge brute',d:caD.map(c=>Math.round(c*.519)),c:'ppos'},{l:'Résultat net',d:caD.map(c=>Math.round(c*.519-1527)),c:'pneu'}];
+  tb.innerHTML=rows.map(r=>{const pd=r.d.map(v=>Math.round(v*(1+g)));const tot=pd.reduce((s,v)=>s+v,0);return`<tr><td>${r.l}</td>${pd.map(v=>`<td class="${r.c}">${fmt(v)} €</td>`).join('')}<td class="${r.c}" style="font-weight:800">${fmt(tot)} €</td></tr>`;}).join('');
+  document.getElementById('prev-ca').textContent=fmt(caD.reduce((s,v)=>s+v,0)*(1+g))+' €';
+  document.getElementById('prev-mb').textContent=fmt(caD.reduce((s,v)=>s+v,0)*.519*(1+g))+' €';
+  document.getElementById('prev-rn').textContent=fmt(18240*(1+g*1.5))+' €';
+}
+function updateGrowth(v){
+  document.getElementById('growth-val').textContent=`+${v} %`;
+  renderPrev();
+  if(charts['c-prev-compare']){charts['c-prev-compare'].destroy();delete charts['c-prev-compare'];}
+  const g=parseFloat(v)/100;
+  mkChart('c-prev-compare',{type:'bar',data:{labels:['CA HT','Marge brute','Résultat net'],datasets:[{label:'N (2026)',data:[105600,54800,18240],backgroundColor:'rgba(59,126,255,.65)',borderRadius:5,borderSkipped:false},{label:'N+1 (prévisionnel)',data:[Math.round(105600*(1+g)),Math.round(54800*(1+g)),Math.round(18240*(1+g*1.5))],backgroundColor:'rgba(14,165,114,.65)',borderRadius:5,borderSkipped:false}]},options:{plugins:{legend:{display:true}}}});
+}
+function recalcPrev(){renderPrev();}
+
+// ── SIMULATEUR ──
+function runSim(){
+  const dca=parseFloat(document.getElementById('sim-ca').value)/100||0;
+  const dcf=parseFloat(document.getElementById('sim-cf').value)/100||0;
+  const dcv=parseFloat(document.getElementById('sim-cv').value)/100||0;
+  const dco=parseFloat(document.getElementById('sim-cout').value)/100||0;
+  const ca=105600*(1+dca);
+  const coa=(105600-54800)*(1+dco);
+  const mb=ca-coa;
+  const cf=18320*(1+dcf);const cv=18240*(1+dcv);
+  const rn=mb-cf-cv;
+  const pm=cf/(mb/ca);
+  document.getElementById('sim-ca-val').textContent=fmt(ca)+' €';
+  document.getElementById('sim-mb-val').textContent=fmt(mb)+' €';
+  const el=document.getElementById('sim-rn-val');el.textContent=fmt(rn)+' €';el.style.color=rn>=0?'var(--t1)':'var(--rd)';
+  document.getElementById('sim-pm-val').textContent=fmt(pm)+' €';
+}
+
+// ── CONTROLE ──
+function updCtrl(){
+  const actifs=articles.filter(a=>a.actif).length;
+  const anom=articles.filter(a=>a.pv<=0||a.ca<0).length;
+  const elems={
+    'ctrl-art':articles.length,'ctrl-actif':actifs,'ctrl-ch':charges.length,'ctrl-anom':anom
+  };
+  Object.entries(elems).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
+  const st=document.getElementById('ctrl-anom-st');
+  if(st){st.textContent=anom>0?`⚠ ${anom}`:'✓ Aucune';st.className='ctrlst '+(anom>0?'bdg-am':'bdg-gr');}
+  const ac=document.getElementById('alert-count');if(ac)ac.textContent=3+anom;
+}
+
+// ── CHARTS ──
+let charts={};
+function gc(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function mkChart(id,cfg){
+  const el=document.getElementById(id);if(!el)return;
+  if(charts[id])charts[id].destroy();
+  const tc=gc('--t2'),cg=gc('--cg');
+  const bs={x:{grid:{color:cg},ticks:{color:tc,font:{size:10,family:'JetBrains Mono'}}},y:{grid:{color:cg},ticks:{color:tc,font:{size:10,family:'JetBrains Mono'},callback:v=>v>=1000?(v/1000)+'k€':v+'€'}}};
+  charts[id]=new Chart(el,{...cfg,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc,font:{size:11,family:'Plus Jakarta Sans'},boxWidth:10,padding:10}},...(cfg.options?.plugins||{})},scales:cfg.type==='doughnut'||cfg.type==='pie'?undefined:{...bs,...(cfg.options?.scales||{})},...cfg.options}});
+}
+function updCharts(){
+  setTimeout(()=>{
+    Object.values(charts).forEach(c=>{
+      if(!c)return;
+      const tc=gc('--t2'),cg=gc('--cg');
+      if(c.options.scales){['x','y'].forEach(ax=>{if(c.options.scales[ax]){if(c.options.scales[ax].grid)c.options.scales[ax].grid.color=cg;if(c.options.scales[ax].ticks)c.options.scales[ax].ticks.color=tc;}});}
+      if(c.options.plugins?.legend?.labels)c.options.plugins.legend.labels.color=tc;
+      c.update();
+    });
+  },60);
+}
+function initCharts(){
+  const tc=gc('--t2'),cg=gc('--cg');
+  mkChart('c-ca-charges',{type:'bar',data:{labels:MS.slice(1),datasets:[{label:'CA 2026',data:caD,backgroundColor:'rgba(59,126,255,.72)',borderRadius:5,borderSkipped:false},{label:'CA N-1',data:caN1,backgroundColor:'rgba(59,126,255,.18)',borderRadius:5,borderSkipped:false},{label:'Charges',data:chD,type:'line',borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.07)',tension:.4,pointRadius:3,fill:true,borderWidth:2}]},options:{plugins:{legend:{display:true}}}});
+  mkChart('c-charges-rep',{type:'doughnut',data:{labels:['Charges fixes','Charges variables'],datasets:[{data:[18320,18240],backgroundColor:['rgba(155,135,245,.85)','rgba(34,211,200,.85)'],borderWidth:0,hoverOffset:4}]},options:{cutout:'66%',plugins:{legend:{position:'bottom',display:true}}}});
+  mkChart('c-treso-mini',{type:'line',data:{labels:MS.slice(1),datasets:[{data:trD,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.08)',tension:.4,pointRadius:2,fill:true,borderWidth:1.5}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{color:cg},ticks:{color:tc,font:{size:9}}},y:{grid:{color:cg},ticks:{color:tc,font:{size:9},callback:v=>(v/1000)+'k'}}}}});
+  mkChart('c-ca-monthly',{type:'bar',data:{labels:MS.slice(1),datasets:[{label:'CA HT',data:caD,backgroundColor:'rgba(59,126,255,.72)',borderRadius:5,borderSkipped:false}]},options:{plugins:{legend:{display:false}}}});
+  const cats={};articles.forEach(a=>cats[a.cat]=(cats[a.cat]||0)+(a.pv*660));
+  mkChart('c-ca-cat',{type:'doughnut',data:{labels:Object.keys(cats),datasets:[{data:Object.values(cats),backgroundColor:['rgba(155,135,245,.8)','rgba(34,211,200,.8)','rgba(59,126,255,.8)'],borderWidth:0,hoverOffset:4}]},options:{cutout:'60%',plugins:{legend:{position:'bottom',display:true}}}});
+  mkChart('c-charges-monthly',{type:'bar',data:{labels:MS.slice(1),datasets:[{label:'Fixes',data:fixD,backgroundColor:'rgba(155,135,245,.75)',borderRadius:5,borderSkipped:false},{label:'Variables',data:varD,backgroundColor:'rgba(34,211,200,.75)',borderRadius:5,borderSkipped:false}]},options:{plugins:{legend:{display:true}},scales:{x:{stacked:true,grid:{color:cg},ticks:{color:tc,font:{size:10}}},y:{stacked:true,grid:{color:cg},ticks:{color:tc,font:{size:10},callback:v=>v>=1000?(v/1000)+'k€':v+'€'}}}}});
+  mkChart('c-marge-monthly',{type:'line',data:{labels:MS.slice(1),datasets:[{label:'Marge brute',data:mrgD,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.09)',tension:.4,pointRadius:3,fill:true,borderWidth:2},{label:'Résultat net',data:mrgD.map(m=>Math.round(m-1527)),borderColor:'#9b87f5',backgroundColor:'rgba(155,135,245,.07)',tension:.4,pointRadius:3,fill:true,borderWidth:2,borderDash:[5,3]}]},options:{plugins:{legend:{display:true}}}});
+  mkChart('c-tva-monthly',{type:'bar',data:{labels:MS.slice(1),datasets:[{label:'Collectée',data:tvaColl,backgroundColor:'rgba(14,165,114,.72)',borderRadius:5,borderSkipped:false},{label:'Déductible',data:tvaDed.map(v=>-v),backgroundColor:'rgba(59,126,255,.72)',borderRadius:5,borderSkipped:false},{label:'Nette',data:tvaN,type:'line',borderColor:'#f43f5e',tension:.4,pointRadius:3,borderWidth:2}]},options:{plugins:{legend:{display:true}},scales:{x:{grid:{color:cg},ticks:{color:tc,font:{size:10}}},y:{grid:{color:cg},ticks:{color:tc,font:{size:10},callback:v=>Math.abs(v)>=1000?(v>0?'':'-')+(Math.abs(v)/1000)+'k€':v+'€'}}}}});
+  mkChart('c-treso-main',{type:'line',data:{labels:MS.slice(1),datasets:[{label:'Solde cumulé',data:trD,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.09)',tension:.4,pointRadius:4,fill:true,borderWidth:2},{label:'Seuil zéro',data:Array(12).fill(0),borderColor:'rgba(244,63,94,.4)',borderDash:[5,4],pointRadius:0,borderWidth:1.5}]},options:{plugins:{legend:{display:true}}}});
+  mkChart('c-prev-compare',{type:'bar',data:{labels:['CA HT','Marge brute','Résultat net'],datasets:[{label:'N (2026)',data:[105600,54800,18240],backgroundColor:'rgba(59,126,255,.65)',borderRadius:5,borderSkipped:false},{label:'N+1 (prévisionnel)',data:[118272,61376,22656],backgroundColor:'rgba(14,165,114,.65)',borderRadius:5,borderSkipped:false}]},options:{plugins:{legend:{display:true}}}});
+}
+
+// ── SAVE avec Supabase ──
+function markUnsaved(){
+  const d=document.getElementById('sdot');const t=document.getElementById('stxt');
+  if(d)d.classList.remove('saved');if(t)t.textContent='Modifications non enregistrées';
+}
+
+async function saveAll(){
+  const d=document.getElementById('sdot');const t=document.getElementById('stxt');
+  if(t)t.textContent='Enregistrement…';
+  try {
+    const {data:{user}}=await sb.auth.getUser();
+    if(!user){showAuthScreen();return;}
+    const uid=user.id;
+
+    // Upsert paramètres entreprise
+    const pAnnee=parseInt(document.getElementById('p-annee')?.value)||2026;
+    const pDebut=parseInt(document.getElementById('p-debut')?.value)||1;
+    const pFin=parseInt(document.getElementById('p-fin')?.value)||12;
+    const entNom=document.getElementById('ent-nom')?.value||'';
+    await sb.from('parametres').upsert({user_id:uid,annee:pAnnee,mois_debut:pDebut,mois_fin:pFin,nom_entreprise:entNom},{onConflict:'user_id'});
+
+    // Supprimer + réinsérer articles
+    await sb.from('articles').delete().eq('user_id',uid);
+    if(articles.length>0){
+      await sb.from('articles').insert(articles.map(a=>({user_id:uid,code:a.code,nom:a.nom,categorie:a.cat,prix_ht:a.pv,cout_achat:a.ca,tva:a.tva,actif:a.actif})));
+    }
+
+    // Supprimer + réinsérer charges
+    await sb.from('charges').delete().eq('user_id',uid);
+    if(charges.length>0){
+      await sb.from('charges').insert(charges.map(c=>({user_id:uid,code:c.code,nom:c.nom,categorie:c.cat,tva:c.tva,type:c.type,actif:c.actif})));
+    }
+
+    // Supprimer + réinsérer saisies CA
+    await sb.from('saisies_ca').delete().eq('user_id',uid);
+    const saisiesCA=[];
+    articles.forEach(a=>{(qty[a.code]||[]).forEach((q,m)=>{if(q>0)saisiesCA.push({user_id:uid,article_code:a.code,mois:m+1,annee:pAnnee,quantite:q});});});
+    if(saisiesCA.length>0) await sb.from('saisies_ca').insert(saisiesCA);
+
+    // Supprimer + réinsérer saisies charges
+    await sb.from('saisies_charges').delete().eq('user_id',uid);
+    const saisiesCh=[];
+    charges.forEach(c=>{(chMD[c.code]||[]).forEach((v,m)=>{if(v>0)saisiesCh.push({user_id:uid,charge_code:c.code,mois:m+1,annee:pAnnee,montant:v});});});
+    if(saisiesCh.length>0) await sb.from('saisies_charges').insert(saisiesCh);
+
+    if(d)d.classList.add('saved');
+    if(t)t.textContent='Enregistré · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  } catch(err){
+    console.error('Save error:',err);
+    if(t)t.textContent='Erreur — réessayez';
+  }
+}
+
+async function loadUserData(){
+  try {
+    const {data:{user}}=await sb.auth.getUser();
+    if(!user) return false;
+    const uid=user.id;
+
+    // Paramètres
+    const {data:params}=await sb.from('parametres').select('*').eq('user_id',uid).single();
+    if(params){
+      const pa=document.getElementById('p-annee');if(pa)pa.value=params.annee||2026;
+      const pd=document.getElementById('p-debut');if(pd)pd.value=params.mois_debut||1;
+      const pf=document.getElementById('p-fin');if(pf)pf.value=params.mois_fin||12;
+      const en=document.getElementById('ent-nom');if(en)en.value=params.nom_entreprise||'';
+      const dn=document.getElementById('db-company-name');if(dn&&params.nom_entreprise)dn.textContent=params.nom_entreprise;
+    }
+
+    // Articles
+    const {data:arts}=await sb.from('articles').select('*').eq('user_id',uid);
+    if(arts&&arts.length>0){
+      articles=arts.map(a=>({code:a.code,nom:a.nom,cat:a.categorie,pv:parseFloat(a.prix_ht)||0,ca:parseFloat(a.cout_achat)||0,tva:parseFloat(a.tva)||0.2,actif:a.actif}));
+    }
+
+    // Charges
+    const {data:chs}=await sb.from('charges').select('*').eq('user_id',uid);
+    if(chs&&chs.length>0){
+      charges=chs.map(c=>({code:c.code,nom:c.nom,cat:c.categorie,tva:parseFloat(c.tva)||0.2,type:c.type,actif:c.actif}));
+    }
+
+    // Saisies CA
+    const annee=params?.annee||2026;
+    const {data:sca}=await sb.from('saisies_ca').select('*').eq('user_id',uid).eq('annee',annee);
+    if(sca&&sca.length>0){
+      // Reset qty
+      articles.forEach(a=>qty[a.code]=Array(12).fill(0));
+      sca.forEach(r=>{ if(!qty[r.article_code])qty[r.article_code]=Array(12).fill(0); qty[r.article_code][r.mois-1]=r.quantite; });
+    }
+
+    // Saisies charges
+    const {data:sch}=await sb.from('saisies_charges').select('*').eq('user_id',uid).eq('annee',annee);
+    if(sch&&sch.length>0){
+      charges.forEach(c=>chMD[c.code]=Array(12).fill(0));
+      sch.forEach(r=>{ if(!chMD[r.charge_code])chMD[r.charge_code]=Array(12).fill(0); chMD[r.charge_code][r.mois-1]=r.montant; });
+    }
+
+    return true;
+  } catch(err){
+    console.error('Load error:',err);
+    return false;
+  }
+}
+
+// ── EXPORT ──
+function csv(data,name){const b=new Blob([data],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();}
+function exportArticles(){csv('Code,Nom,Catégorie,PrixHT,CoutAchat,TVA,Actif\n'+articles.map(a=>`${a.code},${a.nom},${a.cat},${a.pv},${a.ca},${a.tva},${a.actif}`).join('\n'),'logpose-articles.csv');}
+function exportChParam(){csv('Code,Nom,Catégorie,TVA,Type,Actif\n'+charges.map(c=>`${c.code},${c.nom},${c.cat},${c.tva},${c.type},${c.actif}`).join('\n'),'logpose-charges.csv');}
+function exportCA(){csv('Article,'+MS.slice(1).join(',')+',Total\n'+articles.map(a=>{const q=qty[a.code]||[];return`${a.nom},${q.join(',')},${q.reduce((s,v)=>s+v,0)}`;}).join('\n'),'logpose-ca.csv');}
+function exportChargesData(){csv('Charge,'+MS.slice(1).join(',')+',Total\n'+charges.map(c=>{const d=chMD[c.code]||[];return`${c.nom},${d.join(',')},${d.reduce((s,v)=>s+v,0)}`;}).join('\n'),'logpose-charges-saisie.csv');}
+function exportTreso(){let s=5000,rows='Mois,Encaissements,Décaissements,Solde mois,Solde cumulé\n';caD.forEach((ca,i)=>{const dec=chD[i],sm=ca-dec;s+=sm;rows+=`${MOIS[i+1]},${ca},${dec},${sm},${s}\n`;});csv(rows,'logpose-tresorerie.csv');}
+
+// ── AUTH ──
+let authMode='login';
+
+function showAuthScreen(){
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('onb').style.display='none';
+  document.getElementById('main-app').style.display='none';
+}
+
+function switchAuthTab(mode){
+  authMode=mode;
+  const isLogin=mode==='login';
+  const tl=document.getElementById('auth-tab-login');
+  const tr=document.getElementById('auth-tab-register');
+  tl.style.background=isLogin?'var(--bg-c)':'transparent';
+  tl.style.color=isLogin?'var(--t1)':'var(--t2)';
+  tl.style.fontWeight=isLogin?'700':'500';
+  tl.style.boxShadow=isLogin?'0 1px 4px rgba(0,0,0,.12)':'none';
+  tr.style.background=!isLogin?'var(--bg-c)':'transparent';
+  tr.style.color=!isLogin?'var(--t1)':'var(--t2)';
+  tr.style.fontWeight=!isLogin?'700':'500';
+  tr.style.boxShadow=!isLogin?'0 1px 4px rgba(0,0,0,.12)':'none';
+  document.getElementById('auth-btn').textContent=isLogin?'Se connecter':'Créer mon compte';
+  document.getElementById('auth-forgot').style.display=isLogin?'inline':'none';
+  hideAuthMsg();
+}
+
+function showAuthError(msg){
+  const el=document.getElementById('auth-error');
+  el.textContent=msg;el.style.display='block';
+  document.getElementById('auth-success').style.display='none';
+}
+function showAuthSuccess(msg){
+  const el=document.getElementById('auth-success');
+  el.textContent=msg;el.style.display='block';
+  document.getElementById('auth-error').style.display='none';
+}
+function hideAuthMsg(){
+  document.getElementById('auth-error').style.display='none';
+  document.getElementById('auth-success').style.display='none';
+}
+
+async function authSubmit(){
+  const email=document.getElementById('auth-email').value.trim();
+  const password=document.getElementById('auth-password').value;
+  const btn=document.getElementById('auth-btn');
+  if(!email||!password){showAuthError('Veuillez remplir tous les champs.');return;}
+  if(password.length<8){showAuthError('Le mot de passe doit contenir au moins 8 caractères.');return;}
+  btn.textContent='Chargement…';btn.disabled=true;
+  try {
+    if(authMode==='login'){
+      const {error}=await sb.auth.signInWithPassword({email,password});
+      if(error) throw error;
+    } else {
+      const {error}=await sb.auth.signUp({email,password});
+      if(error) throw error;
+      showAuthSuccess('Compte créé ! Vérifiez votre email pour confirmer votre inscription, puis connectez-vous.');
+      switchAuthTab('login');
+      btn.textContent='Se connecter';btn.disabled=false;
+      return;
+    }
+  } catch(err){
+    const msgs={
+      'Invalid login credentials':'Email ou mot de passe incorrect.',
+      'Email not confirmed':'Confirmez votre email avant de vous connecter.',
+      'User already registered':'Un compte existe déjà avec cet email.',
+    };
+    showAuthError(msgs[err.message]||err.message||'Une erreur est survenue.');
+    btn.textContent=authMode==='login'?'Se connecter':'Créer mon compte';
+    btn.disabled=false;
+  }
+}
+
+async function authForgot(){
+  const email=document.getElementById('auth-email').value.trim();
+  if(!email){showAuthError('Entrez votre email pour réinitialiser votre mot de passe.');return;}
+  const {error}=await sb.auth.resetPasswordForEmail(email);
+  if(error) showAuthError(error.message);
+  else showAuthSuccess('Email de réinitialisation envoyé ! Vérifiez votre boîte.');
+}
+
+async function authLogout(){
+  await sb.auth.signOut();
+  showAuthScreen();
+}
+
+function setUserInfo(user){
+  const email=user.email||'';
+  const avatar=email.charAt(0).toUpperCase();
+  const avEl=document.getElementById('sb-avatar');if(avEl)avEl.textContent=avatar;
+  const emEl=document.getElementById('sb-user-email');if(emEl)emEl.textContent=email;
+}
+
+// ── INIT ──
+function initAll(){
+  renderArt();renderCh();renderSaisieCA();renderSaisieCh();renderTVAProv();renderTresoTable();renderPrev();updPeriod();updCtrl();initCharts();
+  const d=document.getElementById('sdot');const t=document.getElementById('stxt');
+  if(d)d.classList.add('saved');if(t)t.textContent='Données chargées';
+}
+
+// ── START ──
+document.addEventListener('DOMContentLoaded', async ()=>{
+  // Écouter les changements d'auth
+  sb.auth.onAuthStateChange(async (event, session)=>{
+    if(event==='SIGNED_IN' && session){
+      document.getElementById('auth-screen').style.display='none';
+      setUserInfo(session.user);
+      const hasData=await loadUserData();
+      if(hasData && articles.length>0){
+        // Utilisateur existant : aller direct au dashboard
+        document.getElementById('main-app').style.display='flex';
+        initAll();
+      } else {
+        // Nouvel utilisateur : onboarding
+        document.getElementById('onb').style.display='flex';
+        renderOnb();
+      }
+    } else if(event==='SIGNED_OUT'){
+      showAuthScreen();
+    }
+  });
+
+  // Vérifier la session au chargement
+  const {data:{session}}=await sb.auth.getSession();
+  if(session){
+    setUserInfo(session.user);
+    const hasData=await loadUserData();
+    document.getElementById('auth-screen').style.display='none';
+    if(hasData && articles.length>0){
+      document.getElementById('main-app').style.display='flex';
+      initAll();
+    } else {
+      document.getElementById('onb').style.display='flex';
+      renderOnb();
+    }
+  } else {
+    showAuthScreen();
+  }
+});
+</script>
+</body>
+</html>
