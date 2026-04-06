@@ -11,8 +11,8 @@
 // ════════════════════════════════════════════
 // CONFIGURATION SUPABASE — remplace par tes clés
 // ════════════════════════════════════════════
-const SUPABASE_URL  = 'https://ppmdabvtdoaodzzjqqsc.supabase.co'; // ← ta Project URL
-const SUPABASE_KEY  = 'sb_publishable_Bx3WGtuoNlSlQU5MBtJsnQ_Fljdsow1'; // ← ta anon/public key
+const SUPABASE_URL  = 'https://XXXXXXXXXXXXXXXX.supabase.co'; // ← ta Project URL
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.XXXXXXXX'; // ← ta anon/public key
 // ════════════════════════════════════════════
 // LEMON SQUEEZY
 // ════════════════════════════════════════════
@@ -56,13 +56,13 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   --in:#f8faff;--sh:0 4px 20px rgba(0,0,0,.07);
   --cg:rgba(0,0,0,.05);
 }
- 
+
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-height:100vh;transition:background var(--tr),color var(--tr);font-size:14px;line-height:1.55}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bd-s);border-radius:99px}
- 
+
 /* ─ ONBOARDING ─ */
 .onb{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center}
 .onb-card{background:var(--bg-c);border:1px solid var(--bd);border-radius:20px;padding:40px;max-width:520px;width:90%;box-shadow:var(--sh)}
@@ -88,42 +88,47 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 .onb-feat-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
 .onb-feat-title{font-size:12.5px;font-weight:600;margin-bottom:1px}
 .onb-feat-desc{font-size:11px;color:var(--t2);line-height:1.5}
- 
+
 /* ─ LAYOUT ─ */
 .app{display:flex;min-height:100vh}
 .sb{width:var(--sw);background:var(--bg-s);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:all var(--tr);overflow-y:auto;overflow-x:hidden}
 .main{margin-left:var(--sw);flex:1;padding:24px 28px 88px;transition:margin-left var(--tr)}
 .savebar{transition:left var(--tr)}
- 
+
 /* ─ SIDEBAR COLLAPSED ─ */
 .sb.collapsed{width:56px}
-.sb.collapsed .sb-name,.sb.collapsed .sb-sub,.sb.collapsed .sb-lbl,
-.sb.collapsed .sb-item span:not(.sb-item-icon),.sb.collapsed .sb-badge,
-.sb.collapsed .theme-txt,.sb.collapsed .tog,
-.sb.collapsed .sb-sect > .sb-lbl{display:none}
-.sb.collapsed .sb-logo{padding:16px 12px;justify-content:center}
+.sb.collapsed .sb-name,.sb.collapsed .sb-sub,
+.sb.collapsed .sb-item span:not(.sb-item-icon),
+.sb.collapsed .sb-badge,.sb.collapsed .theme-txt,
+.sb.collapsed .tog,.sb.collapsed .sb-lbl,
+.sb.collapsed #sb-user-info .sb-uname,
+.sb.collapsed #sb-user-info .sb-plan-wrap,
+.sb.collapsed #upgrade-btn,
+.sb.collapsed #sb-toggle-txt{display:none!important}
+.sb.collapsed .sb-logo{padding:14px 12px;justify-content:center}
 .sb.collapsed .sb-icon{margin:0}
 .sb.collapsed .sb-sect{padding:0 6px}
-.sb.collapsed .sb-item{padding:9px;justify-content:center;gap:0}
+.sb.collapsed .sb-item{padding:10px;justify-content:center;gap:0;border-radius:var(--radius-sm)}
 .sb.collapsed .sb-item-icon{opacity:.7;width:20px;height:20px}
 .sb.collapsed .sb-item.active .sb-item-icon{opacity:1}
-.sb.collapsed .sb-bottom{padding:10px 6px;align-items:center}
-.sb.collapsed .theme-btn{padding:9px;justify-content:center;border:none;background:transparent}
-.sb.collapsed .sb-toggle-btn{justify-content:center}
+.sb.collapsed .sb-bottom{padding:8px 6px}
+.sb.collapsed .theme-btn{padding:10px;justify-content:center;border:none;background:transparent;width:auto;margin:0 auto}
+.sb.collapsed #sb-user-info{justify-content:center;padding:8px;border:none;background:transparent}
+.sb.collapsed .sb-toggle-btn{width:36px;margin:4px auto;padding:9px;justify-content:center}
 .app.sb-collapsed .main{margin-left:56px}
 .app.sb-collapsed .savebar{left:56px}
- 
+
 /* ─ SIDEBAR TOGGLE BUTTON ─ */
 .sb-toggle-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;color:var(--t2);font-size:12px;font-weight:500;transition:all var(--tr);margin:4px 10px 0;border:1px solid var(--bd);background:transparent;width:calc(100% - 20px)}
 .sb-toggle-btn:hover{background:var(--bg-c);color:var(--t1);border-color:var(--bd-s)}
 .sb.collapsed .sb-toggle-btn{width:36px;margin:4px auto 0;padding:8px;justify-content:center;border-radius:var(--radius-sm)}
- 
+
 /* ─ MOBILE HEADER ─ */
 .mob-header{display:none;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-s);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:99}
 .mob-menu-btn{width:36px;height:36px;border-radius:8px;background:var(--bg-c);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .mob-title{font-weight:700;font-size:16px}
 .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
- 
+
 /* ─ SIDEBAR ─ */
 .sb-logo{padding:18px 16px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
 .sb-icon{width:32px;height:32px;background:var(--ac);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -145,37 +150,37 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 [data-theme="light"] .tog{background:var(--ac)}
 .tog-k{width:14px;height:14px;background:var(--t1);border-radius:50%;position:absolute;top:2px;left:2px;transition:all var(--tr)}
 [data-theme="light"] .tog-k{transform:translateX(14px);background:#fff}
- 
+
 /* ─ TOPBAR ─ */
 .topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:14px;flex-wrap:wrap}
 .page-title{font-size:20px;font-weight:700;letter-spacing:-.4px}
 .page-sub{font-size:12px;color:var(--t2);margin-top:2px}
 .page-actions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
- 
+
 /* ─ PANELS ─ */
 .panel{display:none}.panel.active{display:block}
- 
+
 /* ─ BUTTONS ─ */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all var(--tr);border:none;white-space:nowrap;letter-spacing:-.1px}
 .btn-primary{background:var(--ac);color:#fff}.btn-primary:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 4px 14px rgba(59,126,255,.35)}
 .btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--bd)}.btn-ghost:hover{border-color:var(--bd-s);color:var(--t1);background:var(--bg-c)}
 .btn-sm{padding:6px 13px;font-size:12px}
 .btn-xs{padding:4px 9px;font-size:11px}
- 
+
 /* ─ CARDS ─ */
 .card{background:var(--bg-c);border:1px solid var(--bd);border-radius:var(--radius);padding:20px;margin-bottom:14px;transition:all var(--tr)}
 .card-title{font-size:14px;font-weight:700;letter-spacing:-.2px;margin-bottom:3px}
 .card-sub{font-size:11.5px;color:var(--t2);line-height:1.5}
- 
+
 /* ─ SEC LABEL ─ */
 .slbl{font-size:10px;font-weight:700;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
- 
+
 /* ─ TABS ─ */
 .tabs{display:flex;gap:3px;background:var(--bg-s);border:1px solid var(--bd);border-radius:10px;padding:3px;margin-bottom:20px;width:fit-content;flex-wrap:wrap}
 .tab{padding:7px 16px;border-radius:7px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all var(--tr)}
 .tab:hover{color:var(--t1)}
 .tab.active{background:var(--bg-c);color:var(--t1);font-weight:700;box-shadow:0 1px 5px rgba(0,0,0,.12)}
- 
+
 /* ─ KPI ─ */
 .kpi-grid{display:grid;gap:12px;margin-bottom:14px}
 .g4{grid-template-columns:repeat(4,1fr)}
@@ -189,7 +194,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 .kpi-d{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px}
 .du{background:var(--gr-b);color:var(--gr)}.dd{background:var(--rd-b);color:var(--rd)}.dn{background:var(--am-b);color:var(--am)}
 .kpi-sub{font-size:10.5px;color:var(--t3);margin-top:4px}
- 
+
 /* ─ ALERTS ─ */
 .alerts{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
 .alrt{display:flex;align-items:center;gap:7px;padding:6px 13px;border-radius:99px;font-size:12px;font-weight:600}
@@ -198,7 +203,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 .alrt-g{background:var(--gr-b);color:var(--gr);border:1px solid rgba(14,165,114,.2)}
 .alrt-dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 1.8s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
- 
+
 /* ─ CHARTS ─ */
 .cg2{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:14px}
 .cg3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
@@ -206,7 +211,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 .cwrap{position:relative;height:190px}
 .cwrap-sm{position:relative;height:120px}
 .cwrap-lg{position:relative;height:230px}
- 
+
 /* ─ FORM ─ */
 .fg{display:grid;gap:14px;margin-bottom:14px}
 .fg3{grid-template-columns:repeat(3,1fr)}
@@ -221,7 +226,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 .ppreview{background:var(--ag);border:1px solid rgba(59,126,255,.2);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .ppreview-lbl{font-size:11px;color:var(--t2)}
 .ppreview-val{font-family:var(--font-mono);font-size:12px;color:var(--ac);font-weight:600}
- 
+
 /* ─ TABLE ─ */
 .tbl-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
 .dtbl{width:100%;border-collapse:collapse}
@@ -240,11 +245,11 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 .addrow input:focus,.addrow select:focus{border-color:var(--bd-f);box-shadow:0 0 0 2px var(--ag)}
 .addrow select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b85a8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:22px;cursor:pointer}
 .addrow select option{background:var(--bg-c)}
- 
+
 /* ─ BADGES ─ */
 .bdg{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:99px;letter-spacing:.02em}
 .bdg-gr{background:var(--gr-b);color:var(--gr)}.bdg-am{background:var(--am-b);color:var(--am)}.bdg-rd{background:var(--rd-b);color:var(--rd)}.bdg-pu{background:var(--pu-b);color:var(--pu)}.bdg-tl{background:var(--tl-b);color:var(--tl)}.bdg-ac{background:var(--ag);color:var(--ac)}
- 
+
 /* ─ SAISIE ─ */
 .stbl{width:100%;border-collapse:collapse;font-size:12.5px}
 .stbl th{font-size:9.5px;font-weight:700;font-family:var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:6px 8px;text-align:center;border-bottom:1px solid var(--bd);white-space:nowrap}
@@ -256,11 +261,11 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 .sinp{width:68px;background:transparent;border:1px solid transparent;border-radius:5px;padding:4px 6px;color:var(--t1);font-family:var(--font-mono);font-size:12px;text-align:center;outline:none;transition:all var(--tr)}
 .sinp:focus{background:var(--in);border-color:var(--bd-f);box-shadow:0 0 0 2px var(--ag)}
 .stot{font-family:var(--font-mono);font-size:12px;color:var(--ac);font-weight:700}
- 
+
 /* ─ PROGRESS ─ */
 .pw{background:var(--bd);border-radius:99px;height:6px;overflow:hidden;margin:6px 0}
 .pb{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
- 
+
 /* ─ TOP LIST ─ */
 .toplist{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .topitem{display:flex;align-items:center;gap:9px}
@@ -269,7 +274,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 .topbarw{width:70px;height:4px;background:var(--bd);border-radius:99px}
 .topbar{height:100%;border-radius:99px}
 .topval{font-size:11.5px;font-family:var(--font-mono);color:var(--t2);min-width:58px;text-align:right}
- 
+
 /* ─ TRESO / PREV ─ */
 .ptbl{width:100%;border-collapse:collapse;font-size:12px}
 .ptbl th{font-size:9px;font-weight:700;font-family:var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:6px 10px;text-align:right;border-bottom:1px solid var(--bd)}
@@ -279,7 +284,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 .ptbl tr:last-child td{border-bottom:none;font-weight:700;color:var(--ac)}
 .ptbl tr:hover td{background:var(--bg-h)}
 .ppos{color:var(--gr)}.pneg{color:var(--rd)}.pneu{color:var(--t2)}
- 
+
 /* ─ ALERT BOX ─ */
 .abox{padding:12px 14px;border-radius:var(--radius-sm);font-size:12.5px;margin-bottom:9px;display:flex;align-items:flex-start;gap:10px;border-left:3px solid}
 .abox-r{background:var(--rd-b);color:var(--rd);border-color:var(--rd)}
@@ -289,13 +294,13 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 .abox-ico{font-size:15px;flex-shrink:0;margin-top:1px}
 .abox-title{font-weight:700;margin-bottom:2px;letter-spacing:-.1px}
 .abox-desc{font-size:11px;opacity:.82;line-height:1.5}
- 
+
 /* ─ MARGE ─ */
 .mrgrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd)}
 .mrgrow:last-child{border-bottom:none}
 .mrgname{flex:1;font-size:13px;font-weight:500}
 .mrgtaux{font-family:var(--font-mono);font-size:13px;font-weight:700}
- 
+
 /* ─ TVA ─ */
 .tvarow{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;background:var(--bg-s);border-radius:var(--radius-sm);border:1px solid var(--bd);margin-bottom:8px}
 .tvarow-lbl{font-size:12.5px;font-weight:500;color:var(--t2)}
@@ -303,34 +308,34 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 .tvanet{padding:15px;border-radius:var(--radius-sm);text-align:center;margin-top:12px}
 .tvanet-lbl{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
 .tvanet-val{font-size:28px;font-weight:800;letter-spacing:-1.5px}
- 
+
 /* ─ CTRL ─ */
 .ctrlgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .ctrlitem{background:var(--bg-s);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:12px 14px}
 .ctrlval{font-size:24px;font-weight:800;letter-spacing:-.5px}
 .ctrllbl{font-size:11px;font-weight:500;color:var(--t2);margin-top:2px}
 .ctrlst{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;margin-top:6px;font-family:var(--font-mono)}
- 
+
 /* ─ SCENARIO ─ */
 .sccard{background:var(--bg-c);border:1px solid var(--bd);border-radius:var(--radius);padding:18px;margin-bottom:10px;transition:all var(--tr)}
 .sccard:hover{border-color:var(--bd-s)}
 .scc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .scc-name{font-weight:700;font-size:13.5px}
 .scc-res{font-size:22px;font-weight:800;letter-spacing:-.8px}
- 
+
 /* ─ RADIO ─ */
 .rdopt{display:flex;align-items:center;gap:11px;cursor:pointer;padding:10px 13px;border:1px solid var(--bd);border-radius:var(--radius-sm);transition:all var(--tr);margin-bottom:8px}
 .rdopt:has(input:checked){border-color:var(--bd-f);background:var(--ag)}
 .rdopt input{accent-color:var(--ac)}
 .rdopt-title{font-size:13px;font-weight:600}
 .rdopt-sub{font-size:11px;color:var(--t2)}
- 
+
 /* ─ SAVE BAR ─ */
 .savebar{position:fixed;bottom:0;left:var(--sw);right:0;background:var(--bg-s);border-top:1px solid var(--bd);padding:11px 26px;display:flex;align-items:center;justify-content:space-between;z-index:50;transition:all var(--tr)}
 .save-st{font-size:12px;font-weight:500;color:var(--t2);display:flex;align-items:center;gap:8px}
 .sdot{width:7px;height:7px;border-radius:50%;background:var(--am);animation:blink 1.8s infinite;flex-shrink:0}
 .sdot.saved{background:var(--gr);animation:none}
- 
+
 /* ─ RESPONSIVE ─ */
 @media(max-width:860px){
   .sb{transform:translateX(-100%)}
@@ -354,7 +359,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
 </style>
 </head>
 <body>
- 
+
 <!-- ══ AUTH ══ -->
 <div id="auth-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:2000;display:flex;align-items:center;justify-content:center">
   <div style="background:var(--bg-c);border:1px solid var(--bd);border-radius:20px;padding:40px;max-width:420px;width:90%;box-shadow:var(--sh)">
@@ -367,16 +372,16 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
         <div style="font-size:9px;color:var(--t3);font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase">Financial OS</div>
       </div>
     </div>
- 
+
     <!-- Tabs login/register -->
     <div style="display:flex;background:var(--bg-s);border:1px solid var(--bd);border-radius:9px;padding:3px;margin-bottom:24px">
       <div id="auth-tab-login" onclick="switchAuthTab('login')" style="flex:1;text-align:center;padding:7px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;background:var(--bg-c);color:var(--t1);box-shadow:0 1px 4px rgba(0,0,0,.12);transition:all .2s">Connexion</div>
       <div id="auth-tab-register" onclick="switchAuthTab('register')" style="flex:1;text-align:center;padding:7px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;color:var(--t2);transition:all .2s">Créer un compte</div>
     </div>
- 
+
     <div id="auth-error" style="display:none;padding:10px 14px;background:var(--rd-b);border:1px solid rgba(244,63,94,.2);border-radius:8px;font-size:12.5px;color:var(--rd);margin-bottom:16px;font-weight:500"></div>
     <div id="auth-success" style="display:none;padding:10px 14px;background:var(--gr-b);border:1px solid rgba(14,165,114,.2);border-radius:8px;font-size:12.5px;color:var(--gr);margin-bottom:16px;font-weight:500"></div>
- 
+
     <div style="display:flex;flex-direction:column;gap:12px">
       <div>
         <label style="font-size:10.5px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;font-family:var(--font-mono);display:block;margin-bottom:5px">Adresse e-mail</label>
@@ -387,23 +392,23 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
         <input id="auth-password" type="password" placeholder="8 caractères minimum" style="width:100%;background:var(--in);border:1px solid var(--bd);border-radius:9px;padding:10px 14px;color:var(--t1);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--bd-f)'" onblur="this.style.borderColor='var(--bd)'" onkeydown="if(event.key==='Enter')authSubmit()">
       </div>
     </div>
- 
+
     <button onclick="authSubmit()" id="auth-btn" style="width:100%;margin-top:20px;padding:12px;background:var(--ac);color:#fff;border:none;border-radius:9px;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:-.1px">
       Se connecter
     </button>
- 
+
     <div style="text-align:center;margin-top:16px">
       <span id="auth-forgot" onclick="authForgot()" style="font-size:12px;color:var(--t2);cursor:pointer;text-decoration:underline">Mot de passe oublié ?</span>
     </div>
- 
+
     <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--bd);text-align:center;font-size:11px;color:var(--t3)">
       Vos données sont chiffrées et sécurisées · LogPose 2026
     </div>
   </div>
 </div>
- 
+
 <!-- ══ ONBOARDING ══ -->
-<div class="onb" id="onb">
+<div class="onb" id="onb" style="display:none">
   <div class="onb-card">
     <div class="onb-logo">
       <div class="onb-icon">
@@ -415,9 +420,9 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     <div id="onb-content"></div>
   </div>
 </div>
- 
+
 <div class="app" style="display:none" id="main-app">
- 
+
 <!-- ══ SIDEBAR ══ -->
 <div class="sb-overlay" id="sb-overlay" onclick="closeMobile()"></div>
 <aside class="sb" id="sidebar">
@@ -427,7 +432,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     </div>
     <div><div class="sb-name">LogPose</div><div class="sb-sub">Financial OS</div></div>
   </div>
- 
+
   <div class="sb-sect">
     <div class="sb-lbl">Pilotage</div>
     <div class="sb-item active" onclick="nav('dashboard',this)">
@@ -440,7 +445,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
       <span class="sb-badge" id="alert-count">3</span>
     </div>
   </div>
- 
+
   <div class="sb-sect">
     <div class="sb-lbl">Saisie</div>
     <div class="sb-item" onclick="nav('ca',this)">
@@ -452,7 +457,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
       Charges
     </div>
   </div>
- 
+
   <div class="sb-sect">
     <div class="sb-lbl">Analyse</div>
     <div class="sb-item" onclick="nav('marge',this)">
@@ -476,7 +481,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
       Scénarios
     </div>
   </div>
- 
+
   <div class="sb-sect">
     <div class="sb-lbl">Configuration</div>
     <div class="sb-item" onclick="nav('parametres',this)">
@@ -484,7 +489,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
       Paramètres
     </div>
   </div>
- 
+
   <div class="sb-bottom">
     <!-- User info -->
     <div id="sb-user-info" style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg-c);border-radius:var(--radius-sm);border:1px solid var(--bd);margin-bottom:8px;cursor:default">
@@ -498,11 +503,11 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
       </div>
     </div>
     <a href="#" id="upgrade-btn" onclick="openUpgrade(event)"
-       style="display:block;margin-top:8px;padding:7px 12px;
+       style="display:block;margin-top:8px;padding:7px 10px;
        background:linear-gradient(135deg,var(--ac),var(--pu));
        color:#fff;border-radius:7px;font-size:11px;font-weight:700;
-       text-align:center;text-decoration:none;transition:opacity .2s;
-       box-shadow:0 2px 8px rgba(59,126,255,.25)"
+       text-align:center;text-decoration:none;cursor:pointer;
+       box-shadow:0 2px 8px rgba(59,126,255,.25);transition:opacity .2s"
        onmouseover="this.style.opacity='.85'"
        onmouseout="this.style.opacity='1'">
       ⭐ Passer au Pro — 15 €/mois
@@ -517,7 +522,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     </div>
   </div>
 </aside>
- 
+
 <!-- MOBILE HEADER -->
 <div class="mob-header">
   <div class="mob-menu-btn" onclick="openMobile()">
@@ -526,10 +531,10 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
   <div class="mob-title">LogPose</div>
   <div onclick="toggleTheme()" style="cursor:pointer;font-size:18px" id="mob-theme-icon">🌙</div>
 </div>
- 
+
 <!-- ══ MAIN ══ -->
 <main class="main">
- 
+
 <!-- ── DASHBOARD ── -->
 <div id="panel-dashboard" class="panel active">
   <div class="topbar">
@@ -544,10 +549,8 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
       </select>
     </div>
   </div>
-  <div class="alerts">
-    <div class="alrt alrt-r"><div class="alrt-dot"></div>Marge en baisse 2 mois consécutifs</div>
-    <div class="alrt alrt-a"><div class="alrt-dot"></div>TVA à déclarer dans 18 jours — 4 320 €</div>
-    <div class="alrt alrt-a"><div class="alrt-dot"></div>Août historiquement faible</div>
+  <div class="alerts" id="db-alerts">
+    <div class="alrt alrt-a"><div class="alrt-dot"></div>Chargement des alertes…</div>
   </div>
   <div class="slbl">Résultats clés</div>
   <div class="kpi-grid g4">
@@ -601,7 +604,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     </div>
   </div>
 </div>
- 
+
 <!-- ── SUIVI CA ── -->
 <div id="panel-ca" class="panel">
   <div class="topbar">
@@ -614,13 +617,26 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     <div class="kpi-card"><div class="kpi-acc" style="background:var(--pu)"></div><div class="kpi-lbl">Meilleur mois</div><div class="kpi-val">Décembre</div><span class="kpi-d du">10 800 €</span></div>
     <div class="kpi-card"><div class="kpi-acc" style="background:var(--am)"></div><div class="kpi-lbl">Mois le plus faible</div><div class="kpi-val">Août</div><span class="kpi-d dd">6 400 €</span></div>
   </div>
-  <div class="card"><div class="tbl-hdr"><div class="card-title">Saisie des quantités vendues</div><div style="font-size:11.5px;color:var(--t2)">Cliquez sur une cellule pour modifier · Le CA HT se calcule automatiquement</div></div><div style="overflow-x:auto"><table class="stbl" id="ca-table"></table></div></div>
+  <div class="card">
+    <div class="tbl-hdr">
+      <div><div class="card-title">Saisie des quantités vendues</div><div style="font-size:11.5px;color:var(--t2)">Cliquez sur une cellule pour modifier · CA HT calculé automatiquement</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ca-quick-add').style.display=document.getElementById('ca-quick-add').style.display==='none'?'flex':'none'">+ Nouvel article</button>
+    </div>
+    <div id="ca-quick-add" style="display:none;gap:7px;padding:10px;background:var(--bg-s);border-radius:var(--radius-sm);border:1px dashed var(--bd);margin-bottom:12px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="ca-na-code" placeholder="Code (REF09)" style="flex:0 0 100px;background:var(--in);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:7px 10px;color:var(--t1);font-family:var(--font-body);font-size:13px;outline:none">
+      <input type="text" id="ca-na-nom" placeholder="Nom de l'article" style="flex:2;min-width:120px;background:var(--in);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:7px 10px;color:var(--t1);font-family:var(--font-body);font-size:13px;outline:none">
+      <input type="number" id="ca-na-pv" placeholder="Prix HT €" style="flex:0 0 90px;background:var(--in);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:7px 10px;color:var(--t1);font-family:var(--font-body);font-size:13px;outline:none" step="0.01">
+      <input type="number" id="ca-na-ca" placeholder="Coût achat €" style="flex:0 0 100px;background:var(--in);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:7px 10px;color:var(--t1);font-family:var(--font-body);font-size:13px;outline:none" step="0.01">
+      <button class="btn btn-primary btn-sm" onclick="addArticleFromCA()">Ajouter</button>
+    </div>
+    <div style="overflow-x:auto"><table class="stbl" id="ca-table"></table></div>
+  </div>
   <div class="cgeq">
-    <div class="card"><div class="card-title">CA HT mensuel 2026</div><div class="card-sub">Évolution sur la période</div><div class="cwrap"><canvas id="c-ca-monthly"></canvas></div></div>
+    <div class="card"><div class="card-title">CA HT mensuel</div><div class="card-sub">Évolution sur la période</div><div class="cwrap"><canvas id="c-ca-monthly"></canvas></div></div>
     <div class="card"><div class="card-title">CA par catégorie</div><div class="card-sub">Répartition du chiffre d'affaires</div><div class="cwrap"><canvas id="c-ca-cat"></canvas></div></div>
   </div>
 </div>
- 
+
 <!-- ── SUIVI CHARGES ── -->
 <div id="panel-charges" class="panel">
   <div class="topbar">
@@ -628,26 +644,31 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     <div class="page-actions"><button class="btn btn-ghost btn-sm" onclick="exportChargesData()">↓ Export CSV</button><button class="btn btn-primary btn-sm" onclick="saveAll()">Enregistrer</button></div>
   </div>
   <div class="kpi-grid g4">
-    <div class="kpi-card"><div class="kpi-acc" style="background:var(--am)"></div><div class="kpi-lbl">Total charges</div><div class="kpi-val">36 560 €</div><span class="kpi-d dd">↑ +14,2 %</span></div>
-    <div class="kpi-card"><div class="kpi-acc" style="background:var(--pu)"></div><div class="kpi-lbl">Charges fixes</div><div class="kpi-val">18 320 €</div><span class="kpi-d dn">→ Stable</span><div class="kpi-sub">50,1 % du total</div></div>
-    <div class="kpi-card"><div class="kpi-acc" style="background:var(--tl)"></div><div class="kpi-lbl">Charges variables</div><div class="kpi-val">18 240 €</div><span class="kpi-d dd">↑ +22 %</span><div class="kpi-sub">49,9 % du total</div></div>
-    <div class="kpi-card"><div class="kpi-acc" style="background:var(--rd)"></div><div class="kpi-lbl">Poste principal</div><div class="kpi-val">Marchandise</div><span class="kpi-d dn">30 000 €</span></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--am)"></div><div class="kpi-lbl">Total charges</div><div class="kpi-val" id="kpi-ch-total">0 €</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--pu)"></div><div class="kpi-lbl">Charges fixes</div><div class="kpi-val" id="kpi-ch-fixe">0 €</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--tl)"></div><div class="kpi-lbl">Charges variables</div><div class="kpi-val" id="kpi-ch-var">0 €</div></div>
+    <div class="kpi-card"><div class="kpi-acc" style="background:var(--rd)"></div><div class="kpi-lbl">Poste principal</div><div class="kpi-val" id="kpi-ch-top">—</div></div>
   </div>
-  <div class="card"><div class="tbl-hdr"><div class="card-title">Saisie des charges mensuelles (€ HT)</div><div style="font-size:11.5px;color:var(--t2)">Cliquez sur une cellule pour modifier</div></div><div style="overflow-x:auto"><table class="stbl" id="charges-table"></table></div></div>
+  <div class="card">
+    <div class="tbl-hdr">
+      <div><div class="card-title">Saisie des charges mensuelles (€ HT)</div><div style="font-size:11.5px;color:var(--t2)">Cliquez sur une cellule pour modifier</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ch-quick-add').style.display=document.getElementById('ch-quick-add').style.display==='none'?'flex':'none'">+ Nouvelle charge</button>
+    </div>
+    <div id="ch-quick-add" style="display:none;gap:7px;padding:10px;background:var(--bg-s);border-radius:var(--radius-sm);border:1px dashed var(--bd);margin-bottom:12px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="ch-nc-nom" placeholder="Nom de la charge" style="flex:2;min-width:120px;background:var(--in);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:7px 10px;color:var(--t1);font-family:var(--font-body);font-size:13px;outline:none">
+      <select id="ch-nc-type" style="flex:0 0 110px;background:var(--in);border:1px solid var(--bd);border-radius:var(--radius-sm);padding:7px 10px;color:var(--t1);font-family:var(--font-body);font-size:13px;outline:none;-webkit-appearance:none"><option value="Fixe">Fixe</option><option value="Variable">Variable</option></select>
+      <button class="btn btn-primary btn-sm" onclick="addChargeFromCh()">Ajouter</button>
+    </div>
+    <div style="overflow-x:auto"><table class="stbl" id="charges-table"></table></div>
+  </div>
   <div class="cgeq">
     <div class="card"><div class="card-title">Évolution des charges</div><div class="card-sub">Fixe vs Variable par mois</div><div class="cwrap"><canvas id="c-charges-monthly"></canvas></div></div>
     <div class="card"><div class="card-title">Classement des charges</div><div class="card-sub">Par coût total sur la période</div>
-      <div class="toplist" style="margin-top:14px">
-        <div class="topitem"><div class="toprank">1</div><div class="topname">Marchandise</div><div class="topbarw"><div class="topbar" style="width:100%;background:var(--am)"></div></div><div class="topval">30 000 €</div></div>
-        <div class="topitem"><div class="toprank">2</div><div class="topname">Loyer</div><div class="topbarw"><div class="topbar" style="width:40%;background:var(--pu)"></div></div><div class="topval">12 000 €</div></div>
-        <div class="topitem"><div class="toprank">3</div><div class="topname">Publicité</div><div class="topbarw"><div class="topbar" style="width:16%;background:var(--tl)"></div></div><div class="topval">4 800 €</div></div>
-        <div class="topitem"><div class="toprank">4</div><div class="topname">Électricité</div><div class="topbarw"><div class="topbar" style="width:8%;background:var(--gr)"></div></div><div class="topval">2 400 €</div></div>
-        <div class="topitem"><div class="toprank">5</div><div class="topname">Eau</div><div class="topbarw"><div class="topbar" style="width:4%;background:var(--ac)"></div></div><div class="topval">1 200 €</div></div>
-      </div>
+      <div class="toplist" style="margin-top:14px" id="charges-toplist"></div>
     </div>
   </div>
 </div>
- 
+
 <!-- ── MARGE ── -->
 <div id="panel-marge" class="panel">
   <div class="topbar"><div><div class="page-title">Marge & Rentabilité</div><div class="page-sub">Analyse complète · Coût de revient analytique · Comparaison N/N-1</div></div></div>
@@ -689,7 +710,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     <div class="abox abox-a" style="margin-top:12px"><div class="abox-ico">⚠</div><div><div class="abox-title">Tote bag & Casquette à surveiller</div><div class="abox-desc">Marge réelle sous 15 % une fois les charges fixes imputées. Envisagez une révision du pricing ou du coût d'achat.</div></div></div>
   </div>
 </div>
- 
+
 <!-- ── TVA ── -->
 <div id="panel-tva" class="panel">
   <div class="topbar"><div><div class="page-title">TVA</div><div class="page-sub">TVA collectée · TVA déductible · Solde à décaisser · Provisionnement mensuel</div></div></div>
@@ -707,7 +728,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     </div>
   </div>
 </div>
- 
+
 <!-- ── TRESORERIE ── -->
 <div id="panel-treso" class="panel">
   <div class="topbar"><div><div class="page-title">Trésorerie</div><div class="page-sub">Budget de trésorerie · Solde prévisionnel mois par mois · Alertes automatiques</div></div><div class="page-actions"><button class="btn btn-ghost btn-sm" onclick="exportTreso()">↓ Export CSV</button></div></div>
@@ -730,7 +751,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     </div>
   </div>
 </div>
- 
+
 <!-- ── PREVISIONNEL ── -->
 <div id="panel-previsionnel" class="panel">
   <div class="topbar"><div><div class="page-title">Prévisionnel N+1</div><div class="page-sub">Budget prévisionnel basé sur l'historique · Ajustement par coefficient de croissance</div></div><div class="page-actions"><button class="btn btn-primary btn-sm" onclick="recalcPrev()">↻ Recalculer</button></div></div>
@@ -752,7 +773,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
   </div>
   <div class="card"><div class="card-title">Comparaison N vs N+1 prévisionnel</div><div class="card-sub">CA · Marge brute · Résultat net</div><div class="cwrap-lg"><canvas id="c-prev-compare"></canvas></div></div>
 </div>
- 
+
 <!-- ── SCENARIOS ── -->
 <div id="panel-scenarios" class="panel">
   <div class="topbar"><div><div class="page-title">Scénarios</div><div class="page-sub">Simulations what-if · Impact instantané sur la marge et la rentabilité</div></div></div>
@@ -795,7 +816,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     </div>
   </div>
 </div>
- 
+
 <!-- ── ALERTES ── -->
 <div id="panel-alertes" class="panel">
   <div class="topbar"><div><div class="page-title">Alertes</div><div class="page-sub">Détection automatique des anomalies et risques financiers</div></div><div class="page-actions"><button class="btn btn-ghost btn-sm" onclick="document.querySelectorAll('.abox').forEach(a=>a.style.display='none')">Tout marquer lu</button></div></div>
@@ -814,7 +835,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
   <div class="abox abox-g"><div class="abox-ico">🟢</div><div><div class="abox-title">Objectif CA annuel à 87,9 %</div><div class="abox-desc">105 600 € réalisés sur 120 000 € d'objectif. Il reste 14 400 € à générer. Rythme actuel : suffisant.</div></div></div>
   <div class="abox abox-b"><div class="abox-ico">💡</div><div><div class="abox-title">Tote bag & Casquette — marge réelle sous 15 %</div><div class="abox-desc">Une révision du prix de vente ou du coût d'achat est recommandée pour ces deux articles.</div></div></div>
 </div>
- 
+
 <!-- ── PARAMETRES ── -->
 <div id="panel-parametres" class="panel">
   <div class="topbar"><div><div class="page-title">Paramètres</div><div class="page-sub">Configuration partagée par tous les modules · Données de base</div></div><div class="page-actions"><button class="btn btn-primary" onclick="saveAll()">💾 Enregistrer tout</button></div></div>
@@ -824,7 +845,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     <div class="tab" onclick="switchTab('ch-param',this)">💸 Charges</div>
     <div class="tab" onclick="switchTab('entreprise',this)">🏢 Entreprise</div>
   </div>
- 
+
   <div id="tab-periode" class="panel active">
     <div class="slbl">Période analysée</div>
     <div class="card">
@@ -843,7 +864,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
       <div class="ctrlitem"><div class="ctrlval" id="ctrl-anom">0</div><div class="ctrllbl">Anomalies détectées</div><div class="ctrlst bdg-gr" id="ctrl-anom-st">✓ Aucune</div></div>
     </div></div>
   </div>
- 
+
   <div id="tab-articles" class="panel">
     <div class="card">
       <div class="tbl-hdr"><div><div class="card-title">Table articles</div><div class="card-sub">Utilisée par : CA · Marge · Coût de revient analytique</div></div><button class="btn btn-ghost btn-sm" onclick="exportArticles()">↓ CSV</button></div>
@@ -859,7 +880,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
       </div>
     </div>
   </div>
- 
+
   <div id="tab-ch-param" class="panel">
     <div class="card">
       <div class="tbl-hdr"><div><div class="card-title">Table charges</div><div class="card-sub">Utilisée par : Charges · TVA · Trésorerie · Point mort</div></div><button class="btn btn-ghost btn-sm" onclick="exportChParam()">↓ CSV</button></div>
@@ -879,7 +900,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
       </div>
     </div>
   </div>
- 
+
   <div id="tab-entreprise" class="panel">
     <div class="slbl">Informations générales</div>
     <div class="card">
@@ -910,70 +931,41 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--t1);min-heigh
     </div>
   </div>
 </div>
- 
+
 </main>
 </div>
- 
+
 <!-- SAVE BAR -->
 <div class="savebar">
   <div class="save-st"><div class="sdot" id="sdot"></div><span id="stxt">Modifications non enregistrées</span></div>
   <div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" onclick="location.reload()">Annuler</button><button class="btn btn-primary btn-sm" onclick="saveAll()">💾 Enregistrer</button></div>
 </div>
- 
+
 <script>
-// ── DATA ──
+// ── DATA ── (vide par défaut — chargé depuis Supabase)
 const MOIS=['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const MS=['','Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
- 
-let articles=[
-  {code:'REF01',nom:'T-shirt oversize',cat:'Textile',pv:20,ca:12,tva:.2,actif:true},
-  {code:'REF02',nom:'Casquette',cat:'Accessoire',pv:10,ca:5,tva:.2,actif:true},
-  {code:'REF03',nom:'Hoodie',cat:'Textile',pv:30,ca:17,tva:.2,actif:true},
-  {code:'REF04',nom:'Tote bag',cat:'Accessoire',pv:15,ca:9,tva:.2,actif:true},
-  {code:'REF05',nom:'Pantalon cargo',cat:'Textile',pv:25,ca:15,tva:.2,actif:true},
-  {code:'REF06',nom:'Ceinture',cat:'Accessoire',pv:10,ca:5,tva:.2,actif:true},
-  {code:'REF07',nom:'Veste légère',cat:'Textile',pv:40,ca:19,tva:.2,actif:true},
-  {code:'REF08',nom:'Chaussettes',cat:'Accessoire',pv:10,ca:5,tva:.2,actif:true},
-];
-let charges=[
-  {code:1,nom:'Électricité',cat:'Énergie',tva:.2,type:'Variable',actif:true},
-  {code:2,nom:'Publicité',cat:'Publicité',tva:.2,type:'Variable',actif:true},
-  {code:3,nom:'Eau',cat:'Énergie',tva:.2,type:'Variable',actif:true},
-  {code:4,nom:'Marchandise',cat:'Marchandise',tva:.2,type:'Variable',actif:true},
-  {code:5,nom:'Loyer',cat:'Loyer',tva:.2,type:'Fixe',actif:true},
-];
-const caD=[7200,8800,9600,8000,8800,9600,8000,6400,9600,8800,9600,10800];
-const chD=[3600,4200,4200,3800,4200,4200,3800,3200,4200,4200,4200,4600];
-const caN1=[6400,7600,8400,7200,7800,8800,7200,5800,8800,8200,8800,9800];
-const fixD=[1527,1527,1527,1527,1527,1527,1527,1527,1527,1527,1527,1527];
-const varD=chD.map((c,i)=>c-fixD[i]);
-const mrgD=caD.map(c=>Math.round(c*.519));
-const trD=[7400,14000,21400,27600,34200,41600,47800,50800,58200,64800,72200,80600];
-const tvaColl=caD.map(c=>Math.round(c*.2));
-const tvaDed=chD.map(c=>Math.round(c*.2));
-const tvaN=tvaColl.map((c,i)=>c-tvaDed[i]);
-const qty={
-  'REF01':[50,55,60,50,55,60,50,55,60,50,55,60],
-  'REF02':[50,55,60,50,55,60,50,55,60,50,55,60],
-  'REF03':[50,55,60,50,55,60,50,55,60,50,55,60],
-  'REF04':[50,55,60,50,55,60,50,55,60,50,55,60],
-  'REF05':[50,55,60,50,55,60,50,55,60,50,55,60],
-  'REF06':[50,55,60,50,55,60,50,55,60,50,55,60],
-  'REF07':[50,55,60,50,55,60,50,55,60,50,55,60],
-  'REF08':[50,55,60,50,55,60,50,55,60,50,55,60],
-};
-const chMD={
-  1:[200,200,200,200,200,200,200,200,200,200,200,200],
-  2:[400,400,400,400,400,400,400,400,400,400,400,400],
-  3:[100,100,100,100,100,100,100,100,100,100,100,100],
-  4:[2500,2500,2500,2500,2500,2500,2500,2500,2500,2500,2500,2500],
-  5:[1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000],
-};
- 
+
+let articles=[];
+let charges=[];
+// Données de graphes calculées dynamiquement depuis la saisie
+let caD=Array(12).fill(0);
+let chD=Array(12).fill(0);
+let caN1=Array(12).fill(0);
+let fixD=Array(12).fill(0);
+let varD=Array(12).fill(0);
+let mrgD=Array(12).fill(0);
+let trD=Array(12).fill(0);
+let tvaColl=Array(12).fill(0);
+let tvaDed=Array(12).fill(0);
+let tvaN=Array(12).fill(0);
+let qty={};
+let chMD={};
+
 // ── ONBOARDING ──
 let onbStep=1;
 const onbData={};
- 
+
 function renderOnb(){
   const steps=[
     {
@@ -1022,7 +1014,7 @@ function finishOnb(){
   initAll();
   setTimeout(saveAll,600);
 }
- 
+
 // ── NAV ──
 function nav(id,el){
   document.querySelectorAll('.panel.active[id^="panel-"]').forEach(p=>p.classList.remove('active'));
@@ -1033,7 +1025,7 @@ function nav(id,el){
 }
 function openMobile(){document.getElementById('sidebar').classList.add('open');document.getElementById('sb-overlay').classList.add('open');}
 function closeMobile(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-overlay').classList.remove('open');}
- 
+
 // ── SIDEBAR COLLAPSE ──
 let sbCollapsed=false;
 function toggleSidebar(){
@@ -1050,7 +1042,7 @@ function toggleSidebar(){
   if(txt) txt.textContent=sbCollapsed?'Agrandir':'Réduire';
   setTimeout(()=>Object.values(charts).forEach(c=>c&&c.resize()),220);
 }
- 
+
 // ── THEME ──
 function toggleTheme(){
   const html=document.documentElement;
@@ -1060,7 +1052,7 @@ function toggleTheme(){
   document.getElementById('mob-theme-icon').textContent=isDark?'☀️':'🌙';
   updCharts();
 }
- 
+
 // ── TABS ──
 function switchTab(id,el){
   document.querySelectorAll('#panel-parametres .panel').forEach(p=>p.classList.remove('active'));
@@ -1068,7 +1060,7 @@ function switchTab(id,el){
   document.getElementById('tab-'+id).classList.add('active');
   el.classList.add('active');
 }
- 
+
 // ── PERIOD ──
 function updPeriod(){
   const a=parseInt(document.getElementById('p-annee').value)||2026;
@@ -1081,11 +1073,11 @@ function updPeriod(){
   document.getElementById('db-period').textContent=`${MOIS[d]} → ${MOIS[f]} ${a} · Données de démonstration`;
 }
 function switchPeriod(v){const m={year:'Année complète 2026',q1:'T1 2026 (Jan–Mar)',q2:'T2 2026 (Avr–Jun)',q3:'T3 2026 (Jul–Sep)',q4:'T4 2026 (Oct–Déc)'};document.getElementById('db-period').textContent=m[v]+' · Données de démonstration';}
- 
+
 // ── FMT ──
 function fmt(n){return new Intl.NumberFormat('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n)}
 function mcol(m){return m>=40?'var(--gr)':m>=20?'var(--am)':'var(--rd)'}
- 
+
 // ── ARTICLES ──
 function renderArt(){
   const tb=document.getElementById('art-tbody');if(!tb)return;
@@ -1113,8 +1105,35 @@ function addArticle(){
   ['na-code','na-nom','na-cat','na-pv','na-ca'].forEach(id=>document.getElementById(id).value='');
   renderArt();markUnsaved();
 }
-function delArt(i){if(confirm(`Supprimer "${articles[i].nom}" ?`)){articles.splice(i,1);renderArt();markUnsaved();}}
- 
+function delArt(i){if(confirm(`Supprimer "${articles[i].nom}" ?`)){articles.splice(i,1);renderArt();renderSaisieCA();markUnsaved();}}
+
+// Fix 4 — Ajout rapide article depuis module CA
+function addArticleFromCA(){
+  const nom=document.getElementById('ca-na-nom').value.trim();
+  if(!nom){alert('Le nom de l\'article est requis.');return;}
+  const pv=parseFloat(document.getElementById('ca-na-pv').value)||0;
+  const ca=parseFloat(document.getElementById('ca-na-ca').value)||0;
+  const code=document.getElementById('ca-na-code').value||`ART${String(articles.length+1).padStart(2,'0')}`;
+  articles.push({code,nom,cat:'Divers',pv,ca,tva:.2,actif:true});
+  qty[code]=Array(12).fill(0);
+  ['ca-na-code','ca-na-nom','ca-na-pv','ca-na-ca'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ca-quick-add').style.display='none';
+  renderArt();renderSaisieCA();markUnsaved();
+}
+
+// Fix 4 — Ajout rapide charge depuis module Charges
+function addChargeFromCh(){
+  const nom=document.getElementById('ch-nc-nom').value.trim();
+  if(!nom){alert('Le nom de la charge est requis.');return;}
+  const type=document.getElementById('ch-nc-type').value;
+  const code=charges.length+1;
+  charges.push({code,nom,cat:'Divers',tva:.2,type,actif:true});
+  chMD[code]=Array(12).fill(0);
+  document.getElementById('ch-nc-nom').value='';
+  document.getElementById('ch-quick-add').style.display='none';
+  renderCh();renderSaisieCh();markUnsaved();
+}
+
 // ── CHARGES ──
 function renderCh(){
   const tb=document.getElementById('ch-tbody');if(!tb)return;
@@ -1144,55 +1163,96 @@ function addCharge(){
   ['nc-code','nc-nom','nc-cat'].forEach(id=>document.getElementById(id).value='');
   renderCh();markUnsaved();
 }
-function delCh(i){if(confirm(`Supprimer "${charges[i].nom}" ?`)){charges.splice(i,1);renderCh();markUnsaved();}}
- 
+function delCh(i){if(confirm(`Supprimer "${charges[i].nom}" ?`)){charges.splice(i,1);renderCh();renderSaisieCh();markUnsaved();}}
+
 // ── SAISIE CA ──
 function renderSaisieCA(){
   const t=document.getElementById('ca-table');if(!t)return;
+  if(articles.length===0){
+    t.innerHTML='<thead></thead><tbody><tr><td colspan="15" style="text-align:center;padding:32px;color:var(--t2);font-size:13px">Aucun article configuré · Cliquez sur "+ Nouvel article" pour commencer</td></tr></tbody>';
+    return;
+  }
   let h=`<thead><tr><th>Code</th><th>Article</th>`;
   MS.slice(1).forEach(m=>h+=`<th>${m}</th>`);
-  h+=`<th>Total</th><th>CA HT</th></tr></thead><tbody>`;
-  articles.forEach(a=>{
+  h+=`<th>Total</th><th>CA HT</th><th></th></tr></thead><tbody>`;
+  articles.forEach((a,ai)=>{
     const q=qty[a.code]||Array(12).fill(0);
     const tot=q.reduce((s,v)=>s+v,0);
-    h+=`<tr><td style="color:var(--t2);font-family:var(--font-mono);font-size:11px">${a.code}</td><td style="font-weight:600">${a.nom}</td>`;
-    q.forEach((v,m)=>h+=`<td><input class="sinp" type="number" value="${v}" min="0" onchange="qty['${a.code}'][${m}]=parseInt(this.value)||0;renderSaisieCA()"></td>`);
-    h+=`<td class="stot">${tot}</td><td class="stot" style="color:var(--gr)">${fmt(tot*a.pv)} €</td></tr>`;
+    h+=`<tr><td style="color:var(--t2);font-family:var(--font-mono);font-size:11px">${a.code}</td><td style="font-weight:600;white-space:nowrap">${a.nom}</td>`;
+    q.forEach((v,m)=>h+=`<td><input class="sinp" type="number" value="${v}" min="0" onchange="qty['${a.code}'][${m}]=parseInt(this.value)||0;recalcData();renderAlerts()"></td>`);
+    h+=`<td class="stot">${tot}</td><td class="stot" style="color:var(--gr)">${fmt(tot*a.pv)} €</td>`;
+    h+=`<td><button class="delbtn" onclick="if(confirm('Supprimer ${a.nom} ?')){articles.splice(${ai},1);delete qty['${a.code}'];renderSaisieCA();renderArt();markUnsaved()}" title="Supprimer">×</button></td>`;
+    h+=`</tr>`;
   });
-  const tots=Array(12).fill(0);articles.forEach(a=>(qty[a.code]||[]).forEach((v,m)=>tots[m]+=v));
+  const tots=Array(12).fill(0);
+  articles.forEach(a=>(qty[a.code]||[]).forEach((v,m)=>tots[m]+=v));
   h+=`<tr><td colspan="2" style="text-align:left;font-weight:700">Total mensuel</td>`;
   tots.forEach((t2,m)=>h+=`<td class="stot">${fmt(articles.reduce((s,a)=>(s+(qty[a.code]?.[m]||0)*a.pv),0))} €</td>`);
-  h+=`<td class="stot">${tots.reduce((s,v)=>s+v,0)}</td><td class="stot" style="color:var(--ac)">${fmt(articles.reduce((s,a)=>s+(qty[a.code]||[]).reduce((ss,q2)=>ss+q2,0)*a.pv,0))} €</td></tr></tbody>`;
+  const grandTotal=articles.reduce((s,a)=>s+(qty[a.code]||[]).reduce((ss,q2)=>ss+q2,0)*a.pv,0);
+  h+=`<td class="stot">${tots.reduce((s,v)=>s+v,0)}</td><td class="stot" style="color:var(--ac)">${fmt(grandTotal)} €</td><td></td></tr></tbody>`;
   t.innerHTML=h;
 }
- 
+
 // ── SAISIE CHARGES ──
 function renderSaisieCh(){
   const t=document.getElementById('charges-table');if(!t)return;
+  if(charges.length===0){
+    t.innerHTML='<thead></thead><tbody><tr><td colspan="15" style="text-align:center;padding:32px;color:var(--t2);font-size:13px">Aucune charge configurée · Cliquez sur "+ Nouvelle charge" pour commencer</td></tr></tbody>';
+    updChargesKPIs();return;
+  }
   let h=`<thead><tr><th>Code</th><th>Charge</th><th>Type</th>`;
   MS.slice(1).forEach(m=>h+=`<th>${m}</th>`);
-  h+=`<th>Total</th></tr></thead><tbody>`;
-  charges.forEach(c=>{
+  h+=`<th>Total</th><th></th></tr></thead><tbody>`;
+  charges.forEach((c,ci)=>{
     const d=chMD[c.code]||Array(12).fill(0);
     const tot=d.reduce((s,v)=>s+v,0);
     const tb=c.type==='Fixe'?'bdg-pu':'bdg-tl';
-    h+=`<tr><td style="color:var(--t2);font-family:var(--font-mono);font-size:11px">${c.code}</td><td style="font-weight:600">${c.nom}</td><td><span class="bdg ${tb}">${c.type}</span></td>`;
-    d.forEach((v,m)=>h+=`<td><input class="sinp" type="number" value="${v}" min="0" onchange="chMD[${c.code}][${m}]=parseInt(this.value)||0;renderSaisieCh()"></td>`);
-    h+=`<td class="stot" style="color:var(--am)">${fmt(tot)} €</td></tr>`;
+    h+=`<tr><td style="color:var(--t2);font-family:var(--font-mono);font-size:11px">${c.code}</td><td style="font-weight:600;white-space:nowrap">${c.nom}</td><td><span class="bdg ${tb}">${c.type}</span></td>`;
+    d.forEach((v,m)=>h+=`<td><input class="sinp" type="number" value="${v}" min="0" onchange="chMD[${c.code}][${m}]=parseInt(this.value)||0;recalcData();updChargesKPIs();renderAlerts()"></td>`);
+    h+=`<td class="stot" style="color:var(--am)">${fmt(tot)} €</td>`;
+    h+=`<td><button class="delbtn" onclick="if(confirm('Supprimer ${c.nom} ?')){charges.splice(${ci},1);delete chMD[${c.code}];renderSaisieCh();renderCh();markUnsaved()}" title="Supprimer">×</button></td>`;
+    h+=`</tr>`;
   });
   const tots=Array(12).fill(0);charges.forEach(c=>(chMD[c.code]||[]).forEach((v,m)=>tots[m]+=v));
   h+=`<tr><td colspan="3" style="text-align:left;font-weight:700">Total mensuel</td>`;
   tots.forEach(v=>h+=`<td class="stot">${fmt(v)} €</td>`);
-  h+=`<td class="stot" style="color:var(--rd)">${fmt(tots.reduce((s,v)=>s+v,0))} €</td></tr></tbody>`;
+  h+=`<td class="stot" style="color:var(--rd)">${fmt(tots.reduce((s,v)=>s+v,0))} €</td><td></td></tr></tbody>`;
   t.innerHTML=h;
+  updChargesKPIs();
 }
- 
+
+function updChargesKPIs(){
+  const totFix=charges.filter(c=>c.type==='Fixe').reduce((s,c)=>(chMD[c.code]||[]).reduce((ss,v)=>ss+v,s),0);
+  const totVar=charges.filter(c=>c.type==='Variable').reduce((s,c)=>(chMD[c.code]||[]).reduce((ss,v)=>ss+v,s),0);
+  const tot=totFix+totVar;
+  const el=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  el('kpi-ch-total',fmt(tot)+' €');
+  el('kpi-ch-fixe',fmt(totFix)+' €');
+  el('kpi-ch-var',fmt(totVar)+' €');
+  // Top charge
+  let top=null,topVal=0;
+  charges.forEach(c=>{const v=(chMD[c.code]||[]).reduce((s,v2)=>s+v2,0);if(v>topVal){topVal=v;top=c;}});
+  el('kpi-ch-top',top?top.nom:'—');
+  // Top list dynamique
+  const tl=document.getElementById('charges-toplist');
+  if(!tl) return;
+  const sorted=[...charges].map(c=>({...c,total:(chMD[c.code]||[]).reduce((s,v)=>s+v,0)})).sort((a,b)=>b.total-a.total).slice(0,5);
+  const colors=['var(--am)','var(--pu)','var(--tl)','var(--gr)','var(--ac)'];
+  const maxV=sorted[0]?.total||1;
+  tl.innerHTML=sorted.map((c,i)=>`
+    <div class="topitem">
+      <div class="toprank">${i+1}</div>
+      <div class="topname">${c.nom}</div>
+      <div class="topbarw"><div class="topbar" style="width:${Math.round(c.total/maxV*100)}%;background:${colors[i]}"></div></div>
+      <div class="topval">${fmt(c.total)} €</div>
+    </div>`).join('');
+}
 // ── TVA PROV ──
 function renderTVAProv(){
   const el=document.getElementById('tva-prov');if(!el)return;
   el.innerHTML=tvaN.map((v,i)=>`<div class="tvarow"><span class="tvarow-lbl">${MOIS[i+1]}</span><span class="tvarow-val" style="color:${v>0?'var(--rd)':v<0?'var(--gr)':'var(--t2)'}">${v>0?'+':''}${fmt(v)} €</span></div>`).join('');
 }
- 
+
 // ── TRESO ──
 function renderTresoTable(){
   const tb=document.getElementById('treso-tbody');if(!tb)return;
@@ -1200,7 +1260,7 @@ function renderTresoTable(){
   caD.forEach((ca,i)=>{const dec=chD[i];const sm=ca-dec;s+=sm;const c=sm>=0?'ppos':'pneg';h+=`<tr><td>${MOIS[i+1]}</td><td class="ppos">${fmt(ca)} €</td><td class="pneg">${fmt(dec)} €</td><td class="${c}">${sm>=0?'+':''}${fmt(sm)} €</td><td class="ppos">${fmt(s)} €</td></tr>`;});
   tb.innerHTML=h;
 }
- 
+
 // ── PREV ──
 function renderPrev(){
   const tb=document.getElementById('prev-tbody');if(!tb)return;
@@ -1219,7 +1279,7 @@ function updateGrowth(v){
   mkChart('c-prev-compare',{type:'bar',data:{labels:['CA HT','Marge brute','Résultat net'],datasets:[{label:'N (2026)',data:[105600,54800,18240],backgroundColor:'rgba(59,126,255,.65)',borderRadius:5,borderSkipped:false},{label:'N+1 (prévisionnel)',data:[Math.round(105600*(1+g)),Math.round(54800*(1+g)),Math.round(18240*(1+g*1.5))],backgroundColor:'rgba(14,165,114,.65)',borderRadius:5,borderSkipped:false}]},options:{plugins:{legend:{display:true}}}});
 }
 function recalcPrev(){renderPrev();}
- 
+
 // ── SIMULATEUR ──
 function runSim(){
   const dca=parseFloat(document.getElementById('sim-ca').value)/100||0;
@@ -1237,7 +1297,7 @@ function runSim(){
   const el=document.getElementById('sim-rn-val');el.textContent=fmt(rn)+' €';el.style.color=rn>=0?'var(--t1)':'var(--rd)';
   document.getElementById('sim-pm-val').textContent=fmt(pm)+' €';
 }
- 
+
 // ── CONTROLE ──
 function updCtrl(){
   const actifs=articles.filter(a=>a.actif).length;
@@ -1250,7 +1310,7 @@ function updCtrl(){
   if(st){st.textContent=anom>0?`⚠ ${anom}`:'✓ Aucune';st.className='ctrlst '+(anom>0?'bdg-am':'bdg-gr');}
   const ac=document.getElementById('alert-count');if(ac)ac.textContent=3+anom;
 }
- 
+
 // ── CHARTS ──
 let charts={};
 function gc(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
@@ -1286,13 +1346,13 @@ function initCharts(){
   mkChart('c-treso-main',{type:'line',data:{labels:MS.slice(1),datasets:[{label:'Solde cumulé',data:trD,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.09)',tension:.4,pointRadius:4,fill:true,borderWidth:2},{label:'Seuil zéro',data:Array(12).fill(0),borderColor:'rgba(244,63,94,.4)',borderDash:[5,4],pointRadius:0,borderWidth:1.5}]},options:{plugins:{legend:{display:true}}}});
   mkChart('c-prev-compare',{type:'bar',data:{labels:['CA HT','Marge brute','Résultat net'],datasets:[{label:'N (2026)',data:[105600,54800,18240],backgroundColor:'rgba(59,126,255,.65)',borderRadius:5,borderSkipped:false},{label:'N+1 (prévisionnel)',data:[118272,61376,22656],backgroundColor:'rgba(14,165,114,.65)',borderRadius:5,borderSkipped:false}]},options:{plugins:{legend:{display:true}}}});
 }
- 
+
 // ── SAVE avec Supabase ──
 function markUnsaved(){
   const d=document.getElementById('sdot');const t=document.getElementById('stxt');
   if(d)d.classList.remove('saved');if(t)t.textContent='Modifications non enregistrées';
 }
- 
+
 async function saveAll(){
   const d=document.getElementById('sdot');const t=document.getElementById('stxt');
   if(t)t.textContent='Enregistrement…';
@@ -1300,38 +1360,38 @@ async function saveAll(){
     const {data:{user}}=await sb.auth.getUser();
     if(!user){showAuthScreen();return;}
     const uid=user.id;
- 
+
     // Upsert paramètres entreprise
     const pAnnee=parseInt(document.getElementById('p-annee')?.value)||2026;
     const pDebut=parseInt(document.getElementById('p-debut')?.value)||1;
     const pFin=parseInt(document.getElementById('p-fin')?.value)||12;
     const entNom=document.getElementById('ent-nom')?.value||'';
     await sb.from('parametres').upsert({user_id:uid,annee:pAnnee,mois_debut:pDebut,mois_fin:pFin,nom_entreprise:entNom},{onConflict:'user_id'});
- 
+
     // Supprimer + réinsérer articles
     await sb.from('articles').delete().eq('user_id',uid);
     if(articles.length>0){
       await sb.from('articles').insert(articles.map(a=>({user_id:uid,code:a.code,nom:a.nom,categorie:a.cat,prix_ht:a.pv,cout_achat:a.ca,tva:a.tva,actif:a.actif})));
     }
- 
+
     // Supprimer + réinsérer charges
     await sb.from('charges').delete().eq('user_id',uid);
     if(charges.length>0){
       await sb.from('charges').insert(charges.map(c=>({user_id:uid,code:c.code,nom:c.nom,categorie:c.cat,tva:c.tva,type:c.type,actif:c.actif})));
     }
- 
+
     // Supprimer + réinsérer saisies CA
     await sb.from('saisies_ca').delete().eq('user_id',uid);
     const saisiesCA=[];
     articles.forEach(a=>{(qty[a.code]||[]).forEach((q,m)=>{if(q>0)saisiesCA.push({user_id:uid,article_code:a.code,mois:m+1,annee:pAnnee,quantite:q});});});
     if(saisiesCA.length>0) await sb.from('saisies_ca').insert(saisiesCA);
- 
+
     // Supprimer + réinsérer saisies charges
     await sb.from('saisies_charges').delete().eq('user_id',uid);
     const saisiesCh=[];
     charges.forEach(c=>{(chMD[c.code]||[]).forEach((v,m)=>{if(v>0)saisiesCh.push({user_id:uid,charge_code:c.code,mois:m+1,annee:pAnnee,montant:v});});});
     if(saisiesCh.length>0) await sb.from('saisies_charges').insert(saisiesCh);
- 
+
     if(d)d.classList.add('saved');
     if(t)t.textContent='Enregistré · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   } catch(err){
@@ -1339,13 +1399,13 @@ async function saveAll(){
     if(t)t.textContent='Erreur — réessayez';
   }
 }
- 
+
 async function loadUserData(){
   try {
     const {data:{user}}=await sb.auth.getUser();
     if(!user) return false;
     const uid=user.id;
- 
+
     // Paramètres
     const {data:params}=await sb.from('parametres').select('*').eq('user_id',uid).single();
     if(params){
@@ -1355,19 +1415,19 @@ async function loadUserData(){
       const en=document.getElementById('ent-nom');if(en)en.value=params.nom_entreprise||'';
       const dn=document.getElementById('db-company-name');if(dn&&params.nom_entreprise)dn.textContent=params.nom_entreprise;
     }
- 
+
     // Articles
     const {data:arts}=await sb.from('articles').select('*').eq('user_id',uid);
     if(arts&&arts.length>0){
       articles=arts.map(a=>({code:a.code,nom:a.nom,cat:a.categorie,pv:parseFloat(a.prix_ht)||0,ca:parseFloat(a.cout_achat)||0,tva:parseFloat(a.tva)||0.2,actif:a.actif}));
     }
- 
+
     // Charges
     const {data:chs}=await sb.from('charges').select('*').eq('user_id',uid);
     if(chs&&chs.length>0){
       charges=chs.map(c=>({code:c.code,nom:c.nom,cat:c.categorie,tva:parseFloat(c.tva)||0.2,type:c.type,actif:c.actif}));
     }
- 
+
     // Saisies CA
     const annee=params?.annee||2026;
     const {data:sca}=await sb.from('saisies_ca').select('*').eq('user_id',uid).eq('annee',annee);
@@ -1376,21 +1436,21 @@ async function loadUserData(){
       articles.forEach(a=>qty[a.code]=Array(12).fill(0));
       sca.forEach(r=>{ if(!qty[r.article_code])qty[r.article_code]=Array(12).fill(0); qty[r.article_code][r.mois-1]=r.quantite; });
     }
- 
+
     // Saisies charges
     const {data:sch}=await sb.from('saisies_charges').select('*').eq('user_id',uid).eq('annee',annee);
     if(sch&&sch.length>0){
       charges.forEach(c=>chMD[c.code]=Array(12).fill(0));
       sch.forEach(r=>{ if(!chMD[r.charge_code])chMD[r.charge_code]=Array(12).fill(0); chMD[r.charge_code][r.mois-1]=r.montant; });
     }
- 
+
     return true;
   } catch(err){
     console.error('Load error:',err);
     return false;
   }
 }
- 
+
 // ── EXPORT ──
 function csv(data,name){const b=new Blob([data],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();}
 function exportArticles(){csv('Code,Nom,Catégorie,PrixHT,CoutAchat,TVA,Actif\n'+articles.map(a=>`${a.code},${a.nom},${a.cat},${a.pv},${a.ca},${a.tva},${a.actif}`).join('\n'),'logpose-articles.csv');}
@@ -1398,16 +1458,16 @@ function exportChParam(){csv('Code,Nom,Catégorie,TVA,Type,Actif\n'+charges.map(
 function exportCA(){csv('Article,'+MS.slice(1).join(',')+',Total\n'+articles.map(a=>{const q=qty[a.code]||[];return`${a.nom},${q.join(',')},${q.reduce((s,v)=>s+v,0)}`;}).join('\n'),'logpose-ca.csv');}
 function exportChargesData(){csv('Charge,'+MS.slice(1).join(',')+',Total\n'+charges.map(c=>{const d=chMD[c.code]||[];return`${c.nom},${d.join(',')},${d.reduce((s,v)=>s+v,0)}`;}).join('\n'),'logpose-charges-saisie.csv');}
 function exportTreso(){let s=5000,rows='Mois,Encaissements,Décaissements,Solde mois,Solde cumulé\n';caD.forEach((ca,i)=>{const dec=chD[i],sm=ca-dec;s+=sm;rows+=`${MOIS[i+1]},${ca},${dec},${sm},${s}\n`;});csv(rows,'logpose-tresorerie.csv');}
- 
+
 // ── AUTH ──
 let authMode='login';
- 
+
 function showAuthScreen(){
   document.getElementById('auth-screen').style.display='flex';
   document.getElementById('onb').style.display='none';
   document.getElementById('main-app').style.display='none';
 }
- 
+
 function switchAuthTab(mode){
   authMode=mode;
   const isLogin=mode==='login';
@@ -1425,7 +1485,7 @@ function switchAuthTab(mode){
   document.getElementById('auth-forgot').style.display=isLogin?'inline':'none';
   hideAuthMsg();
 }
- 
+
 function showAuthError(msg){
   const el=document.getElementById('auth-error');
   el.textContent=msg;el.style.display='block';
@@ -1440,7 +1500,7 @@ function hideAuthMsg(){
   document.getElementById('auth-error').style.display='none';
   document.getElementById('auth-success').style.display='none';
 }
- 
+
 async function authSubmit(){
   const email=document.getElementById('auth-email').value.trim();
   const password=document.getElementById('auth-password').value;
@@ -1455,7 +1515,7 @@ async function authSubmit(){
     } else {
       const {error}=await sb.auth.signUp({email,password});
       if(error) throw error;
-      showAuthSuccess('Compte créé ! Vérifiez votre email pour confirmer votre inscription, puis connectez-vous.');
+      showAuthSuccess('✉️ Compte créé ! Un email de confirmation vous a été envoyé. Cliquez sur le lien dans l\'email pour activer votre compte, puis connectez-vous.');
       switchAuthTab('login');
       btn.textContent='Se connecter';btn.disabled=false;
       return;
@@ -1471,7 +1531,7 @@ async function authSubmit(){
     btn.disabled=false;
   }
 }
- 
+
 async function authForgot(){
   const email=document.getElementById('auth-email').value.trim();
   if(!email){showAuthError('Entrez votre email pour réinitialiser votre mot de passe.');return;}
@@ -1479,30 +1539,36 @@ async function authForgot(){
   if(error) showAuthError(error.message);
   else showAuthSuccess('Email de réinitialisation envoyé ! Vérifiez votre boîte.');
 }
- 
+
 async function authLogout(){
   await sb.auth.signOut();
   showAuthScreen();
 }
- 
+
 function setUserInfo(user){
   const email=user.email||'';
   const avatar=email.charAt(0).toUpperCase();
   const avEl=document.getElementById('sb-avatar');if(avEl)avEl.textContent=avatar;
   const emEl=document.getElementById('sb-user-email');if(emEl)emEl.textContent=email;
 }
- 
+
 // ── LEMON SQUEEZY ──
 function openUpgrade(e){
   e.preventDefault();
-  // Passe l'email de l'utilisateur à Lemon Squeezy pour pré-remplir le checkout
+  // Ouvre d'abord la fenêtre (doit être synchrone pour éviter le blocage popup)
+  const win = window.open('about:blank','_blank');
+  // Puis récupère l'email et redirige
   sb.auth.getUser().then(({data:{user}})=>{
-    const email = user?.email || '';
-    const url = LEMON_URL + (email ? `?checkout[email]=${encodeURIComponent(email)}` : '');
-    window.open(url,'_blank');
+    const email = user?.email||'';
+    const url = LEMON_URL+(email?`?checkout[email]=${encodeURIComponent(email)}`:'');
+    if(win) win.location.href=url;
+    else window.location.href=url; // fallback si popup bloqué
+  }).catch(()=>{
+    if(win) win.location.href=LEMON_URL;
+    else window.location.href=LEMON_URL;
   });
 }
- 
+
 function checkUpgrade(){
   const params = new URLSearchParams(window.location.search);
   if(params.get('upgraded')==='true'){
@@ -1528,7 +1594,7 @@ function checkUpgrade(){
     }, 800);
   }
 }
- 
+
 function setPro(){
   const badge = document.getElementById('sb-plan-badge');
   const btn = document.getElementById('upgrade-btn');
@@ -1541,17 +1607,114 @@ function setPro(){
   }
   if(btn) btn.style.display='none';
 }
- 
+
+// ── RECALCUL DONNÉES DYNAMIQUES ──
+function recalcData(){
+  // Recalcule caD, chD, fixD, varD, mrgD, trD, tvaColl, tvaDed, tvaN depuis qty et chMD
+  caD=Array(12).fill(0);
+  articles.forEach(a=>{
+    (qty[a.code]||Array(12).fill(0)).forEach((q,m)=>{ caD[m]+=q*a.pv; });
+  });
+  chD=Array(12).fill(0);
+  fixD=Array(12).fill(0);
+  varD=Array(12).fill(0);
+  charges.forEach(c=>{
+    (chMD[c.code]||Array(12).fill(0)).forEach((v,m)=>{
+      chD[m]+=v;
+      if(c.type==='Fixe') fixD[m]+=v; else varD[m]+=v;
+    });
+  });
+  mrgD=caD.map((c,i)=>Math.round(c-chD[i]*(50800/36560||0)));
+  // Marge brute = CA - coût achat (approx 48% du CA)
+  mrgD=caD.map(c=>Math.round(c*0.519));
+  let s=0;
+  trD=caD.map((c,i)=>{ s+=c-chD[i]; return Math.round(s); });
+  tvaColl=caD.map(c=>Math.round(c*0.2));
+  tvaDed=chD.map(c=>Math.round(c*0.2));
+  tvaN=tvaColl.map((c,i)=>c-tvaDed[i]);
+}
+
+// ── ALERTES DYNAMIQUES ──
+function renderAlerts(){
+  const totalCA=caD.reduce((s,v)=>s+v,0);
+  const totalCh=chD.reduce((s,v)=>s+v,0);
+  const totalMrg=totalCA-totalCh;
+  const alerts=[];
+
+  // Marge en baisse 2 mois consécutifs ET pas redressée après
+  let baisseConsec=0;
+  for(let i=1;i<12;i++){
+    if(mrgD[i]<mrgD[i-1]) baisseConsec++;
+    else baisseConsec=0;
+    if(baisseConsec>=2 && (i===11||mrgD[i+1]>=mrgD[i])){
+      alerts.push({type:'r',msg:`Marge en baisse sur ${MOIS[i]} et ${MOIS[i+1]||MOIS[i]} — vérifiez vos coûts`});
+    }
+  }
+
+  // TVA à déclarer (montant significatif)
+  const tvaTotale=tvaN.reduce((s,v)=>s+v,0);
+  if(tvaTotale>0) alerts.push({type:'a',msg:`TVA nette à reverser : ${fmt(tvaTotale)} € — anticipez le décaissement`});
+
+  // Charges fixes > 60% du CA
+  const totalFix=fixD.reduce((s,v)=>s+v,0);
+  if(totalCA>0 && totalFix/totalCA>0.6) alerts.push({type:'r',msg:`Charges fixes > 60 % du CA — structure de coûts risquée`});
+
+  // Objectif CA
+  if(totalCA>0 && totalCA<100000) alerts.push({type:'a',msg:`CA actuel : ${fmt(totalCA)} € — continuez à saisir vos données`});
+
+  // Aucune donnée
+  if(totalCA===0) alerts.push({type:'a',msg:'Aucune vente saisie — commencez par le module Chiffre d\'affaires'});
+
+  // Mise à jour UI dashboard
+  const dbAlerts=document.getElementById('db-alerts');
+  if(dbAlerts){
+    if(alerts.length===0){
+      dbAlerts.innerHTML='<div class="alrt alrt-g"><div class="alrt-dot"></div>Tout est en ordre — aucune alerte active</div>';
+    } else {
+      dbAlerts.innerHTML=alerts.map(a=>`<div class="alrt alrt-${a.type}"><div class="alrt-dot"></div>${a.msg}</div>`).join('');
+    }
+  }
+
+  // Compteur sidebar
+  const ac=document.getElementById('alert-count');
+  if(ac) ac.textContent=alerts.filter(a=>a.type==='r').length||'';
+
+  // Page alertes
+  renderAlertsPage(alerts,totalCA,tvaTotale);
+}
+
+function renderAlertsPage(alerts,totalCA,tvaTotale){
+  const critiques=alerts.filter(a=>a.type==='r');
+  const avertissements=alerts.filter(a=>a.type==='a');
+  const panel=document.getElementById('panel-alertes');
+  if(!panel) return;
+  const kpis=panel.querySelector('.kpi-grid');
+  if(kpis){
+    const vals=kpis.querySelectorAll('.kpi-val');
+    if(vals[0]) vals[0].textContent=critiques.length;
+    if(vals[1]) vals[1].textContent=avertissements.length;
+  }
+}
+
 // ── INIT ──
 function initAll(){
-  renderArt();renderCh();renderSaisieCA();renderSaisieCh();renderTVAProv();renderTresoTable();renderPrev();updPeriod();updCtrl();initCharts();
+  recalcData();
+  renderArt();renderCh();renderSaisieCA();renderSaisieCh();
+  renderTVAProv();renderTresoTable();renderPrev();
+  updPeriod();updCtrl();initCharts();
+  renderAlerts();
+  // Fix 7 — save bar status sans appel saveAll
   const d=document.getElementById('sdot');const t=document.getElementById('stxt');
-  if(d)d.classList.add('saved');if(t)t.textContent='Données chargées';
+  if(d)d.classList.add('saved');
+  if(t)t.textContent='Données chargées depuis votre compte';
 }
- 
+
 // ── START ──
 document.addEventListener('DOMContentLoaded', async ()=>{
-  // Écouter les changements d'auth
+  // Fix 5 — Afficher l'écran auth immédiatement sans attendre Supabase
+  showAuthScreen();
+
+  // Écouter les changements d'auth (connexion/déconnexion)
   sb.auth.onAuthStateChange(async (event, session)=>{
     if(event==='SIGNED_IN' && session){
       document.getElementById('auth-screen').style.display='none';
@@ -1559,34 +1722,37 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       const hasData=await loadUserData();
       if(hasData && articles.length>0){
         document.getElementById('main-app').style.display='flex';
+        document.getElementById('onb').style.display='none';
         initAll();
         checkUpgrade();
       } else {
         document.getElementById('onb').style.display='flex';
+        document.getElementById('main-app').style.display='none';
         renderOnb();
       }
     } else if(event==='SIGNED_OUT'){
       showAuthScreen();
     }
   });
- 
-  // Vérifier la session au chargement
+
+  // Vérifier si une session existe déjà (utilisateur déjà connecté)
   const {data:{session}}=await sb.auth.getSession();
   if(session){
+    document.getElementById('auth-screen').style.display='none';
     setUserInfo(session.user);
     const hasData=await loadUserData();
-    document.getElementById('auth-screen').style.display='none';
     if(hasData && articles.length>0){
       document.getElementById('main-app').style.display='flex';
+      document.getElementById('onb').style.display='none';
       initAll();
       checkUpgrade();
     } else {
       document.getElementById('onb').style.display='flex';
+      document.getElementById('main-app').style.display='none';
       renderOnb();
     }
-  } else {
-    showAuthScreen();
   }
+  // Si pas de session : l'écran auth est déjà affiché, rien à faire
 });
 </script>
 </body>
