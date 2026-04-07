@@ -455,7 +455,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
     <div><div class="page-title" id="db-name">Mon Entreprise</div><div class="page-sub" id="db-period">Chargement…</div></div>
     <div class="page-actions">
       <select class="fsel" style="width:auto;font-size:12px" id="db-period-sel" onchange="filterPeriod(this.value)">
-        <option value="all">Année complète</option>
+        <option value="all">Période complète</option>
         <option value="q1">T1 — Jan à Mar</option>
         <option value="q2">T2 — Avr à Jun</option>
         <option value="q3">T3 — Jul à Sep</option>
@@ -913,7 +913,14 @@ function getMoisRange() {
   return mois;
 }
 function moisToIdx(mois) { return mois.map(m => m-1); }
-function filterPeriod(v) { periodeFilter = v; recalc(); renderAll(); }
+function filterPeriod(v) {
+  periodeFilter = v;
+  recalc();
+  renderAll();
+  // Sync le select avec la valeur choisie
+  const sel = el('db-period-sel');
+  if(sel) sel.value = v;
+}
 
 // ═══════════════════════════════════════════════
 // RENDER DASHBOARD
@@ -1475,8 +1482,10 @@ function updPeriodPreview() {
   S.params.annee   = an;
   S.params.moisDeb = d;
   S.params.moisFin = f;
-  el('db-period-sel').value = 'all';
+  // Reset filtre sur changement de période
   periodeFilter = 'all';
+  const sel = el('db-period-sel');
+  if(sel) sel.value = 'all';
 }
 
 // ═══════════════════════════════════════════════
@@ -1879,17 +1888,386 @@ function setUserUI(user) {
 let _saveTimer = null;
 function smartUpdate() {
   recalc();
-  // Met à jour uniquement les cellules de totaux dans CA
-  el('ca-tbl') && updateCATotals();
-  // Met à jour uniquement les cellules de totaux dans Charges
-  el('ch-tbl') && updateChTotals();
-  // Met à jour les KPIs de chaque module visible
-  updateKPIs();
-  // Statut
+
+  // ── 1. Totaux des tableaux de saisie (sans toucher aux inputs) ──
+  if(el('ca-tbl')) updateCATotals();
+  if(el('ch-tbl')) updateChTotals();
+
+  // ── 2. KPIs dashboard ──
+  updateDashboardKPIs();
+
+  // ── 3. Dashboard — alertes bar ──
+  updateDashboardAlerts();
+
+  // ── 4. Dashboard — carte seuil de rentabilité ──
+  updateSeuilCard();
+
+  // ── 5. Dashboard — top articles ──
+  updateTopArtCard();
+
+  // ── 6. Dashboard — TVA mini card ──
+  updateTVAMiniCard();
+
+  // ── 7. Graphes dashboard ──
+  updateChartsLive();
+
+  // ── 8. Modules Analyse ──
+  updateMargeModule();
+  updateTVAModule();
+  updateTresoModule();
+  updatePrevModule();
+  updateScenModule();
+
+  // ── 9. KPIs CA et Charges ──
+  updateCAKPIs();
+  updateChKPIs();
+
+  // ── 10. Alertes ──
+  renderAlertsPage();
+
+  // ── 11. Statut save ──
   markUnsaved();
-  // Autosave après 2s d'inactivité
+
+  // ── 12. Autosave 2s ──
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(() => { if(S.uid) saveAll(); }, 2000);
+}
+
+function updateDashboardKPIs() {
+  const r1 = el('kpis-row1');
+  const r2 = el('kpis-row2');
+  if(r1) r1.innerHTML = [
+    kpiCard('CA HT','--ac', fmt(C.totalCA)+' €', C.totalCA>0?'Chiffre d\'affaires total':'Commencez à saisir vos quantités', null),
+    kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', `Taux : ${C.txMarge.toFixed(1)} %`, null),
+    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', 'Après toutes charges', null),
+    S.params.regimeTVA === 'Franchise en base'
+      ? kpiCard('TVA','--rd', '—', 'Franchise en base — non applicable', null)
+      : kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null),
+  ].join('');
+  if(r2) r2.innerHTML = [
+    kpiCard('Marge sur coûts variables','--tl', fmt(C.totalMrg - C.totalChV)+' €', `Taux MCV : ${C.txMCV.toFixed(1)} %`, null),
+    kpiCard('Total charges','--am', fmt(C.totalCh)+' €', `Fixes : ${fmt(C.totalChF)} € · Variables : ${fmt(C.totalChV)} €`, null),
+    kpiCard('Panier moyen','--pk', fmt(C.panierM)+' €', `Sur ${C.totalQty} unités vendues`, null),
+    kpiCard('Point mort','--gr', fmt(C.pointMort)+' €', C.jourLib > 0 ? `Jour de libération : le ${C.jourLib}` : 'Pas encore calculable', null),
+  ].join('');
+}
+
+function updateDashboardAlerts() {
+  const alerts = computeAlerts();
+  const dbA = el('db-alerts');
+  if(!dbA) return;
+  dbA.innerHTML = alerts.length === 0
+    ? '<div class="alrt ag"><div class="adot"></div>Aucune alerte — tout est en ordre</div>'
+    : alerts.slice(0,4).map(a => `<div class="alrt a${a.type}"><div class="adot"></div>${a.msg}</div>`).join('');
+}
+
+function updateSeuilCard() {
+  const card = el('db-seuil-card');
+  if(!card) return;
+  const pct = C.pointMort > 0 ? Math.min(C.totalCA / C.pointMort * 100, 100) : 0;
+  card.innerHTML = `
+    <div class="ct">Seuil de rentabilité</div>
+    <div class="cs">Point mort : ${fmt(C.pointMort)} €</div>
+    <div class="pw" style="height:8px;margin:14px 0 6px"><div class="pb" style="width:${pct.toFixed(1)}%;background:linear-gradient(90deg,var(--gr),#34d399)"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--t3)">
+      <span>0 €</span>
+      <span style="color:var(--gr);font-weight:700">${pct.toFixed(0)} % atteint</span>
+      <span>${fmt(C.pointMort)} €</span>
+    </div>
+    ${C.jourLib > 0 ? `<div style="margin-top:12px;padding:10px;background:var(--grb);border-radius:var(--rs);border:1px solid rgba(14,165,114,.18);text-align:center;font-size:12px;color:var(--gr);font-weight:700">📅 Jour de libération : le ${C.jourLib} du mois</div>` : ''}
+    <div style="margin-top:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--fm)">Taux de marge vs ratio CF</div>
+      <div class="tvarow"><span class="tvarow-l">Taux de marge global</span><span class="tvarow-v" style="color:var(--gr)">${C.txMarge.toFixed(1)} %</span></div>
+      <div class="tvarow" style="margin-bottom:0"><span class="tvarow-l">Ratio charges fixes / CA</span><span class="tvarow-v" style="color:${C.totalCA>0&&C.totalChF/C.totalCA>.6?'var(--rd)':'var(--gr)'}">${C.totalCA>0?(C.totalChF/C.totalCA*100).toFixed(1):0} %</span></div>
+    </div>`;
+}
+
+function updateTopArtCard() {
+  const card = el('db-top-art-card');
+  if(!card) return;
+  const colors = ['--ac','--pu','--tl','--gr','--am'];
+  const maxCA = C.artCA[0]?.totalCA || 1;
+  card.innerHTML = `
+    <div class="ct">Top articles par CA</div>
+    <div class="cs">Sur la période sélectionnée</div>
+    ${C.artCA.length === 0
+      ? emptyState('📦','Aucun article','Ajoutez des articles dans CA ou Paramètres')
+      : `<div class="toplist">${C.artCA.slice(0,5).map((a,i) => `
+          <div class="topitem">
+            <div class="toprank">${i+1}</div>
+            <div class="topname">${a.nom}</div>
+            <div class="topbarw"><div class="topbar-fill" style="width:${(a.totalCA/maxCA*100).toFixed(0)}%;background:var(${colors[i]})"></div></div>
+            <div class="topval">${fmt(a.totalCA)} €</div>
+          </div>`).join('')}</div>
+        ${C.concTop3 > 70 ? `<div style="margin-top:12px;padding:9px 12px;background:var(--amb);border:1px solid rgba(245,158,11,.2);border-radius:var(--rs);font-size:11.5px;color:var(--am);font-weight:600">⚠ Top 3 = ${C.concTop3.toFixed(1)} % du CA</div>` : ''}`
+    }`;
+}
+
+function updateTVAMiniCard() {
+  const card = el('db-tva-card');
+  if(!card) return;
+  const isFranchise = S.params.regimeTVA === 'Franchise en base';
+  card.innerHTML = `
+    <div class="ct">TVA nette</div>
+    <div class="cs">${isFranchise ? 'Franchise en base — non applicable' : 'Période en cours · Solde à reverser'}</div>
+    ${isFranchise
+      ? `<div class="abox abb" style="margin-top:14px"><div class="abox-ico">💡</div><div><div class="abox-desc">Régime franchise — vous ne collectez pas la TVA.</div></div></div>`
+      : `<div style="margin-top:12px">
+          <div class="tvarow"><span class="tvarow-l">TVA collectée</span><span class="tvarow-v" style="color:var(--gr)">+${fmt(C.totalTVAC)} €</span></div>
+          <div class="tvarow"><span class="tvarow-l">TVA déductible</span><span class="tvarow-v" style="color:var(--ac)">−${fmt(C.totalTVAD)} €</span></div>
+          <div class="tvanet" style="background:var(--rdb);border:1px solid rgba(244,63,94,.2)"><div class="tvanet-l">À reverser</div><div class="tvanet-v" style="color:var(--rd)">${fmt(C.totalTVAN)} €</div></div>
+        </div>`}
+    <div style="margin-top:14px"><div class="cs" style="font-weight:700;margin-bottom:8px">Trésorerie prévisionnelle</div><div class="cwsm"><canvas id="c-treso-mini"></canvas></div></div>`;
+  // Recréer le mini graphe tréso
+  mkChart('c-treso-mini','line',{labels:MS.slice(1),datasets:[{data:C.tresoM,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.08)',tension:.4,pointRadius:2,fill:true,borderWidth:1.5}]},{legend:false,yCallback:v=>fmtK(v)});
+}
+
+function updateMargeModule() {
+  // KPIs marge
+  const mk = el('mrg-kpis');
+  if(mk) mk.innerHTML = [
+    kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', null, null),
+    kpiCard('Marge sur coûts variables','--tl', fmt(C.totalMrg-C.totalChV)+' €', `${C.txMCV.toFixed(1)} % du CA`, null),
+    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', null, null),
+    kpiCard('Panier moyen','--pk', fmt(C.panierM)+' €', `${C.totalQty} unités vendues`, null),
+  ].join('');
+
+  // Liste marge par article
+  const mal = el('mrg-art-list');
+  if(mal) {
+    mal.innerHTML = C.artCA.length === 0
+      ? emptyState('📊','Aucun article','Ajoutez des articles pour voir l\'analyse')
+      : C.artCA.map(a => {
+          const col = a.txMarge >= 40 ? 'var(--gr)' : a.txMarge >= 20 ? 'var(--am)' : 'var(--rd)';
+          return `<div class="mrgrow">
+            <div class="mrgname">${a.nom}</div>
+            <div style="flex:1;margin:0 10px"><div class="pw" style="margin:0"><div class="pb" style="width:${Math.max(0,Math.min(a.txMarge,100)).toFixed(0)}%;background:${col}"></div></div></div>
+            <span class="mrgtaux" style="color:${col}">${a.txMarge.toFixed(1)} %</span>
+          </div>`;
+        }).join('');
+  }
+
+  // Tableau CRA
+  const crab = el('cra-body');
+  if(crab) {
+    crab.innerHTML = C.artCRA.length === 0
+      ? `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucun article configuré</td></tr>`
+      : C.artCRA.map(a => {
+          const bc = a.txReel >= 30 ? 'bgr' : a.txReel >= 15 ? 'bam' : 'brd';
+          return `<tr>
+            <td style="font-weight:600">${a.nom}</td>
+            <td style="font-family:var(--fm)">${fmt(a.cout)} €</td>
+            <td style="font-family:var(--fm);color:var(--t2)">${fmt(a.cfUnit)} €</td>
+            <td style="font-family:var(--fm);font-weight:700">${fmt(a.cra)} €</td>
+            <td style="font-family:var(--fm)">${fmt(a.pv)} €</td>
+            <td style="font-family:var(--fm);font-weight:700;color:${a.margeReelle>=0?'var(--gr)':'var(--rd)'}">${fmt(a.margeReelle)} €</td>
+            <td><span class="bdg ${bc}">${a.txReel.toFixed(1)} %</span></td>
+          </tr>`;
+        }).join('');
+  }
+
+  // Graphe marge
+  if(charts['c-mrg-m']) {
+    charts['c-mrg-m'].data.datasets[0].data = C.mrgM;
+    charts['c-mrg-m'].data.datasets[1].data = C.rnM;
+    charts['c-mrg-m'].update();
+  } else {
+    mkChart('c-mrg-m','line',{labels:MS.slice(1),datasets:[
+      {label:'Marge brute',data:C.mrgM,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.09)',tension:.4,pointRadius:3,fill:true,borderWidth:2},
+      {label:'Résultat net',data:C.rnM,borderColor:'#9b87f5',backgroundColor:'rgba(155,135,245,.07)',tension:.4,pointRadius:3,fill:true,borderWidth:2,borderDash:[5,3]},
+    ]},{});
+  }
+}
+
+function updateTVAModule() {
+  const tk = el('tva-kpis');
+  if(!tk) return;
+  const isFranchise = S.params.regimeTVA === 'Franchise en base';
+  if(isFranchise) {
+    tk.innerHTML = `<div style="grid-column:1/-1"><div class="abox abb"><div class="abox-ico">💡</div><div><div class="abox-title">Régime Franchise en base de TVA</div><div class="abox-desc">Vous n'êtes pas assujetti à la TVA. Ce module ne vous concerne pas. Modifiez votre régime dans Paramètres → Entreprise.</div></div></div></div>`;
+    return;
+  }
+  tk.innerHTML = [
+    kpiCard('TVA collectée','--gr', fmt(C.totalTVAC)+' €', 'Ventes HT × 20 %', null),
+    kpiCard('TVA déductible','--ac', fmt(C.totalTVAD)+' €', 'Charges × TVA', null),
+    kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null),
+  ].join('');
+  if(charts['c-tva-m']) {
+    charts['c-tva-m'].data.datasets[0].data = C.tvaCollM;
+    charts['c-tva-m'].data.datasets[1].data = C.tvaDedM.map(v=>-v);
+    charts['c-tva-m'].data.datasets[2].data = C.tvaNM;
+    charts['c-tva-m'].update();
+  } else {
+    mkChart('c-tva-m','bar',{labels:MS.slice(1),datasets:[
+      {label:'Collectée',data:C.tvaCollM,backgroundColor:'rgba(14,165,114,.72)',borderRadius:5,borderSkipped:false},
+      {label:'Déductible',data:C.tvaDedM.map(v=>-v),backgroundColor:'rgba(59,126,255,.72)',borderRadius:5,borderSkipped:false},
+      {label:'Nette',data:C.tvaNM,type:'line',borderColor:'#f43f5e',tension:.4,pointRadius:3,borderWidth:2},
+    ]},{});
+  }
+  const prov = el('tva-prov');
+  if(prov) prov.innerHTML = C.tvaNM.map((v,m) => `
+    <div class="tvarow">
+      <span class="tvarow-l">${MOIS[m+1]}</span>
+      <span class="tvarow-v" style="color:${v>0?'var(--rd)':v<0?'var(--gr)':'var(--t2)'}">${v>0?'+':''}${fmt(v)} €</span>
+    </div>`).join('');
+}
+
+function updateTresoModule() {
+  const tk = el('treso-kpis');
+  if(!tk) return;
+  let s = 0;
+  const tresoM2 = C.caM.map((c,m) => { s += c - C.chTotM[m]; return s; });
+  tk.innerHTML = [
+    kpiCard('Solde initial','--gr', '0 €', 'Début de période', null),
+    kpiCard('Encaissements','--ac', fmt(C.totalCA)+' €', null, null),
+    kpiCard('Décaissements','--am', fmt(C.totalCh)+' €', null, null),
+    kpiCard('Solde de fin','--gr', fmt(tresoM2[11])+' €', tresoM2[11]>=0?'↑ Positif':'↓ Négatif', null),
+  ].join('');
+  if(charts['c-treso']) {
+    charts['c-treso'].data.datasets[0].data = tresoM2;
+    charts['c-treso'].update();
+  } else {
+    mkChart('c-treso','line',{labels:MS.slice(1),datasets:[
+      {label:'Solde cumulé',data:tresoM2,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.09)',tension:.4,pointRadius:4,fill:true,borderWidth:2},
+      {label:'Seuil zéro',data:Array(12).fill(0),borderColor:'rgba(244,63,94,.4)',borderDash:[5,4],pointRadius:0,borderWidth:1.5},
+    ]},{});
+  }
+  // Tableau tréso
+  const tb = el('treso-body');
+  if(tb) {
+    let ts = 0;
+    tb.innerHTML = C.caM.map((ca,m) => {
+      const dec = C.chTotM[m]; const sm = ca-dec; ts += sm;
+      return `<tr><td>${MOIS[m+1]}</td><td class="ppos">${fmt(ca)} €</td><td class="pneg">${fmt(dec)} €</td><td class="${sm>=0?'ppos':'pneg'}">${sm>=0?'+':''}${fmt(sm)} €</td><td class="ppos">${fmt(ts)} €</td></tr>`;
+    }).join('');
+  }
+  // Alertes tréso
+  const ta = el('treso-alerts');
+  if(ta) {
+    const hasMoisNeg = tresoM2.some(v=>v<0);
+    ta.innerHTML = `
+      ${!hasMoisNeg ? '<div class="abox abg"><div class="abox-ico">✅</div><div><div class="abox-title">Aucun mois en négatif</div><div class="abox-desc">Le solde reste positif sur toute la période.</div></div></div>' : '<div class="abox abr"><div class="abox-ico">⚠</div><div><div class="abox-title">Solde négatif détecté</div><div class="abox-desc">Vérifiez les mois en rouge dans le tableau.</div></div></div>'}
+      ${C.totalTVAN > 0 && S.params.regimeTVA !== 'Franchise en base' ? `<div class="abox aba"><div class="abox-ico">💡</div><div><div class="abox-title">TVA à reverser : ${fmt(C.totalTVAN)} €</div><div class="abox-desc">Anticipez ce décaissement.</div></div></div>` : ''}`;
+  }
+}
+
+function updatePrevModule() {
+  const pk = el('prev-kpis');
+  if(!pk) return;
+  const g = parseFloat(el('growth')?.value||10) / 100;
+  const tPCA  = C.caM.reduce((s,v)=>s+Math.round(v*(1+g)),0);
+  const tPMrg = C.mrgM.reduce((s,v)=>s+Math.round(v*(1+g)),0);
+  const tPRN  = C.rnM.reduce((s,v)=>s+Math.round(v*(1+g*0.5)),0);
+  pk.innerHTML = [
+    kpiCard('CA prévisionnel N+1','--ac', fmt(tPCA)+' €', `${g>=0?'+':''}${(g*100).toFixed(0)} % vs N`, null),
+    kpiCard('Marge prévisionnelle','--gr', fmt(tPMrg)+' €', null, null),
+    kpiCard('Résultat prévisionnel','--pu', fmt(tPRN)+' €', null, null),
+  ].join('');
+  // Tableau prévisionnel
+  const pb = el('prev-body');
+  if(pb) {
+    const rows=[
+      {l:'CA HT',d:C.caM.map(v=>Math.round(v*(1+g))),c:'ppos'},
+      {l:'Charges totales',d:C.chTotM.map(v=>Math.round(v*(1+g*0.5))),c:'pneg'},
+      {l:'Marge brute',d:C.mrgM.map(v=>Math.round(v*(1+g))),c:'ppos'},
+      {l:'Résultat net',d:C.rnM.map(v=>Math.round(v*(1+g*0.5))),c:'pneu'},
+    ];
+    pb.innerHTML = rows.map(r=>{const tot=r.d.reduce((s,v)=>s+v,0);return`<tr><td>${r.l}</td>${r.d.map(v=>`<td class="${r.c}">${fmt(v)} €</td>`).join('')}<td class="${r.c}" style="font-weight:800">${fmt(tot)} €</td></tr>`;}).join('');
+  }
+  if(charts['c-prev']) {
+    charts['c-prev'].data.datasets[0].data = [C.totalCA, C.totalMrg, C.totalRN];
+    charts['c-prev'].data.datasets[1].data = [tPCA, tPMrg, tPRN];
+    charts['c-prev'].update();
+  } else {
+    mkChart('c-prev','bar',{labels:['CA HT','Marge brute','Résultat net'],datasets:[
+      {label:'N (actuel)',data:[C.totalCA,C.totalMrg,C.totalRN],backgroundColor:'rgba(59,126,255,.65)',borderRadius:5,borderSkipped:false},
+      {label:'N+1 (prévisionnel)',data:[tPCA,tPMrg,tPRN],backgroundColor:'rgba(14,165,114,.65)',borderRadius:5,borderSkipped:false},
+    ]},{});
+  }
+}
+
+function updateScenModule() {
+  const sc = el('scen-cards');
+  if(!sc) return;
+  const scens = [
+    {ico:'📉',label:'Scénario pessimiste',cls:'',tag:'brd',tagTxt:'-20 % CA',dca:-.2,dcf:0,dcv:0,dco:0},
+    {ico:'📊',label:'Situation actuelle',cls:';border-color:var(--ac);background:var(--ag)',tag:'bac',tagTxt:'Référence',dca:0,dcf:0,dcv:0,dco:0},
+    {ico:'📈',label:'Scénario optimiste',cls:'',tag:'bgr',tagTxt:'+20 % CA',dca:.2,dcf:0,dcv:.05,dco:0},
+  ];
+  sc.innerHTML = scens.map(s => {
+    const ca = C.totalCA*(1+s.dca);
+    const cout = C.coutM.reduce((ss,v)=>ss+v,0)*(1+s.dco);
+    const mrg = ca - cout;
+    const cf = C.totalChF*(1+s.dcf);
+    const cv = C.totalChV*(1+s.dcv);
+    const rn = mrg - cf - cv;
+    const col = rn >= 0 ? 'var(--gr)' : 'var(--rd)';
+    return `<div class="sccard" style="${s.cls}">
+      <div class="sccard-hdr"><span class="sccard-name">${s.ico} ${s.label}</span><span class="bdg ${s.tag}">${s.tagTxt}</span></div>
+      <div class="sccard-res" style="color:${col}">${fmt(rn)} €</div>
+      <div style="font-size:11px;color:var(--t2);margin-top:3px">Résultat net estimé</div>
+      <div class="abox ${rn>=0?'abg':'abr'}" style="margin-top:10px"><div class="abox-ico">${rn>=0?'✅':'⚠'}</div><div><div class="abox-desc">${rn>=0?'Résultat positif.':'Résultat négatif — les charges fixes ne sont plus couvertes.'}</div></div></div>
+    </div>`;
+  }).join('');
+  // Simulateur
+  runSim();
+}
+
+function updateCAKPIs() {
+  const ck = el('ca-kpis');
+  if(!ck) return;
+  const bestM  = C.caM.indexOf(Math.max(...C.caM));
+  const nonZero = C.caM.filter(v=>v>0);
+  const worstM = nonZero.length > 0 ? C.caM.indexOf(Math.min(...nonZero)) : -1;
+  ck.innerHTML = [
+    kpiCard('CA HT total','--ac', fmt(C.totalCA)+' €', null, null),
+    kpiCard('Quantités vendues','--gr', C.totalQty.toString(), null, null),
+    kpiCard('Meilleur mois','--pu', C.caM[bestM]>0?MS[bestM+1]:'—', C.caM[bestM]>0?fmt(C.caM[bestM])+' €':'', null),
+    kpiCard('Mois le plus faible','--am', worstM>=0?MS[worstM+1]:'—', worstM>=0?fmt(C.caM[worstM])+' €':'', null),
+  ].join('');
+  // Graphes CA
+  if(charts['c-ca-m']) { charts['c-ca-m'].data.datasets[0].data=C.caM; charts['c-ca-m'].update(); }
+  // Top charges toplist
+  const maxV = C.chClass[0]?.total || 1;
+  const cols2 = ['--am','--pu','--tl','--gr','--ac'];
+  const tl = el('ch-toplist');
+  if(tl) tl.innerHTML = C.chClass.slice(0,5).map((c,i)=>`
+    <div class="topitem">
+      <div class="toprank">${i+1}</div>
+      <div class="topname">${c.nom}</div>
+      <div class="topbarw"><div class="topbar-fill" style="width:${(c.total/maxV*100).toFixed(0)}%;background:var(${cols2[i]})"></div></div>
+      <div class="topval">${fmt(c.total)} €</div>
+    </div>`).join('');
+}
+
+function updateChKPIs() {
+  const ck = el('ch-kpis');
+  if(!ck) return;
+  const topCh = C.chClass[0];
+  ck.innerHTML = [
+    kpiCard('Total charges','--am', fmt(C.totalCh)+' €', null, null),
+    kpiCard('Charges fixes','--pu', fmt(C.totalChF)+' €', C.totalCh>0?`${(C.totalChF/C.totalCh*100).toFixed(1)} % du total`:'', null),
+    kpiCard('Charges variables','--tl', fmt(C.totalChV)+' €', C.totalCh>0?`${(C.totalChV/C.totalCh*100).toFixed(1)} % du total`:'', null),
+    kpiCard('Poste principal','--rd', topCh?topCh.nom:'—', topCh?fmt(topCh.total)+' €':'', null),
+  ].join('');
+  if(charts['c-ch-m']) {
+    charts['c-ch-m'].data.datasets[0].data=C.chFixM;
+    charts['c-ch-m'].data.datasets[1].data=C.chVarM;
+    charts['c-ch-m'].update();
+  }
+}
+
+// Autosave avec debounce
+let _renderTimer = null;
+function debouncedRenderAll() {
+  recalc();
+  smartUpdate();
+}
+
+function autoSave() {
+  markUnsaved();
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => { if(S.uid) saveAll(); }, 1500);
 }
 
 function updateCATotals() {
@@ -1939,65 +2317,7 @@ function updateChTotals() {
   }
 }
 
-function updateKPIs() {
-  // Dashboard KPIs
-  const r1 = el('kpis-row1'), r2 = el('kpis-row2');
-  if(r1) r1.innerHTML = [
-    kpiCard('CA HT','--ac', fmt(C.totalCA)+' €', C.totalCA>0?'Chiffre d\'affaires total':'Commencez à saisir', null),
-    kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', `Taux : ${C.txMarge.toFixed(1)} %`, null),
-    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', 'Après toutes charges', null),
-    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', 'Après toutes charges', null),
-    S.params.regimeTVA === 'Franchise en base'
-      ? kpiCard('TVA','--rd', '—', 'Franchise en base — non applicable', null)
-      : kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null),
-  ].join('');
-  if(r2) r2.innerHTML = [
-    kpiCard('Marge sur coûts variables','--tl', fmt(C.totalMrg - C.totalChV)+' €', `Taux MCV : ${C.txMCV.toFixed(1)} %`, null),
-    kpiCard('Total charges','--am', fmt(C.totalCh)+' €', `Fixes : ${fmt(C.totalChF)} € · Variables : ${fmt(C.totalChV)} €`, null),
-    kpiCard('Panier moyen','--pk', fmt(C.panierM)+' €', `Sur ${C.totalQty} unités vendues`, null),
-    kpiCard('Point mort','--gr', fmt(C.pointMort)+' €', C.jourLib > 0 ? `Jour de libération : le ${C.jourLib}` : 'Pas encore calculable', null),
-  ].join('');
-  // CA KPIs
-  if(el('ca-kpis')) {
-    const bestM = C.caM.indexOf(Math.max(...C.caM));
-    const worstM = C.caM.indexOf(Math.min(...C.caM.filter(v=>v>0)));
-    el('ca-kpis').innerHTML = [
-      kpiCard('CA HT total','--ac', fmt(C.totalCA)+' €', null, null),
-      kpiCard('Quantités vendues','--gr', C.totalQty.toString(), null, null),
-      kpiCard('Meilleur mois','--pu', C.caM[bestM]>0?MS[bestM+1]:'—', C.caM[bestM]>0?fmt(C.caM[bestM])+' €':'', null),
-      kpiCard('Mois le plus faible','--am', worstM>=0?MS[worstM+1]:'—', worstM>=0&&C.caM[worstM]>0?fmt(C.caM[worstM])+' €':'', null),
-    ].join('');
-  }
-  // Charges KPIs
-  if(el('ch-kpis')) {
-    const topCh = C.chClass[0];
-    el('ch-kpis').innerHTML = [
-      kpiCard('Total charges','--am', fmt(C.totalCh)+' €', null, null),
-      kpiCard('Charges fixes','--pu', fmt(C.totalChF)+' €', C.totalCh>0?`${(C.totalChF/C.totalCh*100).toFixed(1)} % du total`:'', null),
-      kpiCard('Charges variables','--tl', fmt(C.totalChV)+' €', C.totalCh>0?`${(C.totalChV/C.totalCh*100).toFixed(1)} % du total`:'', null),
-      kpiCard('Poste principal','--rd', topCh?topCh.nom:'—', topCh?fmt(topCh.total)+' €':'', null),
-    ].join('');
-  }
-  // Alertes sidebar badge
-  const alerts = computeAlerts();
-  const nb = alerts.filter(a=>a.type==='r').length;
-  el('alert-count').textContent = nb > 0 ? nb : '';
-  el('alert-count').style.display = nb > 0 ? '' : 'none';
-}
-
-// Autosave avec debounce 2s
-let _renderTimer = null;
-function debouncedRenderAll() {
-  recalc();
-  smartUpdate();
-}
-
-// Autosave déclenché par les modifications de structure (ajout/suppression)
-function autoSave() {
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(() => { if(S.uid) saveAll(); }, 1500);
-}
-
+// ─── updateKPIs remplacé par les fonctions granulaires dans smartUpdate ───
 function doUpgrade() {
   // Récupère l'email et redirige directement — pas de window.open pour éviter le blocage popup
   sb.auth.getUser().then(({data:{user}}) => {
