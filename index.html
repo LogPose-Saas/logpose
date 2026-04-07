@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -308,6 +308,22 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .rdopt-title{font-size:13px;font-weight:600}
 .rdopt-sub{font-size:11px;color:var(--t2)}
 
+/* ── KPI TOOLTIP ── */
+.kcard{position:relative;cursor:default}
+.kcard .ktooltip{
+  display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:var(--bgc);border:1px solid var(--bds);border-radius:var(--rs);
+  padding:10px 13px;font-size:11.5px;color:var(--t1);line-height:1.5;
+  width:220px;z-index:200;box-shadow:var(--sh);pointer-events:none;
+  text-align:left;font-family:var(--f);font-weight:400;
+}
+.kcard .ktooltip::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:var(--bds);
+}
+.kcard:hover .ktooltip{display:block;animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(4px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
 /* ── CTRL ── */
 .ctrlgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .ctrlitem{background:var(--bgs);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 14px}
@@ -398,6 +414,16 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
     <div class="sb-texts"><div class="sb-name">LogPose</div><div class="sb-sub">Financial OS</div></div>
   </div>
   <div class="sb-scroll">
+    <!-- Sélecteur d'année en sidebar -->
+    <div style="padding:10px 14px 4px;border-bottom:1px solid var(--bd);margin-bottom:4px">
+      <div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-family:var(--fm);margin-bottom:6px">Année</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button onclick="el('p-an').value=S.params.annee-1;changeAnnee(S.params.annee-1)" style="width:24px;height:24px;border-radius:5px;background:var(--bgc);border:1px solid var(--bd);color:var(--t2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">‹</button>
+        <span id="sb-annee" style="flex:1;text-align:center;font-size:14px;font-weight:700;font-family:var(--fm);color:var(--t1)">2026</span>
+        <button onclick="el('p-an').value=S.params.annee+1;changeAnnee(S.params.annee+1)" style="width:24px;height:24px;border-radius:5px;background:var(--bgc);border:1px solid var(--bd);color:var(--t2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">›</button>
+      </div>
+      <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap" id="sb-annees"></div>
+    </div>
     <div class="sb-sect">
       <div class="sb-lbl">Pilotage</div>
       <div class="sb-item active" onclick="nav('db',this)"><span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span>Vue d'ensemble</span></div>
@@ -503,9 +529,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
     </div>
     <div style="overflow-x:auto"><table class="stbl" id="ca-tbl"></table></div>
   </div>
-  <div class="cgeq">
-    <div class="card"><div class="ct">CA HT mensuel</div><div class="cs">Évolution sur la période</div><div class="cw"><canvas id="c-ca-m"></canvas></div></div>
-    <div class="card"><div class="ct">CA par catégorie</div><div class="cs">Répartition du chiffre d'affaires</div><div class="cw"><canvas id="c-ca-cat"></canvas></div></div>
+    <div class="cgeq">
+    <div class="card"><div class="ct">Chiffre d'affaires mensuel</div><div class="cs">Évolution sur la période</div><div class="cw"><canvas id="c-ca-m"></canvas></div></div>
+    <div class="card"><div class="ct">Chiffre d'affaires par catégorie</div><div class="cs">Répartition du chiffre d'affaires</div><div class="cw"><canvas id="c-ca-cat"></canvas></div></div>
   </div>
 </div>
 
@@ -574,6 +600,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 <!-- ── TRESORERIE ── -->
 <div id="pnl-treso" class="pnl">
   <div class="topbar"><div><div class="page-title">Trésorerie</div><div class="page-sub">Budget de trésorerie · Solde prévisionnel · Alertes automatiques</div></div><div class="page-actions"><button class="btn btn-g btn-sm" onclick="exportTreso()">↓ CSV</button></div></div>
+  <!-- Solde initial -->
+  <div class="card" style="margin-bottom:14px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px">
+      <label class="flbl">Solde de trésorerie initial (€)</label>
+      <input class="finp" type="number" id="treso-init" value="0" step="100" placeholder="0" oninput="S.params.tresoInit=parseFloat(this.value)||0;smartUpdate();autoSave()" style="max-width:200px">
+    </div>
+    <div style="font-size:12px;color:var(--t2);line-height:1.5">Entrez le solde de votre compte bancaire au <strong>1er jour de la période</strong>. Ce montant sera la base de votre trésorerie cumulée. Si vous passez en 2027, ce champ est automatiquement rempli avec le solde de fin décembre 2026.</div>
+  </div>
   <div class="kgrid g4" id="treso-kpis"></div>
   <div class="card"><div class="ct">Solde de trésorerie cumulé</div><div class="cs">Évolution mois par mois · Seuil zéro en rouge</div><div class="cwlg"><canvas id="c-treso"></canvas></div></div>
   <div class="cgeq">
@@ -591,18 +625,18 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div><div class="ct">Budget mensuel N+1</div><div class="cs">Basé sur N × coefficient</div></div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span style="font-size:12px;font-weight:600;color:var(--t2)">Croissance estimée</span>
-        <input type="range" id="growth" min="-20" max="50" value="10" style="width:100px;accent-color:var(--ac)" oninput="document.getElementById('growth-val').textContent=(this.value>0?'+':'')+this.value+' %';renderPrev()">
+        <input type="range" id="growth" min="-20" max="100" value="10" style="width:100px;accent-color:var(--ac)" oninput="document.getElementById('growth-val').textContent=(this.value>0?'+':'')+this.value+' %';renderPrev()">
         <span class="bdg bac" id="growth-val">+10 %</span>
       </div>
     </div>
     <div style="overflow-x:auto"><table class="ptbl" id="prev-tbl"><thead><tr><th>Indicateur</th><th>Jan</th><th>Fév</th><th>Mar</th><th>Avr</th><th>Mai</th><th>Jun</th><th>Jul</th><th>Aoû</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Déc</th><th>Total N+1</th></tr></thead><tbody id="prev-body"></tbody></table></div>
   </div>
-  <div class="card"><div class="ct">Comparaison N vs N+1</div><div class="cs">CA · Marge brute · Résultat net</div><div class="cwlg"><canvas id="c-prev"></canvas></div></div>
+  <div class="card"><div class="ct">Comparaison N vs N+1</div><div class="cwlg"><canvas id="c-prev"></canvas></div></div>
 </div>
 
 <!-- ── SCENARIOS ── -->
 <div id="pnl-scen" class="pnl">
-  <div class="topbar"><div><div class="page-title">Scénarios</div><div class="page-sub">Simulations what-if · Impact instantané sur la rentabilité</div></div></div>
+  <div class="topbar"><div><div class="page-title">Scénarios</div><div class="page-sub">Simulations d'impact · Résultats instantanés sur la rentabilité</div></div></div>
   <div class="kgrid g3" id="scen-cards"></div>
   <div class="card">
     <div class="ct">Simulateur personnalisé</div><div class="cs">Ajustez les paramètres — résultats en temps réel</div>
@@ -638,11 +672,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
     <div class="slbl">Période analysée</div>
     <div class="card">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px">
-        <div><label class="flbl">Année analysée</label><input class="finp" type="number" id="p-an" value="2026" min="2020" max="2040" onchange="changeAnnee(this.value)"></div>
-        <div><label class="flbl">Mois de début</label><select class="fsel" id="p-deb" onchange="updPeriodPreview();recalc();renderAll();autoSave()">
+        <div><label class="flbl">Année</label><input class="finp" type="number" id="p-an" value="2026" min="2020" max="2040" onchange="changeAnnee(this.value)"></div>
+        <div><label class="flbl">Mois début</label><select class="fsel" id="p-deb" onchange="updPeriodPreview();recalc();renderAll();autoSave()">
           <option value="1" selected>Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
         </select></div>
-        <div><label class="flbl">Mois de fin</label><select class="fsel" id="p-fin" onchange="updPeriodPreview();recalc();renderAll();autoSave()">
+        <div><label class="flbl">Mois fin</label><select class="fsel" id="p-fin" onchange="updPeriodPreview();recalc();renderAll();autoSave()">
           <option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12" selected>Décembre</option>
         </select></div>
       </div>
@@ -651,20 +685,12 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <span style="font-family:var(--fm);font-size:12px;color:var(--ac);font-weight:600" id="p-prev-val">Janvier 2026 → Décembre 2026</span>
         <span style="font-size:11px;color:var(--t2);margin-left:auto" id="p-prev-nb">12 mois</span>
       </div>
-      <!-- Multi-années -->
+      <!-- Sélecteur d'années rapide -->
       <div style="margin-top:14px;padding:12px 14px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)">
-        <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;font-family:var(--fm);margin-bottom:6px">📅 Multi-années</div>
-        <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:10px">Chaque année est stockée indépendamment. Changez l'année ci-dessus pour basculer vers une autre période — vos données 2026 restent intactes quand vous passez à 2027.</div>
+        <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;font-family:var(--fm);margin-bottom:8px">Navigation rapide</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap" id="annees-nav"></div>
       </div>
     </div>
-    <div class="slbl" style="margin-top:16px">Contrôle de cohérence</div>
-    <div class="card"><div class="ctrlgrid" id="ctrl-grid">
-      <div class="ctrlitem"><div class="ctrlval" id="ctrl-art">0</div><div class="ctrllbl">Articles</div><div class="ctrlst bgr">✓ OK</div></div>
-      <div class="ctrlitem"><div class="ctrlval" id="ctrl-act">0</div><div class="ctrllbl">Articles actifs</div><div class="ctrlst bgr">✓ OK</div></div>
-      <div class="ctrlitem"><div class="ctrlval" id="ctrl-ch">0</div><div class="ctrllbl">Charges</div><div class="ctrlst bgr">✓ OK</div></div>
-      <div class="ctrlitem"><div class="ctrlval" id="ctrl-an">0</div><div class="ctrllbl">Anomalies</div><div class="ctrlst bgr" id="ctrl-an-st">✓ Aucune</div></div>
-    </div></div>
   </div>
 
   <!-- Articles -->
@@ -752,8 +778,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 <!-- SAVE BAR -->
 <div class="savebar" id="savebar">
   <div class="save-st">
-    <div class="sdot saved" id="sdot"></div>
-    <span id="stxt">Prêt</span>
+    <div class="sdot saved" id="sdot" title="Sauvegarde automatique active"></div>
+    <span id="stxt" style="font-size:11px;color:var(--t3)">Enregistré</span>
   </div>
 </div>
 
@@ -769,7 +795,7 @@ let S = {
   charges:  [],   // [{code,nom,cat,tva,type,actif}]
   qty:      {},   // {code: [m0..m11]}
   chMD:     {},   // {code: [m0..m11]}
-  params: {annee:2026, moisDeb:1, moisFin:12, nomEnt:'', obj:0, secteur:'', regimeTVA:'', regimeFisc:'', cle:'qte'},
+  params: {annee:2026, moisDeb:1, moisFin:12, nomEnt:'', obj:0, secteur:'', regimeTVA:'', regimeFisc:'', cle:'qte', tresoInit:0},
   isPro: false,
   uid: null,
 };
@@ -844,8 +870,8 @@ function recalc() {
   const tvaDedM  = isFranchise ? Array(12).fill(0) : chTotM.map(c => c * 0.2);
   const tvaNM    = tvaCollM.map((c,m) => c - tvaDedM[m]);
 
-  // Trésorerie cumulée
-  let solde = 0;
+  // Trésorerie cumulée avec solde initial
+  let solde = S.params.tresoInit || 0;
   const tresoM = caM.map((c,m) => { solde += c - chTotM[m]; return solde; });
 
   // Filtrer selon la période sélectionnée
@@ -1158,7 +1184,7 @@ function renderTVA() {
     el('tva-kpis').innerHTML = `<div style="grid-column:1/-1">
       <div class="abox abb"><div class="abox-ico">💡</div><div>
         <div class="abox-title">Régime Franchise en base de TVA</div>
-        <div class="abox-desc">Vous n'êtes pas assujetti à la TVA. Vous ne collectez pas de TVA sur vos ventes et ne déduisez pas la TVA sur vos achats. Ce module ne vous concerne pas. Pour modifier votre régime, rendez-vous dans Paramètres → Entreprise.</div>
+        <div class="abox-desc">Vous n'êtes pas assujetti à la TVA. Vous ne collectez pas de TVA sur vos ventes et ne déduisez pas la TVA sur vos achats. Pour modifier votre régime, rendez-vous dans Paramètres → Entreprise.</div>
       </div></div>
     </div>`;
     return;
@@ -1518,15 +1544,7 @@ function delChAt(i) {
 }
 
 function renderCtrl() {
-  const actifs = S.articles.filter(a=>a.actif).length;
-  const anom = S.articles.filter(a=>a.pv<=0).length;
-  el('ctrl-art').textContent = S.articles.length;
-  el('ctrl-act').textContent = actifs;
-  el('ctrl-ch').textContent  = S.charges.length;
-  el('ctrl-an').textContent  = anom;
-  const st = el('ctrl-an-st');
-  st.textContent = anom > 0 ? `⚠ ${anom}` : '✓ Aucune';
-  st.className = 'ctrlst ' + (anom > 0 ? 'bam' : 'bgr');
+  // Contrôle de cohérence retiré de l'interface — fonction conservée pour compatibilité
 }
 
 function updPeriodPreview() {
@@ -1550,8 +1568,16 @@ function updPeriodPreview() {
 async function changeAnnee(val) {
   const newAn = parseInt(val)||2026;
   if(newAn === S.params.annee) return;
-  // Sauvegarder l'année courante d'abord
+  // Sauvegarder l'année courante
   await saveAll();
+  // Reprise du solde de fin de l'année précédente en trésorerie initiale
+  if(newAn === S.params.annee + 1) {
+    // Calculer le solde de fin de l'année courante
+    let s = S.params.tresoInit || 0;
+    C.caM.forEach((ca, m) => { s += ca - C.chTotM[m]; });
+    S.params.tresoInit = Math.round(s);
+    const eTi = el('treso-init'); if(eTi) eTi.value = S.params.tresoInit;
+  }
   // Changer l'année
   S.params.annee = newAn;
   // Réinitialiser les saisies en mémoire
@@ -1577,18 +1603,33 @@ async function changeAnnee(val) {
 }
 
 function renderAnneesNav() {
-  const nav2 = el('annees-nav');
-  if(!nav2) return;
-  // Afficher les 3 dernières années + année courante + prochaine
   const cur = S.params.annee;
-  const annees = [cur-2, cur-1, cur, cur+1].filter(a => a >= 2020 && a <= 2040);
-  nav2.innerHTML = annees.map(a => `
-    <button onclick="el('p-an').value=${a};changeAnnee(${a})"
-      style="padding:5px 14px;border-radius:var(--rs);font-size:12px;font-weight:${a===cur?'700':'500'};
-      background:${a===cur?'var(--ac)':'var(--bgc)'};color:${a===cur?'#fff':'var(--t2)'};
-      border:1px solid ${a===cur?'var(--ac)':'var(--bd)'};cursor:pointer;transition:all var(--tr)">
-      ${a}${a===cur?' ✓':''}
-    </button>`).join('');
+  // Sync sidebar
+  const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = cur;
+  // Boutons rapides sidebar
+  const sbAns = el('sb-annees');
+  if(sbAns) {
+    const anneesDisp = [cur-1, cur, cur+1].filter(a => a >= 2020 && a <= 2040);
+    sbAns.innerHTML = anneesDisp.map(a => `
+      <button onclick="el('p-an').value=${a};changeAnnee(${a})"
+        style="flex:1;padding:3px 6px;border-radius:5px;font-size:11px;font-weight:${a===cur?'700':'400'};
+        background:${a===cur?'var(--ac)':'var(--bgc)'};color:${a===cur?'#fff':'var(--t3)'};
+        border:1px solid ${a===cur?'var(--ac)':'var(--bd)'};cursor:pointer">
+        ${a}
+      </button>`).join('');
+  }
+  // Sync params tab nav
+  const nav2 = el('annees-nav');
+  if(nav2) {
+    const annees = [cur-2, cur-1, cur, cur+1].filter(a => a >= 2020 && a <= 2040);
+    nav2.innerHTML = annees.map(a => `
+      <button onclick="el('p-an').value=${a};changeAnnee(${a})"
+        style="padding:5px 14px;border-radius:var(--rs);font-size:12px;font-weight:${a===cur?'700':'500'};
+        background:${a===cur?'var(--ac)':'var(--bgc)'};color:${a===cur?'#fff':'var(--t2)'};
+        border:1px solid ${a===cur?'var(--ac)':'var(--bd)'};cursor:pointer">
+        ${a}${a===cur?' ✓':''}
+      </button>`).join('');
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1679,7 +1720,7 @@ function updChartsTheme() {
 // ═══════════════════════════════════════════════
 // KPI CARD HELPER
 // ═══════════════════════════════════════════════
-function kpiCard(lbl, color, val, sub, trend) {
+function kpiCard(lbl, color, val, sub, trend, tooltip='') {
   const deltaHtml = trend !== null && trend !== undefined
     ? `<span class="kdel ${trend>=0?'du':'dd'}">${trend>=0?'↑':'↓'} ${Math.abs(trend).toFixed(1)} %</span>`
     : '';
@@ -1689,6 +1730,7 @@ function kpiCard(lbl, color, val, sub, trend) {
     <div class="kval">${val}</div>
     ${deltaHtml}
     ${sub ? `<div class="ksub">${sub}</div>` : ''}
+    ${tooltip ? `<div class="ktooltip">${tooltip}</div>` : ''}
   </div>`;
 }
 
@@ -1762,10 +1804,19 @@ function closeMob() { el('sb').classList.remove('mob-open'); el('sb-ov').classLi
 // ═══════════════════════════════════════════════
 function toggleTheme() {
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
-  el('theme-lbl').textContent = dark ? '☀️ Thème clair' : '🌙 Thème sombre';
-  el('mob-theme').textContent = dark ? '☀️' : '🌙';
+  const next = dark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('lp-theme', next);
+  el('theme-lbl').textContent = next === 'dark' ? '🌙 Thème sombre' : '☀️ Thème clair';
+  const mob = el('mob-theme'); if(mob) mob.textContent = next === 'dark' ? '🌙' : '☀️';
   updChartsTheme();
+}
+
+function applyTheme() {
+  const saved = localStorage.getItem('lp-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  const lbl = el('theme-lbl'); if(lbl) lbl.textContent = saved === 'dark' ? '🌙 Thème sombre' : '☀️ Thème clair';
+  const mob = el('mob-theme'); if(mob) mob.textContent = saved === 'dark' ? '🌙' : '☀️';
 }
 
 // ═══════════════════════════════════════════════
@@ -1779,7 +1830,7 @@ function addArt() {
   S.qty[code] = Array(12).fill(0);
   ['pa-code','pa-nom','pa-cat','pa-pv','pa-cout'].forEach(id=>el(id).value='');
   toggleAdd('p-art-add');
-  recalc(); renderArt(); renderCA(); renderCtrl(); autoSave();
+  recalc(); renderArt(); renderCA(); smartUpdate(); autoSave();
 }
 
 function addArtFromCA() {
@@ -1789,7 +1840,7 @@ function addArtFromCA() {
   S.qty[code] = Array(12).fill(0);
   ['ca-code','ca-nom','ca-cat','ca-pv','ca-cout'].forEach(id=>el(id).value='');
   toggleAdd('ca-add');
-  recalc(); renderCA(); renderArt(); renderCtrl(); autoSave();
+  recalc(); renderCA(); renderArt(); smartUpdate(); autoSave();
 }
 
 function addCh() {
@@ -1800,7 +1851,7 @@ function addCh() {
   S.chMD[code] = Array(12).fill(0);
   ['pc-nom','pc-cat'].forEach(id=>el(id).value='');
   toggleAdd('p-ch-add');
-  recalc(); renderCh(); renderCharges(); renderCtrl(); autoSave();
+  recalc(); renderCh(); renderCharges(); smartUpdate(); autoSave();
 }
 
 function addChFromPanel() {
@@ -1810,26 +1861,23 @@ function addChFromPanel() {
   S.chMD[code] = Array(12).fill(0);
   ['ch-nom','ch-cat'].forEach(id=>el(id).value='');
   toggleAdd('ch-add');
-  recalc(); renderCharges(); renderCh(); renderCtrl(); autoSave();
+  recalc(); renderCharges(); renderCh(); smartUpdate(); autoSave();
 }
 
 // ═══════════════════════════════════════════════
 // SAVE BAR
 // ═══════════════════════════════════════════════
 function markUnsaved() {
-  const d = el('sdot'); const t = el('stxt');
-  if(d) d.classList.remove('saved');
-  if(t) t.textContent = 'Sauvegarde automatique dans 2s…';
+  const d = el('sdot'); if(d) { d.classList.remove('saved'); d.title='Sauvegarde en attente…'; }
+  const t = el('stxt'); if(t) t.textContent = '';
 }
 function setSaved() {
-  const d = el('sdot'); const t = el('stxt');
-  if(d) d.classList.add('saved');
-  if(t) t.textContent = 'Enregistré · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  const d = el('sdot'); if(d) { d.classList.add('saved'); d.title='Toutes les modifications sont enregistrées'; }
+  const t = el('stxt'); if(t) t.textContent = 'Enregistré';
 }
 function setLoading(msg) {
-  const d = el('sdot'); const t = el('stxt');
-  if(d) d.classList.remove('saved');
-  if(t) t.textContent = msg || 'Chargement…';
+  const d = el('sdot'); if(d) { d.classList.remove('saved'); }
+  const t = el('stxt'); if(t) t.textContent = msg||'';
 }
 
 // ═══════════════════════════════════════════════
@@ -1856,6 +1904,7 @@ async function saveAll() {
       secteur: el('ent-sect')?.value||'',
       regime_tva: S.params.regimeTVA||'TVA réelle mensuelle',
       cle_repartition: document.querySelector('input[name="cle"]:checked')?.value||'qte',
+      treso_init: S.params.tresoInit||0,
     }, {onConflict:'user_id'});
 
     // Articles
@@ -1905,6 +1954,7 @@ async function loadData(uid) {
       S.params.obj       = params.objectif_ca||0;
       S.params.regimeTVA = params.regime_tva||'TVA réelle mensuelle';
       S.params.nomEnt    = params.nom_entreprise||'';
+      S.params.tresoInit = params.treso_init||0;
       S.isPro            = params.is_pro === true;
       const pAn  = el('p-an');   if(pAn)  pAn.value  = S.params.annee;
       const pDeb = el('p-deb');  if(pDeb) pDeb.value  = S.params.moisDeb;
@@ -1913,6 +1963,7 @@ async function loadData(uid) {
       const eObj = el('ent-obj'); if(eObj) eObj.value = params.objectif_ca||0;
       const eTva = el('ent-tva'); if(eTva) eTva.value = S.params.regimeTVA;
       const dbn  = el('db-name'); if(dbn && params.nom_entreprise) dbn.textContent = params.nom_entreprise;
+      const eTi  = el('treso-init'); if(eTi) eTi.value = S.params.tresoInit||0;
     }
 
     // Articles
@@ -2117,21 +2168,20 @@ function smartUpdate() {
 function updateDashboardKPIs() {
   const r1 = el('kpis-row1');
   const r2 = el('kpis-row2');
-  // KPI TVA : une seule valeur selon le régime
   const tvaKPI = S.params.regimeTVA === 'Franchise en base'
-    ? kpiCard('TVA','--rd', '—', 'Franchise en base — non applicable', null)
-    : kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null);
+    ? kpiCard('TVA','--rd', '—', 'Franchise en base — non applicable', null, 'En franchise de TVA, vous ne collectez pas de TVA sur vos ventes et ne la déduisez pas sur vos achats. ')
+    : kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null, 'Différence entre la TVA que vous avez collectée sur vos ventes et celle que vous pouvez déduire sur vos achats. C\'est le montant à reverser à l\'État.');
   if(r1) r1.innerHTML = [
-    kpiCard('CA HT','--ac', fmt(C.totalCA)+' €', C.totalCA>0?'Chiffre d\'affaires total':'Commencez à saisir vos quantités', null),
-    kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', `Taux : ${C.txMarge.toFixed(1)} %`, null),
-    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', 'Après toutes charges', null),
+    kpiCard('CA HT','--ac', fmt(C.totalCA)+' €', C.totalCA>0?'Chiffre d\'affaires total':'Commencez à saisir vos quantités', null, 'Chiffre d\'affaires hors taxes : total de vos ventes sur la période, avant déduction de toute charge.'),
+    kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', `Taux : ${C.txMarge.toFixed(1)} %`, null, 'Marge brute = CA HT − coûts d\'achat des marchandises. Indique combien il vous reste après avoir payé ce que vous revendez, avant de couvrir vos autres charges.'),
+    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', 'Après toutes charges', null, 'Estimation du bénéfice ou de la perte après déduction de toutes vos charges (fixes + variables) de votre marge brute. C\'est votre "profit" avant impôts.'),
     tvaKPI,
   ].join('');
   if(r2) r2.innerHTML = [
-    kpiCard('Marge sur coûts variables','--tl', fmt(C.totalMrg - C.totalChV)+' €', `Taux MCV : ${C.txMCV.toFixed(1)} %`, null),
-    kpiCard('Total charges','--am', fmt(C.totalCh)+' €', `Fixes : ${fmt(C.totalChF)} € · Variables : ${fmt(C.totalChV)} €`, null),
-    kpiCard('Panier moyen','--pk', fmt(C.panierM)+' €', `Sur ${C.totalQty} unités vendues`, null),
-    kpiCard('Point mort','--gr', fmt(C.pointMort)+' €', C.jourLib > 0 ? `Jour de libération : le ${C.jourLib}` : 'Pas encore calculable', null),
+    kpiCard('Marge sur coûts variables','--tl', fmt(C.totalMrg - C.totalChV)+' €', `Taux MCV : ${C.txMCV.toFixed(1)} %`, null, 'Marge sur Coûts Variables = Marge brute − Charges variables. Montre ce qui reste pour couvrir vos charges fixes. Doit être positif pour atteindre la rentabilité.'),
+    kpiCard('Total charges','--am', fmt(C.totalCh)+' €', `Fixes : ${fmt(C.totalChF)} € · Variables : ${fmt(C.totalChV)} €`, null, 'Ensemble de vos dépenses sur la période. Les charges fixes (loyer, abonnements…) ne varient pas avec votre activité. Les charges variables évoluent avec votre volume de ventes.'),
+    kpiCard('Panier moyen','--pk', fmt(C.panierM)+' €', `Sur ${C.totalQty} unités vendues`, null, 'CA HT divisé par le nombre total d\'unités vendues. Indique la valeur moyenne générée par chaque vente.'),
+    kpiCard('Point mort','--gr', fmt(C.pointMort)+' €', C.jourLib > 0 ? `Jour de libération : le ${C.jourLib}` : 'Pas encore calculable', null, 'Niveau de CA à atteindre pour couvrir exactement toutes vos charges. En dessous : vous êtes en perte. Au-dessus : vous êtes rentable.'),
   ].join('');
 }
 
@@ -2209,10 +2259,10 @@ function updateMargeModule() {
   // KPIs marge
   const mk = el('mrg-kpis');
   if(mk) mk.innerHTML = [
-    kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', null, null),
-    kpiCard('Marge sur coûts variables','--tl', fmt(C.totalMrg-C.totalChV)+' €', `${C.txMCV.toFixed(1)} % du CA`, null),
-    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', null, null),
-    kpiCard('Panier moyen','--pk', fmt(C.panierM)+' €', `${C.totalQty} unités vendues`, null),
+    kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', null, null, 'CA HT moins le coût d\'achat de vos marchandises. C\'est ce qu\'il vous reste avant de payer vos charges fixes et variables.'),
+    kpiCard('Marge sur coûts variables','--tl', fmt(C.totalMrg-C.totalChV)+' €', `${C.txMCV.toFixed(1)} % du CA`, null, 'Indique la capacité de votre activité à absorber vos charges fixes. Si ce chiffre est négatif, chaque vente aggrave votre situation.'),
+    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', null, null, 'Estimation du résultat final après toutes vos charges. Positif = bénéfice. Négatif = perte.'),
+    kpiCard('Panier moyen','--pk', fmt(C.panierM)+' €', `${C.totalQty} unités vendues`, null, 'Valeur moyenne d\'une vente unitaire. Augmenter ce chiffre (upsell, gamme premium) améliore la rentabilité sans augmenter le volume.'),
   ].join('');
 
   // Liste marge par article
@@ -2267,13 +2317,20 @@ function updateTVAModule() {
   if(!tk) return;
   const isFranchise = S.params.regimeTVA === 'Franchise en base';
   if(isFranchise) {
-    tk.innerHTML = `<div style="grid-column:1/-1"><div class="abox abb"><div class="abox-ico">💡</div><div><div class="abox-title">Régime Franchise en base de TVA</div><div class="abox-desc">Vous n'êtes pas assujetti à la TVA. Ce module ne vous concerne pas. Modifiez votre régime dans Paramètres → Entreprise.</div></div></div></div>`;
+    tk.innerHTML = `<div style="grid-column:1/-1"><div class="abox abb"><div class="abox-ico">💡</div><div><div class="abox-title">Régime Franchise en base de TVA</div><div class="abox-desc">Vous n'êtes pas assujetti à la TVA — vous ne collectez pas de TVA sur vos ventes et ne la déduisez pas sur vos achats. Pour modifier votre régime, rendez-vous dans Paramètres → Entreprise.</div></div></div></div>`;
+    // Provisionnement à 0 pour tous les mois
+    const prov = el('tva-prov');
+    if(prov) prov.innerHTML = Array(12).fill(0).map((_,m) => `
+      <div class="tvarow">
+        <span class="tvarow-l">${MOIS[m+1]}</span>
+        <span class="tvarow-v" style="color:var(--t2)">0 €</span>
+      </div>`).join('');
     return;
   }
   tk.innerHTML = [
-    kpiCard('TVA collectée','--gr', fmt(C.totalTVAC)+' €', 'Ventes HT × 20 %', null),
-    kpiCard('TVA déductible','--ac', fmt(C.totalTVAD)+' €', 'Charges × TVA', null),
-    kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null),
+    kpiCard('TVA collectée','--gr', fmt(C.totalTVAC)+' €', 'Ventes HT × 20 %', null, 'TVA que vous avez facturée à vos clients sur vos ventes. Vous la collectez pour le compte de l\'État.'),
+    kpiCard('TVA déductible','--ac', fmt(C.totalTVAD)+' €', 'Charges × TVA', null, 'TVA payée sur vos achats professionnels, que vous pouvez récupérer en la déduisant de la TVA collectée.'),
+    kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null, 'Montant que vous devez reverser à l\'État lors de votre déclaration de TVA. Provisionnez ce montant chaque mois.'),
   ].join('');
   if(charts['c-tva-m']) {
     charts['c-tva-m'].data.datasets[0].data = C.tvaCollM;
@@ -2298,13 +2355,15 @@ function updateTVAModule() {
 function updateTresoModule() {
   const tk = el('treso-kpis');
   if(!tk) return;
-  let s = 0;
+  const init = S.params.tresoInit || 0;
+  let s = init;
   const tresoM2 = C.caM.map((c,m) => { s += c - C.chTotM[m]; return s; });
+  const soldeFin = tresoM2[tresoM2.length-1] || 0;
   tk.innerHTML = [
-    kpiCard('Solde initial','--gr', '0 €', 'Début de période', null),
-    kpiCard('Encaissements','--ac', fmt(C.totalCA)+' €', null, null),
-    kpiCard('Décaissements','--am', fmt(C.totalCh)+' €', null, null),
-    kpiCard('Solde de fin','--gr', fmt(tresoM2[11])+' €', tresoM2[11]>=0?'↑ Positif':'↓ Négatif', null),
+    kpiCard('Solde initial','--gr', fmt(init)+' €', 'Début de période', null, 'Solde bancaire au 1er jour de la période. Modifiez-le dans le champ ci-dessus.'),
+    kpiCard('Encaissements','--ac', fmt(C.totalCA)+' €', 'Total des ventes', null),
+    kpiCard('Décaissements','--am', fmt(C.totalCh)+' €', 'Total des charges', null),
+    kpiCard('Solde de fin','--gr', fmt(soldeFin)+' €', soldeFin>=0?'↑ Positif':'↓ Négatif', null, 'Solde prévisionnel en fin de période, solde initial inclus.'),
   ].join('');
   if(charts['c-treso']) {
     charts['c-treso'].data.datasets[0].data = tresoM2;
@@ -2315,22 +2374,20 @@ function updateTresoModule() {
       {label:'Seuil zéro',data:Array(12).fill(0),borderColor:'rgba(244,63,94,.4)',borderDash:[5,4],pointRadius:0,borderWidth:1.5},
     ]},{});
   }
-  // Tableau tréso
   const tb = el('treso-body');
   if(tb) {
-    let ts = 0;
+    let ts = init;
     tb.innerHTML = C.caM.map((ca,m) => {
       const dec = C.chTotM[m]; const sm = ca-dec; ts += sm;
-      return `<tr><td>${MOIS[m+1]}</td><td class="ppos">${fmt(ca)} €</td><td class="pneg">${fmt(dec)} €</td><td class="${sm>=0?'ppos':'pneg'}">${sm>=0?'+':''}${fmt(sm)} €</td><td class="ppos">${fmt(ts)} €</td></tr>`;
+      return `<tr><td>${MOIS[m+1]}</td><td class="ppos">${fmt(ca)} €</td><td class="pneg">${fmt(dec)} €</td><td class="${sm>=0?'ppos':'pneg'}">${sm>=0?'+':''}${fmt(sm)} €</td><td class="${ts>=0?'ppos':'pneg'}">${fmt(ts)} €</td></tr>`;
     }).join('');
   }
-  // Alertes tréso
   const ta = el('treso-alerts');
   if(ta) {
     const hasMoisNeg = tresoM2.some(v=>v<0);
     ta.innerHTML = `
       ${!hasMoisNeg ? '<div class="abox abg"><div class="abox-ico">✅</div><div><div class="abox-title">Aucun mois en négatif</div><div class="abox-desc">Le solde reste positif sur toute la période.</div></div></div>' : '<div class="abox abr"><div class="abox-ico">⚠</div><div><div class="abox-title">Solde négatif détecté</div><div class="abox-desc">Vérifiez les mois en rouge dans le tableau.</div></div></div>'}
-      ${C.totalTVAN > 0 && S.params.regimeTVA !== 'Franchise en base' ? `<div class="abox aba"><div class="abox-ico">💡</div><div><div class="abox-title">TVA à reverser : ${fmt(C.totalTVAN)} €</div><div class="abox-desc">Anticipez ce décaissement.</div></div></div>` : ''}`;
+      ${C.totalTVAN > 0 && S.params.regimeTVA !== 'Franchise en base' ? `<div class="abox aba"><div class="abox-ico">💡</div><div><div class="abox-title">TVA à reverser : ${fmt(C.totalTVAN)} €</div><div class="abox-desc">Anticipez ce décaissement dans votre trésorerie.</div></div></div>` : ''}`;
   }
 }
 
@@ -2504,19 +2561,10 @@ function updateChTotals() {
 
 // ─── updateKPIs remplacé par les fonctions granulaires dans smartUpdate ───
 function doUpgrade() {
-  // IMPORTANT: window.open DOIT être synchrone (au moment du clic)
-  // Sinon les navigateurs bloquent le popup
-  const win = window.open('about:blank', '_blank');
-  // Puis récupérer l'email et naviguer
-  sb.auth.getUser().then(({data:{user}}) => {
-    const email = user?.email || '';
-    const url = LEMON_URL + (email ? `?checkout[email]=${encodeURIComponent(email)}` : '');
-    if(win && !win.closed) win.location.href = url;
-    else window.location.href = url; // fallback si fenêtre bloquée
-  }).catch(() => {
-    if(win && !win.closed) win.location.href = LEMON_URL;
-    else window.location.href = LEMON_URL;
-  });
+  // window.open DOIT être synchrone au clic — sinon le navigateur bloque le popup
+  const email = S.uid ? (el('sb-email')?.textContent||'') : '';
+  const url = LEMON_URL + (email ? `?checkout[email]=${encodeURIComponent(email)}` : '');
+  window.open(url, '_blank');
 }
 
 function checkUpgrade() {
@@ -2687,6 +2735,8 @@ async function startApp(user) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Appliquer le thème sauvegardé immédiatement
+  applyTheme();
   window._appStarted = false;
 
   // Auth state listener
