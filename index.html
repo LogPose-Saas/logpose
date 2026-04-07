@@ -635,11 +635,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
     <div class="slbl">Période analysée</div>
     <div class="card">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px">
-        <div><label class="flbl">Année analysée</label><input class="finp" type="number" id="p-an" value="2026" min="2020" max="2040" oninput="updPeriodPreview();markUnsaved()"></div>
-        <div><label class="flbl">Mois de début</label><select class="fsel" id="p-deb" onchange="updPeriodPreview();markUnsaved()">
+        <div><label class="flbl">Année analysée</label><input class="finp" type="number" id="p-an" value="2026" min="2020" max="2040" oninput="updPeriodPreview();recalc();renderAll();autoSave()"></div>
+        <div><label class="flbl">Mois de début</label><select class="fsel" id="p-deb" onchange="updPeriodPreview();recalc();renderAll();autoSave()">
           <option value="1" selected>Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
         </select></div>
-        <div><label class="flbl">Mois de fin</label><select class="fsel" id="p-fin" onchange="updPeriodPreview();markUnsaved()">
+        <div><label class="flbl">Mois de fin</label><select class="fsel" id="p-fin" onchange="updPeriodPreview();recalc();renderAll();autoSave()">
           <option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12" selected>Décembre</option>
         </select></div>
       </div>
@@ -702,22 +702,22 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
     <div class="slbl">Informations générales</div>
     <div class="card">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px">
-        <div><label class="flbl">Nom de l'entreprise</label><input class="finp" id="ent-nom" type="text" placeholder="Mon Entreprise" onchange="markUnsaved();document.getElementById('db-name').textContent=this.value||'Mon Entreprise'"></div>
-        <div><label class="flbl">Secteur</label><select class="fsel" id="ent-sect" onchange="markUnsaved()"><option>Commerce de détail</option><option>E-commerce</option><option>Prestation de service</option><option>Restauration / Food</option><option>BTP / Artisanat</option><option>Autre</option></select></div>
-        <div><label class="flbl">Objectif CA annuel (€)</label><input class="finp" id="ent-obj" type="number" placeholder="120000" onchange="markUnsaved()"></div>
+        <div><label class="flbl">Nom de l'entreprise</label><input class="finp" id="ent-nom" type="text" placeholder="Mon Entreprise" onchange="autoSave();document.getElementById('db-name').textContent=this.value||'Mon Entreprise'"></div>
+        <div><label class="flbl">Secteur</label><select class="fsel" id="ent-sect" onchange="autoSave()"><option>Commerce de détail</option><option>E-commerce</option><option>Prestation de service</option><option>Restauration / Food</option><option>BTP / Artisanat</option><option>Autre</option></select></div>
+        <div><label class="flbl">Objectif CA annuel (€)</label><input class="finp" id="ent-obj" type="number" placeholder="120000" onchange="S.params.obj=parseFloat(this.value)||0;autoSave()"></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-        <div><label class="flbl">Régime TVA</label><select class="fsel" id="ent-tva" onchange="markUnsaved()"><option>TVA réelle mensuelle</option><option>TVA réelle trimestrielle</option><option>Franchise en base</option></select></div>
-        <div><label class="flbl">Régime fiscal</label><select class="fsel" id="ent-fisc" onchange="markUnsaved()"><option>IS — Impôt sur les sociétés</option><option>IR — Impôt sur le revenu</option><option>Micro-entreprise</option></select></div>
-        <div><label class="flbl">Devise</label><select class="fsel" id="ent-dev" onchange="markUnsaved()"><option>€ Euro</option><option>$ Dollar</option><option>£ Livre sterling</option></select></div>
+        <div><label class="flbl">Régime TVA</label><select class="fsel" id="ent-tva" onchange="S.params.regimeTVA=this.value;recalc();renderAll();autoSave()"><option>TVA réelle mensuelle</option><option>TVA réelle trimestrielle</option><option>Franchise en base</option></select></div>
+        <div><label class="flbl">Régime fiscal</label><select class="fsel" id="ent-fisc" onchange="autoSave()"><option>IS — Impôt sur les sociétés</option><option>IR — Impôt sur le revenu</option><option>Micro-entreprise</option></select></div>
+        <div><label class="flbl">Devise</label><select class="fsel" id="ent-dev" onchange="autoSave()"><option>€ Euro</option><option>$ Dollar</option><option>£ Livre sterling</option></select></div>
       </div>
     </div>
     <div class="slbl" style="margin-top:16px">Clé de répartition des charges fixes</div>
     <div class="card">
       <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
         <div style="flex:1;min-width:220px">
-          <label class="rdopt"><input type="radio" name="cle" value="qte" checked onchange="markUnsaved()"><div><div class="rdopt-title">Prorata des quantités vendues</div><div class="rdopt-sub">Recommandé · Simple et universel</div></div></label>
-          <label class="rdopt"><input type="radio" name="cle" value="ca" onchange="markUnsaved()"><div><div class="rdopt-title">Prorata du CA HT</div><div class="rdopt-sub">Si les prix varient beaucoup entre articles</div></div></label>
+          <label class="rdopt"><input type="radio" name="cle" value="qte" checked onchange="autoSave()"><div><div class="rdopt-title">Prorata des quantités vendues</div><div class="rdopt-sub">Recommandé · Simple et universel</div></div></label>
+          <label class="rdopt"><input type="radio" name="cle" value="ca" onchange="autoSave()"><div><div class="rdopt-title">Prorata du CA HT</div><div class="rdopt-sub">Si les prix varient beaucoup entre articles</div></div></label>
           <label class="rdopt" style="opacity:.5"><input type="radio" name="cle" disabled><div><div class="rdopt-title">Clé personnalisée <span class="bdg bam" style="font-size:9px">V2</span></div><div class="rdopt-sub">Définir un % par article manuellement</div></div></label>
         </div>
         <div style="width:210px;background:var(--bgs);border:1px solid var(--bd);border-radius:var(--rs);padding:14px">
@@ -735,7 +735,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 <!-- SAVE BAR -->
 <div class="savebar" id="savebar">
   <div class="save-st"><div class="sdot saved" id="sdot"></div><span id="stxt">Prêt</span></div>
-  <div style="display:flex;gap:8px"><button class="btn btn-g btn-sm" onclick="if(confirm('Annuler les modifications ?'))location.reload()">Annuler</button><button class="btn btn-p btn-sm" onclick="saveAll()">💾 Enregistrer</button></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-p btn-sm" onclick="saveAll()">💾 Enregistrer</button>
+  </div>
 </div>
 
 <script>
@@ -819,9 +821,10 @@ function recalc() {
   // Résultat net mensuel = CA - coût achat - charges
   const rnM = caM.map((c,m) => c - coutM[m] - chTotM[m]);
 
-  // TVA
-  const tvaCollM = caM.map(c => c * 0.2);
-  const tvaDedM  = chTotM.map(c => c * 0.2);
+  // TVA — zéro si franchise en base
+  const isFranchise = S.params.regimeTVA === 'Franchise en base';
+  const tvaCollM = isFranchise ? Array(12).fill(0) : caM.map(c => c * 0.2);
+  const tvaDedM  = isFranchise ? Array(12).fill(0) : chTotM.map(c => c * 0.2);
   const tvaNM    = tvaCollM.map((c,m) => c - tvaDedM[m]);
 
   // Trésorerie cumulée
@@ -937,7 +940,9 @@ function renderDB() {
     kpiCard('CA HT','--ac', fmt(C.totalCA)+' €', C.totalCA>0?'du chiffre d\'affaires':'Commencez à saisir', null),
     kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', `Taux : ${C.txMarge.toFixed(1)} %`, C.txMarge),
     kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', 'Après toutes charges', null),
-    kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null),
+    S.params.regimeTVA === 'Franchise en base'
+      ? kpiCard('TVA','--rd', '—', 'Franchise en base — non applicable', null)
+      : kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null),
   ].join('');
 
   // KPIs row 2
@@ -1025,11 +1030,11 @@ function renderCA() {
       h += `<tr><td style="color:var(--t2);font-family:var(--fm);font-size:11px">${a.code}</td>`;
       h += `<td style="font-weight:600;white-space:nowrap">${a.nom}</td>`;
       q.forEach((v,m) => {
-        h += `<td><input class="sinp" type="number" value="${v}" min="0" oninput="S.qty['${a.code}'][${m}]=parseInt(this.value)||0;debouncedRenderAll()"></td>`;
+        h += `<td><input class="sinp" type="number" value="${v}" min="0" oninput="S.qty['${a.code}'][${m}]=parseInt(this.value)||0;smartUpdate()"></td>`;
       });
       h += `<td class="stot">${tot}</td>`;
       h += `<td class="stot" style="color:var(--gr)">${fmt(tot*a.pv)} €</td>`;
-      h += `<td><button class="delbtn" onclick="if(confirm('Supprimer ${a.nom.replace(/'/g,"\\'")} ?')){S.articles.splice(${ai},1);delete S.qty['${a.code}'];recalc();renderCA();renderArt();renderCtrl();markUnsaved()}">×</button></td>`;
+      h += `<td><button class="delbtn" onclick="if(confirm('Supprimer ${a.nom.replace(/'/g,"\\'")} ?')){S.articles.splice(${ai},1);delete S.qty['${a.code}'];recalc();renderCA();renderArt();renderCtrl();autoSave()}">×</button></td>`;
       h += `</tr>`;
     });
     // Ligne totaux
@@ -1080,10 +1085,10 @@ function renderCharges() {
       h += `<td style="font-weight:600;white-space:nowrap">${c.nom}</td>`;
       h += `<td><span class="bdg ${colors[c.type]||'bac'}">${c.type}</span></td>`;
       d.forEach((v,m) => {
-        h += `<td><input class="sinp" type="number" value="${v}" min="0" oninput="S.chMD[${c.code}][${m}]=parseInt(this.value)||0;debouncedRenderAll()"></td>`;
+        h += `<td><input class="sinp" type="number" value="${v}" min="0" oninput="S.chMD[${c.code}][${m}]=parseInt(this.value)||0;smartUpdate()"></td>`;
       });
       h += `<td class="stot" style="color:var(--am)">${fmt(tot)} €</td>`;
-      h += `<td><button class="delbtn" onclick="if(confirm('Supprimer ${c.nom.replace(/'/g,"\\'")} ?')){S.charges.splice(${ci},1);delete S.chMD[${c.code}];recalc();renderCharges();renderCh();renderCtrl();markUnsaved()}">×</button></td>`;
+      h += `<td><button class="delbtn" onclick="if(confirm('Supprimer ${c.nom.replace(/'/g,"\\'")} ?')){S.charges.splice(${ci},1);delete S.chMD[${c.code}];recalc();renderCharges();renderCh();renderCtrl();autoSave()}">×</button></td>`;
       h += `</tr>`;
     });
     const tots = C.chTotM;
@@ -1172,8 +1177,20 @@ function renderMarge() {
 // RENDER TVA
 // ═══════════════════════════════════════════════
 function renderTVA() {
+  const isFranchise = S.params.regimeTVA === 'Franchise en base';
+
+  if(isFranchise) {
+    el('tva-kpis').innerHTML = `<div style="grid-column:1/-1">
+      <div class="abox abb"><div class="abox-ico">💡</div><div>
+        <div class="abox-title">Régime Franchise en base de TVA</div>
+        <div class="abox-desc">Vous n'êtes pas assujetti à la TVA. Vous ne collectez pas de TVA sur vos ventes et ne déduisez pas la TVA sur vos achats. Ce module ne vous concerne pas. Pour modifier votre régime, rendez-vous dans Paramètres → Entreprise.</div>
+      </div></div>
+    </div>`;
+    return;
+  }
+
   el('tva-kpis').innerHTML = [
-    kpiCard('TVA collectée','--gr', fmt(C.totalTVAC)+' €', 'Ventes HT × taux TVA', null),
+    kpiCard('TVA collectée','--gr', fmt(C.totalTVAC)+' €', 'Ventes HT × taux TVA moyen 20 %', null),
     kpiCard('TVA déductible','--ac', fmt(C.totalTVAD)+' €', 'Charges éligibles × TVA', null),
     kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null),
   ].join('');
@@ -1395,15 +1412,15 @@ function renderArt() {
         const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
         const tvaOpts = [[.2,'20%'],[.1,'10%'],[.055,'5,5%'],[0,'0%']].map(([v,l])=>`<option value="${v}" ${a.tva==v?'selected':''}>${l}</option>`).join('');
         return `<tr>
-          <td><input class="tdinp" value="${a.code}" onchange="S.articles[${i}].code=this.value;markUnsaved()" style="max-width:88px"></td>
-          <td><input class="tdinp" value="${a.nom}" onchange="S.articles[${i}].nom=this.value;markUnsaved()"></td>
-          <td><input class="tdinp" value="${a.cat}" onchange="S.articles[${i}].cat=this.value;markUnsaved()" style="max-width:100px"></td>
-          <td><input class="tdinp" type="number" value="${a.pv}" step="0.01" onchange="S.articles[${i}].pv=parseFloat(this.value)||0;recalc();renderArt();markUnsaved()" style="max-width:80px"></td>
-          <td><input class="tdinp" type="number" value="${a.cout}" step="0.01" onchange="S.articles[${i}].cout=parseFloat(this.value)||0;recalc();renderArt();markUnsaved()" style="max-width:80px"></td>
-          <td><select class="tdsel" onchange="S.articles[${i}].tva=parseFloat(this.value);markUnsaved()" style="max-width:78px">${tvaOpts}</select></td>
+          <td><input class="tdinp" value="${a.code}" onchange="S.articles[${i}].code=this.value;autoSave()" style="max-width:88px"></td>
+          <td><input class="tdinp" value="${a.nom}" onchange="S.articles[${i}].nom=this.value;renderCA();autoSave()"></td>
+          <td><input class="tdinp" value="${a.cat}" onchange="S.articles[${i}].cat=this.value;autoSave()" style="max-width:100px"></td>
+          <td><input class="tdinp" type="number" value="${a.pv}" step="0.01" onchange="S.articles[${i}].pv=parseFloat(this.value)||0;recalc();renderArt();updateKPIs();autoSave()" style="max-width:80px"></td>
+          <td><input class="tdinp" type="number" value="${a.cout}" step="0.01" onchange="S.articles[${i}].cout=parseFloat(this.value)||0;recalc();renderArt();updateKPIs();autoSave()" style="max-width:80px"></td>
+          <td><select class="tdsel" onchange="S.articles[${i}].tva=parseFloat(this.value);autoSave()" style="max-width:78px">${tvaOpts}</select></td>
           <td><span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span></td>
-          <td><select class="tdsel" onchange="S.articles[${i}].actif=this.value==='true';markUnsaved()" style="max-width:70px"><option value="true" ${a.actif?'selected':''}>Oui</option><option value="false" ${!a.actif?'selected':''}>Non</option></select></td>
-          <td><button class="delbtn" onclick="if(confirm('Supprimer ?')){S.articles.splice(${i},1);if(S.qty['${a.code}'])delete S.qty['${a.code}'];recalc();renderArt();renderCtrl();markUnsaved()}">×</button></td>
+          <td><select class="tdsel" onchange="S.articles[${i}].actif=this.value==='true';autoSave()" style="max-width:70px"><option value="true" ${a.actif?'selected':''}>Oui</option><option value="false" ${!a.actif?'selected':''}>Non</option></select></td>
+          <td><button class="delbtn" onclick="if(confirm('Supprimer ?')){S.articles.splice(${i},1);if(S.qty['${a.code}'])delete S.qty['${a.code}'];recalc();renderArt();renderCA();renderCtrl();autoSave()}">×</button></td>
         </tr>`;
       }).join('');
   renderCtrl();
@@ -1418,12 +1435,12 @@ function renderCh() {
         const tvaOpts = [[.2,'20%'],[.1,'10%'],[.055,'5,5%'],[0,'0%']].map(([v,l])=>`<option value="${v}" ${c.tva==v?'selected':''}>${l}</option>`).join('');
         return `<tr>
           <td style="color:var(--t2);font-family:var(--fm);font-size:11px">${c.code}</td>
-          <td><input class="tdinp" value="${c.nom}" onchange="S.charges[${i}].nom=this.value;markUnsaved()"></td>
-          <td><input class="tdinp" value="${c.cat}" onchange="S.charges[${i}].cat=this.value;markUnsaved()" style="max-width:110px"></td>
-          <td><select class="tdsel" onchange="S.charges[${i}].tva=parseFloat(this.value);markUnsaved()" style="max-width:78px">${tvaOpts}</select></td>
-          <td><select class="tdsel" onchange="S.charges[${i}].type=this.value;recalc();renderCh();markUnsaved()" style="max-width:100px"><option value="Fixe" ${c.type==='Fixe'?'selected':''}>Fixe</option><option value="Variable" ${c.type==='Variable'?'selected':''}>Variable</option></select></td>
-          <td><select class="tdsel" onchange="S.charges[${i}].actif=this.value==='true';markUnsaved()" style="max-width:70px"><option value="true" ${c.actif?'selected':''}>Oui</option><option value="false" ${!c.actif?'selected':''}>Non</option></select></td>
-          <td><button class="delbtn" onclick="if(confirm('Supprimer ?')){S.charges.splice(${i},1);delete S.chMD[${c.code}];recalc();renderCh();renderCtrl();markUnsaved()}">×</button></td>
+          <td><input class="tdinp" value="${c.nom}" onchange="S.charges[${i}].nom=this.value;renderCharges();autoSave()"></td>
+          <td><input class="tdinp" value="${c.cat}" onchange="S.charges[${i}].cat=this.value;autoSave()" style="max-width:110px"></td>
+          <td><select class="tdsel" onchange="S.charges[${i}].tva=parseFloat(this.value);autoSave()" style="max-width:78px">${tvaOpts}</select></td>
+          <td><select class="tdsel" onchange="S.charges[${i}].type=this.value;recalc();renderCh();updateKPIs();autoSave()" style="max-width:100px"><option value="Fixe" ${c.type==='Fixe'?'selected':''}>Fixe</option><option value="Variable" ${c.type==='Variable'?'selected':''}>Variable</option></select></td>
+          <td><select class="tdsel" onchange="S.charges[${i}].actif=this.value==='true';autoSave()" style="max-width:70px"><option value="true" ${c.actif?'selected':''}>Oui</option><option value="false" ${!c.actif?'selected':''}>Non</option></select></td>
+          <td><button class="delbtn" onclick="if(confirm('Supprimer ?')){S.charges.splice(${i},1);delete S.chMD[${c.code}];recalc();renderCh();renderCharges();renderCtrl();autoSave()}">×</button></td>
         </tr>`;
       }).join('');
   // Répartition
@@ -1630,7 +1647,7 @@ function addArt() {
   S.qty[code] = Array(12).fill(0);
   ['pa-code','pa-nom','pa-cat','pa-pv','pa-cout'].forEach(id=>el(id).value='');
   toggleAdd('p-art-add');
-  recalc(); renderArt(); renderCA(); markUnsaved();
+  recalc(); renderArt(); renderCA(); renderCtrl(); autoSave();
 }
 
 function addArtFromCA() {
@@ -1640,18 +1657,18 @@ function addArtFromCA() {
   S.qty[code] = Array(12).fill(0);
   ['ca-code','ca-nom','ca-cat','ca-pv','ca-cout'].forEach(id=>el(id).value='');
   toggleAdd('ca-add');
-  recalc(); renderCA(); renderArt(); markUnsaved();
+  recalc(); renderCA(); renderArt(); renderCtrl(); autoSave();
 }
 
 function addCh() {
   const nom = el('pc-nom').value.trim(); if(!nom) return;
-  const code = Date.now(); // ID unique
+  const code = Date.now();
   const ch = {code, nom, cat:el('pc-cat').value||'Divers', tva:parseFloat(el('pc-tva').value)||.2, type:el('pc-type').value, actif:true};
   S.charges.push(ch);
   S.chMD[code] = Array(12).fill(0);
   ['pc-nom','pc-cat'].forEach(id=>el(id).value='');
   toggleAdd('p-ch-add');
-  recalc(); renderCh(); renderCharges(); markUnsaved();
+  recalc(); renderCh(); renderCharges(); renderCtrl(); autoSave();
 }
 
 function addChFromPanel() {
@@ -1661,7 +1678,7 @@ function addChFromPanel() {
   S.chMD[code] = Array(12).fill(0);
   ['ch-nom','ch-cat'].forEach(id=>el(id).value='');
   toggleAdd('ch-add');
-  recalc(); renderCharges(); renderCh(); markUnsaved();
+  recalc(); renderCharges(); renderCh(); renderCtrl(); autoSave();
 }
 
 // ═══════════════════════════════════════════════
@@ -1669,7 +1686,7 @@ function addChFromPanel() {
 // ═══════════════════════════════════════════════
 function markUnsaved() {
   el('sdot').classList.remove('saved');
-  el('stxt').textContent = 'Modifications non enregistrées';
+  el('stxt').textContent = 'Sauvegarde automatique dans 2s…';
 }
 function setSaved() {
   el('sdot').classList.add('saved');
@@ -1699,6 +1716,7 @@ async function saveAll() {
       nom_entreprise: el('ent-nom')?.value||'',
       objectif_ca: parseFloat(el('ent-obj')?.value)||0,
       secteur: el('ent-sect')?.value||'',
+      regime_tva: S.params.regimeTVA||'TVA réelle mensuelle',
       cle_repartition: document.querySelector('input[name="cle"]:checked')?.value||'qte',
     }, {onConflict:'user_id'});
 
@@ -1746,11 +1764,13 @@ async function loadData(uid) {
       S.params.moisDeb = params.mois_debut||1;
       S.params.moisFin = params.mois_fin||12;
       S.params.obj     = params.objectif_ca||0;
+      S.params.regimeTVA = params.regime_tva || 'TVA réelle mensuelle';
       const pAn = el('p-an'); if(pAn) pAn.value = S.params.annee;
       const pDeb = el('p-deb'); if(pDeb) pDeb.value = S.params.moisDeb;
       const pFin = el('p-fin'); if(pFin) pFin.value = S.params.moisFin;
       const entNom = el('ent-nom'); if(entNom && params.nom_entreprise) { entNom.value=params.nom_entreprise; el('db-name').textContent=params.nom_entreprise||'Mon Entreprise'; }
       const entObj = el('ent-obj'); if(entObj) entObj.value = params.objectif_ca||0;
+      const entTva = el('ent-tva'); if(entTva) entTva.value = S.params.regimeTVA;
       S.params.obj = params.objectif_ca||0;
     }
 
@@ -1854,11 +1874,128 @@ function setUserUI(user) {
   el('sb-email').textContent = email;
 }
 
-// Debounce renderAll pour éviter de bloquer la saisie
+// ─ SMART UPDATE — met à jour KPIs + totaux SANS recréer les inputs ─
+// Appelé à chaque frappe dans les cellules de saisie
+let _saveTimer = null;
+function smartUpdate() {
+  recalc();
+  // Met à jour uniquement les cellules de totaux dans CA
+  el('ca-tbl') && updateCATotals();
+  // Met à jour uniquement les cellules de totaux dans Charges
+  el('ch-tbl') && updateChTotals();
+  // Met à jour les KPIs de chaque module visible
+  updateKPIs();
+  // Statut
+  markUnsaved();
+  // Autosave après 2s d'inactivité
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => { if(S.uid) saveAll(); }, 2000);
+}
+
+function updateCATotals() {
+  // Met à jour les cellules de totaux par ligne et la ligne de bas
+  const rows = el('ca-tbl').querySelectorAll('tbody tr:not(.totrow)');
+  rows.forEach((row, ai) => {
+    const a = S.articles[ai]; if(!a) return;
+    const q = S.qty[a.code] || Array(12).fill(0);
+    const tot = q.reduce((s,v)=>s+v,0);
+    const cells = row.querySelectorAll('td');
+    const totCell  = cells[cells.length-3]; // avant-avant-dernière (Total qté)
+    const caCell   = cells[cells.length-2]; // avant-dernière (CA HT)
+    if(totCell) totCell.textContent = tot;
+    if(caCell)  { caCell.textContent = fmt(tot*a.pv)+' €'; caCell.className='stot'; caCell.style.color='var(--gr)'; }
+  });
+  // Ligne totaux bas
+  const totRow = el('ca-tbl').querySelector('.totrow');
+  if(totRow) {
+    const cells = totRow.querySelectorAll('td');
+    // cells[0]=colspan2, cells[1..12]=mois, cells[13]=total qte, cells[14]=CA total
+    Array(12).fill(0).forEach((_,m) => {
+      const s = S.articles.reduce((ss,a)=>ss+(S.qty[a.code]?.[m]||0)*a.pv,0);
+      if(cells[m+1]) cells[m+1].textContent = fmt(s)+' €';
+    });
+    if(cells[13]) cells[13].textContent = C.totalQty;
+    if(cells[14]) cells[14].textContent = fmt(C.totalCA)+' €';
+  }
+}
+
+function updateChTotals() {
+  const rows = el('ch-tbl').querySelectorAll('tbody tr:not(.totrow)');
+  rows.forEach((row, ci) => {
+    const c = S.charges[ci]; if(!c) return;
+    const d = S.chMD[c.code] || Array(12).fill(0);
+    const tot = d.reduce((s,v)=>s+v,0);
+    const cells = row.querySelectorAll('td');
+    const totCell = cells[cells.length-2];
+    if(totCell) { totCell.textContent = fmt(tot)+' €'; totCell.className='stot'; totCell.style.color='var(--am)'; }
+  });
+  const totRow = el('ch-tbl').querySelector('.totrow');
+  if(totRow) {
+    const cells = totRow.querySelectorAll('td');
+    Array(12).fill(0).forEach((_,m) => {
+      if(cells[m+1]) cells[m+1].textContent = fmt(C.chTotM[m])+' €';
+    });
+    if(cells[13]) cells[13].textContent = fmt(C.totalCh)+' €';
+  }
+}
+
+function updateKPIs() {
+  // Dashboard KPIs
+  const r1 = el('kpis-row1'), r2 = el('kpis-row2');
+  if(r1) r1.innerHTML = [
+    kpiCard('CA HT','--ac', fmt(C.totalCA)+' €', C.totalCA>0?'Chiffre d\'affaires total':'Commencez à saisir', null),
+    kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', `Taux : ${C.txMarge.toFixed(1)} %`, null),
+    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', 'Après toutes charges', null),
+    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', 'Après toutes charges', null),
+    S.params.regimeTVA === 'Franchise en base'
+      ? kpiCard('TVA','--rd', '—', 'Franchise en base — non applicable', null)
+      : kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null),
+  ].join('');
+  if(r2) r2.innerHTML = [
+    kpiCard('Marge sur coûts variables','--tl', fmt(C.totalMrg - C.totalChV)+' €', `Taux MCV : ${C.txMCV.toFixed(1)} %`, null),
+    kpiCard('Total charges','--am', fmt(C.totalCh)+' €', `Fixes : ${fmt(C.totalChF)} € · Variables : ${fmt(C.totalChV)} €`, null),
+    kpiCard('Panier moyen','--pk', fmt(C.panierM)+' €', `Sur ${C.totalQty} unités vendues`, null),
+    kpiCard('Point mort','--gr', fmt(C.pointMort)+' €', C.jourLib > 0 ? `Jour de libération : le ${C.jourLib}` : 'Pas encore calculable', null),
+  ].join('');
+  // CA KPIs
+  if(el('ca-kpis')) {
+    const bestM = C.caM.indexOf(Math.max(...C.caM));
+    const worstM = C.caM.indexOf(Math.min(...C.caM.filter(v=>v>0)));
+    el('ca-kpis').innerHTML = [
+      kpiCard('CA HT total','--ac', fmt(C.totalCA)+' €', null, null),
+      kpiCard('Quantités vendues','--gr', C.totalQty.toString(), null, null),
+      kpiCard('Meilleur mois','--pu', C.caM[bestM]>0?MS[bestM+1]:'—', C.caM[bestM]>0?fmt(C.caM[bestM])+' €':'', null),
+      kpiCard('Mois le plus faible','--am', worstM>=0?MS[worstM+1]:'—', worstM>=0&&C.caM[worstM]>0?fmt(C.caM[worstM])+' €':'', null),
+    ].join('');
+  }
+  // Charges KPIs
+  if(el('ch-kpis')) {
+    const topCh = C.chClass[0];
+    el('ch-kpis').innerHTML = [
+      kpiCard('Total charges','--am', fmt(C.totalCh)+' €', null, null),
+      kpiCard('Charges fixes','--pu', fmt(C.totalChF)+' €', C.totalCh>0?`${(C.totalChF/C.totalCh*100).toFixed(1)} % du total`:'', null),
+      kpiCard('Charges variables','--tl', fmt(C.totalChV)+' €', C.totalCh>0?`${(C.totalChV/C.totalCh*100).toFixed(1)} % du total`:'', null),
+      kpiCard('Poste principal','--rd', topCh?topCh.nom:'—', topCh?fmt(topCh.total)+' €':'', null),
+    ].join('');
+  }
+  // Alertes sidebar badge
+  const alerts = computeAlerts();
+  const nb = alerts.filter(a=>a.type==='r').length;
+  el('alert-count').textContent = nb > 0 ? nb : '';
+  el('alert-count').style.display = nb > 0 ? '' : 'none';
+}
+
+// Autosave avec debounce 2s
 let _renderTimer = null;
 function debouncedRenderAll() {
-  clearTimeout(_renderTimer);
-  _renderTimer = setTimeout(() => renderAll(), 300);
+  recalc();
+  smartUpdate();
+}
+
+// Autosave déclenché par les modifications de structure (ajout/suppression)
+function autoSave() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => { if(S.uid) saveAll(); }, 1500);
 }
 
 function doUpgrade() {
