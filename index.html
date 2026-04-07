@@ -1799,48 +1799,83 @@ async function saveAll() {
 async function loadData(uid) {
   try {
     // Paramètres
-    const {data:params} = await sb.from('parametres').select('*').eq('user_id',uid).single();
+    const {data:params, error:pErr} = await sb.from('parametres').select('*').eq('user_id',uid).single();
+    if(pErr && pErr.code !== 'PGRST116') console.warn('Params load error:', pErr); // PGRST116 = no rows = normal for new user
     if(params) {
-      S.params.annee   = params.annee||2026;
-      S.params.moisDeb = params.mois_debut||1;
-      S.params.moisFin = params.mois_fin||12;
-      S.params.obj     = params.objectif_ca||0;
-      S.params.regimeTVA = params.regime_tva || 'TVA réelle mensuelle';
-      const pAn = el('p-an'); if(pAn) pAn.value = S.params.annee;
-      const pDeb = el('p-deb'); if(pDeb) pDeb.value = S.params.moisDeb;
-      const pFin = el('p-fin'); if(pFin) pFin.value = S.params.moisFin;
-      const entNom = el('ent-nom'); if(entNom && params.nom_entreprise) { entNom.value=params.nom_entreprise; el('db-name').textContent=params.nom_entreprise||'Mon Entreprise'; }
-      const entObj = el('ent-obj'); if(entObj) entObj.value = params.objectif_ca||0;
-      const entTva = el('ent-tva'); if(entTva) entTva.value = S.params.regimeTVA;
-      S.params.obj = params.objectif_ca||0;
+      S.params.annee     = params.annee||2026;
+      S.params.moisDeb   = params.mois_debut||1;
+      S.params.moisFin   = params.mois_fin||12;
+      S.params.obj       = params.objectif_ca||0;
+      S.params.regimeTVA = params.regime_tva||'TVA réelle mensuelle';
+      S.params.nomEnt    = params.nom_entreprise||'';
+      const pAn  = el('p-an');   if(pAn)  pAn.value  = S.params.annee;
+      const pDeb = el('p-deb');  if(pDeb) pDeb.value  = S.params.moisDeb;
+      const pFin = el('p-fin');  if(pFin) pFin.value  = S.params.moisFin;
+      const eNom = el('ent-nom'); if(eNom && params.nom_entreprise) eNom.value = params.nom_entreprise;
+      const eObj = el('ent-obj'); if(eObj) eObj.value = params.objectif_ca||0;
+      const eTva = el('ent-tva'); if(eTva) eTva.value = S.params.regimeTVA;
+      const dbn  = el('db-name'); if(dbn && params.nom_entreprise) dbn.textContent = params.nom_entreprise;
     }
 
     // Articles
-    const {data:arts} = await sb.from('articles').select('*').eq('user_id',uid);
-    if(arts && arts.length > 0) {
-      S.articles = arts.map(a=>({code:a.code, nom:a.nom, cat:a.categorie, pv:parseFloat(a.prix_ht)||0, cout:parseFloat(a.cout_achat)||0, tva:parseFloat(a.tva)||.2, actif:a.actif}));
+    const {data:arts, error:aErr} = await sb.from('articles').select('*').eq('user_id',uid);
+    if(aErr) { console.error('Articles load error:', aErr); }
+    else if(arts && arts.length > 0) {
+      S.articles = arts.map(a=>({
+        code: a.code,
+        nom:  a.nom,
+        cat:  a.categorie||'Divers',
+        pv:   parseFloat(a.prix_ht)||0,
+        cout: parseFloat(a.cout_achat)||0,
+        tva:  parseFloat(a.tva)||.2,
+        actif: a.actif !== false
+      }));
+      console.log('Articles chargés:', S.articles.length);
     }
 
     // Charges
-    const {data:chs} = await sb.from('charges').select('*').eq('user_id',uid);
-    if(chs && chs.length > 0) {
-      S.charges = chs.map(c=>({code:c.code, nom:c.nom, cat:c.categorie, tva:parseFloat(c.tva)||.2, type:c.type, actif:c.actif}));
+    const {data:chs, error:cErr} = await sb.from('charges').select('*').eq('user_id',uid);
+    if(cErr) { console.error('Charges load error:', cErr); }
+    else if(chs && chs.length > 0) {
+      S.charges = chs.map(c=>({
+        code:  c.code,
+        nom:   c.nom,
+        cat:   c.categorie||'Divers',
+        tva:   parseFloat(c.tva)||.2,
+        type:  c.type||'Variable',
+        actif: c.actif !== false
+      }));
+      console.log('Charges chargées:', S.charges.length);
     }
 
     // Saisies CA
     const an = S.params.annee;
     S.articles.forEach(a => { S.qty[a.code] = Array(12).fill(0); });
-    const {data:sca} = await sb.from('saisies_ca').select('*').eq('user_id',uid).eq('annee',an);
-    if(sca) sca.forEach(r => { if(!S.qty[r.article_code]) S.qty[r.article_code]=Array(12).fill(0); S.qty[r.article_code][r.mois-1]=r.quantite; });
+    const {data:sca, error:scaErr} = await sb.from('saisies_ca').select('*').eq('user_id',uid).eq('annee',an);
+    if(scaErr) { console.error('Saisies CA error:', scaErr); }
+    else if(sca) {
+      sca.forEach(r => {
+        if(!S.qty[r.article_code]) S.qty[r.article_code] = Array(12).fill(0);
+        S.qty[r.article_code][r.mois-1] = r.quantite;
+      });
+      console.log('Saisies CA chargées:', sca.length);
+    }
 
     // Saisies charges
     S.charges.forEach(c => { S.chMD[c.code] = Array(12).fill(0); });
-    const {data:sch} = await sb.from('saisies_charges').select('*').eq('user_id',uid).eq('annee',an);
-    if(sch) sch.forEach(r => { if(!S.chMD[r.charge_code]) S.chMD[r.charge_code]=Array(12).fill(0); S.chMD[r.charge_code][r.mois-1]=r.montant; });
+    const {data:sch, error:schErr} = await sb.from('saisies_charges').select('*').eq('user_id',uid).eq('annee',an);
+    if(schErr) { console.error('Saisies charges error:', schErr); }
+    else if(sch) {
+      sch.forEach(r => {
+        if(!S.chMD[r.charge_code]) S.chMD[r.charge_code] = Array(12).fill(0);
+        S.chMD[r.charge_code][r.mois-1] = r.montant;
+      });
+      console.log('Saisies charges chargées:', sch.length);
+    }
 
     return true;
   } catch(err) {
-    console.error('Load error:', err);
+    console.error('loadData critical error:', err);
     return false;
   }
 }
@@ -1907,19 +1942,20 @@ async function doForgot() {
 }
 
 async function doLogout() {
+  window._appStarted = false;
   // Forcer l'affichage de l'écran auth immédiatement
   el('auth').style.display = 'flex';
   el('onb').style.display  = 'none';
   el('app').style.display  = 'none';
-  // Puis déconnecter de Supabase
-  await sb.auth.signOut();
-  // Réinitialiser l'état
+  // Réinitialiser l'état (uid null bloque l'autosave)
   S = {articles:[],charges:[],qty:{},chMD:{},params:{annee:2026,moisDeb:1,moisFin:12,nomEnt:'',obj:0,secteur:'',regimeTVA:'',regimeFisc:'',cle:'qte'},isPro:false,uid:null};
-  // Remettre le bouton auth en état initial
+  // UI auth
   const btn = el('auth-btn');
   if(btn) { btn.textContent = 'Se connecter'; btn.disabled = false; }
   authMode('login');
   hideAuthMsgs();
+  // Déconnexion Supabase en arrière-plan
+  await sb.auth.signOut();
 }
 
 function setUserUI(user) {
@@ -2316,6 +2352,8 @@ function debouncedRenderAll() {
 function autoSave() {
   markUnsaved();
   clearTimeout(_saveTimer);
+  // Ne planifier la sauvegarde que si l'utilisateur est connecté et les données chargées
+  if(!S.uid) return;
   _saveTimer = setTimeout(() => { if(S.uid) saveAll(); }, 1500);
 }
 
@@ -2493,18 +2531,33 @@ function exportTreso()   {
 // ═══════════════════════════════════════════════
 async function startApp(user) {
   setUserUI(user);
-  // Masquer auth, montrer un état de chargement
+  // Bloquer l'autosave pendant le chargement
+  S.uid = null; // uid null = autoSave ignoré
   el('auth').style.display = 'none';
   el('onb').style.display  = 'none';
   el('app').style.display  = 'flex';
-  // Charger les données
+  // Afficher état de chargement dans la savebar
+  const d = el('sdot'); const t = el('stxt');
+  if(d) d.classList.remove('saved');
+  if(t) t.textContent = 'Chargement de vos données…';
+
+  // Charger toutes les données AVANT de rendre quoi que ce soit
   const hasData = await loadData(user.id);
+
+  // Maintenant on peut débloquer l'autosave
+  S.uid = user.id;
+
   if(hasData && S.articles.length > 0) {
-    // Utilisateur existant — afficher l'app
+    // Utilisateur existant avec données — rendre l'app
     recalc();
     renderAll();
     setSaved();
     checkUpgrade();
+  } else if(hasData) {
+    // Compte existant mais sans articles — onboarding ou app vide
+    recalc();
+    renderAll();
+    setSaved();
   } else {
     // Nouvel utilisateur — onboarding
     el('app').style.display = 'none';
@@ -2514,20 +2567,15 @@ async function startApp(user) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  let appStarted = false;
+  window._appStarted = false;
 
-  // Auth state listener — gère les changements de session
+  // Auth state listener
   sb.auth.onAuthStateChange(async (event, session) => {
-    if(event === 'SIGNED_IN' && session && !appStarted) {
-      appStarted = true;
-      await startApp(session.user);
-    } else if(event === 'SIGNED_IN' && session && appStarted) {
-      // Reconnexion après déconnexion — redémarrer
-      appStarted = true;
+    if(event === 'SIGNED_IN' && session && !window._appStarted) {
+      window._appStarted = true;
       await startApp(session.user);
     } else if(event === 'SIGNED_OUT') {
-      appStarted = false;
-      // doLogout() gère déjà l'UI — sécurité supplémentaire
+      window._appStarted = false;
       el('auth').style.display = 'flex';
       el('onb').style.display  = 'none';
       el('app').style.display  = 'none';
@@ -2536,11 +2584,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Vérifier si une session existe déjà (rechargement de page)
   const {data:{session}} = await sb.auth.getSession();
-  if(session) {
-    appStarted = true;
+  if(session && !window._appStarted) {
+    window._appStarted = true;
     await startApp(session.user);
   }
-  // Sinon #auth est visible par défaut (display:flex dans HTML)
 });
 </script>
 </body>
