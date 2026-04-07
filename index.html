@@ -481,10 +481,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 <!-- ── CA ── -->
 <div id="pnl-ca" class="pnl">
   <div class="topbar">
-    <div><div class="page-title">Chiffre d'affaires</div><div class="page-sub">Saisie des quantités · CA HT calculé automatiquement</div></div>
+    <div><div class="page-title">Chiffre d'affaires</div><div class="page-sub">Saisie des quantités · Sauvegarde automatique</div></div>
     <div class="page-actions">
       <button class="btn btn-g btn-sm" onclick="exportCA()">↓ CSV</button>
-      <button class="btn btn-p btn-sm" onclick="saveAll()">💾 Enregistrer</button>
     </div>
   </div>
   <div class="kgrid g4" id="ca-kpis"></div>
@@ -513,10 +512,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 <!-- ── CHARGES ── -->
 <div id="pnl-charges" class="pnl">
   <div class="topbar">
-    <div><div class="page-title">Charges</div><div class="page-sub">Saisie mensuelle · Fixe vs Variable</div></div>
+    <div><div class="page-title">Charges</div><div class="page-sub">Saisie mensuelle · Sauvegarde automatique</div></div>
     <div class="page-actions">
       <button class="btn btn-g btn-sm" onclick="exportCharges()">↓ CSV</button>
-      <button class="btn btn-p btn-sm" onclick="saveAll()">💾 Enregistrer</button>
     </div>
   </div>
   <div class="kgrid g4" id="ch-kpis"></div>
@@ -531,6 +529,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <select id="ch-type" style="max-width:110px"><option value="Variable">Variable</option><option value="Fixe">Fixe</option></select>
       <button class="btn btn-p btn-sm" onclick="addChFromPanel()">Ajouter</button>
       <button class="btn btn-g btn-sm" onclick="toggleAdd('ch-add')">Annuler</button>
+    </div>
+    <!-- Avertissement doublon marchandise saisie -->
+    <div id="ch-saisie-warn" style="display:none;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--amb);border-left:3px solid var(--am);border-radius:var(--rs);margin-bottom:10px">
+      <span style="font-size:15px;flex-shrink:0">⚠</span>
+      <div style="font-size:12px;color:var(--am)"><strong>Attention :</strong> vous avez des coûts d'achat sur vos articles et une charge Marchandise — risque de doublon dans le résultat net. Voir Paramètres → Charges.</div>
     </div>
     <div style="overflow-x:auto"><table class="stbl" id="ch-tbl"></table></div>
   </div>
@@ -622,7 +625,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
 <!-- ── PARAMETRES ── -->
 <div id="pnl-params" class="pnl">
-  <div class="topbar"><div><div class="page-title">Paramètres</div><div class="page-sub">Configuration partagée par tous les modules</div></div><div class="page-actions"><button class="btn btn-p btn-sm" onclick="saveAll()">💾 Enregistrer tout</button></div></div>
+  <div class="topbar"><div><div class="page-title">Paramètres</div><div class="page-sub">Configuration partagée · Sauvegarde automatique</div></div></div>
   <div class="tabs">
     <div class="tab active" onclick="switchTab('p-periode',this)">📅 Période</div>
     <div class="tab" onclick="switchTab('p-articles',this)">📦 Articles</div>
@@ -689,6 +692,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <button class="btn btn-g btn-sm" onclick="toggleAdd('p-ch-add')">Annuler</button>
       </div>
       <div style="overflow-x:auto"><table class="dtbl"><thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>TVA</th><th>Type</th><th>Actif</th><th></th></tr></thead><tbody id="ch-tbody"></tbody></table></div>
+      <!-- Avertissement doublon marchandise -->
+      <div id="ch-doublon-warn" style="display:none;align-items:flex-start;gap:10px;margin-top:14px;padding:12px 14px;background:var(--amb);border-left:3px solid var(--am);border-radius:var(--rs)">
+        <span style="font-size:16px;flex-shrink:0">⚠</span>
+        <div>
+          <div style="font-size:12.5px;font-weight:700;color:var(--am);margin-bottom:3px">Risque de doublon — Achats comptés deux fois</div>
+          <div style="font-size:11.5px;color:var(--am);opacity:.85;line-height:1.5">Vous avez des coûts d'achat renseignés dans vos articles <strong>et</strong> une charge de type Marchandise / Achat. Ces achats risquent d'être comptés deux fois dans le résultat net.<br><strong>Choisissez une seule méthode :</strong> coût unitaire par article <em>ou</em> charge globale mensuelle.</div>
+        </div>
+      </div>
       <div style="margin-top:14px;padding:13px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)">
         <div class="slbl" style="margin-bottom:8px">Répartition Fixe / Variable</div>
         <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--t2);margin-bottom:5px"><span id="rep-f">Fixe : 0</span><span id="rep-v">Variable : 0</span></div>
@@ -734,9 +745,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
 <!-- SAVE BAR -->
 <div class="savebar" id="savebar">
-  <div class="save-st"><div class="sdot saved" id="sdot"></div><span id="stxt">Prêt</span></div>
-  <div style="display:flex;gap:8px">
-    <button class="btn btn-p btn-sm" onclick="saveAll()">💾 Enregistrer</button>
+  <div class="save-st">
+    <div class="sdot saved" id="sdot"></div>
+    <span id="stxt">Prêt</span>
   </div>
 </div>
 
@@ -1042,7 +1053,19 @@ function renderCharges() {
     tbl.innerHTML = h;
   }
 
-  // Top list
+  // ── Option A — Avertissement double comptage achats ──
+  const hasArtCout = S.articles.some(a => a.cout > 0);
+  const hasMarchandise = S.charges.some(c => {
+    const cat = (c.cat||'').toLowerCase();
+    const nom = (c.nom||'').toLowerCase();
+    return cat.includes('marchand') || cat.includes('achat') || cat.includes('stock')
+        || nom.includes('marchand') || nom.includes('achat') || nom.includes('stock');
+  });
+  const showWarn = hasArtCout && hasMarchandise;
+  const warnEl = el('ch-doublon-warn');
+  const warnEl2 = el('ch-saisie-warn');
+  if(warnEl)  warnEl.style.display  = showWarn ? 'flex' : 'none';
+  if(warnEl2) warnEl2.style.display = showWarn ? 'flex' : 'none';
   const maxV = C.chClass[0]?.total || 1;
   const cols2 = ['--am','--pu','--tl','--gr','--ac'];
   el('ch-toplist').innerHTML = C.chClass.slice(0,5).length === 0
@@ -1358,18 +1381,46 @@ function renderArt() {
         const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
         const tvaOpts = [[.2,'20%'],[.1,'10%'],[.055,'5,5%'],[0,'0%']].map(([v,l])=>`<option value="${v}" ${a.tva==v?'selected':''}>${l}</option>`).join('');
         return `<tr>
-          <td><input class="tdinp" value="${a.code}" onchange="S.articles[${i}].code=this.value;autoSave()" style="max-width:88px"></td>
-          <td><input class="tdinp" value="${a.nom}" onchange="S.articles[${i}].nom=this.value;renderCA();autoSave()"></td>
-          <td><input class="tdinp" value="${a.cat}" onchange="S.articles[${i}].cat=this.value;autoSave()" style="max-width:100px"></td>
-          <td><input class="tdinp" type="number" value="${a.pv}" step="0.01" onchange="S.articles[${i}].pv=parseFloat(this.value)||0;recalc();renderArt();updateKPIs();autoSave()" style="max-width:80px"></td>
-          <td><input class="tdinp" type="number" value="${a.cout}" step="0.01" onchange="S.articles[${i}].cout=parseFloat(this.value)||0;recalc();renderArt();updateKPIs();autoSave()" style="max-width:80px"></td>
+          <td><input class="tdinp" value="${a.code}" oninput="S.articles[${i}].code=this.value;autoSave()" style="max-width:88px"></td>
+          <td><input class="tdinp" value="${a.nom}" oninput="S.articles[${i}].nom=this.value;autoSave()"></td>
+          <td><input class="tdinp" value="${a.cat}" oninput="S.articles[${i}].cat=this.value;autoSave()" style="max-width:100px"></td>
+          <td><input class="tdinp" type="number" value="${a.pv}" step="0.01" oninput="updArtPv(${i},this.value)" style="max-width:80px"></td>
+          <td><input class="tdinp" type="number" value="${a.cout}" step="0.01" oninput="updArtCout(${i},this.value)" style="max-width:80px"></td>
           <td><select class="tdsel" onchange="S.articles[${i}].tva=parseFloat(this.value);autoSave()" style="max-width:78px">${tvaOpts}</select></td>
-          <td><span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span></td>
+          <td id="art-mg-${i}"><span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span></td>
           <td><select class="tdsel" onchange="S.articles[${i}].actif=this.value==='true';autoSave()" style="max-width:70px"><option value="true" ${a.actif?'selected':''}>Oui</option><option value="false" ${!a.actif?'selected':''}>Non</option></select></td>
-          <td><button class="delbtn" onclick="if(confirm('Supprimer ?')){S.articles.splice(${i},1);if(S.qty['${a.code}'])delete S.qty['${a.code}'];recalc();renderArt();renderCA();renderCtrl();autoSave()}">×</button></td>
+          <td><button class="delbtn" onclick="delArtAt(${i})">×</button></td>
         </tr>`;
       }).join('');
   renderCtrl();
+}
+
+// Mise à jour prix sans recréer le DOM — préserve le focus
+function updArtPv(i, val) {
+  S.articles[i].pv = parseFloat(val)||0;
+  const mg = S.articles[i].pv > 0 ? (S.articles[i].pv - S.articles[i].cout)/S.articles[i].pv*100 : 0;
+  const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
+  const cell = el('art-mg-'+i);
+  if(cell) cell.innerHTML = `<span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span>`;
+  recalc(); smartUpdate(); autoSave();
+}
+
+// Mise à jour coût sans recréer le DOM — préserve le focus
+function updArtCout(i, val) {
+  S.articles[i].cout = parseFloat(val)||0;
+  const mg = S.articles[i].pv > 0 ? (S.articles[i].pv - S.articles[i].cout)/S.articles[i].pv*100 : 0;
+  const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
+  const cell = el('art-mg-'+i);
+  if(cell) cell.innerHTML = `<span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span>`;
+  recalc(); smartUpdate(); autoSave();
+}
+
+function delArtAt(i) {
+  const a = S.articles[i]; if(!a) return;
+  if(!confirm(`Supprimer "${a.nom}" ?`)) return;
+  S.articles.splice(i,1);
+  delete S.qty[a.code];
+  recalc(); renderArt(); renderCA(); renderCtrl(); smartUpdate(); autoSave();
 }
 
 function renderCh() {
@@ -1379,14 +1430,18 @@ function renderCh() {
     ? `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucune charge configurée</td></tr>`
     : S.charges.map((c,i) => {
         const tvaOpts = [[.2,'20%'],[.1,'10%'],[.055,'5,5%'],[0,'0%']].map(([v,l])=>`<option value="${v}" ${c.tva==v?'selected':''}>${l}</option>`).join('');
+        // Avertissement doublon marchandise
+        const hasCoutAchat = S.articles.some(a => a.cout > 0);
+        const isMarchandise = ['marchandise','achat','stock','approvisionnement'].some(k => c.cat.toLowerCase().includes(k) || c.nom.toLowerCase().includes(k));
+        const warnIcon = hasCoutAchat && isMarchandise ? `<span title="⚠ Risque de doublon avec les coûts d'achat de vos articles" style="cursor:help;margin-left:4px;color:var(--am)">⚠</span>` : '';
         return `<tr>
           <td style="color:var(--t2);font-family:var(--fm);font-size:11px">${c.code}</td>
-          <td><input class="tdinp" value="${c.nom}" onchange="S.charges[${i}].nom=this.value;renderCharges();autoSave()"></td>
-          <td><input class="tdinp" value="${c.cat}" onchange="S.charges[${i}].cat=this.value;autoSave()" style="max-width:110px"></td>
+          <td><input class="tdinp" value="${c.nom}" oninput="S.charges[${i}].nom=this.value;autoSave()">${warnIcon}</td>
+          <td><input class="tdinp" value="${c.cat}" oninput="S.charges[${i}].cat=this.value;autoSave()" style="max-width:110px"></td>
           <td><select class="tdsel" onchange="S.charges[${i}].tva=parseFloat(this.value);autoSave()" style="max-width:78px">${tvaOpts}</select></td>
-          <td><select class="tdsel" onchange="S.charges[${i}].type=this.value;recalc();renderCh();updateKPIs();autoSave()" style="max-width:100px"><option value="Fixe" ${c.type==='Fixe'?'selected':''}>Fixe</option><option value="Variable" ${c.type==='Variable'?'selected':''}>Variable</option></select></td>
+          <td><select class="tdsel" onchange="S.charges[${i}].type=this.value;recalc();renderCh();smartUpdate();autoSave()" style="max-width:100px"><option value="Fixe" ${c.type==='Fixe'?'selected':''}>Fixe</option><option value="Variable" ${c.type==='Variable'?'selected':''}>Variable</option></select></td>
           <td><select class="tdsel" onchange="S.charges[${i}].actif=this.value==='true';autoSave()" style="max-width:70px"><option value="true" ${c.actif?'selected':''}>Oui</option><option value="false" ${!c.actif?'selected':''}>Non</option></select></td>
-          <td><button class="delbtn" onclick="if(confirm('Supprimer ?')){S.charges.splice(${i},1);delete S.chMD[${c.code}];recalc();renderCh();renderCharges();renderCtrl();autoSave()}">×</button></td>
+          <td><button class="delbtn" onclick="delChAt(${i})">×</button></td>
         </tr>`;
       }).join('');
   // Répartition
@@ -1395,7 +1450,20 @@ function renderCh() {
   el('rep-f').textContent = `Fixe : ${f} charge${f>1?'s':''}`;
   el('rep-v').textContent = `Variable : ${tot-f} charge${tot-f>1?'s':''}`;
   el('rep-bar').style.width = `${f/tot*100}%`;
+  // Avertissement global doublon
+  const hasCoutAchat = S.articles.some(a => a.cout > 0);
+  const hasMarchandise = S.charges.some(c => ['marchandise','achat','stock','approvisionnement'].some(k => c.cat.toLowerCase().includes(k) || c.nom.toLowerCase().includes(k)));
+  const warn = el('ch-doublon-warn');
+  if(warn) warn.style.display = hasCoutAchat && hasMarchandise ? 'flex' : 'none';
   renderCtrl();
+}
+
+function delChAt(i) {
+  const c = S.charges[i]; if(!c) return;
+  if(!confirm(`Supprimer "${c.nom}" ?`)) return;
+  S.charges.splice(i,1);
+  delete S.chMD[c.code];
+  recalc(); renderCh(); renderCharges(); renderCtrl(); smartUpdate(); autoSave();
 }
 
 function renderCtrl() {
@@ -1672,7 +1740,10 @@ function setLoading(msg) {
 // ═══════════════════════════════════════════════
 async function saveAll() {
   if(!S.uid) return;
-  setLoading('Enregistrement…');
+  // Sauvegarde silencieuse — on montre juste le point orange
+  const d = el('sdot'); const t = el('stxt');
+  if(d) d.classList.remove('saved');
+  if(t) t.textContent = '💾 Sauvegarde…';
   try {
     const uid = S.uid;
     const an  = S.params.annee;
