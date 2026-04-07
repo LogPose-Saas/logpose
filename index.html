@@ -638,7 +638,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
     <div class="slbl">Période analysée</div>
     <div class="card">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px">
-        <div><label class="flbl">Année analysée</label><input class="finp" type="number" id="p-an" value="2026" min="2020" max="2040" oninput="updPeriodPreview();recalc();renderAll();autoSave()"></div>
+        <div><label class="flbl">Année analysée</label><input class="finp" type="number" id="p-an" value="2026" min="2020" max="2040" onchange="changeAnnee(this.value)"></div>
         <div><label class="flbl">Mois de début</label><select class="fsel" id="p-deb" onchange="updPeriodPreview();recalc();renderAll();autoSave()">
           <option value="1" selected>Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
         </select></div>
@@ -650,6 +650,12 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <span style="font-size:11px;color:var(--t2)">Période :</span>
         <span style="font-family:var(--fm);font-size:12px;color:var(--ac);font-weight:600" id="p-prev-val">Janvier 2026 → Décembre 2026</span>
         <span style="font-size:11px;color:var(--t2);margin-left:auto" id="p-prev-nb">12 mois</span>
+      </div>
+      <!-- Multi-années -->
+      <div style="margin-top:14px;padding:12px 14px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)">
+        <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;font-family:var(--fm);margin-bottom:6px">📅 Multi-années</div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:10px">Chaque année est stockée indépendamment. Changez l'année ci-dessus pour basculer vers une autre période — vos données 2026 restent intactes quand vous passez à 2027.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="annees-nav"></div>
       </div>
     </div>
     <div class="slbl" style="margin-top:16px">Contrôle de cohérence</div>
@@ -1309,37 +1315,82 @@ function runSim() {
 // ═══════════════════════════════════════════════
 function computeAlerts() {
   const alerts = [];
+
+  // Pas de données — message d'invitation uniquement
   if(C.totalCA === 0) {
-    alerts.push({type:'a',cat:'info',msg:'Aucune vente saisie — commencez par le module Chiffre d\'affaires',title:'Démarrage',desc:''});
+    alerts.push({type:'a',cat:'info',msg:'Aucune vente saisie — commencez par le module Chiffre d\'affaires',title:'Démarrage',desc:'Ajoutez vos articles dans Paramètres puis saisissez vos quantités.'});
     return alerts;
   }
-  // Marge en baisse consécutive non redressée
-  let baisseRun = 0;
-  for(let i=1;i<12;i++) {
-    if(C.mrgM[i] < C.mrgM[i-1] && C.mrgM[i-1] > 0) baisseRun++;
-    else baisseRun = 0;
-    if(baisseRun >= 2) {
-      const suivant = C.mrgM[i+1];
-      if(typeof suivant === 'undefined' || suivant <= C.mrgM[i]) {
-        alerts.push({type:'r',cat:'critique',msg:`Marge en baisse sur ${MOIS[i]} et ${MOIS[i+1]||'Déc.'} — vérifiez vos coûts`,title:'Marge en baisse',desc:'Vérifiez vos coûts d\'achat et votre politique de prix.'});
-        break;
+
+  // ── Marge en baisse 2 mois consécutifs ET non redressée ensuite ──
+  // Seulement si on a au moins 4 mois de données significatives
+  const moisAvecCA = C.caM.filter(v => v > 0).length;
+  if(moisAvecCA >= 4) {
+    let baisseRun = 0, baisseSignalee = false;
+    for(let i=1; i<12 && !baisseSignalee; i++) {
+      const prev = C.mrgM[i-1], curr = C.mrgM[i];
+      if(curr < prev && prev > 0) {
+        baisseRun++;
+      } else {
+        // Redressement détecté — on remet à zéro sans alerter
+        baisseRun = 0;
+      }
+      if(baisseRun >= 2) {
+        // Vérifier si les mois suivants montrent un redressement
+        const prochainMois = C.mrgM.slice(i+1).filter(v => v > 0);
+        const redresse = prochainMois.length > 0 && prochainMois[0] > curr;
+        if(!redresse) {
+          alerts.push({
+            type:'r', cat:'critique',
+            msg:`Marge en baisse sur ${MOIS[i]} et ${MOIS[i+1]||'Déc.'} sans redressement`,
+            title:'Marge en baisse prolongée',
+            desc:'Vérifiez vos coûts d\'achat et votre politique tarifaire. La tendance ne s\'est pas inversée.'
+          });
+          baisseSignalee = true;
+        }
       }
     }
   }
-  // TVA significative
-  if(C.totalTVAN > 500) alerts.push({type:'a',cat:'avert',msg:`TVA nette à reverser : ${fmt(C.totalTVAN)} € — anticipez le décaissement`,title:'TVA à reverser',desc:''});
-  // Charges fixes > 60% du CA
-  if(C.totalCA > 0 && C.totalChF/C.totalCA > 0.6) alerts.push({type:'r',cat:'critique',msg:'Charges fixes > 60 % du CA — structure de coûts risquée',title:'Ratio charges fixes élevé',desc:'Le seuil de rentabilité est trop élevé par rapport à votre CA.'});
-  // Concentration top 3
-  if(C.concTop3 > 70) alerts.push({type:'a',cat:'avert',msg:`Top 3 articles = ${C.concTop3.toFixed(1)} % du CA — risque de dépendance`,title:'Concentration CA',desc:''});
-  // Objectif CA
+
+  // ── TVA à reverser (seulement si régime TVA réel) ──
+  if(S.params.regimeTVA !== 'Franchise en base' && C.totalTVAN > 500) {
+    alerts.push({type:'a',cat:'avert',msg:`TVA nette à reverser : ${fmt(C.totalTVAN)} € — anticipez le décaissement`,title:'TVA à reverser',desc:''});
+  }
+
+  // ── Charges fixes trop lourdes ──
+  if(C.totalCA > 0 && C.totalChF > 0 && C.totalChF/C.totalCA > 0.6) {
+    alerts.push({type:'r',cat:'critique',msg:'Charges fixes > 60 % du CA — seuil de rentabilité trop élevé',title:'Structure de coûts risquée',desc:'Le point mort est difficile à atteindre. Envisagez de réduire vos charges fixes.'});
+  }
+
+  // ── Concentration CA — seulement si > 5 articles ET top 3 > 70% ──
+  // Avec 3 articles ou moins, 100% de concentration est mathématiquement inévitable
+  if(S.articles.length > 4 && C.concTop3 > 70) {
+    alerts.push({type:'a',cat:'avert',msg:`Top 3 articles = ${C.concTop3.toFixed(1)} % du CA — risque de dépendance`,title:'Concentration du CA',desc:'Développez d\'autres articles pour réduire ce risque.'});
+  }
+
+  // ── Objectif CA ──
   if(S.params.obj > 0) {
     const pctObj = C.totalCA / S.params.obj * 100;
-    if(pctObj >= 100) alerts.push({type:'g',cat:'info',msg:`🎉 Objectif CA atteint ! ${fmt(C.totalCA)} € / ${fmt(S.params.obj)} €`,title:'Objectif atteint',desc:''});
-    else alerts.push({type:'a',cat:'info',msg:`Objectif CA à ${pctObj.toFixed(0)} % — ${fmt(S.params.obj - C.totalCA)} € restants`,title:'Objectif CA',desc:''});
+    if(pctObj >= 100) {
+      alerts.push({type:'g',cat:'info',msg:`🎉 Objectif CA atteint ! ${fmt(C.totalCA)} € sur ${fmt(S.params.obj)} € visés`,title:'Objectif atteint',desc:''});
+    } else if(pctObj < 50 && moisAvecCA > 6) {
+      // Alerte seulement si on est à plus de 6 mois et < 50% de l'objectif
+      alerts.push({type:'r',cat:'critique',msg:`Objectif CA à ${pctObj.toFixed(0)} % — retard important`,title:'Objectif CA en retard',desc:`Il reste ${fmt(S.params.obj - C.totalCA)} € à générer.`});
+    } else {
+      alerts.push({type:'a',cat:'info',msg:`Objectif CA à ${pctObj.toFixed(0)} % — ${fmt(S.params.obj - C.totalCA)} € restants`,title:'Objectif CA',desc:''});
+    }
   }
-  // Résultat négatif
-  if(C.totalRN < 0) alerts.push({type:'r',cat:'critique',msg:`Résultat net négatif : ${fmt(C.totalRN)} € — les charges dépassent la marge`,title:'Perte nette',desc:'Réduisez vos charges ou augmentez votre CA.'});
+
+  // ── Résultat net négatif ──
+  if(C.totalRN < 0) {
+    alerts.push({type:'r',cat:'critique',msg:`Résultat net négatif : ${fmt(C.totalRN)} € — les charges dépassent la marge brute`,title:'Perte nette',desc:'Réduisez vos charges ou augmentez votre CA. Le seuil de rentabilité n\'est pas atteint.'});
+  }
+
+  // ── Aucune charge saisie alors qu'il y a du CA ──
+  if(C.totalCA > 0 && C.totalCh === 0) {
+    alerts.push({type:'a',cat:'info',msg:'Aucune charge saisie — le résultat net est surestimé',title:'Charges manquantes',desc:'Saisissez vos charges dans le module Charges pour un résultat fiable.'});
+  }
+
   return alerts;
 }
 
@@ -1495,6 +1546,51 @@ function updPeriodPreview() {
   if(sel) sel.value = 'all';
 }
 
+// ── MULTI-ANNÉES ──
+async function changeAnnee(val) {
+  const newAn = parseInt(val)||2026;
+  if(newAn === S.params.annee) return;
+  // Sauvegarder l'année courante d'abord
+  await saveAll();
+  // Changer l'année
+  S.params.annee = newAn;
+  // Réinitialiser les saisies en mémoire
+  S.qty = {};
+  S.chMD = {};
+  S.articles.forEach(a => { S.qty[a.code] = Array(12).fill(0); });
+  S.charges.forEach(c => { S.chMD[c.code] = Array(12).fill(0); });
+  // Recharger les saisies pour la nouvelle année
+  if(S.uid) {
+    const {data:sca} = await sb.from('saisies_ca').select('*').eq('user_id',S.uid).eq('annee',newAn);
+    if(sca) sca.forEach(r => { if(!S.qty[r.article_code]) S.qty[r.article_code]=Array(12).fill(0); S.qty[r.article_code][r.mois-1]=r.quantite; });
+    const {data:sch} = await sb.from('saisies_charges').select('*').eq('user_id',S.uid).eq('annee',newAn);
+    if(sch) sch.forEach(r => { if(!S.chMD[r.charge_code]) S.chMD[r.charge_code]=Array(12).fill(0); S.chMD[r.charge_code][r.mois-1]=r.montant; });
+  }
+  updPeriodPreview();
+  renderAnneesNav();
+  recalc();
+  renderAll();
+  renderCA();
+  renderCharges();
+  setSaved();
+  toast(`📅 Basculé sur l'année ${newAn}`, 3000);
+}
+
+function renderAnneesNav() {
+  const nav2 = el('annees-nav');
+  if(!nav2) return;
+  // Afficher les 3 dernières années + année courante + prochaine
+  const cur = S.params.annee;
+  const annees = [cur-2, cur-1, cur, cur+1].filter(a => a >= 2020 && a <= 2040);
+  nav2.innerHTML = annees.map(a => `
+    <button onclick="el('p-an').value=${a};changeAnnee(${a})"
+      style="padding:5px 14px;border-radius:var(--rs);font-size:12px;font-weight:${a===cur?'700':'500'};
+      background:${a===cur?'var(--ac)':'var(--bgc)'};color:${a===cur?'#fff':'var(--t2)'};
+      border:1px solid ${a===cur?'var(--ac)':'var(--bd)'};cursor:pointer;transition:all var(--tr)">
+      ${a}${a===cur?' ✓':''}
+    </button>`).join('');
+}
+
 // ═══════════════════════════════════════════════
 // CHARTS
 // ═══════════════════════════════════════════════
@@ -1614,10 +1710,11 @@ function renderAll() {
   renderPrev();
   renderScen();
   renderAlertsPage();
-  renderArt();
-  renderCh();
+  // renderArt() et renderCh() ne sont PAS appelés ici pour préserver le focus
+  // Ils sont appelés uniquement au chargement (startApp) et après ajout/suppression
   renderCtrl();
   updPeriodPreview();
+  renderAnneesNav();
   runSim();
 }
 
@@ -1808,6 +1905,7 @@ async function loadData(uid) {
       S.params.obj       = params.objectif_ca||0;
       S.params.regimeTVA = params.regime_tva||'TVA réelle mensuelle';
       S.params.nomEnt    = params.nom_entreprise||'';
+      S.isPro            = params.is_pro === true;
       const pAn  = el('p-an');   if(pAn)  pAn.value  = S.params.annee;
       const pDeb = el('p-deb');  if(pDeb) pDeb.value  = S.params.moisDeb;
       const pFin = el('p-fin');  if(pFin) pFin.value  = S.params.moisFin;
@@ -2406,25 +2504,41 @@ function updateChTotals() {
 
 // ─── updateKPIs remplacé par les fonctions granulaires dans smartUpdate ───
 function doUpgrade() {
-  // Récupère l'email et redirige directement — pas de window.open pour éviter le blocage popup
+  // IMPORTANT: window.open DOIT être synchrone (au moment du clic)
+  // Sinon les navigateurs bloquent le popup
+  const win = window.open('about:blank', '_blank');
+  // Puis récupérer l'email et naviguer
   sb.auth.getUser().then(({data:{user}}) => {
     const email = user?.email || '';
     const url = LEMON_URL + (email ? `?checkout[email]=${encodeURIComponent(email)}` : '');
-    window.open(url, '_blank', 'noopener,noreferrer');
+    if(win && !win.closed) win.location.href = url;
+    else window.location.href = url; // fallback si fenêtre bloquée
   }).catch(() => {
-    window.open(LEMON_URL, '_blank', 'noopener,noreferrer');
+    if(win && !win.closed) win.location.href = LEMON_URL;
+    else window.location.href = LEMON_URL;
   });
 }
 
 function checkUpgrade() {
   const p = new URLSearchParams(window.location.search);
   if(p.get('upgraded') === 'true') {
-    S.isPro = true;
-    el('sb-plan').textContent = '⭐ Pro';
-    el('sb-plan').style.color = 'var(--am)';
-    el('sb-upgrade').style.display = 'none';
     window.history.replaceState({}, '', window.location.pathname);
-    setTimeout(() => toast('Bienvenue dans LogPose Pro ! Tous vos modules sont débloqués.',5000), 800);
+    setPro(true);
+    setTimeout(() => toast('🎉 Bienvenue dans LogPose Pro ! Merci pour votre confiance.', 6000), 800);
+  }
+  // Appliquer l'état Pro depuis S.isPro chargé depuis Supabase
+  if(S.isPro) setPro(false); // false = pas de toast
+}
+
+function setPro(showToast=false) {
+  S.isPro = true;
+  const plan = el('sb-plan');
+  const btn  = el('sb-upgrade');
+  if(plan) { plan.textContent = '⭐ Pro'; plan.style.color = 'var(--am)'; }
+  if(btn)  btn.style.display = 'none';
+  // Sauvegarder is_pro en base
+  if(S.uid) {
+    sb.from('parametres').upsert({user_id:S.uid, is_pro:true},{onConflict:'user_id'}).catch(e=>console.warn('is_pro save:',e));
   }
 }
 
@@ -2501,6 +2615,8 @@ async function finishOnb() {
   el('app').style.display = 'flex';
   recalc();
   renderAll();
+  renderArt();
+  renderCh();
   setSaved();
   // Sauvegarder après affichage
   setTimeout(() => saveAll(), 600);
@@ -2551,12 +2667,16 @@ async function startApp(user) {
     // Utilisateur existant avec données — rendre l'app
     recalc();
     renderAll();
+    renderArt();
+    renderCh();
     setSaved();
     checkUpgrade();
   } else if(hasData) {
-    // Compte existant mais sans articles — onboarding ou app vide
+    // Compte existant mais sans articles — app vide prête
     recalc();
     renderAll();
+    renderArt();
+    renderCh();
     setSaved();
   } else {
     // Nouvel utilisateur — onboarding
