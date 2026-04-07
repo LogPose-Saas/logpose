@@ -660,41 +660,24 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 <!-- ── PARAMETRES ── -->
 <div id="pnl-params" class="pnl">
   <div class="topbar"><div><div class="page-title">Paramètres</div><div class="page-sub">Configuration partagée · Sauvegarde automatique</div></div></div>
+
+  <!-- Champs période cachés (toujours présents pour updPeriodPreview) -->
+  <div style="display:none">
+    <input type="number" id="p-an" value="2026" min="2020" max="2040">
+    <select id="p-deb"><option value="1" selected>Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option></select>
+    <select id="p-fin"><option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12" selected>Décembre</option></select>
+    <span id="p-prev-val"></span><span id="p-prev-nb"></span>
+    <div id="annees-nav"></div>
+  </div>
+
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('p-periode',this)">📅 Période</div>
-    <div class="tab" onclick="switchTab('p-articles',this)">📦 Articles</div>
+    <div class="tab active" onclick="switchTab('p-articles',this)">📦 Articles</div>
     <div class="tab" onclick="switchTab('p-charges',this)">💸 Charges</div>
     <div class="tab" onclick="switchTab('p-entreprise',this)">🏢 Entreprise</div>
   </div>
 
-  <!-- Période -->
-  <div id="p-periode" class="tab-pnl active">
-    <div class="slbl">Période analysée</div>
-    <div class="card">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px">
-        <div><label class="flbl">Année</label><input class="finp" type="number" id="p-an" value="2026" min="2020" max="2040" onchange="changeAnnee(this.value)"></div>
-        <div><label class="flbl">Mois début</label><select class="fsel" id="p-deb" onchange="updPeriodPreview();recalc();renderAll();autoSave()">
-          <option value="1" selected>Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
-        </select></div>
-        <div><label class="flbl">Mois fin</label><select class="fsel" id="p-fin" onchange="updPeriodPreview();recalc();renderAll();autoSave()">
-          <option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12" selected>Décembre</option>
-        </select></div>
-      </div>
-      <div id="p-preview" style="background:var(--ag);border:1px solid rgba(59,126,255,.2);border-radius:var(--rs);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span style="font-size:11px;color:var(--t2)">Période :</span>
-        <span style="font-family:var(--fm);font-size:12px;color:var(--ac);font-weight:600" id="p-prev-val">Janvier 2026 → Décembre 2026</span>
-        <span style="font-size:11px;color:var(--t2);margin-left:auto" id="p-prev-nb">12 mois</span>
-      </div>
-      <!-- Sélecteur d'années rapide -->
-      <div style="margin-top:14px;padding:12px 14px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)">
-        <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;font-family:var(--fm);margin-bottom:8px">Navigation rapide</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap" id="annees-nav"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- Articles -->
-  <div id="p-articles" class="tab-pnl">
+  <div id="p-articles" class="tab-pnl active">
     <div class="card">
       <div class="tbl-hdr"><div><div class="ct">Table articles</div><div class="cs">Utilisée par : CA · Marge · Coût de revient</div></div><div style="display:flex;gap:8px"><button class="btn btn-g btn-sm" onclick="exportArts()">↓ CSV</button><button class="btn btn-g btn-sm" onclick="toggleAdd('p-art-add')">+ Ajouter</button></div></div>
       <div class="addrow" id="p-art-add">
@@ -1568,30 +1551,67 @@ function updPeriodPreview() {
 async function changeAnnee(val) {
   const newAn = parseInt(val)||2026;
   if(newAn === S.params.annee) return;
-  // Sauvegarder l'année courante
-  await saveAll();
-  // Reprise du solde de fin de l'année précédente en trésorerie initiale
+
+  // 1. Annuler tout autosave en attente
+  clearTimeout(_saveTimer);
+
+  // 2. Sauvegarder l'année COURANTE avant de changer (S.params.annee = ancienne année)
+  if(S.uid) await saveAll();
+
+  // 3. Reprise du solde de fin de l'année précédente → trésorerie initiale
   if(newAn === S.params.annee + 1) {
-    // Calculer le solde de fin de l'année courante
     let s = S.params.tresoInit || 0;
     C.caM.forEach((ca, m) => { s += ca - C.chTotM[m]; });
     S.params.tresoInit = Math.round(s);
     const eTi = el('treso-init'); if(eTi) eTi.value = S.params.tresoInit;
+  } else {
+    // Pour les autres changements d'année, remettre tréso initiale à 0
+    // (l'utilisateur peut la modifier manuellement)
   }
-  // Changer l'année
+
+  // 4. Changer l'année dans S.params
   S.params.annee = newAn;
-  // Réinitialiser les saisies en mémoire
-  S.qty = {};
+  const pAn = el('p-an'); if(pAn) pAn.value = newAn;
+
+  // 5. Vider les saisies en mémoire (on va recharger depuis Supabase)
+  S.qty  = {};
   S.chMD = {};
-  S.articles.forEach(a => { S.qty[a.code] = Array(12).fill(0); });
-  S.charges.forEach(c => { S.chMD[c.code] = Array(12).fill(0); });
-  // Recharger les saisies pour la nouvelle année
-  if(S.uid) {
-    const {data:sca} = await sb.from('saisies_ca').select('*').eq('user_id',S.uid).eq('annee',newAn);
-    if(sca) sca.forEach(r => { if(!S.qty[r.article_code]) S.qty[r.article_code]=Array(12).fill(0); S.qty[r.article_code][r.mois-1]=r.quantite; });
-    const {data:sch} = await sb.from('saisies_charges').select('*').eq('user_id',S.uid).eq('annee',newAn);
-    if(sch) sch.forEach(r => { if(!S.chMD[r.charge_code]) S.chMD[r.charge_code]=Array(12).fill(0); S.chMD[r.charge_code][r.mois-1]=r.montant; });
+  S.articles.forEach(a => { S.qty[a.code]  = Array(12).fill(0); });
+  S.charges.forEach(c  => { S.chMD[c.code] = Array(12).fill(0); });
+
+  // 6. Bloquer l'autosave pendant le rechargement
+  const savedUid = S.uid;
+  S.uid = null;
+
+  // 7. Recharger les saisies de la nouvelle année depuis Supabase
+  if(savedUid) {
+    const {data:sca} = await sb.from('saisies_ca')
+      .select('*').eq('user_id', savedUid).eq('annee', newAn);
+    if(sca) sca.forEach(r => {
+      if(!S.qty[r.article_code]) S.qty[r.article_code] = Array(12).fill(0);
+      S.qty[r.article_code][r.mois-1] = r.quantite;
+    });
+
+    const {data:sch} = await sb.from('saisies_charges')
+      .select('*').eq('user_id', savedUid).eq('annee', newAn);
+    if(sch) sch.forEach(r => {
+      if(!S.chMD[r.charge_code]) S.chMD[r.charge_code] = Array(12).fill(0);
+      S.chMD[r.charge_code][r.mois-1] = r.montant;
+    });
   }
+
+  // 8. Restaurer l'uid et mettre à jour l'UI
+  S.uid = savedUid;
+
+  // 9. Sauvegarder l'année active dans parametres
+  if(S.uid) {
+    await sb.from('parametres').upsert({
+      user_id: S.uid, annee: newAn,
+      treso_init: S.params.tresoInit||0,
+    }, {onConflict:'user_id'});
+  }
+
+  // 10. Tout rerendre
   updPeriodPreview();
   renderAnneesNav();
   recalc();
@@ -1599,7 +1619,7 @@ async function changeAnnee(val) {
   renderCA();
   renderCharges();
   setSaved();
-  toast(`📅 Basculé sur l'année ${newAn}`, 3000);
+  toast(`📅 Année ${newAn}`, 2000);
 }
 
 function renderAnneesNav() {
@@ -1885,15 +1905,14 @@ function setLoading(msg) {
 // ═══════════════════════════════════════════════
 async function saveAll() {
   if(!S.uid) return;
-  // Sauvegarde silencieuse — on montre juste le point orange
   const d = el('sdot'); const t = el('stxt');
   if(d) d.classList.remove('saved');
-  if(t) t.textContent = '💾 Sauvegarde…';
+
   try {
     const uid = S.uid;
-    const an  = S.params.annee;
+    const an  = S.params.annee; // Capturer l'année AU MOMENT de l'appel
 
-    // Paramètres
+    // Paramètres globaux (indépendants de l'année)
     await sb.from('parametres').upsert({
       user_id: uid,
       annee: an,
@@ -1905,37 +1924,52 @@ async function saveAll() {
       regime_tva: S.params.regimeTVA||'TVA réelle mensuelle',
       cle_repartition: document.querySelector('input[name="cle"]:checked')?.value||'qte',
       treso_init: S.params.tresoInit||0,
+      is_pro: S.isPro||false,
     }, {onConflict:'user_id'});
 
-    // Articles
+    // Articles (structure globale, indépendante de l'année)
     await sb.from('articles').delete().eq('user_id', uid);
     if(S.articles.length > 0) {
-      await sb.from('articles').insert(S.articles.map(a=>({user_id:uid, code:a.code, nom:a.nom, categorie:a.cat, prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif})));
+      await sb.from('articles').insert(S.articles.map(a=>({
+        user_id:uid, code:a.code, nom:a.nom, categorie:a.cat,
+        prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif
+      })));
     }
 
-    // Charges
+    // Charges (structure globale)
     await sb.from('charges').delete().eq('user_id', uid);
     if(S.charges.length > 0) {
-      await sb.from('charges').insert(S.charges.map(c=>({user_id:uid, code:String(c.code), nom:c.nom, categorie:c.cat, tva:c.tva, type:c.type, actif:c.actif})));
+      await sb.from('charges').insert(S.charges.map(c=>({
+        user_id:uid, code:String(c.code), nom:c.nom, categorie:c.cat,
+        tva:c.tva, type:c.type, actif:c.actif
+      })));
     }
 
-    // Saisies CA
+    // Saisies CA pour l'année EN COURS UNIQUEMENT
     await sb.from('saisies_ca').delete().eq('user_id', uid).eq('annee', an);
     const sca = [];
-    S.articles.forEach(a => (S.qty[a.code]||[]).forEach((q,m) => { if(q>0) sca.push({user_id:uid, article_code:a.code, mois:m+1, annee:an, quantite:q}); }));
+    S.articles.forEach(a => {
+      (S.qty[a.code]||[]).forEach((q,m) => {
+        if(q>0) sca.push({user_id:uid, article_code:a.code, mois:m+1, annee:an, quantite:q});
+      });
+    });
     if(sca.length > 0) await sb.from('saisies_ca').insert(sca);
 
-    // Saisies charges
+    // Saisies charges pour l'année EN COURS UNIQUEMENT
     await sb.from('saisies_charges').delete().eq('user_id', uid).eq('annee', an);
     const sch = [];
-    S.charges.forEach(c => (S.chMD[c.code]||[]).forEach((v,m) => { if(v>0) sch.push({user_id:uid, charge_code:String(c.code), mois:m+1, annee:an, montant:v}); }));
+    S.charges.forEach(c => {
+      (S.chMD[c.code]||[]).forEach((v,m) => {
+        if(v>0) sch.push({user_id:uid, charge_code:String(c.code), mois:m+1, annee:an, montant:v});
+      });
+    });
     if(sch.length > 0) await sb.from('saisies_charges').insert(sch);
 
     setSaved();
   } catch(err) {
     console.error('Save error:', err);
-    el('sdot').classList.remove('saved');
-    el('stxt').textContent = 'Erreur — ' + (err.message||'réessayez');
+    const d2 = el('sdot'); if(d2) d2.classList.remove('saved');
+    const t2 = el('stxt'); if(t2) t2.textContent = 'Erreur sauvegarde';
   }
 }
 
