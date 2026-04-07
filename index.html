@@ -1025,7 +1025,7 @@ function renderCA() {
       h += `<tr><td style="color:var(--t2);font-family:var(--fm);font-size:11px">${a.code}</td>`;
       h += `<td style="font-weight:600;white-space:nowrap">${a.nom}</td>`;
       q.forEach((v,m) => {
-        h += `<td><input class="sinp" type="number" value="${v}" min="0" oninput="S.qty['${a.code}'][${m}]=parseInt(this.value)||0;recalc();updateChartsLive()"></td>`;
+        h += `<td><input class="sinp" type="number" value="${v}" min="0" oninput="S.qty['${a.code}'][${m}]=parseInt(this.value)||0;debouncedRenderAll()"></td>`;
       });
       h += `<td class="stot">${tot}</td>`;
       h += `<td class="stot" style="color:var(--gr)">${fmt(tot*a.pv)} €</td>`;
@@ -1080,7 +1080,7 @@ function renderCharges() {
       h += `<td style="font-weight:600;white-space:nowrap">${c.nom}</td>`;
       h += `<td><span class="bdg ${colors[c.type]||'bac'}">${c.type}</span></td>`;
       d.forEach((v,m) => {
-        h += `<td><input class="sinp" type="number" value="${v}" min="0" oninput="S.chMD[${c.code}][${m}]=parseInt(this.value)||0;recalc();renderChargeKPIs();updateChartsLive()"></td>`;
+        h += `<td><input class="sinp" type="number" value="${v}" min="0" oninput="S.chMD[${c.code}][${m}]=parseInt(this.value)||0;debouncedRenderAll()"></td>`;
       });
       h += `<td class="stot" style="color:var(--am)">${fmt(tot)} €</td>`;
       h += `<td><button class="delbtn" onclick="if(confirm('Supprimer ${c.nom.replace(/'/g,"\\'")} ?')){S.charges.splice(${ci},1);delete S.chMD[${c.code}];recalc();renderCharges();renderCh();renderCtrl();markUnsaved()}">×</button></td>`;
@@ -1854,14 +1854,22 @@ function setUserUI(user) {
   el('sb-email').textContent = email;
 }
 
+// Debounce renderAll pour éviter de bloquer la saisie
+let _renderTimer = null;
+function debouncedRenderAll() {
+  clearTimeout(_renderTimer);
+  _renderTimer = setTimeout(() => renderAll(), 300);
+}
+
 function doUpgrade() {
+  // Récupère l'email et redirige directement — pas de window.open pour éviter le blocage popup
   sb.auth.getUser().then(({data:{user}}) => {
     const email = user?.email || '';
     const url = LEMON_URL + (email ? `?checkout[email]=${encodeURIComponent(email)}` : '');
-    const w = window.open('about:blank','_blank');
-    if(w) w.location.href = url;
-    else window.location.href = url;
-  }).catch(() => window.open(LEMON_URL,'_blank'));
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }).catch(() => {
+    window.open(LEMON_URL, '_blank', 'noopener,noreferrer');
+  });
 }
 
 function checkUpgrade() {
