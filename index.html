@@ -926,9 +926,9 @@ function filterPeriod(v) {
 // RENDER DASHBOARD — délègue aux fonctions granulaires
 // ═══════════════════════════════════════════════
 function renderDB() {
-  // Sous-titre période
+  // Sous-titre période — guard si C pas encore calculé
   const an = S.params.annee;
-  const mois = C.mois;
+  const mois = C.mois || [1];
   const dbp = el('db-period');
   if(dbp) dbp.textContent = `${MOIS[mois[0]]} → ${MOIS[mois[mois.length-1]]} ${an}`;
 
@@ -1652,16 +1652,19 @@ function addChFromPanel() {
 // SAVE BAR
 // ═══════════════════════════════════════════════
 function markUnsaved() {
-  el('sdot').classList.remove('saved');
-  el('stxt').textContent = 'Sauvegarde automatique dans 2s…';
+  const d = el('sdot'); const t = el('stxt');
+  if(d) d.classList.remove('saved');
+  if(t) t.textContent = 'Sauvegarde automatique dans 2s…';
 }
 function setSaved() {
-  el('sdot').classList.add('saved');
-  el('stxt').textContent = 'Enregistré · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  const d = el('sdot'); const t = el('stxt');
+  if(d) d.classList.add('saved');
+  if(t) t.textContent = 'Enregistré · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
 }
 function setLoading(msg) {
-  el('sdot').classList.remove('saved');
-  el('stxt').textContent = msg || 'Chargement…';
+  const d = el('sdot'); const t = el('stxt');
+  if(d) d.classList.remove('saved');
+  if(t) t.textContent = msg || 'Chargement…';
 }
 
 // ═══════════════════════════════════════════════
@@ -1799,15 +1802,18 @@ async function doAuth() {
   btn.textContent = 'Chargement…'; btn.disabled = true;
   try {
     if(authCurrentMode === 'login') {
-      const {error} = await sb.auth.signInWithPassword({email, password:pwd});
+      const {data, error} = await sb.auth.signInWithPassword({email, password:pwd});
       if(error) throw error;
+      // Succès — startApp sera appelé par onAuthStateChange
+      // On remet le bouton au cas où onAuthStateChange tarde
+      btn.textContent = 'Connexion réussie ✓';
     } else {
       const {error} = await sb.auth.signUp({email, password:pwd});
       if(error) throw error;
-      showAuthOk('✉️ Compte créé ! Un email de confirmation vous a été envoyé. Cliquez sur le lien dans l\'email pour activer votre compte, puis connectez-vous.');
+      showAuthOk('✉️ Compte créé ! Un email de confirmation vous a été envoyé. Cliquez sur le lien dans l\'email pour activer votre compte, puis connectez-vous ici.');
       authMode('login');
-      btn.textContent = 'Se connecter'; btn.disabled = false;
-      return;
+      btn.textContent = 'Se connecter';
+      btn.disabled = false;
     }
   } catch(err) {
     const msgs = {
@@ -1816,7 +1822,7 @@ async function doAuth() {
       'User already registered':'Un compte existe déjà avec cet email.',
     };
     showAuthErr(msgs[err.message] || err.message || 'Une erreur est survenue.');
-    btn.textContent = authCurrentMode==='login'?'Se connecter':'Créer mon compte';
+    btn.textContent = authCurrentMode==='login' ? 'Se connecter' : 'Créer mon compte';
     btn.disabled = false;
   }
 }
@@ -1824,13 +1830,25 @@ async function doAuth() {
 async function doForgot() {
   const email = el('auth-email').value.trim();
   if(!email) { showAuthErr('Entrez votre email pour réinitialiser votre mot de passe.'); return; }
-  const {error} = await sb.auth.resetPasswordForEmail(email);
+  const {error} = await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
   if(error) showAuthErr(error.message);
-  else showAuthOk('Email de réinitialisation envoyé — vérifiez votre boîte.');
+  else showAuthOk('Email de réinitialisation envoyé — vérifiez votre boîte mail.');
 }
 
 async function doLogout() {
+  // Forcer l'affichage de l'écran auth immédiatement
+  el('auth').style.display = 'flex';
+  el('onb').style.display  = 'none';
+  el('app').style.display  = 'none';
+  // Puis déconnecter de Supabase
   await sb.auth.signOut();
+  // Réinitialiser l'état
+  S = {articles:[],charges:[],qty:{},chMD:{},params:{annee:2026,moisDeb:1,moisFin:12,nomEnt:'',obj:0,secteur:'',regimeTVA:'',regimeFisc:'',cle:'qte'},isPro:false,uid:null};
+  // Remettre le bouton auth en état initial
+  const btn = el('auth-btn');
+  if(btn) { btn.textContent = 'Se connecter'; btn.disabled = false; }
+  authMode('login');
+  hideAuthMsgs();
 }
 
 function setUserUI(user) {
@@ -2363,23 +2381,20 @@ function nextOnb() { if(onbStep<3){onbStep++;renderOnb();} }
 function prevOnb() { if(onbStep>1){onbStep--;renderOnb();} }
 
 async function finishOnb() {
-  if(onbData.nom) {
-    S.params.nom = onbData.nom;
-    const entNom = el('ent-nom'); if(entNom) entNom.value = onbData.nom;
-    el('db-name').textContent = onbData.nom;
-  }
-  if(onbData.annee) { S.params.annee = onbData.annee; const pAn=el('p-an'); if(pAn) pAn.value=onbData.annee; }
-  if(onbData.deb)   { S.params.moisDeb = onbData.deb; const pDeb=el('p-deb'); if(pDeb) pDeb.value=onbData.deb; }
-  if(onbData.fin)   { S.params.moisFin = onbData.fin; const pFin=el('p-fin'); if(pFin) pFin.value=onbData.fin; }
+  // Appliquer les données d'onboarding à S.params
+  if(onbData.nom)   { S.params.nomEnt = onbData.nom; const e=el('ent-nom'); if(e) e.value=onbData.nom; const n=el('db-name'); if(n) n.textContent=onbData.nom; }
+  if(onbData.annee) { S.params.annee   = onbData.annee; const e=el('p-an');  if(e) e.value=onbData.annee; }
+  if(onbData.deb)   { S.params.moisDeb = onbData.deb;   const e=el('p-deb'); if(e) e.value=onbData.deb; }
+  if(onbData.fin)   { S.params.moisFin = onbData.fin;   const e=el('p-fin'); if(e) e.value=onbData.fin; }
   if(onbData.obj)   { S.params.obj = onbData.obj; }
+  // Afficher l'app
   el('onb').style.display = 'none';
-  el('app').style.display = 'block';
+  el('app').style.display = 'flex';
   recalc();
-  initCharts();
   renderAll();
   setSaved();
-  // Sauvegarder les paramètres d'onboarding
-  setTimeout(() => saveAll(), 500);
+  // Sauvegarder après affichage
+  setTimeout(() => saveAll(), 600);
 }
 
 // ═══════════════════════════════════════════════
@@ -2407,44 +2422,54 @@ function exportTreso()   {
 // ═══════════════════════════════════════════════
 async function startApp(user) {
   setUserUI(user);
-  setLoading('Chargement de vos données…');
-  const hasData = await loadData(user.id);
+  // Masquer auth, montrer un état de chargement
   el('auth').style.display = 'none';
+  el('onb').style.display  = 'none';
+  el('app').style.display  = 'flex';
+  // Charger les données
+  const hasData = await loadData(user.id);
   if(hasData && S.articles.length > 0) {
-    el('onb').style.display = 'none';
-    el('app').style.display = 'block';
+    // Utilisateur existant — afficher l'app
     recalc();
-    initCharts();
     renderAll();
     setSaved();
     checkUpgrade();
   } else {
-    // Nouvel utilisateur
-    el('onb').style.display = 'flex';
+    // Nouvel utilisateur — onboarding
     el('app').style.display = 'none';
+    el('onb').style.display = 'flex';
     renderOnb();
   }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Auth state listener
+  let appStarted = false;
+
+  // Auth state listener — gère les changements de session
   sb.auth.onAuthStateChange(async (event, session) => {
-    if(event === 'SIGNED_IN' && session) {
+    if(event === 'SIGNED_IN' && session && !appStarted) {
+      appStarted = true;
+      await startApp(session.user);
+    } else if(event === 'SIGNED_IN' && session && appStarted) {
+      // Reconnexion après déconnexion — redémarrer
+      appStarted = true;
       await startApp(session.user);
     } else if(event === 'SIGNED_OUT') {
-      S = {articles:[],charges:[],qty:{},chMD:{},params:{annee:2026,moisDeb:1,moisFin:12,nomEnt:'',obj:0,secteur:'',regimeTVA:'',regimeFisc:'',cle:'qte'},isPro:false,uid:null};
+      appStarted = false;
+      // doLogout() gère déjà l'UI — sécurité supplémentaire
       el('auth').style.display = 'flex';
       el('onb').style.display  = 'none';
       el('app').style.display  = 'none';
     }
   });
 
-  // Vérifie session existante
+  // Vérifier si une session existe déjà (rechargement de page)
   const {data:{session}} = await sb.auth.getSession();
   if(session) {
+    appStarted = true;
     await startApp(session.user);
   }
-  // Sinon l'écran auth est déjà visible par défaut (display:flex dans le HTML)
+  // Sinon #auth est visible par défaut (display:flex dans HTML)
 });
 </script>
 </body>
