@@ -1566,10 +1566,12 @@ async function changeAnnee(val) {
   const newAn = parseInt(val)||2026;
   if(newAn === S.params.annee) return;
 
-  // 1. Annuler tout autosave en attente
-  clearTimeout(_saveTimer);
+  // Écrire la nouvelle année dans localStorage EN PREMIER — avant tout réseau
+  // Si l'user refresh pendant la sauvegarde, il reviendra sur la bonne année
+  if(S.uid) try { localStorage.setItem('lp_annee_'+S.uid, newAn); } catch(e){}
 
-  // 2. Sauvegarder l'année COURANTE avant de changer (S.params.annee = ancienne année)
+  // Annuler tout autosave en attente puis sauvegarder l'année courante
+  clearTimeout(_saveTimer);
   if(S.uid) await saveAll();
 
   // 3. Reprise du solde de fin de l'année précédente → trésorerie initiale
@@ -1992,152 +1994,113 @@ async function saveAll() {
 
 
 // Helper: requête Supabase avec timeout réduit
-function sbQuery(promise, timeoutMs = 3000) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs))
-  ]);
+function sbQuery(promise, ms=6000) {
+  return Promise.race([promise, new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
 }
 
 async function loadData(uid) {
-  // ── 1. Restaurer l'année active depuis localStorage AVANT tout (instantané) ──
+  // ── Étape 1 : année active depuis localStorage (0ms, avant tout réseau) ──
   try {
-    const an = parseInt(localStorage.getItem('lp_annee_' + uid));
+    const an = parseInt(localStorage.getItem('lp_annee_'+uid));
     if(an >= 2020 && an <= 2040) {
       S.params.annee = an;
-      const pAn = el('p-an'); if(pAn) pAn.value = an;
-      const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = an;
+      const e=el('p-an'); if(e) e.value=an;
+      const s=el('sb-annee'); if(s) s.textContent=an;
     }
-  } catch(e) {}
+  } catch(e){}
 
-  // ── 2. Paramètres depuis Supabase ──
-  try {
+  const anneeActive = S.params.annee; // Mémoriser l'année choisie par l'user
 
-    const {data:p, error:e} = await sbQuery(
-      sb.from('parametres').select('*').eq('user_id',uid).single()
-    );
+  // ── Étape 2 : toutes les requêtes Supabase EN PARALLÈLE ──
+  const [rP, rA, rC, rSca, rSch] = await Promise.allSettled([
+    sbQuery(sb.from('parametres').select('*').eq('user_id',uid).single()),
+    sbQuery(sb.from('articles').select('*').eq('user_id',uid)),
+    sbQuery(sb.from('charges').select('*').eq('user_id',uid)),
+    sbQuery(sb.from('saisies_ca').select('article_code,mois,quantite').eq('user_id',uid).eq('annee',anneeActive)),
+    sbQuery(sb.from('saisies_charges').select('charge_code,mois,montant').eq('user_id',uid).eq('annee',anneeActive)),
+  ]);
 
-    if(e && e.code !== 'PGRST116') console.warn('[load] params:', e.code, e.message);
-    if(p) {
-      S.params.annee     = p.annee           || 2026;
-      S.params.moisDeb   = p.mois_debut      || 1;
-      S.params.moisFin   = p.mois_fin        || 12;
-      S.params.obj       = p.objectif_ca     || 0;
-      S.params.regimeTVA = p.regime_tva      || 'TVA réelle mensuelle';
-      S.params.nomEnt    = p.nom_entreprise  || '';
-      S.params.secteur   = p.secteur         || '';
-      S.params.cle       = p.cle_repartition || 'qte';
-      S.params.tresoInit = p.treso_init      || 0;
-      S.isPro            = p.is_pro === true;
-      const set = (id, v) => { const e=el(id); if(e) e.value=v; };
-      set('p-an', S.params.annee); set('p-deb', S.params.moisDeb); set('p-fin', S.params.moisFin);
-      set('ent-nom', S.params.nomEnt); set('ent-obj', S.params.obj);
-      set('ent-tva', S.params.regimeTVA); set('ent-sect', S.params.secteur);
-      set('treso-init', S.params.tresoInit);
-      const dbn = el('db-name'); if(dbn) dbn.textContent = S.params.nomEnt || 'Mon Entreprise';
-      const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = S.params.annee;
-    }
-  } catch(e) { console.warn('[load] params exception:', e.message); }
+  // ── Étape 3 : traiter les résultats ──
 
-  // ── Articles ──
-  try {
-    const {data:arts, error:e} = await sbQuery(
-      sb.from('articles').select('*').eq('user_id',uid)
-    );
-    if(e) { console.warn('[load] articles:', e.message); }
-    else if(arts && arts.length > 0) {
-      S.articles = arts.map(a=>({
-        code:a.code, nom:a.nom, cat:a.categorie||'Divers',
-        pv:parseFloat(a.prix_ht)||0, cout:parseFloat(a.cout_achat)||0,
-        tva:parseFloat(a.tva)||0.2, actif:a.actif!==false,
-      }));
+  // Params — NE JAMAIS écraser l'année active
+  if(rP.status==='fulfilled' && rP.value?.data) {
+    const p = rP.value.data;
+    S.params.moisDeb   = p.mois_debut      || 1;
+    S.params.moisFin   = p.mois_fin        || 12;
+    S.params.obj       = p.objectif_ca     || 0;
+    S.params.regimeTVA = p.regime_tva      || 'TVA réelle mensuelle';
+    S.params.nomEnt    = p.nom_entreprise  || '';
+    S.params.secteur   = p.secteur         || '';
+    S.params.cle       = p.cle_repartition || 'qte';
+    S.params.tresoInit = p.treso_init      || 0;
+    S.isPro            = p.is_pro === true;
+    S.params.annee     = anneeActive; // Toujours garder l'année choisie par l'user
+    const set=(id,v)=>{const e=el(id);if(e)e.value=v;};
+    set('p-deb',S.params.moisDeb); set('p-fin',S.params.moisFin);
+    set('ent-nom',S.params.nomEnt); set('ent-obj',S.params.obj);
+    set('ent-tva',S.params.regimeTVA); set('ent-sect',S.params.secteur);
+    set('treso-init',S.params.tresoInit);
+    const d=el('db-name'); if(d) d.textContent=S.params.nomEnt||'Mon Entreprise';
+  } else if(rP.status==='rejected') console.warn('[load] params:',rP.reason?.message);
 
-    }
-  } catch(e) { console.warn('[load] articles exception:', e.message); }
+  // Articles
+  if(rA.status==='fulfilled' && rA.value?.data?.length>0) {
+    S.articles = rA.value.data.map(a=>({
+      code:a.code, nom:a.nom, cat:a.categorie||'Divers',
+      pv:parseFloat(a.prix_ht)||0, cout:parseFloat(a.cout_achat)||0,
+      tva:parseFloat(a.tva)||0.2, actif:a.actif!==false,
+    }));
+  } else if(rA.status==='rejected') console.warn('[load] articles:',rA.reason?.message);
 
-  // ── Charges ──
-  try {
-    const {data:chs, error:e} = await sbQuery(
-      sb.from('charges').select('*').eq('user_id',uid)
-    );
-    if(e) { console.warn('[load] charges:', e.message); }
-    else if(chs && chs.length > 0) {
-      S.charges = chs.map(c=>({
-        code:c.code, nom:c.nom, cat:c.categorie||'Divers',
-        tva:parseFloat(c.tva)||0.2, type:c.type||'Variable', actif:c.actif!==false,
-      }));
+  // Charges
+  if(rC.status==='fulfilled' && rC.value?.data?.length>0) {
+    S.charges = rC.value.data.map(c=>({
+      code:c.code, nom:c.nom, cat:c.categorie||'Divers',
+      tva:parseFloat(c.tva)||0.2, type:c.type||'Variable', actif:c.actif!==false,
+    }));
+  } else if(rC.status==='rejected') console.warn('[load] charges:',rC.reason?.message);
 
-    }
-  } catch(e) { console.warn('[load] charges exception:', e.message); }
+  // Saisies CA
+  S.articles.forEach(a=>{S.qty[a.code]=Array(12).fill(0);});
+  if(rSca.status==='fulfilled' && rSca.value?.data) {
+    rSca.value.data.forEach(r=>{
+      if(!S.qty[r.article_code]) S.qty[r.article_code]=Array(12).fill(0);
+      S.qty[r.article_code][r.mois-1]=r.quantite;
+    });
+  } else if(rSca.status==='rejected') console.warn('[load] saisies_ca:',rSca.reason?.message);
 
-  // ── Saisies CA ──
-  const an = S.params.annee;
-  S.articles.forEach(a => { S.qty[a.code] = Array(12).fill(0); });
-  try {
-    const {data:sca, error:e} = await sbQuery(
-      sb.from('saisies_ca').select('article_code,mois,quantite').eq('user_id',uid).eq('annee',an)
-    );
-    if(e) { console.warn('[load] saisies_ca:', e.message); }
-    else if(sca) {
-      sca.forEach(r => {
-        if(!S.qty[r.article_code]) S.qty[r.article_code] = Array(12).fill(0);
-        S.qty[r.article_code][r.mois-1] = r.quantite;
-      });
+  // Saisies Charges
+  S.charges.forEach(c=>{S.chMD[c.code]=Array(12).fill(0);});
+  if(rSch.status==='fulfilled' && rSch.value?.data) {
+    rSch.value.data.forEach(r=>{
+      if(!S.chMD[r.charge_code]) S.chMD[r.charge_code]=Array(12).fill(0);
+      S.chMD[r.charge_code][r.mois-1]=r.montant;
+    });
+  } else if(rSch.status==='rejected') console.warn('[load] saisies_charges:',rSch.reason?.message);
 
-    }
-  } catch(e) { console.warn('[load] saisies_ca exception:', e.message); }
-
-  // ── Saisies Charges ──
-  S.charges.forEach(c => { S.chMD[c.code] = Array(12).fill(0); });
-  try {
-    const {data:sch, error:e} = await sbQuery(
-      sb.from('saisies_charges').select('charge_code,mois,montant').eq('user_id',uid).eq('annee',an)
-    );
-    if(e) { console.warn('[load] saisies_charges:', e.message); }
-    else if(sch) {
-      sch.forEach(r => {
-        if(!S.chMD[r.charge_code]) S.chMD[r.charge_code] = Array(12).fill(0);
-        S.chMD[r.charge_code][r.mois-1] = r.montant;
-      });
-
-    }
-  } catch(e) { console.warn('[load] saisies_charges exception:', e.message); }
-
-  // ── Restauration localStorage si Supabase a renvoyé 0 articles ──
-  if(S.articles.length === 0) {
+  // ── Étape 4 : filet localStorage si 0 articles ──
+  if(S.articles.length===0) {
     try {
-      const raw = localStorage.getItem('lp_' + uid);
+      const raw=localStorage.getItem('lp_'+uid);
       if(raw) {
-        const bk = JSON.parse(raw);
-        if(bk.articles && bk.articles.length > 0) {
-          console.warn('[load] restauration depuis localStorage backup');
-          // Préserver l'année déjà restaurée depuis lp_annee_uid
-          const anneeActive = S.params.annee;
-          S.articles = bk.articles;
-          S.charges  = bk.charges  || S.charges;
-          // Charger les saisies pour l'année ACTIVE (pas celle du backup)
-          S.qty  = bk.qty  || {};
-          S.chMD = bk.chMD || {};
-          if(bk.params) {
-            Object.assign(S.params, bk.params);
-            // Rétablir l'année active — elle prime sur celle du backup
-            S.params.annee = anneeActive;
-          }
-          // Sync DOM
-          const pAn = el('p-an'); if(pAn) pAn.value = S.params.annee;
-          const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = S.params.annee;
+        const bk=JSON.parse(raw);
+        if(bk.articles?.length>0) {
+          S.articles=bk.articles; S.charges=bk.charges||S.charges;
+          S.qty=bk.qty||{}; S.chMD=bk.chMD||{};
+          if(bk.params) Object.assign(S.params,bk.params);
+          S.params.annee=anneeActive; // Toujours préserver l'année active
         }
       }
-    } catch(e) {}
+    } catch(e){}
   }
 
+  // Sync sidebar finale
+  const sbA=el('sb-annee'); if(sbA) sbA.textContent=S.params.annee;
+  const pA=el('p-an'); if(pA) pA.value=S.params.annee;
   return true;
 }
 
 
-// ═══════════════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════════════
 let authCurrentMode = 'login';
 
 function authMode(mode) {
