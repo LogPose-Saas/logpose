@@ -1924,12 +1924,25 @@ async function saveAll() {
 
   try {
     const uid = S.uid;
-    const an  = S.params.annee; // Capturer l'année AU MOMENT de l'appel
+    const an  = S.params.annee;
 
-    // Paramètres globaux — source de vérité = S.params (jamais le DOM)
+    // ── Backup localStorage (filet de sécurité local) ──
+    try {
+      const backup = {
+        articles: S.articles,
+        charges: S.charges,
+        qty: S.qty,
+        chMD: S.chMD,
+        params: S.params,
+        annee: an,
+        ts: Date.now()
+      };
+      localStorage.setItem('lp-backup-' + uid, JSON.stringify(backup));
+    } catch(e) { /* localStorage peut être indisponible */ }
+
+    // ── Paramètres ──
     const paramsData = {
-      user_id: uid,
-      annee: an,
+      user_id: uid, annee: an,
       mois_debut: S.params.moisDeb,
       mois_fin: S.params.moisFin,
       nom_entreprise: S.params.nomEnt || '',
@@ -1939,60 +1952,75 @@ async function saveAll() {
       cle_repartition: S.params.cle || 'qte',
       is_pro: S.isPro || false,
     };
-    // treso_init est optionnel (colonne peut ne pas exister si SQL pas encore exécuté)
-    if(S.params.tresoInit !== undefined && S.params.tresoInit !== null) {
-      paramsData.treso_init = S.params.tresoInit;
-    }
-    await sb.from('parametres').upsert(paramsData, {onConflict:'user_id'});
+    if(S.params.tresoInit !== undefined) paramsData.treso_init = S.params.tresoInit;
+    const {error: pErr} = await sb.from('parametres').upsert(paramsData, {onConflict:'user_id'});
+    if(pErr) console.error('Save params error:', pErr);
 
-    // Articles — NE PAS supprimer si le tableau est vide (protection contre data wipe)
+    // ── Articles ── DELETE+INSERT seulement si on a des articles
     if(S.articles.length > 0) {
       await sb.from('articles').delete().eq('user_id', uid);
-      await sb.from('articles').insert(S.articles.map(a=>({
+      const {error: aErr} = await sb.from('articles').insert(S.articles.map(a=>({
         user_id:uid, code:a.code, nom:a.nom, categorie:a.cat,
         prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif
       })));
+      if(aErr) console.error('Save articles error:', aErr);
+      else console.log('✓ Saved articles:', S.articles.length);
     }
 
-    // Charges — NE PAS supprimer si le tableau est vide
+    // ── Charges ── DELETE+INSERT seulement si on a des charges
     if(S.charges.length > 0) {
       await sb.from('charges').delete().eq('user_id', uid);
-      await sb.from('charges').insert(S.charges.map(c=>({
+      const {error: cErr} = await sb.from('charges').insert(S.charges.map(c=>({
         user_id:uid, code:String(c.code), nom:c.nom, categorie:c.cat,
         tva:c.tva, type:c.type, actif:c.actif
       })));
+      if(cErr) console.error('Save charges error:', cErr);
+      else console.log('✓ Saved charges:', S.charges.length);
     }
 
-    // Saisies CA — sauvegarder uniquement si on a des saisies OU si on veut effacer explicitement
-    // On vérifie qu'il y a bien des articles avant de toucher aux saisies
-    if(S.articles.length > 0) {
+    // ── Saisies CA ── UPSERT par ligne (jamais de DELETE global)
+    // On calcule les saisies non nulles en mémoire
+    const scaRows = [];
+    S.articles.forEach(a => {
+      (S.qty[a.code]||[]).forEach((q,m) => {
+        if(q > 0) scaRows.push({user_id:uid, article_code:a.code, mois:m+1, annee:an, quantite:q});
+      });
+    });
+    if(scaRows.length > 0) {
+      // DELETE uniquement les lignes qui vont être remplacées, puis INSERT
       await sb.from('saisies_ca').delete().eq('user_id', uid).eq('annee', an);
-      const sca = [];
-      S.articles.forEach(a => {
-        (S.qty[a.code]||[]).forEach((q,m) => {
-          if(q > 0) sca.push({user_id:uid, article_code:a.code, mois:m+1, annee:an, quantite:q});
-        });
-      });
-      if(sca.length > 0) await sb.from('saisies_ca').insert(sca);
+      const {error: scaErr} = await sb.from('saisies_ca').insert(scaRows);
+      if(scaErr) console.error('Save saisies CA error:', scaErr);
+      else console.log('✓ Saved saisies CA:', scaRows.length, 'pour', an);
+    } else if(S.articles.length > 0) {
+      // On a des articles mais pas de saisies (tout à 0) : effacer l'année proprement
+      await sb.from('saisies_ca').delete().eq('user_id', uid).eq('annee', an);
+      console.log('✓ Saisies CA vidées pour', an, '(tout à 0)');
     }
+    // Si S.articles.length === 0 : ne toucher à rien
 
-    // Saisies charges — idem
-    if(S.charges.length > 0) {
-      await sb.from('saisies_charges').delete().eq('user_id', uid).eq('annee', an);
-      const sch = [];
-      S.charges.forEach(c => {
-        (S.chMD[c.code]||[]).forEach((v,m) => {
-          if(v > 0) sch.push({user_id:uid, charge_code:String(c.code), mois:m+1, annee:an, montant:v});
-        });
+    // ── Saisies Charges ── idem
+    const schRows = [];
+    S.charges.forEach(c => {
+      (S.chMD[c.code]||[]).forEach((v,m) => {
+        if(v > 0) schRows.push({user_id:uid, charge_code:String(c.code), mois:m+1, annee:an, montant:v});
       });
-      if(sch.length > 0) await sb.from('saisies_charges').insert(sch);
+    });
+    if(schRows.length > 0) {
+      await sb.from('saisies_charges').delete().eq('user_id', uid).eq('annee', an);
+      const {error: schErr} = await sb.from('saisies_charges').insert(schRows);
+      if(schErr) console.error('Save saisies charges error:', schErr);
+      else console.log('✓ Saved saisies charges:', schRows.length, 'pour', an);
+    } else if(S.charges.length > 0) {
+      await sb.from('saisies_charges').delete().eq('user_id', uid).eq('annee', an);
     }
 
     setSaved();
+    console.log('✓ Save complet — articles:', S.articles.length, 'charges:', S.charges.length);
+
   } catch(err) {
-    console.error('Save error:', err);
+    console.error('saveAll CRITICAL:', err);
     const d2 = el('sdot'); if(d2) d2.classList.remove('saved');
-    const t2 = el('stxt'); if(t2) t2.textContent = 'Erreur sauvegarde';
   }
 }
 
@@ -2095,10 +2123,41 @@ async function loadData(uid) {
       console.log('✓ Saisies charges:', sch.length, '— année', an);
     }
 
+    // ── Filet de sécurité : si Supabase retourne 0 articles mais backup local existe ──
+    if(S.articles.length === 0) {
+      try {
+        const raw = localStorage.getItem('lp-backup-' + uid);
+        if(raw) {
+          const bk = JSON.parse(raw);
+          if(bk.articles && bk.articles.length > 0) {
+            console.warn('⚠ 0 articles depuis Supabase — restauration backup localStorage');
+            S.articles = bk.articles;
+            S.charges  = bk.charges  || S.charges;
+            S.qty      = bk.qty      || S.qty;
+            S.chMD     = bk.chMD     || S.chMD;
+          }
+        }
+      } catch(e) {}
+    }
+
     return true;
 
   } catch(err) {
     console.error('loadData CRITICAL error:', err);
+    // Dernier recours : backup localStorage
+    try {
+      const raw = localStorage.getItem('lp-backup-' + uid);
+      if(raw) {
+        const bk = JSON.parse(raw);
+        if(bk.articles && bk.articles.length > 0) {
+          console.warn('⚠ loadData failed — restauration backup localStorage');
+          S.articles = bk.articles; S.charges = bk.charges || [];
+          S.qty = bk.qty || {}; S.chMD = bk.chMD || {};
+          if(bk.params) Object.assign(S.params, bk.params);
+          return true;
+        }
+      }
+    } catch(e2) {}
     return false;
   }
 }
