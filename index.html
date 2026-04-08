@@ -134,6 +134,21 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .tog-k{width:13px;height:13px;background:var(--t1);border-radius:50%;position:absolute;top:2px;left:2px;transition:all var(--tr)}
 [data-theme="light"] .tog-k{transform:translateX(13px);background:#fff}
 
+/* ── SIDEBAR YEAR SELECTOR ── */
+.sb-year-block{padding:10px 12px 8px;border-bottom:1px solid var(--bd);margin-bottom:4px}
+.sb-year-label{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-family:var(--fm);margin-bottom:6px}
+.sb-year-row{display:flex;align-items:center;gap:5px}
+.sb-year-btn{width:24px;height:24px;border-radius:5px;background:var(--bgc);border:1px solid var(--bd);color:var(--t2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--tr)}
+.sb-year-btn:hover{background:var(--ac);color:#fff;border-color:var(--ac)}
+.sb-year-val{flex:1;text-align:center;font-size:13px;font-weight:700;font-family:var(--fm);color:var(--t1)}
+.sb-year-btns{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+/* Collapsed : ne montrer que les flèches et l'année centrés, masquer les boutons rapides */
+.sb.col .sb-year-label,.sb.col .sb-year-btns{display:none}
+.sb.col .sb-year-block{padding:8px 4px}
+.sb.col .sb-year-row{flex-direction:column;gap:2px;align-items:center}
+.sb.col .sb-year-val{font-size:10px;font-weight:700}
+.sb.col .sb-year-btn{width:20px;height:16px;font-size:11px}
+
 /* ── COLLAPSED SIDEBAR ── */
 .sb.col .sb-texts,.sb.col .sb-lbl,
 .sb.col .sb-item span:not(.sb-ico),
@@ -415,14 +430,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   </div>
   <div class="sb-scroll">
     <!-- Sélecteur d'année en sidebar -->
-    <div style="padding:10px 14px 4px;border-bottom:1px solid var(--bd);margin-bottom:4px">
-      <div style="font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-family:var(--fm);margin-bottom:6px">Année</div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <button onclick="el('p-an').value=S.params.annee-1;changeAnnee(S.params.annee-1)" style="width:24px;height:24px;border-radius:5px;background:var(--bgc);border:1px solid var(--bd);color:var(--t2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">‹</button>
-        <span id="sb-annee" style="flex:1;text-align:center;font-size:14px;font-weight:700;font-family:var(--fm);color:var(--t1)">2026</span>
-        <button onclick="el('p-an').value=S.params.annee+1;changeAnnee(S.params.annee+1)" style="width:24px;height:24px;border-radius:5px;background:var(--bgc);border:1px solid var(--bd);color:var(--t2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">›</button>
+    <div class="sb-year-block" id="sb-year-block">
+      <div class="sb-year-label">Année</div>
+      <div class="sb-year-row">
+        <button class="sb-year-btn" onclick="changeAnnee(S.params.annee-1)">‹</button>
+        <span id="sb-annee" class="sb-year-val">2026</span>
+        <button class="sb-year-btn" onclick="changeAnnee(S.params.annee+1)">›</button>
       </div>
-      <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap" id="sb-annees"></div>
+      <div class="sb-year-btns" id="sb-annees"></div>
     </div>
     <div class="sb-sect">
       <div class="sb-lbl">Pilotage</div>
@@ -1905,65 +1920,69 @@ function setLoading(msg) {
 // ═══════════════════════════════════════════════
 async function saveAll() {
   if(!S.uid) return;
-  const d = el('sdot'); const t = el('stxt');
-  if(d) d.classList.remove('saved');
+  const d = el('sdot'); if(d) d.classList.remove('saved');
 
   try {
     const uid = S.uid;
     const an  = S.params.annee; // Capturer l'année AU MOMENT de l'appel
 
-    // Paramètres globaux (indépendants de l'année)
+    // Paramètres globaux
     await sb.from('parametres').upsert({
       user_id: uid,
       annee: an,
       mois_debut: S.params.moisDeb,
       mois_fin: S.params.moisFin,
-      nom_entreprise: el('ent-nom')?.value||'',
-      objectif_ca: parseFloat(el('ent-obj')?.value)||0,
-      secteur: el('ent-sect')?.value||'',
-      regime_tva: S.params.regimeTVA||'TVA réelle mensuelle',
-      cle_repartition: document.querySelector('input[name="cle"]:checked')?.value||'qte',
-      treso_init: S.params.tresoInit||0,
-      is_pro: S.isPro||false,
+      nom_entreprise: el('ent-nom')?.value || S.params.nomEnt || '',
+      objectif_ca: parseFloat(el('ent-obj')?.value) || S.params.obj || 0,
+      secteur: el('ent-sect')?.value || S.params.secteur || '',
+      regime_tva: S.params.regimeTVA || 'TVA réelle mensuelle',
+      cle_repartition: document.querySelector('input[name="cle"]:checked')?.value || 'qte',
+      treso_init: S.params.tresoInit || 0,
+      is_pro: S.isPro || false,
     }, {onConflict:'user_id'});
 
-    // Articles (structure globale, indépendante de l'année)
-    await sb.from('articles').delete().eq('user_id', uid);
+    // Articles — NE PAS supprimer si le tableau est vide (protection contre data wipe)
     if(S.articles.length > 0) {
+      await sb.from('articles').delete().eq('user_id', uid);
       await sb.from('articles').insert(S.articles.map(a=>({
         user_id:uid, code:a.code, nom:a.nom, categorie:a.cat,
         prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif
       })));
     }
 
-    // Charges (structure globale)
-    await sb.from('charges').delete().eq('user_id', uid);
+    // Charges — NE PAS supprimer si le tableau est vide
     if(S.charges.length > 0) {
+      await sb.from('charges').delete().eq('user_id', uid);
       await sb.from('charges').insert(S.charges.map(c=>({
         user_id:uid, code:String(c.code), nom:c.nom, categorie:c.cat,
         tva:c.tva, type:c.type, actif:c.actif
       })));
     }
 
-    // Saisies CA pour l'année EN COURS UNIQUEMENT
-    await sb.from('saisies_ca').delete().eq('user_id', uid).eq('annee', an);
-    const sca = [];
-    S.articles.forEach(a => {
-      (S.qty[a.code]||[]).forEach((q,m) => {
-        if(q>0) sca.push({user_id:uid, article_code:a.code, mois:m+1, annee:an, quantite:q});
+    // Saisies CA — sauvegarder uniquement si on a des saisies OU si on veut effacer explicitement
+    // On vérifie qu'il y a bien des articles avant de toucher aux saisies
+    if(S.articles.length > 0) {
+      await sb.from('saisies_ca').delete().eq('user_id', uid).eq('annee', an);
+      const sca = [];
+      S.articles.forEach(a => {
+        (S.qty[a.code]||[]).forEach((q,m) => {
+          if(q > 0) sca.push({user_id:uid, article_code:a.code, mois:m+1, annee:an, quantite:q});
+        });
       });
-    });
-    if(sca.length > 0) await sb.from('saisies_ca').insert(sca);
+      if(sca.length > 0) await sb.from('saisies_ca').insert(sca);
+    }
 
-    // Saisies charges pour l'année EN COURS UNIQUEMENT
-    await sb.from('saisies_charges').delete().eq('user_id', uid).eq('annee', an);
-    const sch = [];
-    S.charges.forEach(c => {
-      (S.chMD[c.code]||[]).forEach((v,m) => {
-        if(v>0) sch.push({user_id:uid, charge_code:String(c.code), mois:m+1, annee:an, montant:v});
+    // Saisies charges — idem
+    if(S.charges.length > 0) {
+      await sb.from('saisies_charges').delete().eq('user_id', uid).eq('annee', an);
+      const sch = [];
+      S.charges.forEach(c => {
+        (S.chMD[c.code]||[]).forEach((v,m) => {
+          if(v > 0) sch.push({user_id:uid, charge_code:String(c.code), mois:m+1, annee:an, montant:v});
+        });
       });
-    });
-    if(sch.length > 0) await sb.from('saisies_charges').insert(sch);
+      if(sch.length > 0) await sb.from('saisies_charges').insert(sch);
+    }
 
     setSaved();
   } catch(err) {
@@ -1988,16 +2007,22 @@ async function loadData(uid) {
       S.params.obj       = params.objectif_ca||0;
       S.params.regimeTVA = params.regime_tva||'TVA réelle mensuelle';
       S.params.nomEnt    = params.nom_entreprise||'';
+      S.params.secteur   = params.secteur||'';
+      S.params.cle       = params.cle_repartition||'qte';
       S.params.tresoInit = params.treso_init||0;
       S.isPro            = params.is_pro === true;
-      const pAn  = el('p-an');   if(pAn)  pAn.value  = S.params.annee;
-      const pDeb = el('p-deb');  if(pDeb) pDeb.value  = S.params.moisDeb;
-      const pFin = el('p-fin');  if(pFin) pFin.value  = S.params.moisFin;
-      const eNom = el('ent-nom'); if(eNom && params.nom_entreprise) eNom.value = params.nom_entreprise;
-      const eObj = el('ent-obj'); if(eObj) eObj.value = params.objectif_ca||0;
-      const eTva = el('ent-tva'); if(eTva) eTva.value = S.params.regimeTVA;
-      const dbn  = el('db-name'); if(dbn && params.nom_entreprise) dbn.textContent = params.nom_entreprise;
-      const eTi  = el('treso-init'); if(eTi) eTi.value = S.params.tresoInit||0;
+      // Sync les champs du DOM
+      const pAn  = el('p-an');      if(pAn)  pAn.value   = S.params.annee;
+      const pDeb = el('p-deb');     if(pDeb) pDeb.value   = S.params.moisDeb;
+      const pFin = el('p-fin');     if(pFin) pFin.value   = S.params.moisFin;
+      const eNom = el('ent-nom');   if(eNom) eNom.value   = S.params.nomEnt;
+      const eObj = el('ent-obj');   if(eObj) eObj.value   = S.params.obj;
+      const eTva = el('ent-tva');   if(eTva) eTva.value   = S.params.regimeTVA;
+      const eSec = el('ent-sect');  if(eSec) eSec.value   = S.params.secteur;
+      const dbn  = el('db-name');   if(dbn && S.params.nomEnt) dbn.textContent = S.params.nomEnt;
+      const eTi  = el('treso-init');if(eTi)  eTi.value    = S.params.tresoInit;
+      // Sync sélecteur d'année sidebar
+      const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = S.params.annee;
     }
 
     // Articles
@@ -2126,18 +2151,16 @@ async function doForgot() {
 
 async function doLogout() {
   window._appStarted = false;
-  // Forcer l'affichage de l'écran auth immédiatement
+  window._appLoading = false;
+  clearTimeout(_saveTimer); // Annuler tout autosave en attente
   el('auth').style.display = 'flex';
   el('onb').style.display  = 'none';
   el('app').style.display  = 'none';
-  // Réinitialiser l'état (uid null bloque l'autosave)
-  S = {articles:[],charges:[],qty:{},chMD:{},params:{annee:2026,moisDeb:1,moisFin:12,nomEnt:'',obj:0,secteur:'',regimeTVA:'',regimeFisc:'',cle:'qte'},isPro:false,uid:null};
-  // UI auth
+  S = {articles:[],charges:[],qty:{},chMD:{},params:{annee:2026,moisDeb:1,moisFin:12,nomEnt:'',obj:0,secteur:'',regimeTVA:'',regimeFisc:'',cle:'qte',tresoInit:0},isPro:false,uid:null};
   const btn = el('auth-btn');
   if(btn) { btn.textContent = 'Se connecter'; btn.disabled = false; }
   authMode('login');
   hideAuthMsgs();
-  // Déconnexion Supabase en arrière-plan
   await sb.auth.signOut();
 }
 
@@ -2769,28 +2792,38 @@ async function startApp(user) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Appliquer le thème sauvegardé immédiatement
   applyTheme();
   window._appStarted = false;
+  window._appLoading = false; // Verrou supplémentaire contre les appels simultanés
+
+  async function tryStartApp(user) {
+    if(window._appLoading) return; // Un chargement est déjà en cours
+    window._appLoading = true;
+    window._appStarted = true;
+    try {
+      await startApp(user);
+    } finally {
+      window._appLoading = false;
+    }
+  }
 
   // Auth state listener
   sb.auth.onAuthStateChange(async (event, session) => {
     if(event === 'SIGNED_IN' && session && !window._appStarted) {
-      window._appStarted = true;
-      await startApp(session.user);
+      await tryStartApp(session.user);
     } else if(event === 'SIGNED_OUT') {
       window._appStarted = false;
+      window._appLoading = false;
       el('auth').style.display = 'flex';
       el('onb').style.display  = 'none';
       el('app').style.display  = 'none';
     }
   });
 
-  // Vérifier si une session existe déjà (rechargement de page)
+  // Session existante (rechargement de page)
   const {data:{session}} = await sb.auth.getSession();
   if(session && !window._appStarted) {
-    window._appStarted = true;
-    await startApp(session.user);
+    await tryStartApp(session.user);
   }
 });
 </script>
