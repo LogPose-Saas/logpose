@@ -1997,93 +1997,106 @@ async function saveAll() {
 // ═══════════════════════════════════════════════
 async function loadData(uid) {
   try {
-    // Paramètres
-    const {data:params, error:pErr} = await sb.from('parametres').select('*').eq('user_id',uid).single();
-    if(pErr && pErr.code !== 'PGRST116') console.warn('Params load error:', pErr); // PGRST116 = no rows = normal for new user
+    // ── Paramètres ──
+    const {data:params, error:pErr} = await sb.from('parametres')
+      .select('annee,mois_debut,mois_fin,nom_entreprise,objectif_ca,secteur,regime_tva,cle_repartition,treso_init,is_pro')
+      .eq('user_id', uid).single();
+
+    if(pErr && pErr.code !== 'PGRST116') {
+      // PGRST116 = pas de ligne = nouvel utilisateur, c'est normal
+      console.warn('Params load warning:', pErr.code, pErr.message);
+    }
+
     if(params) {
-      S.params.annee     = params.annee||2026;
-      S.params.moisDeb   = params.mois_debut||1;
-      S.params.moisFin   = params.mois_fin||12;
-      S.params.obj       = params.objectif_ca||0;
-      S.params.regimeTVA = params.regime_tva||'TVA réelle mensuelle';
-      S.params.nomEnt    = params.nom_entreprise||'';
-      S.params.secteur   = params.secteur||'';
-      S.params.cle       = params.cle_repartition||'qte';
-      S.params.tresoInit = params.treso_init||0;
+      S.params.annee     = params.annee     || 2026;
+      S.params.moisDeb   = params.mois_debut|| 1;
+      S.params.moisFin   = params.mois_fin  || 12;
+      S.params.obj       = params.objectif_ca || 0;
+      S.params.regimeTVA = params.regime_tva || 'TVA réelle mensuelle';
+      S.params.nomEnt    = params.nom_entreprise || '';
+      S.params.secteur   = params.secteur    || '';
+      S.params.cle       = params.cle_repartition || 'qte';
+      S.params.tresoInit = params.treso_init || 0;
       S.isPro            = params.is_pro === true;
-      // Sync les champs du DOM
-      const pAn  = el('p-an');      if(pAn)  pAn.value   = S.params.annee;
-      const pDeb = el('p-deb');     if(pDeb) pDeb.value   = S.params.moisDeb;
-      const pFin = el('p-fin');     if(pFin) pFin.value   = S.params.moisFin;
-      const eNom = el('ent-nom');   if(eNom) eNom.value   = S.params.nomEnt;
-      const eObj = el('ent-obj');   if(eObj) eObj.value   = S.params.obj;
-      const eTva = el('ent-tva');   if(eTva) eTva.value   = S.params.regimeTVA;
-      const eSec = el('ent-sect');  if(eSec) eSec.value   = S.params.secteur;
-      const dbn  = el('db-name');   if(dbn && S.params.nomEnt) dbn.textContent = S.params.nomEnt;
-      const eTi  = el('treso-init');if(eTi)  eTi.value    = S.params.tresoInit;
-      // Sync sélecteur d'année sidebar
+      // Sync DOM
+      const pAn = el('p-an');       if(pAn)  pAn.value  = S.params.annee;
+      const pDeb = el('p-deb');     if(pDeb) pDeb.value = S.params.moisDeb;
+      const pFin = el('p-fin');     if(pFin) pFin.value = S.params.moisFin;
+      const eNom = el('ent-nom');   if(eNom) eNom.value = S.params.nomEnt;
+      const eObj = el('ent-obj');   if(eObj) eObj.value = S.params.obj;
+      const eTva = el('ent-tva');   if(eTva) eTva.value = S.params.regimeTVA;
+      const eSec = el('ent-sect');  if(eSec) eSec.value = S.params.secteur;
+      const dbn  = el('db-name');   if(dbn)  dbn.textContent = S.params.nomEnt || 'Mon Entreprise';
+      const eTi  = el('treso-init');if(eTi)  eTi.value  = S.params.tresoInit;
       const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = S.params.annee;
     }
 
-    // Articles
-    const {data:arts, error:aErr} = await sb.from('articles').select('*').eq('user_id',uid);
-    if(aErr) { console.error('Articles load error:', aErr); }
-    else if(arts && arts.length > 0) {
-      S.articles = arts.map(a=>({
-        code: a.code,
-        nom:  a.nom,
-        cat:  a.categorie||'Divers',
-        pv:   parseFloat(a.prix_ht)||0,
-        cout: parseFloat(a.cout_achat)||0,
-        tva:  parseFloat(a.tva)||.2,
-        actif: a.actif !== false
+    // ── Articles ──
+    const {data:arts, error:aErr} = await sb.from('articles').select('*').eq('user_id', uid);
+    if(aErr) {
+      console.error('Articles error:', aErr.message);
+    } else if(arts && arts.length > 0) {
+      S.articles = arts.map(a => ({
+        code:  a.code,
+        nom:   a.nom,
+        cat:   a.categorie || 'Divers',
+        pv:    parseFloat(a.prix_ht)    || 0,
+        cout:  parseFloat(a.cout_achat) || 0,
+        tva:   parseFloat(a.tva)        || 0.2,
+        actif: a.actif !== false,
       }));
-      console.log('Articles chargés:', S.articles.length);
+      console.log('✓ Articles:', S.articles.length);
     }
 
-    // Charges
-    const {data:chs, error:cErr} = await sb.from('charges').select('*').eq('user_id',uid);
-    if(cErr) { console.error('Charges load error:', cErr); }
-    else if(chs && chs.length > 0) {
-      S.charges = chs.map(c=>({
+    // ── Charges ──
+    const {data:chs, error:cErr} = await sb.from('charges').select('*').eq('user_id', uid);
+    if(cErr) {
+      console.error('Charges error:', cErr.message);
+    } else if(chs && chs.length > 0) {
+      S.charges = chs.map(c => ({
         code:  c.code,
         nom:   c.nom,
-        cat:   c.categorie||'Divers',
-        tva:   parseFloat(c.tva)||.2,
-        type:  c.type||'Variable',
-        actif: c.actif !== false
+        cat:   c.categorie || 'Divers',
+        tva:   parseFloat(c.tva) || 0.2,
+        type:  c.type  || 'Variable',
+        actif: c.actif !== false,
       }));
-      console.log('Charges chargées:', S.charges.length);
+      console.log('✓ Charges:', S.charges.length);
     }
 
-    // Saisies CA
+    // ── Saisies CA ──
     const an = S.params.annee;
     S.articles.forEach(a => { S.qty[a.code] = Array(12).fill(0); });
-    const {data:sca, error:scaErr} = await sb.from('saisies_ca').select('*').eq('user_id',uid).eq('annee',an);
-    if(scaErr) { console.error('Saisies CA error:', scaErr); }
-    else if(sca) {
+    const {data:sca, error:scaErr} = await sb.from('saisies_ca')
+      .select('article_code,mois,quantite').eq('user_id', uid).eq('annee', an);
+    if(scaErr) {
+      console.error('Saisies CA error:', scaErr.message);
+    } else if(sca) {
       sca.forEach(r => {
         if(!S.qty[r.article_code]) S.qty[r.article_code] = Array(12).fill(0);
-        S.qty[r.article_code][r.mois-1] = r.quantite;
+        S.qty[r.article_code][r.mois - 1] = r.quantite;
       });
-      console.log('Saisies CA chargées:', sca.length);
+      console.log('✓ Saisies CA:', sca.length, 'pour', an);
     }
 
-    // Saisies charges
+    // ── Saisies Charges ──
     S.charges.forEach(c => { S.chMD[c.code] = Array(12).fill(0); });
-    const {data:sch, error:schErr} = await sb.from('saisies_charges').select('*').eq('user_id',uid).eq('annee',an);
-    if(schErr) { console.error('Saisies charges error:', schErr); }
-    else if(sch) {
+    const {data:sch, error:schErr} = await sb.from('saisies_charges')
+      .select('charge_code,mois,montant').eq('user_id', uid).eq('annee', an);
+    if(schErr) {
+      console.error('Saisies charges error:', schErr.message);
+    } else if(sch) {
       sch.forEach(r => {
         if(!S.chMD[r.charge_code]) S.chMD[r.charge_code] = Array(12).fill(0);
-        S.chMD[r.charge_code][r.mois-1] = r.montant;
+        S.chMD[r.charge_code][r.mois - 1] = r.montant;
       });
-      console.log('Saisies charges chargées:', sch.length);
+      console.log('✓ Saisies charges:', sch.length, 'pour', an);
     }
 
     return true;
+
   } catch(err) {
-    console.error('loadData critical error:', err);
+    console.error('loadData CRITICAL:', err);
     return false;
   }
 }
@@ -2752,43 +2765,39 @@ function exportTreso()   {
 // ═══════════════════════════════════════════════
 async function startApp(user) {
   setUserUI(user);
-  // Bloquer l'autosave pendant le chargement
-  S.uid = null; // uid null = autoSave ignoré
+  S.uid = null; // Bloquer autosave pendant le chargement
   el('auth').style.display = 'none';
   el('onb').style.display  = 'none';
   el('app').style.display  = 'flex';
-  // Afficher état de chargement dans la savebar
-  const d = el('sdot'); const t = el('stxt');
-  if(d) d.classList.remove('saved');
-  if(t) t.textContent = 'Chargement de vos données…';
 
-  // Charger toutes les données AVANT de rendre quoi que ce soit
-  const hasData = await loadData(user.id);
+  // Charger les données
+  let loadOk = false;
+  try {
+    loadOk = await loadData(user.id);
+  } catch(e) {
+    console.error('loadData exception:', e);
+    loadOk = false;
+  }
 
-  // Maintenant on peut débloquer l'autosave
+  // Débloquer l'autosave
   S.uid = user.id;
 
-  if(hasData && S.articles.length > 0) {
-    // Utilisateur existant avec données — rendre l'app
-    recalc();
-    renderAll();
-    renderArt();
-    renderCh();
-    setSaved();
-    checkUpgrade();
-  } else if(hasData) {
-    // Compte existant mais sans articles — app vide prête
-    recalc();
-    renderAll();
-    renderArt();
-    renderCh();
-    setSaved();
-  } else {
-    // Nouvel utilisateur — onboarding
-    el('app').style.display = 'none';
-    el('onb').style.display = 'flex';
-    renderOnb();
+  if(!loadOk) {
+    // Erreur réseau ou Supabase — afficher l'app quand même avec état vide
+    // NE PAS aller en onboarding : l'utilisateur a peut-être des données en base
+    console.warn('loadData failed — affichage app vide, données peut-être en base');
+    const t = el('stxt');
+    if(t) t.textContent = 'Erreur chargement — actualisez la page';
   }
+
+  // TOUJOURS afficher l'app (jamais d'onboarding si session existante)
+  // L'onboarding n'est montré QUE lors de la toute première connexion (voir doAuth)
+  recalc();
+  renderAll();
+  renderArt();
+  renderCh();
+  setSaved();
+  checkUpgrade();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
