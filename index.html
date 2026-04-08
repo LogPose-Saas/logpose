@@ -1989,11 +1989,14 @@ async function saveAll() {
 
 
 async function loadData(uid) {
+  console.log('[loadData] début pour uid:', uid.slice(0,8));
   // Chaque requête dans son propre try/catch — une erreur n'arrête pas les autres
 
   // ── Paramètres ──
   try {
+    console.log('[loadData] requête parametres...');
     const {data:p, error:e} = await sb.from('parametres').select('*').eq('user_id',uid).single();
+    console.log('[loadData] parametres reçu — data:', !!p, 'error:', e?.code);
     if(e && e.code !== 'PGRST116') console.warn('[load] params:', e.code, e.message);
     if(p) {
       S.params.annee     = p.annee           || 2026;
