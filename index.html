@@ -1542,20 +1542,23 @@ function renderCtrl() {
 }
 
 function updPeriodPreview() {
-  const an = parseInt(el('p-an').value)||2026;
-  const d  = parseInt(el('p-deb').value);
-  const f  = parseInt(el('p-fin').value);
-  const nb = f>=d ? f-d+1 : 12-d+f+1;
-  const an2 = f<d ? an+1 : an;
-  el('p-prev-val').textContent = `${MOIS[d]} ${an} → ${MOIS[f]} ${an2}`;
-  el('p-prev-nb').textContent  = `${nb} mois`;
-  S.params.annee   = an;
-  S.params.moisDeb = d;
-  S.params.moisFin = f;
-  // Reset filtre sur changement de période
+  // Cette fonction affiche uniquement — elle ne modifie JAMAIS S.params
+  // S.params est la source de vérité, le DOM est le reflet
+  const an = S.params.annee;
+  const d  = S.params.moisDeb;
+  const f  = S.params.moisFin;
+  // Sync les champs cachés avec S.params (pas l'inverse)
+  const pAn = el('p-an');   if(pAn  && parseInt(pAn.value)  !== an) pAn.value  = an;
+  const pDeb = el('p-deb'); if(pDeb && parseInt(pDeb.value) !== d)  pDeb.value = d;
+  const pFin = el('p-fin'); if(pFin && parseInt(pFin.value) !== f)  pFin.value = f;
+  // Affichage de la période
+  const nb   = f >= d ? f-d+1 : 12-d+f+1;
+  const an2  = f < d ? an+1 : an;
+  const pv   = el('p-prev-val'); if(pv) pv.textContent = `${MOIS[d]} ${an} → ${MOIS[f]} ${an2}`;
+  const pn   = el('p-prev-nb');  if(pn) pn.textContent = `${nb} mois`;
+  // Reset filtre période
   periodeFilter = 'all';
-  const sel = el('db-period-sel');
-  if(sel) sel.value = 'all';
+  const sel = el('db-period-sel'); if(sel) sel.value = 'all';
 }
 
 // ── MULTI-ANNÉES ──
