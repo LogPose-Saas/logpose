@@ -743,22 +743,22 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
     <div class="slbl">Informations générales</div>
     <div class="card">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px">
-        <div><label class="flbl">Nom de l'entreprise</label><input class="finp" id="ent-nom" type="text" placeholder="Mon Entreprise" onchange="autoSave();document.getElementById('db-name').textContent=this.value||'Mon Entreprise'"></div>
-        <div><label class="flbl">Secteur</label><select class="fsel" id="ent-sect" onchange="autoSave()"><option>Commerce de détail</option><option>E-commerce</option><option>Prestation de service</option><option>Restauration / Food</option><option>BTP / Artisanat</option><option>Autre</option></select></div>
-        <div><label class="flbl">Objectif CA annuel (€)</label><input class="finp" id="ent-obj" type="number" placeholder="120000" onchange="S.params.obj=parseFloat(this.value)||0;autoSave()"></div>
+        <div><label class="flbl">Nom de l'entreprise</label><input class="finp" id="ent-nom" type="text" placeholder="Mon Entreprise" oninput="S.params.nomEnt=this.value;document.getElementById('db-name').textContent=this.value||'Mon Entreprise';autoSave()"></div>
+        <div><label class="flbl">Secteur</label><select class="fsel" id="ent-sect" onchange="S.params.secteur=this.value;autoSave()"><option>Commerce de détail</option><option>E-commerce</option><option>Prestation de service</option><option>Restauration / Food</option><option>BTP / Artisanat</option><option>Autre</option></select></div>
+        <div><label class="flbl">Objectif CA annuel (€)</label><input class="finp" id="ent-obj" type="number" placeholder="120000" oninput="S.params.obj=parseFloat(this.value)||0;autoSave()"></div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
         <div><label class="flbl">Régime TVA</label><select class="fsel" id="ent-tva" onchange="S.params.regimeTVA=this.value;recalc();renderAll();autoSave()"><option>TVA réelle mensuelle</option><option>TVA réelle trimestrielle</option><option>Franchise en base</option></select></div>
-        <div><label class="flbl">Régime fiscal</label><select class="fsel" id="ent-fisc" onchange="autoSave()"><option>IS — Impôt sur les sociétés</option><option>IR — Impôt sur le revenu</option><option>Micro-entreprise</option></select></div>
-        <div><label class="flbl">Devise</label><select class="fsel" id="ent-dev" onchange="autoSave()"><option>€ Euro</option><option>$ Dollar</option><option>£ Livre sterling</option></select></div>
+        <div><label class="flbl">Régime fiscal</label><select class="fsel" id="ent-fisc" onchange="S.params.regimeFisc=this.value;autoSave()"><option>IS — Impôt sur les sociétés</option><option>IR — Impôt sur le revenu</option><option>Micro-entreprise</option></select></div>
+        <div><label class="flbl">Devise</label><select class="fsel" id="ent-dev" onchange="S.params.devise=this.value;autoSave()"><option>€ Euro</option><option>$ Dollar</option><option>£ Livre sterling</option></select></div>
       </div>
     </div>
     <div class="slbl" style="margin-top:16px">Clé de répartition des charges fixes</div>
     <div class="card">
       <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
         <div style="flex:1;min-width:220px">
-          <label class="rdopt"><input type="radio" name="cle" value="qte" checked onchange="autoSave()"><div><div class="rdopt-title">Prorata des quantités vendues</div><div class="rdopt-sub">Recommandé · Simple et universel</div></div></label>
-          <label class="rdopt"><input type="radio" name="cle" value="ca" onchange="autoSave()"><div><div class="rdopt-title">Prorata du CA HT</div><div class="rdopt-sub">Si les prix varient beaucoup entre articles</div></div></label>
+          <label class="rdopt"><input type="radio" name="cle" value="qte" checked onchange="S.params.cle='qte';autoSave()"><div><div class="rdopt-title">Prorata des quantités vendues</div><div class="rdopt-sub">Recommandé · Simple et universel</div></div></label>
+          <label class="rdopt"><input type="radio" name="cle" value="ca" onchange="S.params.cle='ca';autoSave()"><div><div class="rdopt-title">Prorata du CA HT</div><div class="rdopt-sub">Si les prix varient beaucoup entre articles</div></div></label>
           <label class="rdopt" style="opacity:.5"><input type="radio" name="cle" disabled><div><div class="rdopt-title">Clé personnalisée <span class="bdg bam" style="font-size:9px">V2</span></div><div class="rdopt-sub">Définir un % par article manuellement</div></div></label>
         </div>
         <div style="width:210px;background:var(--bgs);border:1px solid var(--bd);border-radius:var(--rs);padding:14px">
@@ -1926,17 +1926,17 @@ async function saveAll() {
     const uid = S.uid;
     const an  = S.params.annee; // Capturer l'année AU MOMENT de l'appel
 
-    // Paramètres globaux
+    // Paramètres globaux — source de vérité = S.params (jamais le DOM)
     await sb.from('parametres').upsert({
       user_id: uid,
       annee: an,
       mois_debut: S.params.moisDeb,
       mois_fin: S.params.moisFin,
-      nom_entreprise: el('ent-nom')?.value || S.params.nomEnt || '',
-      objectif_ca: parseFloat(el('ent-obj')?.value) || S.params.obj || 0,
-      secteur: el('ent-sect')?.value || S.params.secteur || '',
+      nom_entreprise: S.params.nomEnt || '',
+      objectif_ca: S.params.obj || 0,
+      secteur: S.params.secteur || '',
       regime_tva: S.params.regimeTVA || 'TVA réelle mensuelle',
-      cle_repartition: document.querySelector('input[name="cle"]:checked')?.value || 'qte',
+      cle_repartition: S.params.cle || 'qte',
       treso_init: S.params.tresoInit || 0,
       is_pro: S.isPro || false,
     }, {onConflict:'user_id'});
