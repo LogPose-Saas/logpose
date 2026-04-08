@@ -2760,25 +2760,24 @@ function exportTreso()   {
 // DÉMARRAGE
 // ═══════════════════════════════════════════════
 async function startApp(user) {
+  console.log('[startApp] début, uid:', user.id.slice(0,8));
   setUserUI(user);
-  S.uid = null; // Bloquer autosave pendant le chargement
+  S.uid = null;
 
-  // Masquer auth, afficher app
   el('auth').style.display = 'none';
   el('onb').style.display  = 'none';
   el('app').style.display  = 'flex';
 
-  // loadData NE RETOURNE JAMAIS false — l'app s'affiche toujours
   await loadData(user.id);
+  console.log('[startApp] après loadData — annee:', S.params.annee, 'articles:', S.articles.length);
 
-  // Débloquer l'autosave
   S.uid = user.id;
 
-  // Rendre l'app
   recalc();
   renderAll();
   renderArt();
   renderCh();
+  console.log('[startApp] après render — annee affichée:', S.params.annee);
   setSaved();
   checkUpgrade();
 }
@@ -2802,6 +2801,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Auth state listener
   sb.auth.onAuthStateChange(async (event, session) => {
+    console.log('[auth] event:', event, 'started:', window._appStarted);
     if(event === 'SIGNED_IN' && session && !window._appStarted) {
       await tryStartApp(session.user);
     } else if(event === 'SIGNED_OUT') {
