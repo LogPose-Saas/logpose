@@ -1927,7 +1927,7 @@ async function saveAll() {
     const an  = S.params.annee; // Capturer l'année AU MOMENT de l'appel
 
     // Paramètres globaux — source de vérité = S.params (jamais le DOM)
-    await sb.from('parametres').upsert({
+    const paramsData = {
       user_id: uid,
       annee: an,
       mois_debut: S.params.moisDeb,
@@ -1937,9 +1937,13 @@ async function saveAll() {
       secteur: S.params.secteur || '',
       regime_tva: S.params.regimeTVA || 'TVA réelle mensuelle',
       cle_repartition: S.params.cle || 'qte',
-      treso_init: S.params.tresoInit || 0,
       is_pro: S.isPro || false,
-    }, {onConflict:'user_id'});
+    };
+    // treso_init est optionnel (colonne peut ne pas exister si SQL pas encore exécuté)
+    if(S.params.tresoInit !== undefined && S.params.tresoInit !== null) {
+      paramsData.treso_init = S.params.tresoInit;
+    }
+    await sb.from('parametres').upsert(paramsData, {onConflict:'user_id'});
 
     // Articles — NE PAS supprimer si le tableau est vide (protection contre data wipe)
     if(S.articles.length > 0) {
@@ -1997,29 +2001,27 @@ async function saveAll() {
 // ═══════════════════════════════════════════════
 async function loadData(uid) {
   try {
-    // ── Paramètres ──
+    // ── Paramètres ── select * pour éviter les erreurs de colonnes manquantes
     const {data:params, error:pErr} = await sb.from('parametres')
-      .select('annee,mois_debut,mois_fin,nom_entreprise,objectif_ca,secteur,regime_tva,cle_repartition,treso_init,is_pro')
-      .eq('user_id', uid).single();
+      .select('*').eq('user_id', uid).single();
 
     if(pErr && pErr.code !== 'PGRST116') {
-      // PGRST116 = pas de ligne = nouvel utilisateur, c'est normal
-      console.warn('Params load warning:', pErr.code, pErr.message);
+      console.warn('Params warning:', pErr.code, pErr.message);
     }
 
     if(params) {
-      S.params.annee     = params.annee     || 2026;
-      S.params.moisDeb   = params.mois_debut|| 1;
-      S.params.moisFin   = params.mois_fin  || 12;
-      S.params.obj       = params.objectif_ca || 0;
-      S.params.regimeTVA = params.regime_tva || 'TVA réelle mensuelle';
+      S.params.annee     = params.annee          || 2026;
+      S.params.moisDeb   = params.mois_debut     || 1;
+      S.params.moisFin   = params.mois_fin       || 12;
+      S.params.obj       = params.objectif_ca    || 0;
+      S.params.regimeTVA = params.regime_tva     || 'TVA réelle mensuelle';
       S.params.nomEnt    = params.nom_entreprise || '';
-      S.params.secteur   = params.secteur    || '';
-      S.params.cle       = params.cle_repartition || 'qte';
-      S.params.tresoInit = params.treso_init || 0;
+      S.params.secteur   = params.secteur        || '';
+      S.params.cle       = params.cle_repartition|| 'qte';
+      S.params.tresoInit = params.treso_init     || 0; // colonne optionnelle
       S.isPro            = params.is_pro === true;
-      // Sync DOM
-      const pAn = el('p-an');       if(pAn)  pAn.value  = S.params.annee;
+      // Sync DOM (sans provoquer d'events onchange/oninput)
+      const pAn  = el('p-an');      if(pAn)  pAn.value  = S.params.annee;
       const pDeb = el('p-deb');     if(pDeb) pDeb.value = S.params.moisDeb;
       const pFin = el('p-fin');     if(pFin) pFin.value = S.params.moisFin;
       const eNom = el('ent-nom');   if(eNom) eNom.value = S.params.nomEnt;
@@ -2034,7 +2036,7 @@ async function loadData(uid) {
     // ── Articles ──
     const {data:arts, error:aErr} = await sb.from('articles').select('*').eq('user_id', uid);
     if(aErr) {
-      console.error('Articles error:', aErr.message);
+      console.error('Articles error:', aErr.code, aErr.message);
     } else if(arts && arts.length > 0) {
       S.articles = arts.map(a => ({
         code:  a.code,
@@ -2051,15 +2053,15 @@ async function loadData(uid) {
     // ── Charges ──
     const {data:chs, error:cErr} = await sb.from('charges').select('*').eq('user_id', uid);
     if(cErr) {
-      console.error('Charges error:', cErr.message);
+      console.error('Charges error:', cErr.code, cErr.message);
     } else if(chs && chs.length > 0) {
       S.charges = chs.map(c => ({
         code:  c.code,
         nom:   c.nom,
         cat:   c.categorie || 'Divers',
         tva:   parseFloat(c.tva) || 0.2,
-        type:  c.type  || 'Variable',
-        actif: c.actif !== false,
+        type:  c.type   || 'Variable',
+        actif: c.actif  !== false,
       }));
       console.log('✓ Charges:', S.charges.length);
     }
@@ -2070,13 +2072,13 @@ async function loadData(uid) {
     const {data:sca, error:scaErr} = await sb.from('saisies_ca')
       .select('article_code,mois,quantite').eq('user_id', uid).eq('annee', an);
     if(scaErr) {
-      console.error('Saisies CA error:', scaErr.message);
+      console.error('Saisies CA error:', scaErr.code, scaErr.message);
     } else if(sca) {
       sca.forEach(r => {
         if(!S.qty[r.article_code]) S.qty[r.article_code] = Array(12).fill(0);
         S.qty[r.article_code][r.mois - 1] = r.quantite;
       });
-      console.log('✓ Saisies CA:', sca.length, 'pour', an);
+      console.log('✓ Saisies CA:', sca.length, '— année', an);
     }
 
     // ── Saisies Charges ──
@@ -2084,19 +2086,19 @@ async function loadData(uid) {
     const {data:sch, error:schErr} = await sb.from('saisies_charges')
       .select('charge_code,mois,montant').eq('user_id', uid).eq('annee', an);
     if(schErr) {
-      console.error('Saisies charges error:', schErr.message);
+      console.error('Saisies charges error:', schErr.code, schErr.message);
     } else if(sch) {
       sch.forEach(r => {
         if(!S.chMD[r.charge_code]) S.chMD[r.charge_code] = Array(12).fill(0);
         S.chMD[r.charge_code][r.mois - 1] = r.montant;
       });
-      console.log('✓ Saisies charges:', sch.length, 'pour', an);
+      console.log('✓ Saisies charges:', sch.length, '— année', an);
     }
 
     return true;
 
   } catch(err) {
-    console.error('loadData CRITICAL:', err);
+    console.error('loadData CRITICAL error:', err);
     return false;
   }
 }
@@ -2770,7 +2772,7 @@ async function startApp(user) {
   el('onb').style.display  = 'none';
   el('app').style.display  = 'flex';
 
-  // Charger les données
+  // Charger les données depuis Supabase
   let loadOk = false;
   try {
     loadOk = await loadData(user.id);
@@ -2779,19 +2781,32 @@ async function startApp(user) {
     loadOk = false;
   }
 
-  // Débloquer l'autosave
-  S.uid = user.id;
-
   if(!loadOk) {
-    // Erreur réseau ou Supabase — afficher l'app quand même avec état vide
-    // NE PAS aller en onboarding : l'utilisateur a peut-être des données en base
-    console.warn('loadData failed — affichage app vide, données peut-être en base');
-    const t = el('stxt');
-    if(t) t.textContent = 'Erreur chargement — actualisez la page';
+    // Échec du chargement : NE PAS activer l'autosave, afficher un message de retry
+    // Les données en base sont intactes — on ne touche à rien
+    el('app').style.display = 'none';
+    el('auth').style.display = 'flex';
+    const err = el('auth-err');
+    if(err) {
+      err.textContent = '⚠ Erreur de chargement — vérifiez votre connexion et réessayez.';
+      err.style.display = 'block';
+    }
+    const btn = el('auth-btn');
+    if(btn) {
+      btn.textContent = '↻ Réessayer';
+      btn.disabled = false;
+      btn.onclick = () => {
+        btn.textContent = 'Chargement…';
+        btn.disabled = true;
+        err.style.display = 'none';
+        startApp(user);
+      };
+    }
+    return; // NE PAS continuer — NE PAS remettre S.uid
   }
 
-  // TOUJOURS afficher l'app (jamais d'onboarding si session existante)
-  // L'onboarding n'est montré QUE lors de la toute première connexion (voir doAuth)
+  // Chargement réussi — activer l'autosave et afficher l'app
+  S.uid = user.id;
   recalc();
   renderAll();
   renderArt();
