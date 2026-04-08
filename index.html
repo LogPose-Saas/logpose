@@ -789,10 +789,10 @@ const MOIS = ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Ao�
 const MS   = ['','Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
 
 let S = {
-  articles: [],   // [{code,nom,cat,pv,cout,tva,actif}]
-  charges:  [],   // [{code,nom,cat,tva,type,actif}]
-  qty:      {},   // {code: [m0..m11]}
-  chMD:     {},   // {code: [m0..m11]}
+  articles: [],
+  charges:  [],
+  qty:      {},
+  chMD:     {},
   params: {annee:2026, moisDeb:1, moisFin:12, nomEnt:'', obj:0, secteur:'', regimeTVA:'', regimeFisc:'', cle:'qte', tresoInit:0},
   isPro: false,
   uid: null,
@@ -1586,6 +1586,8 @@ async function changeAnnee(val) {
   // 4. Changer l'année dans S.params
   S.params.annee = newAn;
   const pAn = el('p-an'); if(pAn) pAn.value = newAn;
+  // Sauvegarder immédiatement dans localStorage pour le refresh
+  try { localStorage.setItem('lp_annee_' + S.uid, newAn); } catch(e) {}
 
   // 5. Vider les saisies en mémoire (on va recharger depuis Supabase)
   S.qty  = {};
@@ -1925,6 +1927,7 @@ async function saveAll() {
 
   // ── 1. Backup localStorage immédiat (ne dépend pas de Supabase) ──
   try {
+    localStorage.setItem('lp_annee_' + uid, an); // Année active — restaurée en premier au refresh
     localStorage.setItem('lp_' + uid, JSON.stringify({
       v:2, ts:Date.now(), an,
       articles:S.articles, charges:S.charges,
@@ -1988,8 +1991,8 @@ async function saveAll() {
 }
 
 
-// Helper: requête Supabase avec timeout
-function sbQuery(promise, timeoutMs = 5000) {
+// Helper: requête Supabase avec timeout réduit
+function sbQuery(promise, timeoutMs = 3000) {
   return Promise.race([
     promise,
     new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs))
@@ -1997,15 +2000,23 @@ function sbQuery(promise, timeoutMs = 5000) {
 }
 
 async function loadData(uid) {
-  console.log('[loadData] début pour uid:', uid.slice(0,8));
-
-  // ── Paramètres ──
+  // ── 1. Restaurer l'année active depuis localStorage AVANT tout (instantané) ──
   try {
-    console.log('[loadData] requête parametres...');
+    const an = parseInt(localStorage.getItem('lp_annee_' + uid));
+    if(an >= 2020 && an <= 2040) {
+      S.params.annee = an;
+      const pAn = el('p-an'); if(pAn) pAn.value = an;
+      const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = an;
+    }
+  } catch(e) {}
+
+  // ── 2. Paramètres depuis Supabase ──
+  try {
+
     const {data:p, error:e} = await sbQuery(
       sb.from('parametres').select('*').eq('user_id',uid).single()
     );
-    console.log('[loadData] parametres reçu — data:', !!p, 'error:', e?.code);
+
     if(e && e.code !== 'PGRST116') console.warn('[load] params:', e.code, e.message);
     if(p) {
       S.params.annee     = p.annee           || 2026;
@@ -2040,7 +2051,7 @@ async function loadData(uid) {
         pv:parseFloat(a.prix_ht)||0, cout:parseFloat(a.cout_achat)||0,
         tva:parseFloat(a.tva)||0.2, actif:a.actif!==false,
       }));
-      console.log('[load] articles:', S.articles.length);
+
     }
   } catch(e) { console.warn('[load] articles exception:', e.message); }
 
@@ -2055,7 +2066,7 @@ async function loadData(uid) {
         code:c.code, nom:c.nom, cat:c.categorie||'Divers',
         tva:parseFloat(c.tva)||0.2, type:c.type||'Variable', actif:c.actif!==false,
       }));
-      console.log('[load] charges:', S.charges.length);
+
     }
   } catch(e) { console.warn('[load] charges exception:', e.message); }
 
@@ -2072,7 +2083,7 @@ async function loadData(uid) {
         if(!S.qty[r.article_code]) S.qty[r.article_code] = Array(12).fill(0);
         S.qty[r.article_code][r.mois-1] = r.quantite;
       });
-      console.log('[load] saisies_ca:', sca.length, 'pour', an);
+
     }
   } catch(e) { console.warn('[load] saisies_ca exception:', e.message); }
 
@@ -2088,7 +2099,7 @@ async function loadData(uid) {
         if(!S.chMD[r.charge_code]) S.chMD[r.charge_code] = Array(12).fill(0);
         S.chMD[r.charge_code][r.mois-1] = r.montant;
       });
-      console.log('[load] saisies_charges:', sch.length, 'pour', an);
+
     }
   } catch(e) { console.warn('[load] saisies_charges exception:', e.message); }
 
@@ -2100,23 +2111,26 @@ async function loadData(uid) {
         const bk = JSON.parse(raw);
         if(bk.articles && bk.articles.length > 0) {
           console.warn('[load] restauration depuis localStorage backup');
+          // Préserver l'année déjà restaurée depuis lp_annee_uid
+          const anneeActive = S.params.annee;
           S.articles = bk.articles;
           S.charges  = bk.charges  || S.charges;
-          S.qty      = bk.qty      || S.qty;
-          S.chMD     = bk.chMD     || S.chMD;
+          // Charger les saisies pour l'année ACTIVE (pas celle du backup)
+          S.qty  = bk.qty  || {};
+          S.chMD = bk.chMD || {};
           if(bk.params) {
             Object.assign(S.params, bk.params);
-            // Re-sync DOM avec les params du backup
-            const set = (id, v) => { const e=el(id); if(e) e.value=v; };
-            set('p-an', S.params.annee);
-            const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = S.params.annee;
+            // Rétablir l'année active — elle prime sur celle du backup
+            S.params.annee = anneeActive;
           }
+          // Sync DOM
+          const pAn = el('p-an'); if(pAn) pAn.value = S.params.annee;
+          const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = S.params.annee;
         }
       }
     } catch(e) {}
   }
 
-  console.log('[loadData] terminé — annee:', S.params.annee, 'articles:', S.articles.length);
   return true;
 }
 
@@ -2784,24 +2798,17 @@ function exportTreso()   {
 // DÉMARRAGE
 // ═══════════════════════════════════════════════
 async function startApp(user) {
-  console.log('[startApp] début, uid:', user.id.slice(0,8));
   setUserUI(user);
   S.uid = null;
-
   el('auth').style.display = 'none';
   el('onb').style.display  = 'none';
   el('app').style.display  = 'flex';
-
   await loadData(user.id);
-  console.log('[startApp] après loadData — annee:', S.params.annee, 'articles:', S.articles.length);
-
   S.uid = user.id;
-
   recalc();
   renderAll();
   renderArt();
   renderCh();
-  console.log('[startApp] après render — annee affichée:', S.params.annee);
   setSaved();
   checkUpgrade();
 }
@@ -2810,10 +2817,10 @@ async function startApp(user) {
 document.addEventListener('DOMContentLoaded', async () => {
   applyTheme();
   window._appStarted = false;
-  window._appLoading = false; // Verrou supplémentaire contre les appels simultanés
+  window._appLoading = false;
 
   async function tryStartApp(user) {
-    if(window._appLoading) return; // Un chargement est déjà en cours
+    if(window._appLoading) return;
     window._appLoading = true;
     window._appStarted = true;
     try {
@@ -2823,10 +2830,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Auth state listener
+  // Supabase v2 envoie INITIAL_SESSION quand le client est prêt (token rafraîchi)
+  // C'est le bon moment pour charger les données — les requêtes ne timeouteront pas
   sb.auth.onAuthStateChange(async (event, session) => {
-    console.log('[auth] event:', event, 'started:', window._appStarted);
-    if(event === 'SIGNED_IN' && session && !window._appStarted) {
+    if((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && session && !window._appStarted) {
+      await tryStartApp(session.user);
+    } else if(event === 'SIGNED_IN' && session && !window._appStarted) {
       await tryStartApp(session.user);
     } else if(event === 'SIGNED_OUT') {
       window._appStarted = false;
@@ -2837,11 +2846,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Session existante (rechargement de page)
-  const {data:{session}} = await sb.auth.getSession();
-  if(session && !window._appStarted) {
-    await tryStartApp(session.user);
-  }
+  // Ne pas appeler getSession() séparément — INITIAL_SESSION s'en charge
+  // getSession() déclenchait startApp trop tôt, avant que le token soit prêt
 });
 </script>
 </body>
