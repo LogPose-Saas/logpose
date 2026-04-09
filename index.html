@@ -2047,29 +2047,16 @@ async function saveAll() {
   // ── Articles : upsert (pas delete+insert) pour préserver annee_suppression ──
   if(S.articles.length>0) {
     try {
-      // Upsert article par article pour ne pas écraser annee_suppression des autres années
+      // UPSERT uniquement — ne jamais DELETE tous les articles
+      // Les articles des autres années restent intacts en base
       const rows = S.articles.map(a=>({
         user_id:uid, code:a.code, nom:a.nom, categorie:a.cat,
         prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif,
-        annee_creation:a.anneeCreation||an,
-        annee_suppression:null, // Cet article est actif dans l'année courante
+        annee_creation: a.anneeCreation || an,
+        annee_suppression: a.anneeSupp || null,
       }));
-      // Delete uniquement les articles actifs pour cet user, puis réinsérer
-      // On récupère tous les articles en base d'abord pour préserver annee_suppression
-      const {data:existing} = await sb.from('articles').select('code,annee_suppression').eq('user_id',uid);
-      const existingMap = {};
-      if(existing) existing.forEach(x => { existingMap[x.code] = x.annee_suppression; });
-      
-      // Construire les rows en préservant annee_suppression existante
-      const finalRows = S.articles.map(a=>({
-        user_id:uid, code:a.code, nom:a.nom, categorie:a.cat,
-        prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif,
-        annee_creation:a.anneeCreation||an,
-        annee_suppression: existingMap[a.code] !== undefined ? existingMap[a.code] : null,
-      }));
-      
-      await sb.from('articles').delete().eq('user_id',uid);
-      await sb.from('articles').insert(finalRows);
+      const {error:aE} = await sb.from('articles').upsert(rows, {onConflict:'user_id,code'});
+      if(aE) console.warn('[save] articles:', aE.message);
     } catch(e){ console.warn('[save] articles:', e.message); }
 
     try {
@@ -2082,22 +2069,17 @@ async function saveAll() {
     } catch(e){ console.warn('[save] saisies_ca:', e.message); }
   }
 
-  // ── Charges : même logique ──
+  // ── Charges : même logique UPSERT ──
   if(S.charges.length>0) {
     try {
-      const {data:existing} = await sb.from('charges').select('code,annee_suppression').eq('user_id',uid);
-      const existingMap = {};
-      if(existing) existing.forEach(x => { existingMap[String(x.code)] = x.annee_suppression; });
-      
-      const finalRows = S.charges.map(c=>({
+      const rows = S.charges.map(c=>({
         user_id:uid, code:String(c.code), nom:c.nom, categorie:c.cat,
         tva:c.tva, type:c.type, actif:c.actif,
-        annee_creation:c.anneeCreation||an,
-        annee_suppression: existingMap[String(c.code)] !== undefined ? existingMap[String(c.code)] : null,
+        annee_creation: c.anneeCreation || an,
+        annee_suppression: c.anneeSupp || null,
       }));
-      
-      await sb.from('charges').delete().eq('user_id',uid);
-      await sb.from('charges').insert(finalRows);
+      const {error:cE} = await sb.from('charges').upsert(rows, {onConflict:'user_id,code'});
+      if(cE) console.warn('[save] charges:', cE.message);
     } catch(e){ console.warn('[save] charges:', e.message); }
 
     try {
