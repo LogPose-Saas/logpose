@@ -2090,10 +2090,11 @@ async function loadData(uid) {
   if(rP.status==='fulfilled' && rP.value?.data?.length>0) {
     const p=rP.value.data[0];
     const estAnneeExacte = p.annee === anneeActive;
+    console.log('[params] ligne trouvée annee='+p.annee+' anneeActive='+anneeActive+' exact='+estAnneeExacte+' obj_en_base='+p.objectif_ca);
     S.params.moisDeb   = p.mois_debut      || 1;
     S.params.moisFin   = p.mois_fin        || 12;
-    // Objectif CA : indépendant par année — 0 si pas de ligne exacte pour cette année
     S.params.obj       = estAnneeExacte ? (p.objectif_ca || 0) : 0;
+    console.log('[params] S.params.obj mis à:', S.params.obj);
     S.params.regimeTVA = p.regime_tva      || 'TVA réelle mensuelle';
     S.params.nomEnt    = p.nom_entreprise  || '';
     S.params.secteur   = p.secteur         || '';
