@@ -636,23 +636,16 @@ function setSaved()    { const d=$('sdot'); if(d) d.classList.add('saved'); cons
 async function loadParams() {
   if(!UID) return;
   try {
-    // Charger TOUTES les lignes ≤ ANNEE pour cet user
     const {data, error} = await sbq(
       DB.from('parametres').select('*').eq('user_id',UID).lte('annee',ANNEE).order('annee',{ascending:false})
     );
     if(error) { console.warn('[params]', error.message); return; }
     if(!data || !data.length) return;
 
-    // Trouver la ligne exacte pour ANNEE si elle existe ET est non vide
-    const ligneExacte    = data.find(r => r.annee === ANNEE && (r.nom_entreprise || r.regime_tva !== 'TVA réelle mensuelle' || r.secteur));
-    // Trouver la ligne la plus récente < ANNEE (héritage)
-    const ligneHeritee   = data.find(r => r.annee < ANNEE);
-
-    // Priorité : ligne exacte non vide > héritage
-    const row = ligneExacte || ligneHeritee;
+    // Chercher la ligne la plus récente NON VIDE ≤ ANNEE
+    const row = data.find(r => r.nom_entreprise || r.secteur || r.regime_tva !== 'TVA réelle mensuelle' || r.objectif_ca > 0);
     if(!row) return;
 
-    const exact = row.annee === ANNEE;
     P.nomEnt    = row.nom_entreprise || '';
     P.secteur   = row.secteur        || '';
     P.regimeTVA = row.regime_tva     || 'TVA réelle mensuelle';
@@ -662,9 +655,10 @@ async function loadParams() {
     P.moisDeb   = row.mois_debut     || 1;
     P.moisFin   = row.mois_fin       || 12;
     P.tresoInit = row.treso_init     || 0;
-    // Objectif CA : uniquement si ligne exacte pour cette année
-    const ligneObjExacte = data.find(r => r.annee === ANNEE);
-    P.obj = ligneObjExacte ? (ligneObjExacte.objectif_ca || 0) : 0;
+
+    // Objectif CA : uniquement si ligne exacte pour ANNEE et non vide
+    const ligneExacte = data.find(r => r.annee === ANNEE && r.objectif_ca > 0);
+    P.obj = ligneExacte ? ligneExacte.objectif_ca : 0;
 
     paramsLoaded = true;
     renderEntreprise();
