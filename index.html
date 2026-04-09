@@ -3,16 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LogPose — Pilotez votre rentabilité</title>
+<title>LogPose — Paramètres</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script>
-const SUPABASE_URL = 'https://ppmdabvtdoaodzzjqqsc.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_Bx3WGtuoNlSlQU5MBtJsnQ_Fljdsow1';
-const LEMON_URL   = 'https://logpose.lemonsqueezy.com/checkout/buy/9b9cfa66-d08b-4646-9e4c-06aeafb00e6c';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-</script>
 <style>
 :root{
   --f:'Plus Jakarta Sans',sans-serif;
@@ -383,8 +376,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 </head>
 <body>
 
-<!-- ══════════ AUTH ══════════ -->
-<div id="auth">
+<!-- AUTH -->
+<div id="auth" style="position:fixed;inset:0;background:var(--bg);z-index:900;display:flex;align-items:center;justify-content:center">
   <div class="auth-card">
     <div class="auth-logo">
       <div class="auth-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
@@ -395,329 +388,256 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="auth-tab" id="tab-reg">Créer un compte</div>
     </div>
     <div class="auth-msg auth-err" id="auth-err"></div>
-    <div class="auth-msg auth-ok" id="auth-ok"></div>
+    <div class="auth-msg auth-ok"  id="auth-ok"></div>
     <div style="display:flex;flex-direction:column;gap:12px">
       <div><label class="flbl">Adresse e-mail</label><input class="finp" type="email" id="auth-email" placeholder="vous@exemple.com"></div>
       <div><label class="flbl">Mot de passe</label><input class="finp" type="password" id="auth-pwd" placeholder="8 caractères minimum"></div>
     </div>
     <button class="btn btn-p btn-full" id="auth-btn" style="margin-top:20px;padding:12px;font-size:14px">Se connecter</button>
-    <div style="text-align:center;margin-top:14px"><span id="auth-forgot" style="font-size:12px;color:var(--t2);cursor:pointer;text-decoration:underline">Mot de passe oublié ?</span></div>
-    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--bd);text-align:center;font-size:11px;color:var(--t3)">Données chiffrées et sécurisées · LogPose 2026</div>
+    <div style="text-align:center;margin-top:14px">
+      <span id="auth-forgot" style="font-size:12px;color:var(--t2);cursor:pointer;text-decoration:underline">Mot de passe oublié ?</span>
+    </div>
   </div>
 </div>
 
-<!-- ══════════ ONBOARDING ══════════ -->
-<div id="onb">
-  <div class="onb-card">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">
-      <div class="auth-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
-      <div><div class="auth-brand">LogPose</div><div style="font-size:9px;color:var(--t3);font-family:var(--fm);letter-spacing:.1em;text-transform:uppercase">Financial OS</div></div>
-    </div>
-    <div class="onb-steps"><div class="onb-step done" id="os1"></div><div class="onb-step" id="os2"></div><div class="onb-step" id="os3"></div></div>
-    <div id="onb-body"></div>
-  </div>
-</div>
+<!-- APP -->
+<div id="app" style="display:none;min-height:100vh">
 
-<!-- ══════════ APP ══════════ -->
-<div id="app">
-<div class="sb-ov" id="sb-ov" onclick="closeMob()"></div>
-<aside class="sb" id="sb">
-  <div class="sb-logo">
-    <div class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
-    <div class="sb-texts"><div class="sb-name">LogPose</div><div class="sb-sub">Financial OS</div></div>
-  </div>
-  <div class="sb-scroll">
-    <!-- Sélecteur d'année en sidebar -->
-    <div class="sb-year-block" id="sb-year-block">
-      <div class="sb-year-label">Année</div>
-      <div class="sb-year-row">
-        <button class="sb-year-btn" onclick="changeAnnee(S.params.annee-1)">‹</button>
-        <span id="sb-annee" class="sb-year-val">2026</span>
-        <button class="sb-year-btn" onclick="changeAnnee(S.params.annee+1)">›</button>
-      </div>
-      <div class="sb-year-btns" id="sb-annees"></div>
+  <!-- SIDEBAR -->
+  <aside class="sb" id="sb">
+    <div class="sb-logo">
+      <div class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+      <div class="sb-texts"><div class="sb-name">LogPose</div><div class="sb-sub">Financial OS</div></div>
     </div>
-    <div class="sb-sect">
-      <div class="sb-lbl">Pilotage</div>
-      <div class="sb-item active" onclick="nav('db',this)"><span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span><span>Vue d'ensemble</span></div>
-      <div class="sb-item" onclick="nav('alertes',this)"><span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span>Alertes</span><span class="sb-badge" id="alert-count"></span></div>
-    </div>
-    <div class="sb-sect">
-      <div class="sb-lbl">Saisie</div>
-      <div class="sb-item" onclick="nav('ca',this)"><span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><span>Chiffre d'affaires</span></div>
-      <div class="sb-item" onclick="nav('charges',this)"><span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span><span>Charges</span></div>
-    </div>
-    <div class="sb-sect">
-      <div class="sb-lbl">Analyse</div>
-      <div class="sb-item" onclick="nav('marge',this)"><span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span><span>Marge & rentabilité</span></div>
-      <div class="sb-item" onclick="nav('tva',this)"><span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span><span>TVA</span></div>
-      <div class="sb-item" onclick="nav('treso',this)"><span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span><span>Trésorerie</span></div>
-      <div class="sb-item" onclick="nav('prev',this)"><span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><span>Prévisionnel</span></div>
-      <div class="sb-item" onclick="nav('scen',this)"><span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg></span><span>Scénarios</span></div>
-    </div>
-    <div class="sb-sect">
-      <div class="sb-lbl">Configuration</div>
-      <div class="sb-item" onclick="nav('params',this)"><span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg></span><span>Paramètres</span></div>
-    </div>
-  </div>
-  <div class="sb-bottom">
-    <div class="sb-user" id="sb-user">
-      <div class="sb-avatar" id="sb-av">?</div>
-      <div class="sb-uinfo"><div class="sb-uemail" id="sb-email">...</div><div class="sb-uplan" id="sb-plan">Gratuit</div></div>
-      <div class="sb-logout" onclick="doLogout()" title="Se déconnecter"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-    </div>
-    <button class="sb-upgrade" id="sb-upgrade" onclick="doUpgrade()">⭐ Passer au Pro — 15 €/mois</button>
-    <button class="sb-col-btn" onclick="toggleSb()">
-      <svg id="col-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19l-7-7 7-7"/><path d="M21 19l-7-7 7-7"/></svg>
-      <span class="col-txt" style="font-size:12px;font-weight:500">Réduire</span>
-    </button>
-    <div class="theme-btn" onclick="toggleTheme()">
-      <span class="theme-txt" id="theme-lbl">🌙 Thème sombre</span>
-      <div class="tog"><div class="tog-k"></div></div>
-    </div>
-  </div>
-</aside>
-
-<!-- MOBILE HEADER -->
-<div class="mob-hdr">
-  <div class="mob-menu" onclick="openMob()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></div>
-  <div style="font-weight:700;font-size:16px">LogPose</div>
-  <div onclick="toggleTheme()" style="cursor:pointer;font-size:18px" id="mob-theme">🌙</div>
-</div>
-
-
-<!-- ══════════ MAIN CONTENT ══════════ -->
-<main class="main" id="main">
-
-<!-- ── PARAMETRES ── -->
-<div id="pnl-params" class="pnl active">
-  <div class="topbar">
-    <div>
-      <div class="page-title">Paramètres</div>
-      <div class="page-sub">Sauvegarde automatique · Année <span id="params-annee-lbl">N</span></div>
-    </div>
-  </div>
-
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('p-articles',this)">📦 Articles</div>
-    <div class="tab" onclick="switchTab('p-charges',this)">💸 Charges</div>
-    <div class="tab" onclick="switchTab('p-entreprise',this)">🏢 Entreprise</div>
-  </div>
-
-  <!-- ── ARTICLES ── -->
-  <div id="p-articles" class="tab-pnl active">
-    <div class="card">
-      <div class="tbl-hdr">
-        <div><div class="ct">Table articles</div><div class="cs">Saisie en année N · Répliqué en N+ automatiquement</div></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-g btn-sm" onclick="exportArts()">↓ CSV</button>
-          <button class="btn btn-g btn-sm" onclick="toggleAdd('p-art-add')">+ Ajouter</button>
+    <div class="sb-scroll">
+      <!-- Sélecteur année -->
+      <div class="sb-year-block">
+        <div class="sb-year-label">Année</div>
+        <div class="sb-year-row">
+          <button class="sb-year-btn" id="btn-year-prev">‹</button>
+          <span class="sb-year-val" id="sb-annee">2026</span>
+          <button class="sb-year-btn" id="btn-year-next">›</button>
         </div>
+        <div class="sb-year-btns" id="sb-annees"></div>
       </div>
-      <div class="addrow" id="p-art-add">
-        <input type="text" id="pa-code" placeholder="Code (REF01)" style="max-width:100px">
-        <input type="text" id="pa-nom" placeholder="Nom de l'article" style="flex:2">
-        <input type="text" id="pa-cat" placeholder="Catégorie" style="max-width:110px">
-        <input type="number" id="pa-pv" placeholder="Prix HT €" style="max-width:90px" step="0.01">
-        <input type="number" id="pa-cout" placeholder="Coût achat €" style="max-width:90px" step="0.01">
-        <select id="pa-tva" style="max-width:90px">
-          <option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option>
-          <option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option>
-        </select>
-        <button class="btn btn-p btn-sm" onclick="addArt()">Ajouter</button>
-        <button class="btn btn-g btn-sm" onclick="toggleAdd('p-art-add')">Annuler</button>
-      </div>
-      <div style="overflow-x:auto">
-        <table class="dtbl">
-          <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>Prix HT</th><th>Coût achat</th><th>TVA</th><th>Taux marge</th><th>Actif</th><th></th></tr></thead>
-          <tbody id="art-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── CHARGES ── -->
-  <div id="p-charges" class="tab-pnl">
-    <div class="card">
-      <div class="tbl-hdr">
-        <div><div class="ct">Table charges</div><div class="cs">Saisie en année N · Répliqué en N+ automatiquement</div></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-g btn-sm" onclick="exportChParam()">↓ CSV</button>
-          <button class="btn btn-g btn-sm" onclick="toggleAdd('p-ch-add')">+ Ajouter</button>
-        </div>
-      </div>
-      <div class="addrow" id="p-ch-add">
-        <input type="text" id="pc-nom" placeholder="Nom de la charge" style="flex:2">
-        <input type="text" id="pc-cat" placeholder="Catégorie" style="max-width:120px">
-        <select id="pc-tva" style="max-width:90px">
-          <option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option>
-          <option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option>
-        </select>
-        <select id="pc-type" style="max-width:105px"><option value="Variable">Variable</option><option value="Fixe">Fixe</option></select>
-        <button class="btn btn-p btn-sm" onclick="addCh()">Ajouter</button>
-        <button class="btn btn-g btn-sm" onclick="toggleAdd('p-ch-add')">Annuler</button>
-      </div>
-      <div style="overflow-x:auto">
-        <table class="dtbl">
-          <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>TVA</th><th>Type</th><th>Actif</th><th></th></tr></thead>
-          <tbody id="ch-tbody"></tbody>
-        </table>
-      </div>
-      <div style="margin-top:14px;padding:13px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)">
-        <div class="slbl" style="margin-bottom:8px">Répartition Fixe / Variable</div>
-        <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--t2);margin-bottom:5px">
-          <span id="rep-f">Fixe : 0</span><span id="rep-v">Variable : 0</span>
-        </div>
-        <div class="pw" style="margin:0"><div class="pb" id="rep-bar" style="width:0%;background:linear-gradient(90deg,var(--pu),var(--tl))"></div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── ENTREPRISE ── -->
-  <div id="p-entreprise" class="tab-pnl">
-    <div class="slbl">Informations générales</div>
-    <div class="card">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px">
-        <div><label class="flbl">Nom de l'entreprise</label>
-          <input class="finp" id="ent-nom" type="text" placeholder="Mon Entreprise"
-            oninput="P.nomEnt=this.value;syncEntNom();schedSave()">
-        </div>
-        <div><label class="flbl">Secteur</label>
-          <select class="fsel" id="ent-sect" onchange="P.secteur=this.value;schedSave()">
-            <option>Commerce de détail</option><option>E-commerce</option>
-            <option>Prestation de service</option><option>Restauration / Food</option>
-            <option>BTP / Artisanat</option><option>Autre</option>
-          </select>
-        </div>
-        <div><label class="flbl">Objectif CA annuel (€)</label>
-          <input class="finp" id="ent-obj" type="number" placeholder="0"
-            oninput="P.obj=parseFloat(this.value)||0;schedSave()">
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-        <div><label class="flbl">Régime TVA</label>
-          <select class="fsel" id="ent-tva" onchange="P.regimeTVA=this.value;schedSave()">
-            <option>TVA réelle mensuelle</option>
-            <option>TVA réelle trimestrielle</option>
-            <option>Franchise en base</option>
-          </select>
-        </div>
-        <div><label class="flbl">Régime fiscal</label>
-          <select class="fsel" id="ent-fisc" onchange="P.regimeFisc=this.value;schedSave()">
-            <option>IS — Impôt sur les sociétés</option>
-            <option>IR — Impôt sur le revenu</option>
-            <option>Micro-entreprise</option>
-          </select>
-        </div>
-        <div><label class="flbl">Devise</label>
-          <select class="fsel" id="ent-dev" onchange="P.devise=this.value;schedSave()">
-            <option>€ Euro</option><option>$ Dollar</option><option>£ Livre sterling</option>
-          </select>
+      <!-- Navigation -->
+      <div class="sb-sect">
+        <div class="sb-lbl">Configuration</div>
+        <div class="sb-item active" id="nav-params">
+          <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg></span>
+          <span>Paramètres</span>
         </div>
       </div>
     </div>
-    <div class="slbl" style="margin-top:16px">Clé de répartition des charges fixes</div>
-    <div class="card">
-      <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
-        <div style="flex:1;min-width:220px">
-          <label class="rdopt"><input type="radio" name="cle" value="qte" checked
-            onchange="P.cle='qte';schedSave()">
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-avatar" id="sb-av">?</div>
+        <div class="sb-uinfo"><div class="sb-uemail" id="sb-email">...</div></div>
+        <div class="sb-logout" id="btn-logout" title="Se déconnecter">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </div>
+      </div>
+      <button class="sb-col-btn" id="btn-toggle-sb">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19l-7-7 7-7"/><path d="M21 19l-7-7 7-7"/></svg>
+        <span class="col-txt" style="font-size:12px;font-weight:500">Réduire</span>
+      </button>
+      <div class="theme-btn" id="btn-theme">
+        <span class="theme-txt" id="theme-lbl">🌙 Thème sombre</span>
+        <div class="tog"><div class="tog-k"></div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- PARAMÈTRES -->
+    <div id="pnl-params">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Paramètres</div>
+          <div class="page-sub">Sauvegarde automatique · Année <span id="params-annee-lbl">2026</span></div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" id="tab-articles">📦 Articles</div>
+        <div class="tab" id="tab-charges">💸 Charges</div>
+        <div class="tab" id="tab-entreprise">🏢 Entreprise</div>
+      </div>
+
+      <!-- Articles -->
+      <div id="p-articles" class="tab-pnl active">
+        <div class="card">
+          <div class="tbl-hdr">
+            <div><div class="ct">Table articles</div><div class="cs">Répliqué automatiquement sur les années suivantes</div></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-g btn-sm" id="btn-add-art">+ Ajouter</button>
+            </div>
+          </div>
+          <div class="addrow" id="p-art-add">
+            <input type="text" id="pa-code" placeholder="Code (REF01)" style="max-width:100px">
+            <input type="text" id="pa-nom" placeholder="Nom de l'article" style="flex:2">
+            <input type="text" id="pa-cat" placeholder="Catégorie" style="max-width:110px">
+            <input type="number" id="pa-pv" placeholder="Prix HT €" style="max-width:90px" step="0.01">
+            <input type="number" id="pa-cout" placeholder="Coût achat €" style="max-width:90px" step="0.01">
+            <select id="pa-tva" style="max-width:90px">
+              <option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option>
+              <option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option>
+            </select>
+            <button class="btn btn-p btn-sm" id="btn-add-art-ok">Ajouter</button>
+            <button class="btn btn-g btn-sm" id="btn-add-art-cancel">Annuler</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="dtbl">
+              <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>Prix HT</th><th>Coût achat</th><th>TVA</th><th>Marge</th><th>Actif</th><th></th></tr></thead>
+              <tbody id="art-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charges -->
+      <div id="p-charges" class="tab-pnl">
+        <div class="card">
+          <div class="tbl-hdr">
+            <div><div class="ct">Table charges</div><div class="cs">Répliqué automatiquement sur les années suivantes</div></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-g btn-sm" id="btn-add-ch">+ Ajouter</button>
+            </div>
+          </div>
+          <div class="addrow" id="p-ch-add">
+            <input type="text" id="pc-nom" placeholder="Nom de la charge" style="flex:2">
+            <input type="text" id="pc-cat" placeholder="Catégorie" style="max-width:120px">
+            <select id="pc-tva" style="max-width:90px">
+              <option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option>
+              <option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option>
+            </select>
+            <select id="pc-type" style="max-width:105px"><option value="Variable">Variable</option><option value="Fixe">Fixe</option></select>
+            <button class="btn btn-p btn-sm" id="btn-add-ch-ok">Ajouter</button>
+            <button class="btn btn-g btn-sm" id="btn-add-ch-cancel">Annuler</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="dtbl">
+              <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>TVA</th><th>Type</th><th>Actif</th><th></th></tr></thead>
+              <tbody id="ch-tbody"></tbody>
+            </table>
+          </div>
+          <div style="margin-top:14px;padding:13px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)">
+            <div class="slbl" style="margin-bottom:8px">Répartition Fixe / Variable</div>
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--t2);margin-bottom:5px">
+              <span id="rep-f">Fixe : 0</span><span id="rep-v">Variable : 0</span>
+            </div>
+            <div class="pw" style="margin:0"><div class="pb" id="rep-bar" style="width:0%;background:linear-gradient(90deg,var(--pu),var(--tl))"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entreprise -->
+      <div id="p-entreprise" class="tab-pnl">
+        <div class="slbl">Informations générales</div>
+        <div class="card">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px">
+            <div><label class="flbl">Nom de l'entreprise</label>
+              <input class="finp" id="ent-nom" type="text" placeholder="Mon Entreprise"></div>
+            <div><label class="flbl">Secteur</label>
+              <select class="fsel" id="ent-sect">
+                <option>Commerce de détail</option><option>E-commerce</option>
+                <option>Prestation de service</option><option>Restauration / Food</option>
+                <option>BTP / Artisanat</option><option>Autre</option>
+              </select></div>
+            <div><label class="flbl">Objectif CA annuel (€)</label>
+              <input class="finp" id="ent-obj" type="number" placeholder="0"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+            <div><label class="flbl">Régime TVA</label>
+              <select class="fsel" id="ent-tva">
+                <option>TVA réelle mensuelle</option>
+                <option>TVA réelle trimestrielle</option>
+                <option>Franchise en base</option>
+              </select></div>
+            <div><label class="flbl">Régime fiscal</label>
+              <select class="fsel" id="ent-fisc">
+                <option>IS — Impôt sur les sociétés</option>
+                <option>IR — Impôt sur le revenu</option>
+                <option>Micro-entreprise</option>
+              </select></div>
+            <div><label class="flbl">Devise</label>
+              <select class="fsel" id="ent-dev">
+                <option>€ Euro</option><option>$ Dollar</option><option>£ Livre sterling</option>
+              </select></div>
+          </div>
+        </div>
+        <div class="slbl" style="margin-top:16px">Clé de répartition des charges fixes</div>
+        <div class="card">
+          <label class="rdopt"><input type="radio" name="cle" value="qte" id="cle-qte" checked>
             <div><div class="rdopt-title">Prorata des quantités vendues</div>
             <div class="rdopt-sub">Recommandé · Simple et universel</div></div>
           </label>
-          <label class="rdopt"><input type="radio" name="cle" value="ca"
-            onchange="P.cle='ca';schedSave()">
+          <label class="rdopt"><input type="radio" name="cle" value="ca" id="cle-ca">
             <div><div class="rdopt-title">Prorata du CA HT</div>
             <div class="rdopt-sub">Si les prix varient beaucoup entre articles</div></div>
           </label>
         </div>
-        <div style="width:210px;background:var(--bgs);border:1px solid var(--bd);border-radius:var(--rs);padding:14px">
-          <div style="font-size:10px;font-weight:700;font-family:var(--fm);color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">💡 Comment ça marche</div>
-          <div style="font-size:12px;color:var(--t2);line-height:1.6">Si vous vendez 100 unités et que l'article A en représente 30, il absorbe 30 % des charges fixes dans son coût de revient.</div>
-        </div>
       </div>
     </div>
-  </div>
+
+  </main>
 </div>
 
-</main>
-</div><!-- end #app -->
-
 <!-- SAVE BAR -->
-<div class="savebar" id="savebar">
+<div class="savebar">
   <div class="save-st">
     <div class="sdot saved" id="sdot"></div>
     <span id="stxt" style="font-size:11px;color:var(--t3)">Enregistré</span>
   </div>
 </div>
+
 <script>
-// ═══════════════════════════════════════════════════════
-// LOGPOSE — PARAMÈTRES
-// ═══════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════════
+const SUPA_URL = 'https://ppmdabvtdoaodzzjqqsc.supabase.co';
+const SUPA_KEY = 'sb_publishable_Bx3WGtuoNlSlQU5MBtJsnQ_Fljdsow1';
+const DB = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-// ── État global ──────────────────────────────────────
-let UID   = null;   // user id courant
-let ANNEE = 2026;   // année active
-
-// P = paramètres de l'année active (Entreprise)
-let P = {
+// ════════════════════════════════════════════════════════
+// ÉTAT
+// ════════════════════════════════════════════════════════
+let UID   = null;
+let ANNEE = 2026;
+let P = {  // paramètres entreprise de l'année active
   nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
   regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
   cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12,
 };
+let articles = [];
+let charges  = [];
 
-// Articles et charges visibles pour l'année active
-let articles = [];  // [{code, nom, cat, pv, cout, tva, actif}]
-let charges  = [];  // [{code, nom, cat, tva, type, actif}]
-
-// ── Helpers ──────────────────────────────────────────
-const el = id => document.getElementById(id);
-const q  = (promise, ms=12000) => Promise.race([
-  promise,
-  new Promise((_,r) => setTimeout(() => r(new Error('timeout')), ms))
-]);
-const setDOM = (id, v) => { const e = el(id); if(e) e.value = v; };
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const sbq = (p, ms=12000) => Promise.race([p, new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
 
 let _saveTimer = null;
-function schedSave() {
-  setSaving();
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(saveParams, 1500);
-}
+function schedSave() { markUnsaved(); clearTimeout(_saveTimer); _saveTimer = setTimeout(saveParams, 1500); }
+function markUnsaved() { const d=$('sdot'); if(d) d.classList.remove('saved'); }
+function setSaved()    { const d=$('sdot'); if(d) d.classList.add('saved'); const t=$('stxt'); if(t) t.textContent='Enregistré'; }
 
-function setSaving() {
-  const d = el('sdot'); if(d) d.classList.remove('saved');
-}
-function setSaved() {
-  const d = el('sdot'); if(d) d.classList.add('saved');
-  const t = el('stxt'); if(t) t.textContent = 'Enregistré';
-}
-function syncEntNom() {
-  const nb = el('db-name');
-  if(nb) nb.textContent = P.nomEnt || 'Mon Entreprise';
-}
-
-// ── Supabase : charger les paramètres ────────────────
-// Règle : prendre la ligne la plus récente ≤ ANNEE
-// SAUF objectif_ca : uniquement si ligne exacte = ANNEE
+// ════════════════════════════════════════════════════════
+// PARAMÈTRES ENTREPRISE
+// ════════════════════════════════════════════════════════
 async function loadParams() {
   if(!UID) return;
   try {
-    const {data, error} = await q(
-      sb.from('parametres')
-        .select('*')
-        .eq('user_id', UID)
-        .lte('annee', ANNEE)
-        .order('annee', {ascending: false})
-        .limit(1)
+    const {data, error} = await sbq(
+      DB.from('parametres').select('*').eq('user_id',UID).lte('annee',ANNEE).order('annee',{ascending:false}).limit(1)
     );
-    if(error) { console.warn('[params] load error:', error.message); return; }
-    if(!data || data.length === 0) return; // Pas de données → P garde ses défauts
-
+    if(error) { console.warn('[params]', error.message); return; }
+    if(!data || !data.length) return;
     const row = data[0];
-    const estExacte = row.annee === ANNEE;
-
-    // Champs hérités de N-1 si pas de ligne exacte
+    const exact = row.annee === ANNEE;
     P.nomEnt    = row.nom_entreprise || '';
     P.secteur   = row.secteur        || '';
     P.regimeTVA = row.regime_tva     || 'TVA réelle mensuelle';
@@ -727,194 +647,136 @@ async function loadParams() {
     P.moisDeb   = row.mois_debut     || 1;
     P.moisFin   = row.mois_fin       || 12;
     P.tresoInit = row.treso_init     || 0;
-
-    // Objectif CA : uniquement si ligne exacte pour cette année
-    P.obj = estExacte ? (row.objectif_ca || 0) : 0;
-
-    renderParams();
-  } catch(e) {
-    console.warn('[params] load exception:', e.message);
-    // En cas de timeout : P garde ses valeurs (backup localStorage)
-    restoreParamsFromLocal();
-  }
+    P.obj       = exact ? (row.objectif_ca || 0) : 0;
+    renderEntreprise();
+  } catch(e) { console.warn('[params timeout]', e.message); }
 }
 
-// ── Supabase : sauvegarder les paramètres ────────────
 async function saveParams() {
   if(!UID) return;
-  // Backup local avant Supabase
-  saveParamsToLocal();
   try {
-    const {error} = await sb.from('parametres').upsert({
+    const {error} = await DB.from('parametres').upsert({
       user_id:UID, annee:ANNEE,
-      nom_entreprise: P.nomEnt,
-      secteur:        P.secteur,
-      regime_tva:     P.regimeTVA,
-      regime_fiscal:  P.regimeFisc,
-      devise:         P.devise,
-      cle_repartition:P.cle,
-      objectif_ca:    P.obj,
-      treso_init:     P.tresoInit,
-      mois_debut:     P.moisDeb,
-      mois_fin:       P.moisFin,
-    }, {onConflict: 'user_id,annee'});
-    if(error) console.warn('[params] save error:', error.message);
+      nom_entreprise:P.nomEnt, secteur:P.secteur,
+      regime_tva:P.regimeTVA, regime_fiscal:P.regimeFisc,
+      devise:P.devise, cle_repartition:P.cle,
+      objectif_ca:P.obj, treso_init:P.tresoInit,
+      mois_debut:P.moisDeb, mois_fin:P.moisFin,
+    }, {onConflict:'user_id,annee'});
+    if(error) console.warn('[save params]', error.message);
     else setSaved();
-  } catch(e) {
-    console.warn('[params] save exception:', e.message);
-  }
+  } catch(e) { console.warn('[save params timeout]', e.message); }
 }
 
-// ── LocalStorage backup ──────────────────────────────
-function saveParamsToLocal() {
-  if(!UID) return;
-  try {
-    const bk = JSON.parse(localStorage.getItem('lp_'+UID) || '{}');
-    if(!bk.params) bk.params = {};
-    bk.params[ANNEE] = {...P};
-    bk.annee = ANNEE;
-    localStorage.setItem('lp_'+UID, JSON.stringify(bk));
-    localStorage.setItem('lp_annee_'+UID, ANNEE);
-  } catch(e){}
+function renderEntreprise() {
+  const set = (id, v) => { const e=$(id); if(e) e.value=v; };
+  set('ent-nom',  P.nomEnt);
+  set('ent-sect', P.secteur);
+  set('ent-obj',  P.obj);
+  set('ent-tva',  P.regimeTVA);
+  set('ent-fisc', P.regimeFisc);
+  set('ent-dev',  P.devise);
+  document.querySelectorAll('input[name="cle"]').forEach(r => r.checked = r.value === P.cle);
+  const lbl = $('params-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+  const dbn = $('db-name'); if(dbn) dbn.textContent = P.nomEnt || 'Mon Entreprise';
 }
 
-function restoreParamsFromLocal() {
-  if(!UID) return;
-  try {
-    const raw = localStorage.getItem('lp_'+UID);
-    if(!raw) return;
-    const bk = JSON.parse(raw);
-    if(!bk.params) return;
-    // Héritage : chercher la ligne la plus récente ≤ ANNEE
-    const annees = Object.keys(bk.params).map(Number).filter(a => a <= ANNEE).sort((a,b) => b-a);
-    if(annees.length === 0) return;
-    const src = bk.params[annees[0]];
-    const estExacte = annees[0] === ANNEE;
-    Object.assign(P, src);
-    P.obj = estExacte ? (src.obj || 0) : 0; // Objectif CA : jamais hérité
-    renderParams();
-  } catch(e){}
+function bindEntreprise() {
+  $('ent-nom').addEventListener('input',   e => { P.nomEnt    =e.target.value;              schedSave(); });
+  $('ent-sect').addEventListener('change', e => { P.secteur   =e.target.value;              schedSave(); });
+  $('ent-obj').addEventListener('input',   e => { P.obj       =parseFloat(e.target.value)||0;schedSave(); });
+  $('ent-tva').addEventListener('change',  e => { P.regimeTVA =e.target.value;              schedSave(); });
+  $('ent-fisc').addEventListener('change', e => { P.regimeFisc=e.target.value;              schedSave(); });
+  $('ent-dev').addEventListener('change',  e => { P.devise    =e.target.value;              schedSave(); });
+  document.querySelectorAll('input[name="cle"]').forEach(r =>
+    r.addEventListener('change', e => { P.cle=e.target.value; schedSave(); })
+  );
 }
 
-// ── Rendu DOM ────────────────────────────────────────
-function renderParams() {
-  setDOM('ent-nom',  P.nomEnt);
-  setDOM('ent-sect', P.secteur);
-  setDOM('ent-obj',  P.obj);
-  setDOM('ent-tva',  P.regimeTVA);
-  setDOM('ent-fisc', P.regimeFisc);
-  setDOM('ent-dev',  P.devise);
-  // Clé de répartition
-  document.querySelectorAll('input[name="cle"]').forEach(r => {
-    r.checked = r.value === P.cle;
-  });
-  syncEntNom();
-  // Label année
-  const lbl = el('params-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
-}
-
-// ── Articles ─────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// ARTICLES
+// ════════════════════════════════════════════════════════
 async function loadArticles() {
   if(!UID) return;
   try {
-    const {data, error} = await q(
-      sb.from('articles')
-        .select('*')
-        .eq('user_id', UID)
-        .order('annee', {ascending: true})
-    );
-    if(error) { console.warn('[articles] load:', error.message); return; }
-    // Héritage : pour chaque code, prendre la ligne la plus récente ≤ ANNEE
+    const {data, error} = await sbq(DB.from('articles').select('*').eq('user_id',UID).order('annee',{ascending:true}));
+    if(error) { console.warn('[articles]', error.message); return; }
     const byCode = {};
-    (data||[]).forEach(row => {
-      if(row.annee <= ANNEE) byCode[row.code] = row;
-    });
-    articles = Object.values(byCode)
-      .filter(r => r.actif !== false)
-      .map(r => ({
-        code: r.code, nom: r.nom, cat: r.categorie || 'Divers',
-        pv:   parseFloat(r.prix_ht)   || 0,
-        cout: parseFloat(r.cout_achat)|| 0,
-        tva:  parseFloat(r.tva)       || 0.2,
-        actif: true,
-      }));
+    (data||[]).forEach(r => { if(r.annee <= ANNEE) byCode[r.code] = r; });
+    articles = Object.values(byCode).filter(r => r.actif !== false).map(r => ({
+      code:r.code, nom:r.nom, cat:r.categorie||'Divers',
+      pv:parseFloat(r.prix_ht)||0, cout:parseFloat(r.cout_achat)||0,
+      tva:parseFloat(r.tva)||0.2, actif:true,
+    }));
     renderArticles();
-  } catch(e) { console.warn('[articles] exception:', e.message); }
+  } catch(e) { console.warn('[articles timeout]', e.message); }
 }
 
-async function saveArticle(art) {
+async function upsertArticle(a) {
   if(!UID) return;
-  const {error} = await sb.from('articles').upsert({
-    user_id:UID, code:art.code, annee:ANNEE,
-    nom:art.nom, categorie:art.cat,
-    prix_ht:art.pv, cout_achat:art.cout, tva:art.tva, actif:true,
+  const {error} = await DB.from('articles').upsert({
+    user_id:UID, code:a.code, annee:ANNEE,
+    nom:a.nom, categorie:a.cat, prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif,
   }, {onConflict:'user_id,code,annee'});
-  if(error) console.warn('[articles] save:', error.message);
-  else setSaved();
+  if(error) console.warn('[upsert article]', error.message); else setSaved();
 }
 
 function addArt() {
-  const nom  = el('pa-nom').value.trim();  if(!nom) return;
-  const code = el('pa-code').value.trim() || `ART${String(articles.length+1).padStart(2,'0')}`;
-  const art  = {
-    code, nom,
-    cat:  el('pa-cat').value  || 'Divers',
-    pv:   parseFloat(el('pa-pv').value)   || 0,
-    cout: parseFloat(el('pa-cout').value) || 0,
-    tva:  parseFloat(el('pa-tva').value)  || 0.2,
-    actif: true,
+  const nom  = $('pa-nom').value.trim();  if(!nom) return;
+  const code = $('pa-code').value.trim() || 'ART'+String(articles.length+1).padStart(2,'0');
+  const a = {
+    code, nom, cat:$('pa-cat').value||'Divers',
+    pv:parseFloat($('pa-pv').value)||0, cout:parseFloat($('pa-cout').value)||0,
+    tva:parseFloat($('pa-tva').value)||0.2, actif:true,
   };
-  articles.push(art);
-  ['pa-code','pa-nom','pa-cat','pa-pv','pa-cout'].forEach(id => el(id).value = '');
-  toggleAdd('p-art-add');
-  saveArticle(art);
+  articles.push(a);
+  ['pa-code','pa-nom','pa-cat','pa-pv','pa-cout'].forEach(id => $(id).value='');
+  $('p-art-add').classList.remove('open');
+  upsertArticle(a);
   renderArticles();
 }
 
 async function delArt(i) {
   const a = articles[i]; if(!a) return;
   if(!confirm(`Supprimer "${a.nom}" à partir de ${ANNEE} ?`)) return;
-  articles.splice(i, 1);
-  // Insérer ligne actif=false pour ANNEE → les années passées restent inchangées
+  articles.splice(i,1);
   if(UID) {
-    const {error} = await sb.from('articles').upsert({
+    const {error} = await DB.from('articles').upsert({
       user_id:UID, code:a.code, annee:ANNEE,
-      nom:a.nom, categorie:a.cat,
-      prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:false,
+      nom:a.nom, categorie:a.cat, prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:false,
     }, {onConflict:'user_id,code,annee'});
-    if(error) console.warn('[articles] del:', error.message);
-    else setSaved();
+    if(error) console.warn('[del art]', error.message); else setSaved();
   }
   renderArticles();
 }
 
 function renderArticles() {
-  const tb = el('art-tbody'); if(!tb) return;
-  if(articles.length === 0) {
-    tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--t2)">Aucun article · Cliquez sur + Ajouter</td></tr>`;
+  const tb = $('art-tbody'); if(!tb) return;
+  if(!articles.length) {
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--t2)">Aucun article — cliquez sur + Ajouter</td></tr>';
     return;
   }
+  const tvaOpts = sel => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
+    .map(([v,l]) => `<option value="${v}" ${sel==v?'selected':''}>{l}</option>`).join('');
   tb.innerHTML = articles.map((a,i) => {
-    const mg = a.pv > 0 ? (a.pv-a.cout)/a.pv*100 : 0;
+    const mg = a.pv>0 ? (a.pv-a.cout)/a.pv*100 : 0;
     const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
-    const tvaOpts = [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
-      .map(([v,l]) => `<option value="${v}" ${a.tva==v?'selected':''}>${l}</option>`).join('');
     return `<tr>
       <td><input class="tdinp" value="${a.code}" style="max-width:88px"
-        oninput="articles[${i}].code=this.value" onblur="saveArticle(articles[${i}])"></td>
+        onblur="articles[${i}].code=this.value;upsertArticle(articles[${i}])"></td>
       <td><input class="tdinp" value="${a.nom}"
-        oninput="articles[${i}].nom=this.value" onblur="saveArticle(articles[${i}])"></td>
+        onblur="articles[${i}].nom=this.value;upsertArticle(articles[${i}])"></td>
       <td><input class="tdinp" value="${a.cat}" style="max-width:100px"
-        oninput="articles[${i}].cat=this.value" onblur="saveArticle(articles[${i}])"></td>
-      <td><input class="tdinp" type="number" value="${a.pv}" step="0.01" style="max-width:80px"
-        oninput="articles[${i}].pv=parseFloat(this.value)||0" onblur="saveArticle(articles[${i}]);renderArticles()"></td>
-      <td><input class="tdinp" type="number" value="${a.cout}" step="0.01" style="max-width:80px"
-        oninput="articles[${i}].cout=parseFloat(this.value)||0" onblur="saveArticle(articles[${i}]);renderArticles()"></td>
+        onblur="articles[${i}].cat=this.value;upsertArticle(articles[${i}])"></td>
+      <td><input class="tdinp" type="number" value="${a.pv}" style="max-width:80px"
+        onblur="articles[${i}].pv=parseFloat(this.value)||0;upsertArticle(articles[${i}]);renderArticles()"></td>
+      <td><input class="tdinp" type="number" value="${a.cout}" style="max-width:80px"
+        onblur="articles[${i}].cout=parseFloat(this.value)||0;upsertArticle(articles[${i}]);renderArticles()"></td>
       <td><select class="tdsel" style="max-width:78px"
-        onchange="articles[${i}].tva=parseFloat(this.value);saveArticle(articles[${i}])">${tvaOpts}</select></td>
+        onchange="articles[${i}].tva=parseFloat(this.value);upsertArticle(articles[${i}])">${tvaOpts(a.tva)}</select></td>
       <td><span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span></td>
       <td><select class="tdsel" style="max-width:70px"
-        onchange="articles[${i}].actif=this.value==='true';saveArticle(articles[${i}])">
+        onchange="articles[${i}].actif=this.value==='true';upsertArticle(articles[${i}])">
         <option value="true" ${a.actif?'selected':''}>Oui</option>
         <option value="false" ${!a.actif?'selected':''}>Non</option>
       </select></td>
@@ -923,321 +785,278 @@ function renderArticles() {
   }).join('');
 }
 
-// ── Charges ──────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// CHARGES
+// ════════════════════════════════════════════════════════
 async function loadCharges() {
   if(!UID) return;
   try {
-    const {data, error} = await q(
-      sb.from('charges')
-        .select('*')
-        .eq('user_id', UID)
-        .order('annee', {ascending: true})
-    );
-    if(error) { console.warn('[charges] load:', error.message); return; }
+    const {data, error} = await sbq(DB.from('charges').select('*').eq('user_id',UID).order('annee',{ascending:true}));
+    if(error) { console.warn('[charges]', error.message); return; }
     const byCode = {};
-    (data||[]).forEach(row => {
-      if(row.annee <= ANNEE) byCode[String(row.code)] = row;
-    });
-    charges = Object.values(byCode)
-      .filter(r => r.actif !== false)
-      .map(r => ({
-        code: r.code, nom: r.nom, cat: r.categorie || 'Divers',
-        tva:  parseFloat(r.tva) || 0.2,
-        type: r.type || 'Variable',
-        actif: true,
-      }));
+    (data||[]).forEach(r => { if(r.annee <= ANNEE) byCode[String(r.code)] = r; });
+    charges = Object.values(byCode).filter(r => r.actif !== false).map(r => ({
+      code:r.code, nom:r.nom, cat:r.categorie||'Divers',
+      tva:parseFloat(r.tva)||0.2, type:r.type||'Variable', actif:true,
+    }));
     renderCharges();
-  } catch(e) { console.warn('[charges] exception:', e.message); }
+  } catch(e) { console.warn('[charges timeout]', e.message); }
 }
 
-async function saveCharge(ch) {
+async function upsertCharge(c) {
   if(!UID) return;
-  const {error} = await sb.from('charges').upsert({
-    user_id:UID, code:String(ch.code), annee:ANNEE,
-    nom:ch.nom, categorie:ch.cat, tva:ch.tva, type:ch.type, actif:true,
+  const {error} = await DB.from('charges').upsert({
+    user_id:UID, code:String(c.code), annee:ANNEE,
+    nom:c.nom, categorie:c.cat, tva:c.tva, type:c.type, actif:c.actif,
   }, {onConflict:'user_id,code,annee'});
-  if(error) console.warn('[charges] save:', error.message);
-  else setSaved();
+  if(error) console.warn('[upsert charge]', error.message); else setSaved();
 }
 
 function addCh() {
-  const nom = el('pc-nom').value.trim(); if(!nom) return;
-  const code = String(Date.now());
-  const ch = {
-    code, nom,
-    cat:  el('pc-cat').value  || 'Divers',
-    tva:  parseFloat(el('pc-tva').value)  || 0.2,
-    type: el('pc-type').value || 'Variable',
-    actif: true,
+  const nom = $('pc-nom').value.trim(); if(!nom) return;
+  const c = {
+    code:String(Date.now()), nom, cat:$('pc-cat').value||'Divers',
+    tva:parseFloat($('pc-tva').value)||0.2, type:$('pc-type').value||'Variable', actif:true,
   };
-  charges.push(ch);
-  ['pc-nom','pc-cat'].forEach(id => el(id).value = '');
-  toggleAdd('p-ch-add');
-  saveCharge(ch);
+  charges.push(c);
+  ['pc-nom','pc-cat'].forEach(id => $(id).value='');
+  $('p-ch-add').classList.remove('open');
+  upsertCharge(c);
   renderCharges();
 }
 
 async function delCh(i) {
   const c = charges[i]; if(!c) return;
   if(!confirm(`Supprimer "${c.nom}" à partir de ${ANNEE} ?`)) return;
-  charges.splice(i, 1);
+  charges.splice(i,1);
   if(UID) {
-    const {error} = await sb.from('charges').upsert({
+    const {error} = await DB.from('charges').upsert({
       user_id:UID, code:String(c.code), annee:ANNEE,
       nom:c.nom, categorie:c.cat, tva:c.tva, type:c.type, actif:false,
     }, {onConflict:'user_id,code,annee'});
-    if(error) console.warn('[charges] del:', error.message);
-    else setSaved();
+    if(error) console.warn('[del charge]', error.message); else setSaved();
   }
   renderCharges();
 }
 
 function renderCharges() {
-  const tb = el('ch-tbody'); if(!tb) return;
-  if(charges.length === 0) {
-    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucune charge · Cliquez sur + Ajouter</td></tr>`;
-    el('rep-f').textContent = 'Fixe : 0';
-    el('rep-v').textContent = 'Variable : 0';
-    el('rep-bar').style.width = '0%';
+  const tb = $('ch-tbody'); if(!tb) return;
+  if(!charges.length) {
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucune charge — cliquez sur + Ajouter</td></tr>';
+    $('rep-f').textContent='Fixe : 0'; $('rep-v').textContent='Variable : 0'; $('rep-bar').style.width='0%';
     return;
   }
-  const tvaOpts = v => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
-    .map(([x,l]) => `<option value="${x}" ${v==x?'selected':''}>${l}</option>`).join('');
+  const tvaOpts = sel => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
+    .map(([v,l]) => `<option value="${v}" ${sel==v?'selected':''}>{l}</option>`).join('');
   tb.innerHTML = charges.map((c,i) => `<tr>
-    <td style="color:var(--t3);font-family:var(--fm);font-size:11px">${c.code.slice(-6)}</td>
+    <td style="color:var(--t3);font-family:var(--fm);font-size:11px">${String(c.code).slice(-6)}</td>
     <td><input class="tdinp" value="${c.nom}"
-      oninput="charges[${i}].nom=this.value" onblur="saveCharge(charges[${i}])"></td>
+      onblur="charges[${i}].nom=this.value;upsertCharge(charges[${i}])"></td>
     <td><input class="tdinp" value="${c.cat}" style="max-width:110px"
-      oninput="charges[${i}].cat=this.value" onblur="saveCharge(charges[${i}])"></td>
+      onblur="charges[${i}].cat=this.value;upsertCharge(charges[${i}])"></td>
     <td><select class="tdsel" style="max-width:78px"
-      onchange="charges[${i}].tva=parseFloat(this.value);saveCharge(charges[${i}])">${tvaOpts(c.tva)}</select></td>
+      onchange="charges[${i}].tva=parseFloat(this.value);upsertCharge(charges[${i}])">${tvaOpts(c.tva)}</select></td>
     <td><select class="tdsel" style="max-width:100px"
-      onchange="charges[${i}].type=this.value;saveCharge(charges[${i}]);renderCharges()">
+      onchange="charges[${i}].type=this.value;upsertCharge(charges[${i}]);renderCharges()">
       <option value="Fixe" ${c.type==='Fixe'?'selected':''}>Fixe</option>
       <option value="Variable" ${c.type==='Variable'?'selected':''}>Variable</option>
     </select></td>
     <td><select class="tdsel" style="max-width:70px"
-      onchange="charges[${i}].actif=this.value==='true';saveCharge(charges[${i}])">
+      onchange="charges[${i}].actif=this.value==='true';upsertCharge(charges[${i}])">
       <option value="true" ${c.actif?'selected':''}>Oui</option>
       <option value="false" ${!c.actif?'selected':''}>Non</option>
     </select></td>
     <td><button class="delbtn" onclick="delCh(${i})">×</button></td>
   </tr>`).join('');
-  // Répartition
   const f = charges.filter(c=>c.type==='Fixe').length;
-  const tot = charges.length;
-  el('rep-f').textContent = `Fixe : ${f} charge${f!==1?'s':''}`;
-  el('rep-v').textContent = `Variable : ${tot-f} charge${tot-f!==1?'s':''}`;
-  el('rep-bar').style.width = `${tot>0?f/tot*100:0}%`;
+  $('rep-f').textContent=`Fixe : ${f}`;
+  $('rep-v').textContent=`Variable : ${charges.length-f}`;
+  $('rep-bar').style.width=`${charges.length?f/charges.length*100:0}%`;
 }
 
-// ── Changement d'année ───────────────────────────────
-async function changeAnnee(newAn) {
-  newAn = parseInt(newAn);
-  if(isNaN(newAn) || newAn === ANNEE) return;
-
-  // 1. Sauvegarder l'année courante immédiatement
+// ════════════════════════════════════════════════════════
+// NAVIGATION ANNÉES
+// ════════════════════════════════════════════════════════
+async function changeAnnee(n) {
+  n = parseInt(n);
+  if(isNaN(n) || n===ANNEE) return;
   clearTimeout(_saveTimer);
   await saveParams();
-
-  // 2. Changer l'année
-  ANNEE = newAn;
+  ANNEE = n;
   localStorage.setItem('lp_annee_'+UID, ANNEE);
-
-  // 3. Réinitialiser P à ses valeurs par défaut (objectif_ca = 0)
   P = { nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
-        regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
-        cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
-
-  // 4. Recharger depuis Supabase
+         regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
+         cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
   renderAnneesNav();
   await Promise.all([loadParams(), loadArticles(), loadCharges()]);
-
-  toast(`📅 Année ${ANNEE}`);
 }
 
-// ── Navigation années ────────────────────────────────
 function renderAnneesNav() {
-  const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = ANNEE;
-  const sbAns = el('sb-annees');
-  if(sbAns) {
-    const years = [ANNEE-1, ANNEE, ANNEE+1].filter(a => a >= 2020 && a <= 2040);
-    sbAns.innerHTML = years.map(a => `
-      <button onclick="changeAnnee(${a})"
-        style="flex:1;padding:3px 6px;border-radius:5px;font-size:11px;font-weight:${a===ANNEE?'700':'400'};
-        background:${a===ANNEE?'var(--ac)':'var(--bgc)'};color:${a===ANNEE?'#fff':'var(--t3)'};
-        border:1px solid ${a===ANNEE?'var(--ac)':'var(--bd)'};cursor:pointer">${a}</button>
-    `).join('');
+  const a = $('sb-annee'); if(a) a.textContent = ANNEE;
+  const lbl = $('params-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+  const btns = $('sb-annees');
+  if(btns) {
+    const years = [ANNEE-1, ANNEE, ANNEE+1].filter(y => y>=2020&&y<=2040);
+    btns.innerHTML = years.map(y => `<button
+      style="flex:1;padding:3px 6px;border-radius:5px;font-size:11px;
+      font-weight:${y===ANNEE?700:400};cursor:pointer;
+      background:${y===ANNEE?'var(--ac)':'var(--bgc)'};
+      color:${y===ANNEE?'#fff':'var(--t3)'};
+      border:1px solid ${y===ANNEE?'var(--ac)':'var(--bd)'}"
+      data-year="${y}">${y}</button>`).join('');
+    btns.querySelectorAll('button').forEach(b =>
+      b.addEventListener('click', () => changeAnnee(b.dataset.year))
+    );
   }
-  const lbl = el('params-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
 }
 
-// ── UI Helpers ───────────────────────────────────────
-function switchTab(id, btn) {
-  document.querySelectorAll('.tab-pnl').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el(id).classList.add('active');
-  if(btn) btn.classList.add('active');
-}
+// ════════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════════
+let authMode = 'login';
 
-function toggleAdd(id) {
-  el(id).classList.toggle('open');
-}
-
-let _toastTimer = null;
-function toast(msg, dur=2500) {
-  let t = document.querySelector('.toast');
-  if(!t) { t = document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
-  t.textContent = msg;
-  t.style.display = 'flex';
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => { t.style.display='none'; }, dur);
-}
-
-function exportArts() {
-  const rows = ['Code,Nom,Catégorie,PrixHT,CoutAchat,TVA'];
-  articles.forEach(a => rows.push(`${a.code},${a.nom},${a.cat},${a.pv},${a.cout},${a.tva}`));
-  const b = new Blob([rows.join('\n')], {type:'text/csv'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='articles.csv'; a.click();
-}
-
-function exportChParam() {
-  const rows = ['Code,Nom,Catégorie,TVA,Type'];
-  charges.forEach(c => rows.push(`${c.code},${c.nom},${c.cat},${c.tva},${c.type}`));
-  const b = new Blob([rows.join('\n')], {type:'text/csv'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='charges.csv'; a.click();
-}
-
-// ── Auth ─────────────────────────────────────────────
-let authMode_ = 'login';
-function authMode(m) {
-  authMode_ = m;
-  el('tab-login').classList.toggle('active', m==='login');
-  el('tab-reg').classList.toggle('active', m==='register');
-  el('auth-btn').textContent = m==='login' ? 'Se connecter' : 'Créer mon compte';
-  el('auth-forgot').style.display = m==='login' ? '' : 'none';
-  el('auth-err').style.display = 'none';
-  el('auth-ok').style.display  = 'none';
+function setAuthMode(m) {
+  authMode = m;
+  $('tab-login').classList.toggle('active', m==='login');
+  $('tab-reg').classList.toggle('active',   m==='register');
+  $('auth-btn').textContent = m==='login' ? 'Se connecter' : 'Créer mon compte';
+  $('auth-forgot').style.display = m==='login' ? '' : 'none';
+  $('auth-err').style.display = 'none';
+  $('auth-ok').style.display  = 'none';
 }
 
 async function doAuth() {
-  const email = el('auth-email').value.trim();
-  const pwd   = el('auth-pwd').value;
+  const email = $('auth-email').value.trim();
+  const pwd   = $('auth-pwd').value;
   if(!email||!pwd) { showErr('Remplissez tous les champs.'); return; }
-  const btn = el('auth-btn'); btn.textContent='Chargement…'; btn.disabled=true;
+  const btn = $('auth-btn'); btn.textContent='Chargement…'; btn.disabled=true;
   try {
-    if(authMode_==='login') {
-      const {error} = await sb.auth.signInWithPassword({email, password:pwd});
+    if(authMode==='login') {
+      const {error} = await DB.auth.signInWithPassword({email, password:pwd});
       if(error) throw error;
     } else {
-      const {error} = await sb.auth.signUp({email, password:pwd});
+      const {error} = await DB.auth.signUp({email, password:pwd});
       if(error) throw error;
       showOk('Compte créé ! Vérifiez votre email puis connectez-vous.');
-      authMode('login');
+      setAuthMode('login');
     }
   } catch(e) {
-    const msgs = {'Invalid login credentials':'Email ou mot de passe incorrect.','User already registered':'Compte déjà existant.'};
-    showErr(msgs[e.message]||e.message);
+    const m = {'Invalid login credentials':'Email ou mot de passe incorrect.','User already registered':'Compte déjà existant.'};
+    showErr(m[e.message]||e.message||'Erreur inconnue.');
   }
   btn.disabled=false;
-  btn.textContent = authMode_==='login'?'Se connecter':'Créer mon compte';
+  btn.textContent = authMode==='login'?'Se connecter':'Créer mon compte';
 }
 
 async function doForgot() {
-  const email = el('auth-email').value.trim();
-  if(!email) { showErr('Entrez votre email d\'abord.'); return; }
-  const {error} = await sb.auth.resetPasswordForEmail(email);
-  if(error) showErr(error.message);
-  else showOk('Email de réinitialisation envoyé.');
+  const email = $('auth-email').value.trim();
+  if(!email) { showErr('Entrez votre email.'); return; }
+  const {error} = await DB.auth.resetPasswordForEmail(email);
+  if(error) showErr(error.message); else showOk('Email envoyé.');
 }
 
-function showErr(msg) { el('auth-err').textContent=msg; el('auth-err').style.display='block'; el('auth-ok').style.display='none'; }
-function showOk(msg)  { el('auth-ok').textContent=msg;  el('auth-ok').style.display='block';  el('auth-err').style.display='none'; }
+function showErr(msg) { $('auth-err').textContent=msg; $('auth-err').style.display='block'; $('auth-ok').style.display='none'; }
+function showOk(msg)  { $('auth-ok').textContent=msg;  $('auth-ok').style.display='block';  $('auth-err').style.display='none'; }
 
 async function doLogout() {
   clearTimeout(_saveTimer);
   UID = null;
-  el('auth').style.display = 'flex';
-  el('app').style.display  = 'none';
-  authMode('login');
-  await sb.auth.signOut();
+  $('auth').style.display='flex'; $('app').style.display='none';
+  await DB.auth.signOut();
 }
 
-function setUserUI(user) {
-  const av = el('sb-av');    if(av) av.textContent = user.email[0].toUpperCase();
-  const em = el('sb-email'); if(em) em.textContent = user.email;
-}
-
-function applyTheme() {
-  const t = localStorage.getItem('lp-theme') || 'light';
-  document.documentElement.setAttribute('data-theme', t);
-  const lbl = el('theme-lbl'); if(lbl) lbl.textContent = t==='light' ? '🌙 Thème sombre' : '☀️ Thème clair';
-  const mob = el('mob-theme'); if(mob) mob.textContent = t==='light' ? '🌙' : '☀️';
-}
-function toggleTheme() {
-  const cur = document.documentElement.getAttribute('data-theme');
-  const next = cur==='light'?'dark':'light';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('lp-theme', next);
-  const lbl = el('theme-lbl'); if(lbl) lbl.textContent = next==='light'?'🌙 Thème sombre':'☀️ Thème clair';
-  const mob = el('mob-theme'); if(mob) mob.textContent = next==='light'?'🌙':'☀️';
-}
-
-function toggleSb() {
-  const sidebar = document.querySelector('.sb');
-  sidebar.classList.toggle('col');
-  localStorage.setItem('lp-sb-col', sidebar.classList.contains('col'));
-}
-function openMob()  { document.querySelector('.sb').classList.add('mob-open'); el('sb-ov').classList.add('open'); }
-function closeMob() { document.querySelector('.sb').classList.remove('mob-open'); el('sb-ov').classList.remove('open'); }
-
-// ── Démarrage ────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// APP START
+// ════════════════════════════════════════════════════════
 async function startApp(user) {
-  UID = null; // Bloquer saves pendant chargement
-  setUserUI(user);
-  el('auth').style.display = 'none';
-  el('app').style.display  = 'flex';
-
-  // Restaurer année depuis localStorage (instantané)
-  const savedAn = parseInt(localStorage.getItem('lp_annee_'+user.id));
-  if(savedAn >= 2020 && savedAn <= 2040) ANNEE = savedAn;
-
-  // Tenter restauration locale en attendant Supabase
+  UID = null;
+  $('auth').style.display='none'; $('app').style.display='flex';
+  // Restaurer année
+  const saved = parseInt(localStorage.getItem('lp_annee_'+user.id));
+  if(saved>=2020&&saved<=2040) ANNEE=saved;
   UID = user.id;
-  restoreParamsFromLocal();
+  // UI utilisateur
+  const av=$('sb-av'); if(av) av.textContent=user.email[0].toUpperCase();
+  const em=$('sb-email'); if(em) em.textContent=user.email;
   renderAnneesNav();
-
-  // Charger depuis Supabase (peut prendre plusieurs secondes sur plan gratuit)
   await Promise.all([loadParams(), loadArticles(), loadCharges()]);
   setSaved();
 }
 
+// ════════════════════════════════════════════════════════
+// THEME & SIDEBAR
+// ════════════════════════════════════════════════════════
+function applyTheme() {
+  const t = localStorage.getItem('lp-theme')||'light';
+  document.documentElement.setAttribute('data-theme',t);
+  const lbl=$('theme-lbl'); if(lbl) lbl.textContent=t==='light'?'🌙 Thème sombre':'☀️ Thème clair';
+}
+function toggleTheme() {
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('lp-theme',next);
+  const lbl=$('theme-lbl'); if(lbl) lbl.textContent=next==='light'?'🌙 Thème sombre':'☀️ Thème clair';
+}
+function toggleSidebar() {
+  document.querySelector('.sb').classList.toggle('col');
+  localStorage.setItem('lp-sb-col', document.querySelector('.sb').classList.contains('col'));
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
+  if(localStorage.getItem('lp-sb-col')==='true') document.querySelector('.sb').classList.add('col');
 
-  // Restaurer état sidebar
-  if(localStorage.getItem('lp-sb-col')==='true') {
-    document.querySelector('.sb')?.classList.add('col');
-  }
+  // Auth
+  $('tab-login').addEventListener('click',  () => setAuthMode('login'));
+  $('tab-reg').addEventListener('click',    () => setAuthMode('register'));
+  $('auth-btn').addEventListener('click',   doAuth);
+  $('auth-forgot').addEventListener('click',doForgot);
+  $('auth-email').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
+  $('auth-pwd').addEventListener('keydown',   e => { if(e.key==='Enter') doAuth(); });
 
-  // Auth listeners
-  el('tab-login').addEventListener('click', () => authMode('login'));
-  el('tab-reg').addEventListener('click',   () => authMode('register'));
-  el('auth-btn').addEventListener('click',  doAuth);
-  el('auth-forgot').addEventListener('click', doForgot);
-  el('auth-email').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
-  el('auth-pwd').addEventListener('keydown',   e => { if(e.key==='Enter') doAuth(); });
+  // Sidebar
+  $('btn-logout').addEventListener('click',    doLogout);
+  $('btn-toggle-sb').addEventListener('click', toggleSidebar);
+  $('btn-theme').addEventListener('click',     toggleTheme);
+  $('btn-year-prev').addEventListener('click', () => changeAnnee(ANNEE-1));
+  $('btn-year-next').addEventListener('click', () => changeAnnee(ANNEE+1));
 
+  // Tabs paramètres
+  [['tab-articles','p-articles'],['tab-charges','p-charges'],['tab-entreprise','p-entreprise']].forEach(([tid,pid]) => {
+    $(tid).addEventListener('click', () => {
+      document.querySelectorAll('.tab-pnl').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+      $(pid).classList.add('active');
+      $(tid).classList.add('active');
+    });
+  });
+
+  // Articles
+  $('btn-add-art').addEventListener('click',    () => $('p-art-add').classList.toggle('open'));
+  $('btn-add-art-ok').addEventListener('click',  addArt);
+  $('btn-add-art-cancel').addEventListener('click', () => $('p-art-add').classList.remove('open'));
+
+  // Charges
+  $('btn-add-ch').addEventListener('click',     () => $('p-ch-add').classList.toggle('open'));
+  $('btn-add-ch-ok').addEventListener('click',   addCh);
+  $('btn-add-ch-cancel').addEventListener('click', () => $('p-ch-add').classList.remove('open'));
+
+  // Entreprise
+  bindEntreprise();
+
+  // Auth state
   let started = false;
-  sb.auth.onAuthStateChange(async (event, session) => {
+  DB.auth.onAuthStateChange(async (event, session) => {
     if((event==='INITIAL_SESSION'||event==='SIGNED_IN') && session && !started) {
       started = true;
       await startApp(session.user);
     } else if(event==='SIGNED_OUT') {
-      started = false;
-      UID = null;
-      el('auth').style.display = 'flex';
-      el('app').style.display  = 'none';
+      started = false; UID = null;
+      $('auth').style.display='flex'; $('app').style.display='none';
     }
   });
 });
