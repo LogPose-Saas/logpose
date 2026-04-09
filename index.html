@@ -1152,15 +1152,33 @@ async function doLogout() {
 async function startApp(user) {
   UID = null;
   $('auth').style.display='none'; $('app').style.display='flex';
-  // Restaurer année
   const saved = parseInt(localStorage.getItem('lp_annee_'+user.id));
   if(saved>=2020&&saved<=2040) ANNEE=saved;
   UID = user.id;
-  // UI utilisateur
   const av=$('sb-av'); if(av) av.textContent=user.email[0].toUpperCase();
   const em=$('sb-email'); if(em) em.textContent=user.email;
   renderAnneesNav();
-  await Promise.all([loadParams(), loadArticles(), loadCharges()]);
+
+  // Ping Supabase — attend le réveil du projet (plan gratuit = jusqu'à 20s)
+  const stxt = $('stxt');
+  if(stxt) stxt.textContent = 'Connexion…';
+  let pret = false;
+  for(let i=0; i<6; i++) {
+    try {
+      const {error} = await Promise.race([
+        DB.from('parametres').select('annee').eq('user_id',UID).limit(1),
+        new Promise((_,r) => setTimeout(()=>r(new Error('timeout')),5000))
+      ]);
+      if(!error) { pret=true; break; }
+    } catch(e) {
+      if(stxt) stxt.textContent = `Réveil du serveur… (${i+1}/6)`;
+    }
+  }
+  if(!pret) { if(stxt) stxt.textContent = 'Serveur indisponible'; return; }
+
+  await loadArticles();
+  await loadCharges();
+  await loadParams();
   await loadCA();
   setSaved();
 }
