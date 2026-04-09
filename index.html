@@ -635,9 +635,11 @@ async function loadParams() {
       DB.from('parametres').select('*').eq('user_id',UID).lte('annee',ANNEE).order('annee',{ascending:false}).limit(1)
     );
     if(error) { console.warn('[params]', error.message); return; }
-    if(!data || !data.length) return;
+    console.log('[params] annee active='+ANNEE+' lignes trouvées='+( data?data.length:0), data&&data[0]?'annee_ligne='+data[0].annee:'');
+    if(!data || !data.length) { console.warn('[params] aucune ligne ≤'+ANNEE); return; }
     const row = data[0];
     const exact = row.annee === ANNEE;
+    console.log('[params] exact='+exact+' nom='+row.nom_entreprise+' tva='+row.regime_tva+' obj='+row.objectif_ca);
     P.nomEnt    = row.nom_entreprise || '';
     P.secteur   = row.secteur        || '';
     P.regimeTVA = row.regime_tva     || 'TVA réelle mensuelle';
@@ -757,7 +759,7 @@ function renderArticles() {
     return;
   }
   const tvaOpts = sel => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
-    .map(([v,l]) => `<option value="${v}" ${sel==v?'selected':''}>{l}</option>`).join('');
+    .map(([v,l]) => `<option value="${v}" ${sel==v?'selected':''}>${l}</option>`).join('');
   tb.innerHTML = articles.map((a,i) => {
     const mg = a.pv>0 ? (a.pv-a.cout)/a.pv*100 : 0;
     const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
@@ -847,7 +849,7 @@ function renderCharges() {
     return;
   }
   const tvaOpts = sel => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
-    .map(([v,l]) => `<option value="${v}" ${sel==v?'selected':''}>{l}</option>`).join('');
+    .map(([v,l]) => `<option value="${v}" ${sel==v?'selected':''}>${l}</option>`).join('');
   tb.innerHTML = charges.map((c,i) => `<tr>
     <td style="color:var(--t3);font-family:var(--fm);font-size:11px">${String(c.code).slice(-6)}</td>
     <td><input class="tdinp" value="${c.nom}"
