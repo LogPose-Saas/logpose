@@ -937,9 +937,16 @@ let qty = {}; // {code: [12 valeurs]}
 
 async function loadCA() {
   if(!UID) return;
+
+  // Si articles est vide (timeout au démarrage), réessayer loadArticles d'abord
+  if(!articles.length) {
+    await loadArticles();
+  }
+
   // Initialiser qty avec 0 pour chaque article
   qty = {};
   articles.forEach(a => { qty[a.code] = Array(12).fill(0); });
+
   try {
     const {data, error} = await sbq(
       DB.from('saisies_ca').select('article_code,mois,quantite')
@@ -948,7 +955,7 @@ async function loadCA() {
     if(error) { console.warn('[ca]', error.message); }
     else {
       (data||[]).forEach(r => {
-        if(qty[r.article_code]) qty[r.article_code][r.mois-1] = r.quantite;
+        if(qty[r.article_code] !== undefined) qty[r.article_code][r.mois-1] = r.quantite;
       });
     }
   } catch(e) { console.warn('[ca timeout]', e.message); }
@@ -1208,7 +1215,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const n=$(navId);   if(n) n.classList.add('active');
   }
   $('nav-params').addEventListener('click', () => showPanel('pnl-params','nav-params'));
-  $('nav-ca').addEventListener('click',     () => showPanel('pnl-ca','nav-ca'));
+  $('nav-ca').addEventListener('click', async () => {
+    showPanel('pnl-ca','nav-ca');
+    await loadCA();
+  });
   [['tab-articles','p-articles'],['tab-charges','p-charges'],['tab-entreprise','p-entreprise']].forEach(([tid,pid]) => {
     $(tid).addEventListener('click', () => {
       document.querySelectorAll('.tab-pnl').forEach(p => p.classList.remove('active'));
