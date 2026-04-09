@@ -642,23 +642,28 @@ async function loadParams() {
     if(error) { console.warn('[params]', error.message); return; }
     if(!data || !data.length) return;
 
-    // Chercher la ligne la plus récente NON VIDE ≤ ANNEE
-    const row = data.find(r => r.nom_entreprise || r.secteur || r.regime_tva !== 'TVA réelle mensuelle' || r.objectif_ca > 0);
-    if(!row) return;
+    // Ligne exacte pour ANNEE (peut être vide)
+    const ligneAnnee = data.find(r => r.annee === ANNEE);
+    // Ligne héritée = la plus récente AVANT ANNEE avec du contenu
+    const ligneHeritee = data.find(r => r.annee < ANNEE && r.nom_entreprise);
 
-    P.nomEnt    = row.nom_entreprise || '';
-    P.secteur   = row.secteur        || '';
-    P.regimeTVA = row.regime_tva     || 'TVA réelle mensuelle';
-    P.regimeFisc= row.regime_fiscal  || 'IS — Impôt sur les sociétés';
-    P.devise    = row.devise         || '€ Euro';
-    P.cle       = row.cle_repartition|| 'qte';
-    P.moisDeb   = row.mois_debut     || 1;
-    P.moisFin   = row.mois_fin       || 12;
-    P.tresoInit = row.treso_init     || 0;
+    // Pour tous les champs sauf objectif_ca : prendre la valeur non vide
+    // Priorité : ligne exacte si elle a du contenu, sinon héritage
+    const src = (ligneAnnee && ligneAnnee.nom_entreprise) ? ligneAnnee : (ligneHeritee || ligneAnnee);
+    if(!src) return;
 
-    // Objectif CA : uniquement si ligne exacte pour ANNEE et non vide
-    const ligneExacte = data.find(r => r.annee === ANNEE && r.objectif_ca > 0);
-    P.obj = ligneExacte ? ligneExacte.objectif_ca : 0;
+    P.nomEnt    = src.nom_entreprise || '';
+    P.secteur   = src.secteur        || '';
+    P.regimeTVA = src.regime_tva     || 'TVA réelle mensuelle';
+    P.regimeFisc= src.regime_fiscal  || 'IS — Impôt sur les sociétés';
+    P.devise    = src.devise         || '€ Euro';
+    P.cle       = src.cle_repartition|| 'qte';
+    P.moisDeb   = src.mois_debut     || 1;
+    P.moisFin   = src.mois_fin       || 12;
+    P.tresoInit = src.treso_init     || 0;
+
+    // Objectif CA : uniquement depuis la ligne exacte de l'année active
+    P.obj = (ligneAnnee && ligneAnnee.objectif_ca > 0) ? ligneAnnee.objectif_ca : 0;
 
     paramsLoaded = true;
     renderEntreprise();
