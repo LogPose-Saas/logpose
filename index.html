@@ -2007,7 +2007,7 @@ async function saveAll() {
       is_pro:S.isPro||false,
     };
     if(S.params.tresoInit!==undefined) p.treso_init=S.params.tresoInit;
-    console.log('[saveAll] params annee='+an+' regime_tva='+p.regime_tva+' obj='+p.objectif_ca);
+
     const {error:pE} = await sb.from('parametres').upsert(p, {onConflict:'user_id,annee'});
     if(pE) console.warn('[save] params:', pE.message);
   } catch(e){ console.warn('[save] params:', e.message); }
@@ -2059,8 +2059,8 @@ async function saveAll() {
   setSaved();
 }
 
-// Helper: requête Supabase avec timeout réduit
-function sbQuery(promise, ms=6000) {
+// Helper: requête Supabase avec timeout
+function sbQuery(promise, ms=10000) {
   return Promise.race([promise, new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
 }
 
@@ -2091,11 +2091,11 @@ async function loadData(uid) {
   if(rP.status==='fulfilled' && rP.value?.data?.length>0) {
     const p=rP.value.data[0];
     const estAnneeExacte = p.annee === anneeActive;
-    console.log('[params] ligne trouvée annee='+p.annee+' anneeActive='+anneeActive+' exact='+estAnneeExacte+' obj_en_base='+p.objectif_ca);
+
     S.params.moisDeb   = p.mois_debut      || 1;
     S.params.moisFin   = p.mois_fin        || 12;
     S.params.obj       = estAnneeExacte ? (p.objectif_ca || 0) : 0;
-    console.log('[params] S.params.obj mis à:', S.params.obj);
+
     S.params.regimeTVA = p.regime_tva      || 'TVA réelle mensuelle';
     S.params.nomEnt    = p.nom_entreprise  || '';
     S.params.secteur   = p.secteur         || '';
@@ -2172,18 +2172,34 @@ async function loadData(uid) {
       if(raw) {
         const bk=JSON.parse(raw);
         // Chercher les articles pour l'année active ou la plus proche
-        const artSrc = bk.artByYear && (bk.artByYear[anneeActive] || 
-          Object.entries(bk.artByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>b[0]-a[0])[0]?.[1]);
+        const artSrc = bk.artByYear && (bk.artByYear[anneeActive] ||
+          Object.entries(bk.artByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>parseInt(b[0])-parseInt(a[0]))[0]?.[1]);
         if(artSrc && artSrc.length>0) {
           S.articles = artSrc.filter(a=>a.actif!==false);
           const chSrc = bk.chByYear && (bk.chByYear[anneeActive] ||
-            Object.entries(bk.chByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>b[0]-a[0])[0]?.[1]);
-          S.charges  = (chSrc||[]).filter(c=>c.actif!==false);
-          S.qty      = (bk.qtyByYear  && bk.qtyByYear[anneeActive])  || {};
-          S.chMD     = (bk.chMDByYear && bk.chMDByYear[anneeActive]) || {};
+            Object.entries(bk.chByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>parseInt(b[0])-parseInt(a[0]))[0]?.[1]);
+          S.charges = (chSrc||[]).filter(c=>c.actif!==false);
+          S.qty     = (bk.qtyByYear  && bk.qtyByYear[anneeActive])  || {};
+          S.chMD    = (bk.chMDByYear && bk.chMDByYear[anneeActive]) || {};
+
+          // Params : héritage depuis la plus récente ≤ anneeActive
           const pSrc = bk.paramsByYear && (bk.paramsByYear[anneeActive] ||
-            Object.entries(bk.paramsByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>b[0]-a[0])[0]?.[1]);
-          if(pSrc) { Object.assign(S.params, pSrc); S.params.annee=anneeActive; }
+            Object.entries(bk.paramsByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>parseInt(b[0])-parseInt(a[0]))[0]?.[1]);
+          if(pSrc) {
+            // Copier tout sauf objectif CA
+            const {obj:_ignore, ...rest} = pSrc;
+            Object.assign(S.params, rest);
+            // Objectif CA : uniquement si ligne exacte pour cette année
+            const pExact = bk.paramsByYear && bk.paramsByYear[anneeActive];
+            S.params.obj = pExact ? (pExact.obj || 0) : 0;
+            S.params.annee = anneeActive;
+            // Sync DOM
+            const set=(id,v)=>{const e=el(id);if(e)e.value=v;};
+            set('ent-nom',S.params.nomEnt); set('ent-obj',S.params.obj);
+            set('ent-tva',S.params.regimeTVA); set('ent-sect',S.params.secteur);
+            const dbn=el('db-name'); if(dbn) dbn.textContent=S.params.nomEnt||'Mon Entreprise';
+            const sbAn=el('sb-annee'); if(sbAn) sbAn.textContent=anneeActive;
+          }
         }
       }
     } catch(e){}
