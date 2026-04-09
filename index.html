@@ -421,8 +421,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 <!-- ══════════ APP ══════════ -->
 <div id="app">
 <div class="sb-ov" id="sb-ov" onclick="closeMob()"></div>
-
-<!-- SIDEBAR -->
 <aside class="sb" id="sb">
   <div class="sb-logo">
     <div class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
@@ -487,202 +485,17 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   <div onclick="toggleTheme()" style="cursor:pointer;font-size:18px" id="mob-theme">🌙</div>
 </div>
 
+
 <!-- ══════════ MAIN CONTENT ══════════ -->
-<main class="main">
-
-<!-- ── DASHBOARD ── -->
-<div id="pnl-db" class="pnl active">
-  <div class="topbar">
-    <div><div class="page-title" id="db-name">Mon Entreprise</div><div class="page-sub" id="db-period">Chargement…</div></div>
-    <div class="page-actions">
-      <select class="fsel" style="width:auto;font-size:12px" id="db-period-sel" onchange="filterPeriod(this.value)">
-        <option value="all">Période complète</option>
-        <option value="q1">T1 — Jan à Mar</option>
-        <option value="q2">T2 — Avr à Jun</option>
-        <option value="q3">T3 — Jul à Sep</option>
-        <option value="q4">T4 — Oct à Déc</option>
-      </select>
-    </div>
-  </div>
-  <div class="alerts" id="db-alerts"></div>
-  <div class="slbl">Résultats clés</div>
-  <div class="kgrid g4" id="kpis-row1"></div>
-  <div class="kgrid g4" id="kpis-row2"></div>
-  <div class="cg2">
-    <div class="card"><div class="ct">CA HT vs Charges — évolution mensuelle</div><div class="cs" id="db-chart-sub">2026</div><div class="cwlg"><canvas id="c-ca-ch"></canvas></div></div>
-    <div class="card"><div class="ct">Répartition des charges</div><div class="cs">Fixe vs Variable</div><div class="cw"><canvas id="c-ch-rep"></canvas></div></div>
-  </div>
-  <div class="cg3">
-    <div class="card" id="db-seuil-card"></div>
-    <div class="card" id="db-top-art-card"></div>
-    <div class="card" id="db-tva-card"></div>
-  </div>
-</div>
-
-<!-- ── CA ── -->
-<div id="pnl-ca" class="pnl">
-  <div class="topbar">
-    <div><div class="page-title">Chiffre d'affaires</div><div class="page-sub">Saisie des quantités · Sauvegarde automatique</div></div>
-    <div class="page-actions">
-      <button class="btn btn-g btn-sm" onclick="exportCA()">↓ CSV</button>
-    </div>
-  </div>
-  <div class="kgrid g4" id="ca-kpis"></div>
-  <div class="card">
-    <div class="tbl-hdr">
-      <div><div class="ct">Quantités vendues par mois</div><div class="cs">Cliquez sur une cellule pour modifier</div></div>
-      <button class="btn btn-g btn-sm" onclick="toggleAdd('ca-add')">+ Nouvel article</button>
-    </div>
-    <div class="addrow" id="ca-add">
-      <input type="text" id="ca-code" placeholder="Code ex: ART01" style="max-width:110px">
-      <input type="text" id="ca-nom" placeholder="Nom de l'article" style="flex:2">
-      <input type="text" id="ca-cat" placeholder="Catégorie" style="max-width:110px">
-      <input type="number" id="ca-pv" placeholder="Prix HT €" style="max-width:90px" step="0.01">
-      <input type="number" id="ca-cout" placeholder="Coût achat €" style="max-width:90px" step="0.01">
-      <button class="btn btn-p btn-sm" onclick="addArtFromCA()">Ajouter</button>
-      <button class="btn btn-g btn-sm" onclick="toggleAdd('ca-add')">Annuler</button>
-    </div>
-    <div style="overflow-x:auto"><table class="stbl" id="ca-tbl"></table></div>
-  </div>
-    <div class="cgeq">
-    <div class="card"><div class="ct">Chiffre d'affaires mensuel</div><div class="cs">Évolution sur la période</div><div class="cw"><canvas id="c-ca-m"></canvas></div></div>
-    <div class="card"><div class="ct">Chiffre d'affaires par catégorie</div><div class="cs">Répartition du chiffre d'affaires</div><div class="cw"><canvas id="c-ca-cat"></canvas></div></div>
-  </div>
-</div>
-
-<!-- ── CHARGES ── -->
-<div id="pnl-charges" class="pnl">
-  <div class="topbar">
-    <div><div class="page-title">Charges</div><div class="page-sub">Saisie mensuelle · Sauvegarde automatique</div></div>
-    <div class="page-actions">
-      <button class="btn btn-g btn-sm" onclick="exportCharges()">↓ CSV</button>
-    </div>
-  </div>
-  <div class="kgrid g4" id="ch-kpis"></div>
-  <div class="card">
-    <div class="tbl-hdr">
-      <div><div class="ct">Montants mensuels (€ HT)</div><div class="cs">Cliquez sur une cellule pour modifier</div></div>
-      <button class="btn btn-g btn-sm" onclick="toggleAdd('ch-add')">+ Nouvelle charge</button>
-    </div>
-    <div class="addrow" id="ch-add">
-      <input type="text" id="ch-nom" placeholder="Nom de la charge" style="flex:2">
-      <input type="text" id="ch-cat" placeholder="Catégorie" style="max-width:120px">
-      <select id="ch-type" style="max-width:110px"><option value="Variable">Variable</option><option value="Fixe">Fixe</option></select>
-      <button class="btn btn-p btn-sm" onclick="addChFromPanel()">Ajouter</button>
-      <button class="btn btn-g btn-sm" onclick="toggleAdd('ch-add')">Annuler</button>
-    </div>
-    <!-- Avertissement doublon marchandise saisie -->
-    <div id="ch-saisie-warn" style="display:none;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--amb);border-left:3px solid var(--am);border-radius:var(--rs);margin-bottom:10px">
-      <span style="font-size:15px;flex-shrink:0">⚠</span>
-      <div style="font-size:12px;color:var(--am)"><strong>Attention :</strong> vous avez des coûts d'achat sur vos articles et une charge Marchandise — risque de doublon dans le résultat net. Voir Paramètres → Charges.</div>
-    </div>
-    <div style="overflow-x:auto"><table class="stbl" id="ch-tbl"></table></div>
-  </div>
-  <div class="cgeq">
-    <div class="card"><div class="ct">Évolution des charges</div><div class="cs">Fixe vs Variable par mois</div><div class="cw"><canvas id="c-ch-m"></canvas></div></div>
-    <div class="card"><div class="ct">Classement des charges</div><div class="cs">Par coût total sur la période</div><div class="toplist" id="ch-toplist" style="margin-top:14px"></div></div>
-  </div>
-</div>
-
-<!-- ── MARGE ── -->
-<div id="pnl-marge" class="pnl">
-  <div class="topbar"><div><div class="page-title">Marge & Rentabilité</div><div class="page-sub">Coût de revient analytique · Taux de marge · Taux de marque</div></div></div>
-  <div class="kgrid g4" id="mrg-kpis"></div>
-  <div class="cgeq">
-    <div class="card"><div class="ct">Taux de marge par article</div><div class="cs">Marge / Prix de vente HT · code couleur automatique</div><div id="mrg-art-list" style="margin-top:14px"></div></div>
-    <div class="card"><div class="ct">Marge brute mensuelle</div><div class="cs">Évolution sur la période</div><div class="cwlg"><canvas id="c-mrg-m"></canvas></div></div>
-  </div>
-  <div class="card">
-    <div class="ct">Coût de revient analytique</div>
-    <div class="cs">Coût d'achat + quote-part charges fixes (prorata quantités vendues)</div>
-    <div style="overflow-x:auto"><table class="dtbl" style="margin-top:14px" id="cra-tbl">
-      <thead><tr><th>Article</th><th>Coût achat</th><th>Quote-part CF</th><th>Coût de revient</th><th>Prix vente HT</th><th>Marge réelle</th><th>Taux réel</th></tr></thead>
-      <tbody id="cra-body"></tbody>
-    </table></div>
-  </div>
-</div>
-
-<!-- ── TVA ── -->
-<div id="pnl-tva" class="pnl">
-  <div class="topbar"><div><div class="page-title">TVA</div><div class="page-sub">TVA collectée · déductible · nette à reverser · provisionnement mensuel</div></div></div>
-  <div class="kgrid g3" id="tva-kpis"></div>
-  <div class="cgeq">
-    <div class="card"><div class="ct">Évolution mensuelle de la TVA</div><div class="cs">Collectée vs déductible vs nette</div><div class="cwlg"><canvas id="c-tva-m"></canvas></div></div>
-    <div class="card"><div class="ct">Provisionnement mensuel</div><div class="cs">Montant à mettre de côté chaque mois</div><div id="tva-prov" style="margin-top:12px"></div><div class="abox abb" style="margin-top:12px"><div class="abox-ico">💡</div><div><div class="abox-title">Conseil</div><div class="abox-desc">Provisionnez la TVA nette dès réception des paiements pour éviter les mauvaises surprises à la déclaration.</div></div></div></div>
-  </div>
-</div>
-
-<!-- ── TRESORERIE ── -->
-<div id="pnl-treso" class="pnl">
-  <div class="topbar"><div><div class="page-title">Trésorerie</div><div class="page-sub">Budget de trésorerie · Solde prévisionnel · Alertes automatiques</div></div><div class="page-actions"><button class="btn btn-g btn-sm" onclick="exportTreso()">↓ CSV</button></div></div>
-  <!-- Solde initial -->
-  <div class="card" style="margin-bottom:14px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-    <div style="flex:1;min-width:200px">
-      <label class="flbl">Solde de trésorerie initial (€)</label>
-      <input class="finp" type="number" id="treso-init" value="0" step="100" placeholder="0" oninput="S.params.tresoInit=parseFloat(this.value)||0;smartUpdate();autoSave()" style="max-width:200px">
-    </div>
-    <div style="font-size:12px;color:var(--t2);line-height:1.5">Entrez le solde de votre compte bancaire au <strong>1er jour de la période</strong>. Ce montant sera la base de votre trésorerie cumulée. Si vous passez en 2027, ce champ est automatiquement rempli avec le solde de fin décembre 2026.</div>
-  </div>
-  <div class="kgrid g4" id="treso-kpis"></div>
-  <div class="card"><div class="ct">Solde de trésorerie cumulé</div><div class="cs">Évolution mois par mois · Seuil zéro en rouge</div><div class="cwlg"><canvas id="c-treso"></canvas></div></div>
-  <div class="cgeq">
-    <div class="card"><div class="ct">Détail mensuel</div><div class="cs">Encaissements · Décaissements · Soldes</div><div style="overflow-x:auto"><table class="ptbl" style="margin-top:12px"><thead><tr><th>Mois</th><th>Encaissements</th><th>Décaissements</th><th>Solde mois</th><th>Solde cumulé</th></tr></thead><tbody id="treso-body"></tbody></table></div></div>
-    <div class="card"><div class="ct">Alertes trésorerie</div><div class="cs">Détection automatique des risques</div><div id="treso-alerts" style="margin-top:12px"></div></div>
-  </div>
-</div>
-
-<!-- ── PREVISIONNEL ── -->
-<div id="pnl-prev" class="pnl">
-  <div class="topbar"><div><div class="page-title">Prévisionnel N+1</div><div class="page-sub">Basé sur l'historique · Ajustez le coefficient de croissance</div></div><div class="page-actions"><button class="btn btn-p btn-sm" onclick="renderPrev()">↻ Recalculer</button></div></div>
-  <div class="kgrid g3" id="prev-kpis"></div>
-  <div class="card">
-    <div class="tbl-hdr">
-      <div><div class="ct">Budget mensuel N+1</div><div class="cs">Basé sur N × coefficient</div></div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span style="font-size:12px;font-weight:600;color:var(--t2)">Croissance estimée</span>
-        <input type="range" id="growth" min="-20" max="100" value="10" style="width:100px;accent-color:var(--ac)" oninput="document.getElementById('growth-val').textContent=(this.value>0?'+':'')+this.value+' %';renderPrev()">
-        <span class="bdg bac" id="growth-val">+10 %</span>
-      </div>
-    </div>
-    <div style="overflow-x:auto"><table class="ptbl" id="prev-tbl"><thead><tr><th>Indicateur</th><th>Jan</th><th>Fév</th><th>Mar</th><th>Avr</th><th>Mai</th><th>Jun</th><th>Jul</th><th>Aoû</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Déc</th><th>Total N+1</th></tr></thead><tbody id="prev-body"></tbody></table></div>
-  </div>
-  <div class="card"><div class="ct">Comparaison N vs N+1</div><div class="cwlg"><canvas id="c-prev"></canvas></div></div>
-</div>
-
-<!-- ── SCENARIOS ── -->
-<div id="pnl-scen" class="pnl">
-  <div class="topbar"><div><div class="page-title">Scénarios</div><div class="page-sub">Simulations d'impact · Résultats instantanés sur la rentabilité</div></div></div>
-  <div class="kgrid g3" id="scen-cards"></div>
-  <div class="card">
-    <div class="ct">Simulateur personnalisé</div><div class="cs">Ajustez les paramètres — résultats en temps réel</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px">
-      <div><label class="flbl">Variation CA (%)</label><input class="finp" type="number" id="sim-ca" value="0" step="1" oninput="runSim()"></div>
-      <div><label class="flbl">Charges fixes (%)</label><input class="finp" type="number" id="sim-cf" value="0" step="1" oninput="runSim()"></div>
-      <div><label class="flbl">Charges variables (%)</label><input class="finp" type="number" id="sim-cv" value="0" step="1" oninput="runSim()"></div>
-      <div><label class="flbl">Coûts d'achat (%)</label><input class="finp" type="number" id="sim-co" value="0" step="1" oninput="runSim()"></div>
-    </div>
-    <div class="kgrid g4" id="sim-kpis" style="margin-top:14px;margin-bottom:0"></div>
-  </div>
-</div>
-
-<!-- ── ALERTES ── -->
-<div id="pnl-alertes" class="pnl">
-  <div class="topbar"><div><div class="page-title">Alertes</div><div class="page-sub">Détection automatique basée sur vos données réelles</div></div><div class="page-actions"><button class="btn btn-g btn-sm" onclick="renderAlertsPage()">↻ Actualiser</button></div></div>
-  <div class="kgrid g4" id="alrt-kpis"></div>
-  <div id="alrt-body"></div>
-</div>
+<main class="main" id="main">
 
 <!-- ── PARAMETRES ── -->
-<div id="pnl-params" class="pnl">
-  <div class="topbar"><div><div class="page-title">Paramètres</div><div class="page-sub">Configuration partagée · Sauvegarde automatique</div></div></div>
-
-  <!-- Champs période cachés (toujours présents pour updPeriodPreview) -->
-  <div style="display:none">
-    <input type="number" id="p-an" value="2026" min="2020" max="2040">
-    <select id="p-deb"><option value="1" selected>Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option></select>
-    <select id="p-fin"><option value="1">Janvier</option><option value="2">Février</option><option value="3">Mars</option><option value="4">Avril</option><option value="5">Mai</option><option value="6">Juin</option><option value="7">Juillet</option><option value="8">Août</option><option value="9">Septembre</option><option value="10">Octobre</option><option value="11">Novembre</option><option value="12" selected>Décembre</option></select>
-    <span id="p-prev-val"></span><span id="p-prev-nb"></span>
-    <div id="annees-nav"></div>
+<div id="pnl-params" class="pnl active">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Paramètres</div>
+      <div class="page-sub">Sauvegarde automatique · Année <span id="params-annee-lbl">N</span></div>
+    </div>
   </div>
 
   <div class="tabs">
@@ -691,75 +504,132 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
     <div class="tab" onclick="switchTab('p-entreprise',this)">🏢 Entreprise</div>
   </div>
 
-  <!-- Articles -->
+  <!-- ── ARTICLES ── -->
   <div id="p-articles" class="tab-pnl active">
     <div class="card">
-      <div class="tbl-hdr"><div><div class="ct">Table articles</div><div class="cs">Utilisée par : CA · Marge · Coût de revient</div></div><div style="display:flex;gap:8px"><button class="btn btn-g btn-sm" onclick="exportArts()">↓ CSV</button><button class="btn btn-g btn-sm" onclick="toggleAdd('p-art-add')">+ Ajouter</button></div></div>
+      <div class="tbl-hdr">
+        <div><div class="ct">Table articles</div><div class="cs">Saisie en année N · Répliqué en N+ automatiquement</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-g btn-sm" onclick="exportArts()">↓ CSV</button>
+          <button class="btn btn-g btn-sm" onclick="toggleAdd('p-art-add')">+ Ajouter</button>
+        </div>
+      </div>
       <div class="addrow" id="p-art-add">
         <input type="text" id="pa-code" placeholder="Code (REF01)" style="max-width:100px">
         <input type="text" id="pa-nom" placeholder="Nom de l'article" style="flex:2">
         <input type="text" id="pa-cat" placeholder="Catégorie" style="max-width:110px">
         <input type="number" id="pa-pv" placeholder="Prix HT €" style="max-width:90px" step="0.01">
         <input type="number" id="pa-cout" placeholder="Coût achat €" style="max-width:90px" step="0.01">
-        <select id="pa-tva" style="max-width:90px"><option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option><option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option></select>
+        <select id="pa-tva" style="max-width:90px">
+          <option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option>
+          <option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option>
+        </select>
         <button class="btn btn-p btn-sm" onclick="addArt()">Ajouter</button>
         <button class="btn btn-g btn-sm" onclick="toggleAdd('p-art-add')">Annuler</button>
       </div>
-      <div style="overflow-x:auto"><table class="dtbl"><thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>Prix HT</th><th>Coût achat</th><th>TVA</th><th>Taux marge</th><th>Actif</th><th></th></tr></thead><tbody id="art-tbody"></tbody></table></div>
+      <div style="overflow-x:auto">
+        <table class="dtbl">
+          <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>Prix HT</th><th>Coût achat</th><th>TVA</th><th>Taux marge</th><th>Actif</th><th></th></tr></thead>
+          <tbody id="art-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- Charges -->
+  <!-- ── CHARGES ── -->
   <div id="p-charges" class="tab-pnl">
     <div class="card">
-      <div class="tbl-hdr"><div><div class="ct">Table charges</div><div class="cs">Utilisée par : Charges · TVA · Trésorerie · Point mort</div></div><div style="display:flex;gap:8px"><button class="btn btn-g btn-sm" onclick="exportChParam()">↓ CSV</button><button class="btn btn-g btn-sm" onclick="toggleAdd('p-ch-add')">+ Ajouter</button></div></div>
+      <div class="tbl-hdr">
+        <div><div class="ct">Table charges</div><div class="cs">Saisie en année N · Répliqué en N+ automatiquement</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-g btn-sm" onclick="exportChParam()">↓ CSV</button>
+          <button class="btn btn-g btn-sm" onclick="toggleAdd('p-ch-add')">+ Ajouter</button>
+        </div>
+      </div>
       <div class="addrow" id="p-ch-add">
         <input type="text" id="pc-nom" placeholder="Nom de la charge" style="flex:2">
         <input type="text" id="pc-cat" placeholder="Catégorie" style="max-width:120px">
-        <select id="pc-tva" style="max-width:90px"><option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option><option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option></select>
+        <select id="pc-tva" style="max-width:90px">
+          <option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option>
+          <option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option>
+        </select>
         <select id="pc-type" style="max-width:105px"><option value="Variable">Variable</option><option value="Fixe">Fixe</option></select>
         <button class="btn btn-p btn-sm" onclick="addCh()">Ajouter</button>
         <button class="btn btn-g btn-sm" onclick="toggleAdd('p-ch-add')">Annuler</button>
       </div>
-      <div style="overflow-x:auto"><table class="dtbl"><thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>TVA</th><th>Type</th><th>Actif</th><th></th></tr></thead><tbody id="ch-tbody"></tbody></table></div>
-      <!-- Avertissement doublon marchandise -->
-      <div id="ch-doublon-warn" style="display:none;align-items:flex-start;gap:10px;margin-top:14px;padding:12px 14px;background:var(--amb);border-left:3px solid var(--am);border-radius:var(--rs)">
-        <span style="font-size:16px;flex-shrink:0">⚠</span>
-        <div>
-          <div style="font-size:12.5px;font-weight:700;color:var(--am);margin-bottom:3px">Risque de doublon — Achats comptés deux fois</div>
-          <div style="font-size:11.5px;color:var(--am);opacity:.85;line-height:1.5">Vous avez des coûts d'achat renseignés dans vos articles <strong>et</strong> une charge de type Marchandise / Achat. Ces achats risquent d'être comptés deux fois dans le résultat net.<br><strong>Choisissez une seule méthode :</strong> coût unitaire par article <em>ou</em> charge globale mensuelle.</div>
-        </div>
+      <div style="overflow-x:auto">
+        <table class="dtbl">
+          <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>TVA</th><th>Type</th><th>Actif</th><th></th></tr></thead>
+          <tbody id="ch-tbody"></tbody>
+        </table>
       </div>
       <div style="margin-top:14px;padding:13px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)">
         <div class="slbl" style="margin-bottom:8px">Répartition Fixe / Variable</div>
-        <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--t2);margin-bottom:5px"><span id="rep-f">Fixe : 0</span><span id="rep-v">Variable : 0</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--t2);margin-bottom:5px">
+          <span id="rep-f">Fixe : 0</span><span id="rep-v">Variable : 0</span>
+        </div>
         <div class="pw" style="margin:0"><div class="pb" id="rep-bar" style="width:0%;background:linear-gradient(90deg,var(--pu),var(--tl))"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- Entreprise -->
+  <!-- ── ENTREPRISE ── -->
   <div id="p-entreprise" class="tab-pnl">
     <div class="slbl">Informations générales</div>
     <div class="card">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px">
-        <div><label class="flbl">Nom de l'entreprise</label><input class="finp" id="ent-nom" type="text" placeholder="Mon Entreprise" oninput="S.params.nomEnt=this.value;document.getElementById('db-name').textContent=this.value||'Mon Entreprise';autoSave()"></div>
-        <div><label class="flbl">Secteur</label><select class="fsel" id="ent-sect" onchange="S.params.secteur=this.value;autoSave()"><option>Commerce de détail</option><option>E-commerce</option><option>Prestation de service</option><option>Restauration / Food</option><option>BTP / Artisanat</option><option>Autre</option></select></div>
-        <div><label class="flbl">Objectif CA annuel (€)</label><input class="finp" id="ent-obj" type="number" placeholder="120000" oninput="S.params.obj=parseFloat(this.value)||0;autoSave()"></div>
+        <div><label class="flbl">Nom de l'entreprise</label>
+          <input class="finp" id="ent-nom" type="text" placeholder="Mon Entreprise"
+            oninput="P.nomEnt=this.value;syncEntNom();schedSave()">
+        </div>
+        <div><label class="flbl">Secteur</label>
+          <select class="fsel" id="ent-sect" onchange="P.secteur=this.value;schedSave()">
+            <option>Commerce de détail</option><option>E-commerce</option>
+            <option>Prestation de service</option><option>Restauration / Food</option>
+            <option>BTP / Artisanat</option><option>Autre</option>
+          </select>
+        </div>
+        <div><label class="flbl">Objectif CA annuel (€)</label>
+          <input class="finp" id="ent-obj" type="number" placeholder="0"
+            oninput="P.obj=parseFloat(this.value)||0;schedSave()">
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-        <div><label class="flbl">Régime TVA</label><select class="fsel" id="ent-tva" onchange="S.params.regimeTVA=this.value;recalc();renderAll();autoSave()"><option>TVA réelle mensuelle</option><option>TVA réelle trimestrielle</option><option>Franchise en base</option></select></div>
-        <div><label class="flbl">Régime fiscal</label><select class="fsel" id="ent-fisc" onchange="S.params.regimeFisc=this.value;autoSave()"><option>IS — Impôt sur les sociétés</option><option>IR — Impôt sur le revenu</option><option>Micro-entreprise</option></select></div>
-        <div><label class="flbl">Devise</label><select class="fsel" id="ent-dev" onchange="S.params.devise=this.value;autoSave()"><option>€ Euro</option><option>$ Dollar</option><option>£ Livre sterling</option></select></div>
+        <div><label class="flbl">Régime TVA</label>
+          <select class="fsel" id="ent-tva" onchange="P.regimeTVA=this.value;schedSave()">
+            <option>TVA réelle mensuelle</option>
+            <option>TVA réelle trimestrielle</option>
+            <option>Franchise en base</option>
+          </select>
+        </div>
+        <div><label class="flbl">Régime fiscal</label>
+          <select class="fsel" id="ent-fisc" onchange="P.regimeFisc=this.value;schedSave()">
+            <option>IS — Impôt sur les sociétés</option>
+            <option>IR — Impôt sur le revenu</option>
+            <option>Micro-entreprise</option>
+          </select>
+        </div>
+        <div><label class="flbl">Devise</label>
+          <select class="fsel" id="ent-dev" onchange="P.devise=this.value;schedSave()">
+            <option>€ Euro</option><option>$ Dollar</option><option>£ Livre sterling</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="slbl" style="margin-top:16px">Clé de répartition des charges fixes</div>
     <div class="card">
       <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
         <div style="flex:1;min-width:220px">
-          <label class="rdopt"><input type="radio" name="cle" value="qte" checked onchange="S.params.cle='qte';autoSave()"><div><div class="rdopt-title">Prorata des quantités vendues</div><div class="rdopt-sub">Recommandé · Simple et universel</div></div></label>
-          <label class="rdopt"><input type="radio" name="cle" value="ca" onchange="S.params.cle='ca';autoSave()"><div><div class="rdopt-title">Prorata du CA HT</div><div class="rdopt-sub">Si les prix varient beaucoup entre articles</div></div></label>
-          <label class="rdopt" style="opacity:.5"><input type="radio" name="cle" disabled><div><div class="rdopt-title">Clé personnalisée <span class="bdg bam" style="font-size:9px">V2</span></div><div class="rdopt-sub">Définir un % par article manuellement</div></div></label>
+          <label class="rdopt"><input type="radio" name="cle" value="qte" checked
+            onchange="P.cle='qte';schedSave()">
+            <div><div class="rdopt-title">Prorata des quantités vendues</div>
+            <div class="rdopt-sub">Recommandé · Simple et universel</div></div>
+          </label>
+          <label class="rdopt"><input type="radio" name="cle" value="ca"
+            onchange="P.cle='ca';schedSave()">
+            <div><div class="rdopt-title">Prorata du CA HT</div>
+            <div class="rdopt-sub">Si les prix varient beaucoup entre articles</div></div>
+          </label>
         </div>
         <div style="width:210px;background:var(--bgs);border:1px solid var(--bd);border-radius:var(--rs);padding:14px">
           <div style="font-size:10px;font-weight:700;font-family:var(--fm);color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">💡 Comment ça marche</div>
@@ -776,2151 +646,595 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 <!-- SAVE BAR -->
 <div class="savebar" id="savebar">
   <div class="save-st">
-    <div class="sdot saved" id="sdot" title="Sauvegarde automatique active"></div>
+    <div class="sdot saved" id="sdot"></div>
     <span id="stxt" style="font-size:11px;color:var(--t3)">Enregistré</span>
   </div>
 </div>
-
 <script>
-// ═══════════════════════════════════════════════
-// ÉTAT GLOBAL — source de vérité unique
-// ═══════════════════════════════════════════════
-const MOIS = ['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-const MS   = ['','Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+// ═══════════════════════════════════════════════════════
+// LOGPOSE — PARAMÈTRES
+// ═══════════════════════════════════════════════════════
 
-let S = {
-  articles: [],
-  charges:  [],
-  qty:      {},
-  chMD:     {},
-  params: {annee:2026, moisDeb:1, moisFin:12, nomEnt:'', obj:0, secteur:'', regimeTVA:'', regimeFisc:'', cle:'qte', tresoInit:0},
-  isPro: false,
-  uid: null,
+const SUPABASE_URL = 'https://ppmdabvtdoaodzzjqqsc.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Bx3WGtuoNlSlQU5MBtJsnQ_Fljdsow1';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── État global ──────────────────────────────────────
+let UID   = null;   // user id courant
+let ANNEE = 2026;   // année active
+
+// P = paramètres de l'année active (Entreprise)
+let P = {
+  nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
+  regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
+  cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12,
 };
 
-// Données calculées (recalculées depuis S à chaque changement)
-let C = {};
+// Articles et charges visibles pour l'année active
+let articles = [];  // [{code, nom, cat, pv, cout, tva, actif}]
+let charges  = [];  // [{code, nom, cat, tva, type, actif}]
 
-// Filtre période dashboard
-let periodeFilter = 'all';
-
-// Charts actifs
-let charts = {};
-
-// ═══════════════════════════════════════════════
-// UTILITAIRES
-// ═══════════════════════════════════════════════
-const fmt = n => new Intl.NumberFormat('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0);
-const fmtK = n => Math.abs(n) >= 1000 ? (n/1000).toFixed(1)+'k' : (n||0).toFixed(0);
-const gc = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+// ── Helpers ──────────────────────────────────────────
 const el = id => document.getElementById(id);
-const toast = (msg,dur=4000) => {
-  const t = document.createElement('div');
-  t.className='toast';
-  t.innerHTML=`<span style="font-size:18px">🎉</span><div>${msg}</div>`;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(),dur);
-};
+const q  = (promise, ms=12000) => Promise.race([
+  promise,
+  new Promise((_,r) => setTimeout(() => r(new Error('timeout')), ms))
+]);
+const setDOM = (id, v) => { const e = el(id); if(e) e.value = v; };
 
-// ═══════════════════════════════════════════════
-// CALCULS CENTRALISÉS
-// ═══════════════════════════════════════════════
-function recalc() {
-  const mois = getMoisRange();
-  
-  // CA mensuel par article
-  const caArt = {}; // {code: [m0..m11]}
-  S.articles.forEach(a => {
-    caArt[a.code] = Array(12).fill(0);
-    (S.qty[a.code]||Array(12).fill(0)).forEach((q,m) => {
-      caArt[a.code][m] = q * a.pv;
-    });
+let _saveTimer = null;
+function schedSave() {
+  setSaving();
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveParams, 1500);
+}
+
+function setSaving() {
+  const d = el('sdot'); if(d) d.classList.remove('saved');
+}
+function setSaved() {
+  const d = el('sdot'); if(d) d.classList.add('saved');
+  const t = el('stxt'); if(t) t.textContent = 'Enregistré';
+}
+function syncEntNom() {
+  const nb = el('db-name');
+  if(nb) nb.textContent = P.nomEnt || 'Mon Entreprise';
+}
+
+// ── Supabase : charger les paramètres ────────────────
+// Règle : prendre la ligne la plus récente ≤ ANNEE
+// SAUF objectif_ca : uniquement si ligne exacte = ANNEE
+async function loadParams() {
+  if(!UID) return;
+  try {
+    const {data, error} = await q(
+      sb.from('parametres')
+        .select('*')
+        .eq('user_id', UID)
+        .lte('annee', ANNEE)
+        .order('annee', {ascending: false})
+        .limit(1)
+    );
+    if(error) { console.warn('[params] load error:', error.message); return; }
+    if(!data || data.length === 0) return; // Pas de données → P garde ses défauts
+
+    const row = data[0];
+    const estExacte = row.annee === ANNEE;
+
+    // Champs hérités de N-1 si pas de ligne exacte
+    P.nomEnt    = row.nom_entreprise || '';
+    P.secteur   = row.secteur        || '';
+    P.regimeTVA = row.regime_tva     || 'TVA réelle mensuelle';
+    P.regimeFisc= row.regime_fiscal  || 'IS — Impôt sur les sociétés';
+    P.devise    = row.devise         || '€ Euro';
+    P.cle       = row.cle_repartition|| 'qte';
+    P.moisDeb   = row.mois_debut     || 1;
+    P.moisFin   = row.mois_fin       || 12;
+    P.tresoInit = row.treso_init     || 0;
+
+    // Objectif CA : uniquement si ligne exacte pour cette année
+    P.obj = estExacte ? (row.objectif_ca || 0) : 0;
+
+    renderParams();
+  } catch(e) {
+    console.warn('[params] load exception:', e.message);
+    // En cas de timeout : P garde ses valeurs (backup localStorage)
+    restoreParamsFromLocal();
+  }
+}
+
+// ── Supabase : sauvegarder les paramètres ────────────
+async function saveParams() {
+  if(!UID) return;
+  // Backup local avant Supabase
+  saveParamsToLocal();
+  try {
+    const {error} = await sb.from('parametres').upsert({
+      user_id:UID, annee:ANNEE,
+      nom_entreprise: P.nomEnt,
+      secteur:        P.secteur,
+      regime_tva:     P.regimeTVA,
+      regime_fiscal:  P.regimeFisc,
+      devise:         P.devise,
+      cle_repartition:P.cle,
+      objectif_ca:    P.obj,
+      treso_init:     P.tresoInit,
+      mois_debut:     P.moisDeb,
+      mois_fin:       P.moisFin,
+    }, {onConflict: 'user_id,annee'});
+    if(error) console.warn('[params] save error:', error.message);
+    else setSaved();
+  } catch(e) {
+    console.warn('[params] save exception:', e.message);
+  }
+}
+
+// ── LocalStorage backup ──────────────────────────────
+function saveParamsToLocal() {
+  if(!UID) return;
+  try {
+    const bk = JSON.parse(localStorage.getItem('lp_'+UID) || '{}');
+    if(!bk.params) bk.params = {};
+    bk.params[ANNEE] = {...P};
+    bk.annee = ANNEE;
+    localStorage.setItem('lp_'+UID, JSON.stringify(bk));
+    localStorage.setItem('lp_annee_'+UID, ANNEE);
+  } catch(e){}
+}
+
+function restoreParamsFromLocal() {
+  if(!UID) return;
+  try {
+    const raw = localStorage.getItem('lp_'+UID);
+    if(!raw) return;
+    const bk = JSON.parse(raw);
+    if(!bk.params) return;
+    // Héritage : chercher la ligne la plus récente ≤ ANNEE
+    const annees = Object.keys(bk.params).map(Number).filter(a => a <= ANNEE).sort((a,b) => b-a);
+    if(annees.length === 0) return;
+    const src = bk.params[annees[0]];
+    const estExacte = annees[0] === ANNEE;
+    Object.assign(P, src);
+    P.obj = estExacte ? (src.obj || 0) : 0; // Objectif CA : jamais hérité
+    renderParams();
+  } catch(e){}
+}
+
+// ── Rendu DOM ────────────────────────────────────────
+function renderParams() {
+  setDOM('ent-nom',  P.nomEnt);
+  setDOM('ent-sect', P.secteur);
+  setDOM('ent-obj',  P.obj);
+  setDOM('ent-tva',  P.regimeTVA);
+  setDOM('ent-fisc', P.regimeFisc);
+  setDOM('ent-dev',  P.devise);
+  // Clé de répartition
+  document.querySelectorAll('input[name="cle"]').forEach(r => {
+    r.checked = r.value === P.cle;
   });
+  syncEntNom();
+  // Label année
+  const lbl = el('params-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+}
 
-  // CA total mensuel
-  const caM = Array(12).fill(0);
-  S.articles.forEach(a => (S.qty[a.code]||[]).forEach((q,m) => caM[m] += q * a.pv));
-
-  // Coût achat total mensuel
-  const coutM = Array(12).fill(0);
-  S.articles.forEach(a => (S.qty[a.code]||[]).forEach((q,m) => coutM[m] += q * a.cout));
-
-  // Marge brute mensuelle = CA - coût achat
-  const mrgM = caM.map((c,m) => c - coutM[m]);
-
-  // Charges mensuelles
-  const chTotM  = Array(12).fill(0);
-  const chFixM  = Array(12).fill(0);
-  const chVarM  = Array(12).fill(0);
-  S.charges.forEach(c => {
-    (S.chMD[c.code]||Array(12).fill(0)).forEach((v,m) => {
-      chTotM[m] += v;
-      if(c.type==='Fixe') chFixM[m] += v; else chVarM[m] += v;
+// ── Articles ─────────────────────────────────────────
+async function loadArticles() {
+  if(!UID) return;
+  try {
+    const {data, error} = await q(
+      sb.from('articles')
+        .select('*')
+        .eq('user_id', UID)
+        .order('annee', {ascending: true})
+    );
+    if(error) { console.warn('[articles] load:', error.message); return; }
+    // Héritage : pour chaque code, prendre la ligne la plus récente ≤ ANNEE
+    const byCode = {};
+    (data||[]).forEach(row => {
+      if(row.annee <= ANNEE) byCode[row.code] = row;
     });
-  });
+    articles = Object.values(byCode)
+      .filter(r => r.actif !== false)
+      .map(r => ({
+        code: r.code, nom: r.nom, cat: r.categorie || 'Divers',
+        pv:   parseFloat(r.prix_ht)   || 0,
+        cout: parseFloat(r.cout_achat)|| 0,
+        tva:  parseFloat(r.tva)       || 0.2,
+        actif: true,
+      }));
+    renderArticles();
+  } catch(e) { console.warn('[articles] exception:', e.message); }
+}
 
-  // Résultat net mensuel = CA - coût achat - charges
-  const rnM = caM.map((c,m) => c - coutM[m] - chTotM[m]);
+async function saveArticle(art) {
+  if(!UID) return;
+  const {error} = await sb.from('articles').upsert({
+    user_id:UID, code:art.code, annee:ANNEE,
+    nom:art.nom, categorie:art.cat,
+    prix_ht:art.pv, cout_achat:art.cout, tva:art.tva, actif:true,
+  }, {onConflict:'user_id,code,annee'});
+  if(error) console.warn('[articles] save:', error.message);
+  else setSaved();
+}
 
-  // TVA — zéro si franchise en base
-  const isFranchise = S.params.regimeTVA === 'Franchise en base';
-  const tvaCollM = isFranchise ? Array(12).fill(0) : caM.map(c => c * 0.2);
-  const tvaDedM  = isFranchise ? Array(12).fill(0) : chTotM.map(c => c * 0.2);
-  const tvaNM    = tvaCollM.map((c,m) => c - tvaDedM[m]);
-
-  // Trésorerie cumulée avec solde initial
-  let solde = S.params.tresoInit || 0;
-  const tresoM = caM.map((c,m) => { solde += c - chTotM[m]; return solde; });
-
-  // Filtrer selon la période sélectionnée
-  const idx = moisToIdx(mois);
-  const sum = (arr) => idx.reduce((s,m) => s + arr[m], 0);
-
-  const totalCA   = sum(caM);
-  const totalCout = sum(coutM);
-  const totalMrg  = sum(mrgM);
-  const totalChF  = sum(chFixM);
-  const totalChV  = sum(chVarM);
-  const totalCh   = sum(chTotM);
-  const totalRN   = sum(rnM);
-  const totalTVAC = sum(tvaCollM);
-  const totalTVAD = sum(tvaDedM);
-  const totalTVAN = sum(tvaNM);
-
-  // Taux de marge globaux
-  const txMarge  = totalCA > 0 ? totalMrg / totalCA * 100 : 0;
-  const txMarque = totalCA > 0 ? totalMrg / totalCA * 100 : 0; // même base ici, marge/PV
-  const txMCV    = totalCA > 0 ? (totalMrg - totalChV) / totalCA * 100 : 0;
-
-  // Point mort
-  const txMCVunit = totalCA > 0 ? (totalMrg - totalChV) / totalCA : 0;
-  const pointMort = txMCVunit > 0 ? totalChF / txMCVunit : 0;
-  const jourLib   = totalCA > 0 ? Math.round(pointMort / totalCA * 30) : 0;
-
-  // Panier moyen
-  const totalQty = S.articles.reduce((s,a) => s + idx.reduce((ss,m) => ss + (S.qty[a.code]?.[m]||0), 0), 0);
-  const panierM  = totalQty > 0 ? totalCA / totalQty : 0;
-
-  // Concentration top 3
-  const artCA = S.articles.map(a => ({
-    code: a.code, nom: a.nom, cat: a.cat, pv: a.pv, cout: a.cout,
-    totalCA: idx.reduce((s,m) => s + (S.qty[a.code]?.[m]||0)*a.pv, 0),
-    totalQty: idx.reduce((s,m) => s + (S.qty[a.code]?.[m]||0), 0),
-    mrgBrute: idx.reduce((s,m) => s + (S.qty[a.code]?.[m]||0)*(a.pv-a.cout), 0),
-    txMarge: a.pv > 0 ? (a.pv - a.cout) / a.pv * 100 : 0,
-  })).sort((a,b) => b.totalCA - a.totalCA);
-
-  const top3CA = artCA.slice(0,3).reduce((s,a) => s + a.totalCA, 0);
-  const concTop3 = totalCA > 0 ? top3CA / totalCA * 100 : 0;
-
-  // Coût de revient analytique (prorata quantités)
-  const cfParUnit = totalQty > 0 ? totalChF / totalQty : 0;
-  const artCRA = artCA.map(a => ({
-    ...a,
-    cfUnit: cfParUnit,
-    cra: a.cout + cfParUnit,
-    margeReelle: a.pv - a.cout - cfParUnit,
-    txReel: a.pv > 0 ? (a.pv - a.cout - cfParUnit) / a.pv * 100 : 0,
-  }));
-
-  // Charges classées
-  const chClass = S.charges.map(c => ({
-    ...c,
-    total: idx.reduce((s,m) => s + (S.chMD[c.code]?.[m]||0), 0),
-  })).sort((a,b) => b.total - a.total);
-
-  C = {
-    caM, coutM, mrgM, chTotM, chFixM, chVarM, rnM,
-    tvaCollM, tvaDedM, tvaNM, tresoM,
-    totalCA, totalCout, totalMrg, totalChF, totalChV, totalCh, totalRN,
-    totalTVAC, totalTVAD, totalTVAN,
-    txMarge, txMarque, txMCV,
-    pointMort, jourLib, panierM, totalQty,
-    concTop3, top3CA, artCA, artCRA, chClass,
-    idx, mois,
+function addArt() {
+  const nom  = el('pa-nom').value.trim();  if(!nom) return;
+  const code = el('pa-code').value.trim() || `ART${String(articles.length+1).padStart(2,'0')}`;
+  const art  = {
+    code, nom,
+    cat:  el('pa-cat').value  || 'Divers',
+    pv:   parseFloat(el('pa-pv').value)   || 0,
+    cout: parseFloat(el('pa-cout').value) || 0,
+    tva:  parseFloat(el('pa-tva').value)  || 0.2,
+    actif: true,
   };
+  articles.push(art);
+  ['pa-code','pa-nom','pa-cat','pa-pv','pa-cout'].forEach(id => el(id).value = '');
+  toggleAdd('p-art-add');
+  saveArticle(art);
+  renderArticles();
 }
 
-function getMoisRange() {
-  if(periodeFilter === 'q1') return [1,2,3];
-  if(periodeFilter === 'q2') return [4,5,6];
-  if(periodeFilter === 'q3') return [7,8,9];
-  if(periodeFilter === 'q4') return [10,11,12];
-  // all — range entre moisDeb et moisFin
-  const mois = [];
-  const d = S.params.moisDeb, f = S.params.moisFin;
-  if(f >= d) { for(let m=d;m<=f;m++) mois.push(m); }
-  else { for(let m=d;m<=12;m++) mois.push(m); for(let m=1;m<=f;m++) mois.push(m); }
-  return mois;
-}
-function moisToIdx(mois) { return mois.map(m => m-1); }
-function filterPeriod(v) {
-  periodeFilter = v;
-  recalc();
-  renderAll();
-  // Sync le select avec la valeur choisie
-  const sel = el('db-period-sel');
-  if(sel) sel.value = v;
-}
-
-// ═══════════════════════════════════════════════
-// RENDER DASHBOARD — délègue aux fonctions granulaires
-// ═══════════════════════════════════════════════
-function renderDB() {
-  // Sous-titre période — guard si C pas encore calculé
-  const an = S.params.annee;
-  const mois = C.mois || [1];
-  const dbp = el('db-period');
-  if(dbp) dbp.textContent = `${MOIS[mois[0]]} → ${MOIS[mois[mois.length-1]]} ${an}`;
-
-  // Toutes les zones du dashboard via les fonctions granulaires
-  updateDashboardKPIs();
-  updateDashboardAlerts();
-  updateSeuilCard();
-  updateTopArtCard();
-  updateTVAMiniCard();
-  // Graphe principal CA vs Charges
-  mkChart('c-ca-ch','bar',{labels:MS.slice(1),datasets:[
-    {label:'CA HT',data:C.caM,backgroundColor:'rgba(59,126,255,.72)',borderRadius:5,borderSkipped:false},
-    {label:'Charges',data:C.chTotM,type:'line',borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.07)',tension:.4,pointRadius:3,fill:true,borderWidth:2},
-  ]},{});
-  // Graphe répartition charges
-  mkChart('c-ch-rep','doughnut',{
-    labels:['Charges fixes','Charges variables'],
-    datasets:[{data:[C.totalChF,C.totalChV],backgroundColor:['rgba(155,135,245,.85)','rgba(34,211,200,.85)'],borderWidth:0,hoverOffset:4}]
-  },{cutout:'66%'});
-}
-
-// ═══════════════════════════════════════════════
-// RENDER CA
-// ═══════════════════════════════════════════════
-function renderCA() {
-  // KPIs
-  const bestM = C.caM.indexOf(Math.max(...C.caM));
-  const worstM = C.caM.indexOf(Math.min(...C.caM));
-  el('ca-kpis').innerHTML = [
-    kpiCard('CA HT total','--ac', fmt(C.totalCA)+' €', null, null),
-    kpiCard('Quantités vendues','--gr', C.totalQty.toString(), null, null),
-    kpiCard('Meilleur mois','--pu', MS[bestM+1]||'—', C.caM[bestM]>0?fmt(C.caM[bestM])+' €':'', null),
-    kpiCard('Mois le plus faible','--am', MS[worstM+1]||'—', C.caM[worstM]>0?fmt(C.caM[worstM])+' €':'', null),
-  ].join('');
-
-  // Table saisie
-  const tbl = el('ca-tbl');
-  if(S.articles.length === 0) {
-    tbl.innerHTML = `<thead></thead><tbody><tr><td colspan="16" style="padding:40px;text-align:center;color:var(--t2)">Aucun article · Cliquez sur "+ Nouvel article" pour commencer</td></tr></tbody>`;
-  } else {
-    let h = `<thead><tr><th>Code</th><th>Article</th>${MS.slice(1).map(m=>`<th>${m}</th>`).join('')}<th>Total</th><th>CA HT</th><th></th></tr></thead><tbody>`;
-    S.articles.forEach((a,ai) => {
-      const q = S.qty[a.code] || Array(12).fill(0);
-      const tot = q.reduce((s,v)=>s+v,0);
-      h += `<tr><td style="color:var(--t2);font-family:var(--fm);font-size:11px">${a.code}</td>`;
-      h += `<td style="font-weight:600;white-space:nowrap">${a.nom}</td>`;
-      q.forEach((v,m) => {
-        h += `<td><input class="sinp" type="number" value="${v}" min="0" oninput="S.qty['${a.code}'][${m}]=parseInt(this.value)||0;smartUpdate()"></td>`;
-      });
-      h += `<td class="stot">${tot}</td>`;
-      h += `<td class="stot" style="color:var(--gr)">${fmt(tot*a.pv)} €</td>`;
-      h += `<td><button class="delbtn" onclick="if(confirm('Supprimer ${a.nom.replace(/'/g,"\\'")} ?')){S.articles.splice(${ai},1);delete S.qty['${a.code}'];recalc();renderCA();renderArt();renderCtrl();autoSave()}">×</button></td>`;
-      h += `</tr>`;
-    });
-    // Ligne totaux
-    h += `<tr class="totrow"><td colspan="2">Total mensuel</td>`;
-    Array(12).fill(0).forEach((_,m) => {
-      const s = S.articles.reduce((ss,a)=>ss+(S.qty[a.code]?.[m]||0)*a.pv,0);
-      h += `<td class="stot">${fmt(s)} €</td>`;
-    });
-    h += `<td class="stot">${C.totalQty}</td><td class="stot" style="color:var(--ac)">${fmt(C.totalCA)} €</td><td></td></tr></tbody>`;
-    tbl.innerHTML = h;
+async function delArt(i) {
+  const a = articles[i]; if(!a) return;
+  if(!confirm(`Supprimer "${a.nom}" à partir de ${ANNEE} ?`)) return;
+  articles.splice(i, 1);
+  // Insérer ligne actif=false pour ANNEE → les années passées restent inchangées
+  if(UID) {
+    const {error} = await sb.from('articles').upsert({
+      user_id:UID, code:a.code, annee:ANNEE,
+      nom:a.nom, categorie:a.cat,
+      prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:false,
+    }, {onConflict:'user_id,code,annee'});
+    if(error) console.warn('[articles] del:', error.message);
+    else setSaved();
   }
-
-  // Graphes
-  mkChart('c-ca-m','bar',{labels:MS.slice(1),datasets:[{label:'CA HT',data:C.caM,backgroundColor:'rgba(59,126,255,.72)',borderRadius:5,borderSkipped:false}]},{legend:false});
-  const cats = {};
-  S.articles.forEach(a => {
-    cats[a.cat] = (cats[a.cat]||0) + C.artCA.find(x=>x.code===a.code)?.totalCA||0;
-  });
-  if(Object.keys(cats).length > 0) {
-    mkChart('c-ca-cat','doughnut',{labels:Object.keys(cats),datasets:[{data:Object.values(cats),backgroundColor:['rgba(155,135,245,.8)','rgba(34,211,200,.8)','rgba(59,126,255,.8)','rgba(14,165,114,.8)','rgba(245,158,11,.8)'],borderWidth:0,hoverOffset:4}]},{cutout:'60%'});
-  }
+  renderArticles();
 }
 
-// ═══════════════════════════════════════════════
-// RENDER CHARGES
-// ═══════════════════════════════════════════════
-function renderCharges() {
-  // KPIs dynamiques
-  const topCh = C.chClass[0];
-  el('ch-kpis').innerHTML = [
-    kpiCard('Total charges','--am', fmt(C.totalCh)+' €', null, null),
-    kpiCard('Charges fixes','--pu', fmt(C.totalChF)+' €', C.totalCh>0?`${(C.totalChF/C.totalCh*100).toFixed(1)} % du total`:'', null),
-    kpiCard('Charges variables','--tl', fmt(C.totalChV)+' €', C.totalCh>0?`${(C.totalChV/C.totalCh*100).toFixed(1)} % du total`:'', null),
-    kpiCard('Poste principal','--rd', topCh?topCh.nom:'—', topCh?fmt(topCh.total)+' €':'Aucune charge', null),
-  ].join('');
-
-  // Table saisie
-  const tbl = el('ch-tbl');
-  if(S.charges.length === 0) {
-    tbl.innerHTML = `<thead></thead><tbody><tr><td colspan="16" style="padding:40px;text-align:center;color:var(--t2)">Aucune charge · Cliquez sur "+ Nouvelle charge" pour commencer</td></tr></tbody>`;
-  } else {
-    const colors = {'Fixe':'bpu','Variable':'btl'};
-    let h = `<thead><tr><th>Code</th><th>Charge</th><th>Type</th>${MS.slice(1).map(m=>`<th>${m}</th>`).join('')}<th>Total</th><th></th></tr></thead><tbody>`;
-    S.charges.forEach((c,ci) => {
-      const d = S.chMD[c.code] || Array(12).fill(0);
-      const tot = d.reduce((s,v)=>s+v,0);
-      h += `<tr><td style="color:var(--t2);font-family:var(--fm);font-size:11px">${c.code}</td>`;
-      h += `<td style="font-weight:600;white-space:nowrap">${c.nom}</td>`;
-      h += `<td><span class="bdg ${colors[c.type]||'bac'}">${c.type}</span></td>`;
-      d.forEach((v,m) => {
-        h += `<td><input class="sinp" type="number" value="${v}" min="0" oninput="S.chMD[${c.code}][${m}]=parseInt(this.value)||0;smartUpdate()"></td>`;
-      });
-      h += `<td class="stot" style="color:var(--am)">${fmt(tot)} €</td>`;
-      h += `<td><button class="delbtn" onclick="if(confirm('Supprimer ${c.nom.replace(/'/g,"\\'")} ?')){S.charges.splice(${ci},1);delete S.chMD[${c.code}];recalc();renderCharges();renderCh();renderCtrl();autoSave()}">×</button></td>`;
-      h += `</tr>`;
-    });
-    const tots = C.chTotM;
-    h += `<tr class="totrow"><td colspan="3">Total mensuel</td>${tots.map(v=>`<td class="stot">${fmt(v)} €</td>`).join('')}<td class="stot" style="color:var(--rd)">${fmt(C.totalCh)} €</td><td></td></tr></tbody>`;
-    tbl.innerHTML = h;
-  }
-
-  // ── Option A — Avertissement double comptage achats ──
-  const hasArtCout = S.articles.some(a => a.cout > 0);
-  const hasMarchandise = S.charges.some(c => {
-    const cat = (c.cat||'').toLowerCase();
-    const nom = (c.nom||'').toLowerCase();
-    return cat.includes('marchand') || cat.includes('achat') || cat.includes('stock')
-        || nom.includes('marchand') || nom.includes('achat') || nom.includes('stock');
-  });
-  const showWarn = hasArtCout && hasMarchandise;
-  const warnEl = el('ch-doublon-warn');
-  const warnEl2 = el('ch-saisie-warn');
-  if(warnEl)  warnEl.style.display  = showWarn ? 'flex' : 'none';
-  if(warnEl2) warnEl2.style.display = showWarn ? 'flex' : 'none';
-  const maxV = C.chClass[0]?.total || 1;
-  const cols2 = ['--am','--pu','--tl','--gr','--ac'];
-  el('ch-toplist').innerHTML = C.chClass.slice(0,5).length === 0
-    ? emptyState('💸','Aucune charge','Ajoutez des charges pour voir le classement')
-    : C.chClass.slice(0,5).map((c,i) => `
-      <div class="topitem">
-        <div class="toprank">${i+1}</div>
-        <div class="topname">${c.nom}</div>
-        <div class="topbarw"><div class="topbar-fill" style="width:${(c.total/maxV*100).toFixed(0)}%;background:var(${cols2[i]})"></div></div>
-        <div class="topval">${fmt(c.total)} €</div>
-      </div>`).join('');
-
-  // Graphes
-  mkChart('c-ch-m','bar',{labels:MS.slice(1),datasets:[
-    {label:'Fixes',data:C.chFixM,backgroundColor:'rgba(155,135,245,.75)',borderRadius:5,borderSkipped:false},
-    {label:'Variables',data:C.chVarM,backgroundColor:'rgba(34,211,200,.75)',borderRadius:5,borderSkipped:false}
-  ]},{stacked:true});
-}
-
-function renderChargeKPIs() {
-  const topCh = C.chClass[0];
-  el('ch-kpis').innerHTML = [
-    kpiCard('Total charges','--am', fmt(C.totalCh)+' €', null, null),
-    kpiCard('Charges fixes','--pu', fmt(C.totalChF)+' €', C.totalCh>0?`${(C.totalChF/C.totalCh*100).toFixed(1)} % du total`:'', null),
-    kpiCard('Charges variables','--tl', fmt(C.totalChV)+' €', C.totalCh>0?`${(C.totalChV/C.totalCh*100).toFixed(1)} % du total`:'', null),
-    kpiCard('Poste principal','--rd', topCh?topCh.nom:'—', topCh?fmt(topCh.total)+' €':'Aucune charge', null),
-  ].join('');
-}
-
-// ═══════════════════════════════════════════════
-// RENDER MARGE
-// ═══════════════════════════════════════════════
-function renderMarge() {
-  el('mrg-kpis').innerHTML = [
-    kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', null, null),
-    kpiCard('Marge sur coûts variables','--tl', fmt(C.totalMrg-C.totalChV)+' €', `${C.txMCV.toFixed(1)} % du CA`, null),
-    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', null, null),
-    kpiCard('Panier moyen','--pk', fmt(C.panierM)+' €', `${C.totalQty} unités vendues`, null),
-  ].join('');
-
-  // Marge par article
-  const maxMrg = Math.max(...C.artCA.map(a=>Math.abs(a.txMarge)),1);
-  el('mrg-art-list').innerHTML = C.artCA.length === 0
-    ? emptyState('📊','Aucun article','Ajoutez des articles pour voir l\'analyse')
-    : C.artCA.map(a => {
-        const col = a.txMarge >= 40 ? 'var(--gr)' : a.txMarge >= 20 ? 'var(--am)' : 'var(--rd)';
-        return `<div class="mrgrow">
-          <div class="mrgname">${a.nom}</div>
-          <div style="flex:1;margin:0 10px"><div class="pw" style="margin:0"><div class="pb" style="width:${Math.min(a.txMarge,100).toFixed(0)}%;background:${col}"></div></div></div>
-          <span class="mrgtaux" style="color:${col}">${a.txMarge.toFixed(1)} %</span>
-        </div>`;
-      }).join('');
-
-  // Coût de revient
-  el('cra-body').innerHTML = C.artCRA.length === 0
-    ? `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucun article configuré</td></tr>`
-    : C.artCRA.map(a => {
-        const badgeCls = a.txReel >= 30 ? 'bgr' : a.txReel >= 15 ? 'bam' : 'brd';
-        return `<tr>
-          <td style="font-weight:600">${a.nom}</td>
-          <td style="font-family:var(--fm)">${fmt(a.cout)} €</td>
-          <td style="font-family:var(--fm);color:var(--t2)">${fmt(a.cfUnit)} €</td>
-          <td style="font-family:var(--fm);font-weight:700">${fmt(a.cra)} €</td>
-          <td style="font-family:var(--fm)">${fmt(a.pv)} €</td>
-          <td style="font-family:var(--fm);font-weight:700;color:${a.margeReelle>=0?'var(--gr)':'var(--rd)'}">${fmt(a.margeReelle)} €</td>
-          <td><span class="bdg ${badgeCls}">${a.txReel.toFixed(1)} %</span></td>
-        </tr>`;
-      }).join('');
-
-  // Graphe marge mensuelle
-  mkChart('c-mrg-m','line',{labels:MS.slice(1),datasets:[
-    {label:'Marge brute',data:C.mrgM,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.09)',tension:.4,pointRadius:3,fill:true,borderWidth:2},
-    {label:'Résultat net',data:C.rnM,borderColor:'#9b87f5',backgroundColor:'rgba(155,135,245,.07)',tension:.4,pointRadius:3,fill:true,borderWidth:2,borderDash:[5,3]},
-  ]},{});
-}
-
-// ═══════════════════════════════════════════════
-// RENDER TVA
-// ═══════════════════════════════════════════════
-function renderTVA() {
-  const isFranchise = S.params.regimeTVA === 'Franchise en base';
-
-  if(isFranchise) {
-    el('tva-kpis').innerHTML = `<div style="grid-column:1/-1">
-      <div class="abox abb"><div class="abox-ico">💡</div><div>
-        <div class="abox-title">Régime Franchise en base de TVA</div>
-        <div class="abox-desc">Vous n'êtes pas assujetti à la TVA. Vous ne collectez pas de TVA sur vos ventes et ne déduisez pas la TVA sur vos achats. Pour modifier votre régime, rendez-vous dans Paramètres → Entreprise.</div>
-      </div></div>
-    </div>`;
+function renderArticles() {
+  const tb = el('art-tbody'); if(!tb) return;
+  if(articles.length === 0) {
+    tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--t2)">Aucun article · Cliquez sur + Ajouter</td></tr>`;
     return;
   }
-
-  el('tva-kpis').innerHTML = [
-    kpiCard('TVA collectée','--gr', fmt(C.totalTVAC)+' €', 'Ventes HT × taux TVA moyen 20 %', null),
-    kpiCard('TVA déductible','--ac', fmt(C.totalTVAD)+' €', 'Charges éligibles × TVA', null),
-    kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null),
-  ].join('');
-
-  mkChart('c-tva-m','bar',{labels:MS.slice(1),datasets:[
-    {label:'Collectée',data:C.tvaCollM,backgroundColor:'rgba(14,165,114,.72)',borderRadius:5,borderSkipped:false},
-    {label:'Déductible',data:C.tvaDedM.map(v=>-v),backgroundColor:'rgba(59,126,255,.72)',borderRadius:5,borderSkipped:false},
-    {label:'Nette',data:C.tvaNM,type:'line',borderColor:'#f43f5e',tension:.4,pointRadius:3,borderWidth:2},
-  ]},{});
-
-  el('tva-prov').innerHTML = C.tvaNM.map((v,m) => `
-    <div class="tvarow">
-      <span class="tvarow-l">${MOIS[m+1]}</span>
-      <span class="tvarow-v" style="color:${v>0?'var(--rd)':v<0?'var(--gr)':'var(--t2)'}">${v>0?'+':''}${fmt(v)} €</span>
-    </div>`).join('');
-}
-
-// ═══════════════════════════════════════════════
-// RENDER TRESORERIE
-// ═══════════════════════════════════════════════
-function renderTreso() {
-  const initSolde = 0;
-  let s = initSolde;
-  const tresoM2 = C.caM.map((c,m) => { s += c - C.chTotM[m]; return s; });
-
-  el('treso-kpis').innerHTML = [
-    kpiCard('Solde initial','--gr', '0 €', 'Début de période', null),
-    kpiCard('Total encaissements','--ac', fmt(C.totalCA)+' €', null, null),
-    kpiCard('Total décaissements','--am', fmt(C.totalCh)+' €', null, null),
-    kpiCard('Solde de fin','--gr', fmt(tresoM2[11])+' €', tresoM2[11]>=0?'↑ Positif':'↓ Négatif', null),
-  ].join('');
-
-  mkChart('c-treso','line',{labels:MS.slice(1),datasets:[
-    {label:'Solde cumulé',data:tresoM2,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.09)',tension:.4,pointRadius:4,fill:true,borderWidth:2},
-    {label:'Seuil zéro',data:Array(12).fill(0),borderColor:'rgba(244,63,94,.4)',borderDash:[5,4],pointRadius:0,borderWidth:1.5},
-  ]},{});
-
-  let ts = initSolde;
-  el('treso-body').innerHTML = C.caM.map((ca,m) => {
-    const dec = C.chTotM[m];
-    const sm = ca - dec;
-    ts += sm;
-    const cls = sm >= 0 ? 'ppos' : 'pneg';
-    return `<tr><td>${MOIS[m+1]}</td><td class="ppos">${fmt(ca)} €</td><td class="pneg">${fmt(dec)} €</td><td class="${cls}">${sm>=0?'+':''}${fmt(sm)} €</td><td class="ppos">${fmt(ts)} €</td></tr>`;
-  }).join('');
-
-  // Alertes tréso
-  const hasMoisNegatif = tresoM2.some(v => v < 0);
-  const tvaAlert = C.totalTVAN > 0;
-  el('treso-alerts').innerHTML = `
-    ${!hasMoisNegatif ? '<div class="abox abg"><div class="abox-ico">✅</div><div><div class="abox-title">Aucun mois en négatif</div><div class="abox-desc">Le solde reste positif sur toute la période.</div></div></div>' :
-      '<div class="abox abr"><div class="abox-ico">⚠</div><div><div class="abox-title">Solde négatif détecté</div><div class="abox-desc">Vérifiez les mois en rouge dans le tableau.</div></div></div>'}
-    ${tvaAlert ? `<div class="abox aba"><div class="abox-ico">💡</div><div><div class="abox-title">TVA à reverser : ${fmt(C.totalTVAN)} €</div><div class="abox-desc">Anticipez ce décaissement dans votre trésorerie.</div></div></div>` : ''}
-    ${C.totalCA === 0 ? '<div class="abox aba"><div class="abox-ico">📊</div><div><div class="abox-title">Aucune donnée saisie</div><div class="abox-desc">Commencez par le module Chiffre d\'affaires.</div></div></div>' : ''}`;
-}
-
-// ═══════════════════════════════════════════════
-// RENDER PREVISIONNEL
-// ═══════════════════════════════════════════════
-function renderPrev() {
-  const g = parseFloat(el('growth').value) / 100;
-  const prevCA   = C.caM.map(v => Math.round(v*(1+g)));
-  const prevCout = C.coutM.map(v => Math.round(v*(1+g)));
-  const prevMrg  = prevCA.map((c,m) => c - prevCout[m]);
-  const prevCh   = C.chTotM.map(v => Math.round(v*(1+g*0.5)));
-  const prevRN   = prevMrg.map((m,i) => m - prevCh[i]);
-
-  const tPCA  = prevCA.reduce((s,v)=>s+v,0);
-  const tPMrg = prevMrg.reduce((s,v)=>s+v,0);
-  const tPRN  = prevRN.reduce((s,v)=>s+v,0);
-
-  el('prev-kpis').innerHTML = [
-    kpiCard('CA prévisionnel N+1','--ac', fmt(tPCA)+' €', `${g>=0?'+':''}${(g*100).toFixed(0)} % vs N`, null),
-    kpiCard('Marge prévisionnelle','--gr', fmt(tPMrg)+' €', null, null),
-    kpiCard('Résultat prévisionnel','--pu', fmt(tPRN)+' €', null, null),
-  ].join('');
-
-  const rows = [
-    {l:'CA HT',d:prevCA,c:'ppos'},
-    {l:'Charges totales',d:prevCh,c:'pneg'},
-    {l:'Marge brute',d:prevMrg,c:'ppos'},
-    {l:'Résultat net',d:prevRN,c:'pneu'},
-  ];
-  el('prev-body').innerHTML = rows.map(r => {
-    const tot = r.d.reduce((s,v)=>s+v,0);
-    return `<tr><td>${r.l}</td>${r.d.map(v=>`<td class="${r.c}">${fmt(v)} €</td>`).join('')}<td class="${r.c}" style="font-weight:800">${fmt(tot)} €</td></tr>`;
-  }).join('');
-
-  mkChart('c-prev','bar',{labels:['CA HT','Marge brute','Résultat net'],datasets:[
-    {label:'N (actuel)',data:[C.totalCA,C.totalMrg,C.totalRN],backgroundColor:'rgba(59,126,255,.65)',borderRadius:5,borderSkipped:false},
-    {label:'N+1 (prévisionnel)',data:[tPCA,tPMrg,tPRN],backgroundColor:'rgba(14,165,114,.65)',borderRadius:5,borderSkipped:false},
-  ]},{});
-}
-
-// ═══════════════════════════════════════════════
-// RENDER SCENARIOS
-// ═══════════════════════════════════════════════
-function renderScen() {
-  const base = {ca:C.totalCA, mrg:C.totalMrg, rn:C.totalRN, pm:C.pointMort};
-  const scens = [
-    {ico:'📉',label:'Scénario pessimiste',cls:'',tag:'brd',tagTxt:'-20 % CA',dca:-.2,dcf:0,dcv:0,dco:0},
-    {ico:'📊',label:'Situation actuelle',cls:';border-color:var(--ac);background:var(--ag)',tag:'bac',tagTxt:'Référence',dca:0,dcf:0,dcv:0,dco:0},
-    {ico:'📈',label:'Scénario optimiste',cls:'',tag:'bgr',tagTxt:'+20 % CA',dca:.2,dcf:0,dcv:.05,dco:0},
-  ];
-  el('scen-cards').innerHTML = scens.map(s => {
-    const ca = C.totalCA*(1+s.dca);
-    const cout = C.coutM.reduce((ss,v)=>ss+v,0)*(1+s.dco);
-    const mrg = ca - cout;
-    const cf = C.totalChF*(1+s.dcf);
-    const cv = C.totalChV*(1+s.dcv);
-    const rn = mrg - cf - cv;
-    const col = rn >= 0 ? 'var(--gr)' : 'var(--rd)';
-    const abcls = rn >= 0 ? 'abg' : 'abr';
-    const msg = rn >= 0 ? 'Résultat positif — bonne santé financière.' : 'Résultat négatif — les charges fixes ne sont plus couvertes.';
-    return `<div class="sccard" style="${s.cls}">
-      <div class="sccard-hdr"><span class="sccard-name">${s.ico} ${s.label}</span><span class="bdg ${s.tag}">${s.tagTxt}</span></div>
-      <div class="sccard-res" style="color:${col}">${fmt(rn)} €</div>
-      <div style="font-size:11px;color:var(--t2);margin-top:3px">Résultat net estimé</div>
-      <div class="abox ${abcls}" style="margin-top:10px"><div class="abox-ico">${rn>=0?'✅':'⚠'}</div><div><div class="abox-desc">${msg}</div></div></div>
-    </div>`;
+  tb.innerHTML = articles.map((a,i) => {
+    const mg = a.pv > 0 ? (a.pv-a.cout)/a.pv*100 : 0;
+    const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
+    const tvaOpts = [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
+      .map(([v,l]) => `<option value="${v}" ${a.tva==v?'selected':''}>${l}</option>`).join('');
+    return `<tr>
+      <td><input class="tdinp" value="${a.code}" style="max-width:88px"
+        oninput="articles[${i}].code=this.value" onblur="saveArticle(articles[${i}])"></td>
+      <td><input class="tdinp" value="${a.nom}"
+        oninput="articles[${i}].nom=this.value" onblur="saveArticle(articles[${i}])"></td>
+      <td><input class="tdinp" value="${a.cat}" style="max-width:100px"
+        oninput="articles[${i}].cat=this.value" onblur="saveArticle(articles[${i}])"></td>
+      <td><input class="tdinp" type="number" value="${a.pv}" step="0.01" style="max-width:80px"
+        oninput="articles[${i}].pv=parseFloat(this.value)||0" onblur="saveArticle(articles[${i}]);renderArticles()"></td>
+      <td><input class="tdinp" type="number" value="${a.cout}" step="0.01" style="max-width:80px"
+        oninput="articles[${i}].cout=parseFloat(this.value)||0" onblur="saveArticle(articles[${i}]);renderArticles()"></td>
+      <td><select class="tdsel" style="max-width:78px"
+        onchange="articles[${i}].tva=parseFloat(this.value);saveArticle(articles[${i}])">${tvaOpts}</select></td>
+      <td><span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span></td>
+      <td><select class="tdsel" style="max-width:70px"
+        onchange="articles[${i}].actif=this.value==='true';saveArticle(articles[${i}])">
+        <option value="true" ${a.actif?'selected':''}>Oui</option>
+        <option value="false" ${!a.actif?'selected':''}>Non</option>
+      </select></td>
+      <td><button class="delbtn" onclick="delArt(${i})">×</button></td>
+    </tr>`;
   }).join('');
 }
 
-function runSim() {
-  const dca = parseFloat(el('sim-ca').value)/100||0;
-  const dcf = parseFloat(el('sim-cf').value)/100||0;
-  const dcv = parseFloat(el('sim-cv').value)/100||0;
-  const dco = parseFloat(el('sim-co').value)/100||0;
-  const ca = C.totalCA*(1+dca);
-  const cout = C.coutM.reduce((s,v)=>s+v,0)*(1+dco);
-  const mrg = ca - cout;
-  const cf = C.totalChF*(1+dcf);
-  const cv = C.totalChV*(1+dcv);
-  const rn = mrg - cf - cv;
-  const txMCV2 = ca > 0 ? (mrg-cv)/ca : 0;
-  const pm = txMCV2 > 0 ? cf/txMCV2 : 0;
-  el('sim-kpis').innerHTML = [
-    kpiCard('CA simulé','--ac', fmt(ca)+' €', null, null),
-    kpiCard('Marge brute simulée','--gr', fmt(mrg)+' €', null, null),
-    kpiCard('Résultat net simulé','--pu', fmt(rn)+' €', null, rn),
-    kpiCard('Point mort simulé','--am', fmt(pm)+' €', null, null),
-  ].join('');
+// ── Charges ──────────────────────────────────────────
+async function loadCharges() {
+  if(!UID) return;
+  try {
+    const {data, error} = await q(
+      sb.from('charges')
+        .select('*')
+        .eq('user_id', UID)
+        .order('annee', {ascending: true})
+    );
+    if(error) { console.warn('[charges] load:', error.message); return; }
+    const byCode = {};
+    (data||[]).forEach(row => {
+      if(row.annee <= ANNEE) byCode[String(row.code)] = row;
+    });
+    charges = Object.values(byCode)
+      .filter(r => r.actif !== false)
+      .map(r => ({
+        code: r.code, nom: r.nom, cat: r.categorie || 'Divers',
+        tva:  parseFloat(r.tva) || 0.2,
+        type: r.type || 'Variable',
+        actif: true,
+      }));
+    renderCharges();
+  } catch(e) { console.warn('[charges] exception:', e.message); }
 }
 
-// ═══════════════════════════════════════════════
-// RENDER ALERTES
-// ═══════════════════════════════════════════════
-function computeAlerts() {
-  const alerts = [];
-  const nbArt = S.articles.length;
-  const moisAvecCA = C.caM.filter(v => v > 0).length;
-
-  // ── Pas de données ──
-  if(C.totalCA === 0) {
-    if(nbArt === 0) {
-      alerts.push({type:'b',msg:'Ajoutez vos premiers articles dans Paramètres → Articles',title:'Démarrage',desc:''});
-    } else {
-      alerts.push({type:'a',msg:'Aucune quantité saisie — rendez-vous dans le module Chiffre d\'affaires',title:'Saisie manquante',desc:''});
-    }
-    return alerts;
-  }
-
-  // ── Résultat net négatif ──
-  if(C.totalRN < 0) {
-    alerts.push({type:'r',msg:`Résultat net négatif : ${fmt(C.totalRN)} € — vos charges dépassent votre marge`,title:'Perte nette',desc:'Réduisez vos charges ou augmentez votre CA.'});
-  }
-
-  // ── Charges fixes > 60% du CA (seulement si on a des charges) ──
-  if(C.totalCh > 0 && C.totalCA > 0 && C.totalChF / C.totalCA > 0.6) {
-    alerts.push({type:'r',msg:'Charges fixes > 60 % du CA — point mort difficile à atteindre',title:'Charges fixes élevées',desc:'Votre seuil de rentabilité est très haut par rapport à votre CA.'});
-  }
-
-  // ── Marge en baisse prolongée (≥3 mois consécutifs, sans redressement) ──
-  // Seulement avec au moins 5 mois de données significatives
-  if(moisAvecCA >= 5) {
-    let run = 0;
-    for(let i = 1; i < 12; i++) {
-      if(C.mrgM[i] > 0 && C.mrgM[i-1] > 0 && C.mrgM[i] < C.mrgM[i-1]) {
-        run++;
-      } else {
-        run = 0;
-      }
-      if(run >= 3) {
-        // Vérifier qu'il n'y a pas de redressement juste après
-        const next = C.mrgM.slice(i+1).find(v => v > 0);
-        if(!next || next <= C.mrgM[i]) {
-          alerts.push({type:'r',msg:`Marge en baisse 3 mois de suite — tendance non inversée`,title:'Baisse de marge prolongée',desc:'Vérifiez vos coûts et votre politique tarifaire.'});
-        }
-        break;
-      }
-    }
-  }
-
-  // ── Concentration CA ──
-  // Pertinent seulement si ≥ 5 articles (avec moins, concentration élevée = normal)
-  if(nbArt >= 5 && C.concTop3 > 70) {
-    alerts.push({type:'a',msg:`Top 3 articles = ${C.concTop3.toFixed(0)} % du CA — risque de dépendance`,title:'Concentration du CA',desc:'Diversifiez votre catalogue pour réduire ce risque.'});
-  }
-
-  // ── TVA à provisionner ──
-  if(S.params.regimeTVA !== 'Franchise en base' && C.totalTVAN > 1000) {
-    alerts.push({type:'a',msg:`TVA nette à reverser : ${fmt(C.totalTVAN)} € — anticipez ce décaissement`,title:'TVA à reverser',desc:''});
-  }
-
-  // ── Objectif CA ──
-  if(S.params.obj > 0) {
-    const pct = C.totalCA / S.params.obj * 100;
-    if(pct >= 100) {
-      alerts.push({type:'g',msg:`🎉 Objectif CA atteint ! ${fmt(C.totalCA)} € / ${fmt(S.params.obj)} €`,title:'Objectif atteint',desc:''});
-    } else if(pct < 50 && moisAvecCA >= 6) {
-      alerts.push({type:'r',msg:`Objectif CA à ${pct.toFixed(0)} % avec ${moisAvecCA} mois de recul`,title:'Retard sur objectif',desc:`Il reste ${fmt(S.params.obj - C.totalCA)} € à générer.`});
-    } else if(pct < 100) {
-      alerts.push({type:'a',msg:`Objectif CA à ${pct.toFixed(0)} % — ${fmt(S.params.obj - C.totalCA)} € restants`,title:'Objectif CA',desc:''});
-    }
-  }
-
-  // ── Aucune charge (résultat surestimé) ──
-  if(C.totalCA > 0 && C.totalCh === 0) {
-    alerts.push({type:'a',msg:'Aucune charge saisie — le résultat net est surestimé',title:'Charges manquantes',desc:'Saisissez vos charges pour un résultat fiable.'});
-  }
-
-  return alerts;
+async function saveCharge(ch) {
+  if(!UID) return;
+  const {error} = await sb.from('charges').upsert({
+    user_id:UID, code:String(ch.code), annee:ANNEE,
+    nom:ch.nom, categorie:ch.cat, tva:ch.tva, type:ch.type, actif:true,
+  }, {onConflict:'user_id,code,annee'});
+  if(error) console.warn('[charges] save:', error.message);
+  else setSaved();
 }
 
-function renderAlertsPage() {
-  const alerts = computeAlerts();
-  const crit = alerts.filter(a=>a.type==='r');
-  const avert = alerts.filter(a=>a.type==='a');
-  const info = alerts.filter(a=>a.type==='g'||a.type==='b');
-
-  el('alrt-kpis').innerHTML = [
-    kpiCard('Alertes critiques','--rd', crit.length.toString(), null, null),
-    kpiCard('Avertissements','--am', avert.length.toString(), null, null),
-    kpiCard('Informations','--gr', info.length.toString(), null, null),
-    kpiCard('Total alertes','--t3', alerts.length.toString(), null, null),
-  ].join('');
-
-  const mapType = {r:'abr',a:'aba',g:'abg',b:'abb'};
-  const mapIco  = {r:'🔴',a:'🟡',g:'🟢',b:'💡'};
-  el('alrt-body').innerHTML = alerts.length === 0
-    ? `<div class="abox abg"><div class="abox-ico">✅</div><div><div class="abox-title">Aucune alerte</div><div class="abox-desc">Tout est en ordre sur la période analysée.</div></div></div>`
-    : alerts.map(a => `<div class="abox ${mapType[a.type]}"><div class="abox-ico">${mapIco[a.type]}</div><div><div class="abox-title">${a.title}</div><div class="abox-desc">${a.desc||a.msg}</div></div></div>`).join('');
-
-  // Badge sidebar
-  const nb = crit.length;
-  el('alert-count').textContent = nb > 0 ? nb : '';
-  el('alert-count').style.display = nb > 0 ? '' : 'none';
+function addCh() {
+  const nom = el('pc-nom').value.trim(); if(!nom) return;
+  const code = String(Date.now());
+  const ch = {
+    code, nom,
+    cat:  el('pc-cat').value  || 'Divers',
+    tva:  parseFloat(el('pc-tva').value)  || 0.2,
+    type: el('pc-type').value || 'Variable',
+    actif: true,
+  };
+  charges.push(ch);
+  ['pc-nom','pc-cat'].forEach(id => el(id).value = '');
+  toggleAdd('p-ch-add');
+  saveCharge(ch);
+  renderCharges();
 }
 
-// ═══════════════════════════════════════════════
-// RENDER PARAMETRES
-// ═══════════════════════════════════════════════
-function renderArt() {
-  const tb = el('art-tbody');
-  if(!tb) return;
-  tb.innerHTML = S.articles.length === 0
-    ? `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--t2)">Aucun article configuré</td></tr>`
-    : S.articles.map((a,i) => {
-        const mg = a.pv > 0 ? (a.pv-a.cout)/a.pv*100 : 0;
-        const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
-        const tvaOpts = [[.2,'20%'],[.1,'10%'],[.055,'5,5%'],[0,'0%']].map(([v,l])=>`<option value="${v}" ${a.tva==v?'selected':''}>${l}</option>`).join('');
-        return `<tr>
-          <td><input class="tdinp" value="${a.code}" oninput="S.articles[${i}].code=this.value;autoSave()" style="max-width:88px"></td>
-          <td><input class="tdinp" value="${a.nom}" oninput="S.articles[${i}].nom=this.value;autoSave()"></td>
-          <td><input class="tdinp" value="${a.cat}" oninput="S.articles[${i}].cat=this.value;autoSave()" style="max-width:100px"></td>
-          <td><input class="tdinp" type="number" value="${a.pv}" step="0.01" oninput="updArtPv(${i},this.value)" style="max-width:80px"></td>
-          <td><input class="tdinp" type="number" value="${a.cout}" step="0.01" oninput="updArtCout(${i},this.value)" style="max-width:80px"></td>
-          <td><select class="tdsel" onchange="S.articles[${i}].tva=parseFloat(this.value);autoSave()" style="max-width:78px">${tvaOpts}</select></td>
-          <td id="art-mg-${i}"><span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span></td>
-          <td><select class="tdsel" onchange="S.articles[${i}].actif=this.value==='true';autoSave()" style="max-width:70px"><option value="true" ${a.actif?'selected':''}>Oui</option><option value="false" ${!a.actif?'selected':''}>Non</option></select></td>
-          <td><button class="delbtn" onclick="delArtAt(${i})">×</button></td>
-        </tr>`;
-      }).join('');
-  renderCtrl();
-}
-
-// Mise à jour prix sans recréer le DOM — préserve le focus
-function updArtPv(i, val) {
-  S.articles[i].pv = parseFloat(val)||0;
-  const mg = S.articles[i].pv > 0 ? (S.articles[i].pv - S.articles[i].cout)/S.articles[i].pv*100 : 0;
-  const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
-  const cell = el('art-mg-'+i);
-  if(cell) cell.innerHTML = `<span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span>`;
-  recalc(); smartUpdate(); autoSave();
-}
-
-// Mise à jour coût sans recréer le DOM — préserve le focus
-function updArtCout(i, val) {
-  S.articles[i].cout = parseFloat(val)||0;
-  const mg = S.articles[i].pv > 0 ? (S.articles[i].pv - S.articles[i].cout)/S.articles[i].pv*100 : 0;
-  const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
-  const cell = el('art-mg-'+i);
-  if(cell) cell.innerHTML = `<span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span>`;
-  recalc(); smartUpdate(); autoSave();
-}
-
-async function delArtAt(i) {
-  const a = S.articles[i]; if(!a) return;
-  if(!confirm(`Supprimer "${a.nom}" à partir de ${S.params.annee} ?`)) return;
-  S.articles.splice(i,1);
-  delete S.qty[a.code];
-  if(S.uid) {
-    const {error:e} = await sb.from('articles').upsert({
-      user_id:S.uid, code:a.code, annee:S.params.annee,
-      nom:a.nom, categorie:a.cat, prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:false,
-    }, {onConflict:'user_id,code,annee'});
-    if(e) console.warn('[del art]', e.message);
-  }
-  recalc(); renderArt(); renderCA(); renderCtrl(); smartUpdate();
-}
-
-function renderCh() {
-  const tb = el('ch-tbody');
-  if(!tb) return;
-  tb.innerHTML = S.charges.length === 0
-    ? `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucune charge configurée</td></tr>`
-    : S.charges.map((c,i) => {
-        const tvaOpts = [[.2,'20%'],[.1,'10%'],[.055,'5,5%'],[0,'0%']].map(([v,l])=>`<option value="${v}" ${c.tva==v?'selected':''}>${l}</option>`).join('');
-        // Avertissement doublon marchandise
-        const hasCoutAchat = S.articles.some(a => a.cout > 0);
-        const isMarchandise = ['marchandise','achat','stock','approvisionnement'].some(k => c.cat.toLowerCase().includes(k) || c.nom.toLowerCase().includes(k));
-        const warnIcon = hasCoutAchat && isMarchandise ? `<span title="⚠ Risque de doublon avec les coûts d'achat de vos articles" style="cursor:help;margin-left:4px;color:var(--am)">⚠</span>` : '';
-        return `<tr>
-          <td style="color:var(--t2);font-family:var(--fm);font-size:11px">${c.code}</td>
-          <td><input class="tdinp" value="${c.nom}" oninput="S.charges[${i}].nom=this.value;autoSave()">${warnIcon}</td>
-          <td><input class="tdinp" value="${c.cat}" oninput="S.charges[${i}].cat=this.value;autoSave()" style="max-width:110px"></td>
-          <td><select class="tdsel" onchange="S.charges[${i}].tva=parseFloat(this.value);autoSave()" style="max-width:78px">${tvaOpts}</select></td>
-          <td><select class="tdsel" onchange="S.charges[${i}].type=this.value;recalc();renderCh();smartUpdate();autoSave()" style="max-width:100px"><option value="Fixe" ${c.type==='Fixe'?'selected':''}>Fixe</option><option value="Variable" ${c.type==='Variable'?'selected':''}>Variable</option></select></td>
-          <td><select class="tdsel" onchange="S.charges[${i}].actif=this.value==='true';autoSave()" style="max-width:70px"><option value="true" ${c.actif?'selected':''}>Oui</option><option value="false" ${!c.actif?'selected':''}>Non</option></select></td>
-          <td><button class="delbtn" onclick="delChAt(${i})">×</button></td>
-        </tr>`;
-      }).join('');
-  // Répartition
-  const f = S.charges.filter(c=>c.type==='Fixe').length;
-  const tot = S.charges.length || 1;
-  el('rep-f').textContent = `Fixe : ${f} charge${f>1?'s':''}`;
-  el('rep-v').textContent = `Variable : ${tot-f} charge${tot-f>1?'s':''}`;
-  el('rep-bar').style.width = `${f/tot*100}%`;
-  // Avertissement global doublon
-  const hasCoutAchat = S.articles.some(a => a.cout > 0);
-  const hasMarchandise = S.charges.some(c => ['marchandise','achat','stock','approvisionnement'].some(k => c.cat.toLowerCase().includes(k) || c.nom.toLowerCase().includes(k)));
-  const warn = el('ch-doublon-warn');
-  if(warn) warn.style.display = hasCoutAchat && hasMarchandise ? 'flex' : 'none';
-  renderCtrl();
-}
-
-async function delChAt(i) {
-  const c = S.charges[i]; if(!c) return;
-  if(!confirm(`Supprimer "${c.nom}" à partir de ${S.params.annee} ?`)) return;
-  // 1. Supprimer de la mémoire immédiatement
-  S.charges.splice(i,1);
-  delete S.chMD[c.code];
-  // 2. Écrire actif:false en base AVANT saveAll (qui s'exécutera ensuite)
-  if(S.uid) {
-    const {error:e} = await sb.from('charges').upsert({
-      user_id:S.uid, code:String(c.code), annee:S.params.annee,
+async function delCh(i) {
+  const c = charges[i]; if(!c) return;
+  if(!confirm(`Supprimer "${c.nom}" à partir de ${ANNEE} ?`)) return;
+  charges.splice(i, 1);
+  if(UID) {
+    const {error} = await sb.from('charges').upsert({
+      user_id:UID, code:String(c.code), annee:ANNEE,
       nom:c.nom, categorie:c.cat, tva:c.tva, type:c.type, actif:false,
     }, {onConflict:'user_id,code,annee'});
-    if(e) console.warn('[del ch]', e.message);
+    if(error) console.warn('[charges] del:', error.message);
+    else setSaved();
   }
-  // 3. saveAll ne réécrira pas cette charge car elle n'est plus dans S.charges
-  recalc(); renderCh(); renderCharges(); renderCtrl(); smartUpdate();
+  renderCharges();
 }
 
-function renderCtrl() {
-  // Contrôle de cohérence retiré de l'interface — fonction conservée pour compatibilité
+function renderCharges() {
+  const tb = el('ch-tbody'); if(!tb) return;
+  if(charges.length === 0) {
+    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucune charge · Cliquez sur + Ajouter</td></tr>`;
+    el('rep-f').textContent = 'Fixe : 0';
+    el('rep-v').textContent = 'Variable : 0';
+    el('rep-bar').style.width = '0%';
+    return;
+  }
+  const tvaOpts = v => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
+    .map(([x,l]) => `<option value="${x}" ${v==x?'selected':''}>${l}</option>`).join('');
+  tb.innerHTML = charges.map((c,i) => `<tr>
+    <td style="color:var(--t3);font-family:var(--fm);font-size:11px">${c.code.slice(-6)}</td>
+    <td><input class="tdinp" value="${c.nom}"
+      oninput="charges[${i}].nom=this.value" onblur="saveCharge(charges[${i}])"></td>
+    <td><input class="tdinp" value="${c.cat}" style="max-width:110px"
+      oninput="charges[${i}].cat=this.value" onblur="saveCharge(charges[${i}])"></td>
+    <td><select class="tdsel" style="max-width:78px"
+      onchange="charges[${i}].tva=parseFloat(this.value);saveCharge(charges[${i}])">${tvaOpts(c.tva)}</select></td>
+    <td><select class="tdsel" style="max-width:100px"
+      onchange="charges[${i}].type=this.value;saveCharge(charges[${i}]);renderCharges()">
+      <option value="Fixe" ${c.type==='Fixe'?'selected':''}>Fixe</option>
+      <option value="Variable" ${c.type==='Variable'?'selected':''}>Variable</option>
+    </select></td>
+    <td><select class="tdsel" style="max-width:70px"
+      onchange="charges[${i}].actif=this.value==='true';saveCharge(charges[${i}])">
+      <option value="true" ${c.actif?'selected':''}>Oui</option>
+      <option value="false" ${!c.actif?'selected':''}>Non</option>
+    </select></td>
+    <td><button class="delbtn" onclick="delCh(${i})">×</button></td>
+  </tr>`).join('');
+  // Répartition
+  const f = charges.filter(c=>c.type==='Fixe').length;
+  const tot = charges.length;
+  el('rep-f').textContent = `Fixe : ${f} charge${f!==1?'s':''}`;
+  el('rep-v').textContent = `Variable : ${tot-f} charge${tot-f!==1?'s':''}`;
+  el('rep-bar').style.width = `${tot>0?f/tot*100:0}%`;
 }
 
-function updPeriodPreview() {
-  // Cette fonction affiche uniquement — elle ne modifie JAMAIS S.params
-  // S.params est la source de vérité, le DOM est le reflet
-  const an = S.params.annee;
-  const d  = S.params.moisDeb;
-  const f  = S.params.moisFin;
-  // Sync les champs cachés avec S.params (pas l'inverse)
-  const pAn = el('p-an');   if(pAn  && parseInt(pAn.value)  !== an) pAn.value  = an;
-  const pDeb = el('p-deb'); if(pDeb && parseInt(pDeb.value) !== d)  pDeb.value = d;
-  const pFin = el('p-fin'); if(pFin && parseInt(pFin.value) !== f)  pFin.value = f;
-  // Affichage de la période
-  const nb   = f >= d ? f-d+1 : 12-d+f+1;
-  const an2  = f < d ? an+1 : an;
-  const pv   = el('p-prev-val'); if(pv) pv.textContent = `${MOIS[d]} ${an} → ${MOIS[f]} ${an2}`;
-  const pn   = el('p-prev-nb');  if(pn) pn.textContent = `${nb} mois`;
-  // Reset filtre période
-  periodeFilter = 'all';
-  const sel = el('db-period-sel'); if(sel) sel.value = 'all';
-}
+// ── Changement d'année ───────────────────────────────
+async function changeAnnee(newAn) {
+  newAn = parseInt(newAn);
+  if(isNaN(newAn) || newAn === ANNEE) return;
 
-// ── MULTI-ANNÉES ──
-async function changeAnnee(val) {
-  const newAn = parseInt(val)||2026;
-  if(newAn === S.params.annee) return;
-
-  // Écrire la nouvelle année dans localStorage EN PREMIER
-  if(S.uid) try { localStorage.setItem('lp_annee_'+S.uid, newAn); } catch(e){}
-
-  // Sauvegarder l'année courante avant de changer
+  // 1. Sauvegarder l'année courante immédiatement
   clearTimeout(_saveTimer);
-  if(S.uid) await saveAll();
+  await saveParams();
 
-  // Reprise tréso N→N+1
-  if(newAn === S.params.annee + 1) {
-    let s = S.params.tresoInit || 0;
-    C.caM.forEach((ca,m) => { s += ca - C.chTotM[m]; });
-    S.params.tresoInit = Math.round(s);
-  } else {
-    S.params.tresoInit = 0;
-  }
+  // 2. Changer l'année
+  ANNEE = newAn;
+  localStorage.setItem('lp_annee_'+UID, ANNEE);
 
-  S.params.annee = newAn;
-  const pAn = el('p-an'); if(pAn) pAn.value = newAn;
+  // 3. Réinitialiser P à ses valeurs par défaut (objectif_ca = 0)
+  P = { nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
+        regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
+        cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
 
-  const savedUid = S.uid;
-  S.uid = null; // Bloquer autosave pendant rechargement
-
-  if(savedUid) {
-    // Toutes les requêtes en parallèle
-    const [rP, rSca, rSch, rArts, rChs] = await Promise.allSettled([
-      sbQuery(sb.from('parametres').select('*').eq('user_id',savedUid).lte('annee',newAn).order('annee',{ascending:false}).limit(1)),
-      sbQuery(sb.from('saisies_ca').select('article_code,mois,quantite').eq('user_id',savedUid).eq('annee',newAn)),
-      sbQuery(sb.from('saisies_charges').select('charge_code,mois,montant').eq('user_id',savedUid).eq('annee',newAn)),
-      sbQuery(sb.from('articles').select('*').eq('user_id',savedUid).order('annee',{ascending:true})),
-      sbQuery(sb.from('charges').select('*').eq('user_id',savedUid).order('annee',{ascending:true})),
-    ]);
-
-    // Params — héritage depuis la ligne la plus récente ≤ newAn
-    // SAUF objectif_ca qui est indépendant par année
-    if(rP.status==='fulfilled' && rP.value?.data?.length>0) {
-      const p=rP.value.data[0];
-      const estAnneeExacte = p.annee === newAn;
-      S.params.obj       = estAnneeExacte ? (p.objectif_ca || 0) : 0;
-      S.params.regimeTVA = p.regime_tva      || 'TVA réelle mensuelle';
-      S.params.nomEnt    = p.nom_entreprise  || '';
-      S.params.secteur   = p.secteur         || '';
-      S.params.cle       = p.cle_repartition || 'qte';
-      S.params.moisDeb   = p.mois_debut      || 1;
-      S.params.moisFin   = p.mois_fin        || 12;
-      if(newAn !== S.params.annee + 1) S.params.tresoInit = p.treso_init || 0;
-      const set=(id,v)=>{const e=el(id);if(e)e.value=v;};
-      set('ent-nom',S.params.nomEnt); set('ent-obj',S.params.obj);
-      set('ent-tva',S.params.regimeTVA); set('ent-sect',S.params.secteur);
-      set('treso-init',S.params.tresoInit);
-      const dbn=el('db-name'); if(dbn) dbn.textContent=S.params.nomEnt||'Mon Entreprise';
-    }
-
-    // Articles — héritage : ligne la plus récente ≤ newAn par code
-    if(rArts.status==='fulfilled' && rArts.value?.data) {
-      const byCode={};
-      rArts.value.data.forEach(a => {
-        if(a.annee <= newAn) byCode[a.code] = a;
-      });
-      S.articles = Object.values(byCode)
-        .filter(a => a.actif !== false)
-        .map(a => ({
-          code:a.code, nom:a.nom, cat:a.categorie||'Divers',
-          pv:parseFloat(a.prix_ht)||0, cout:parseFloat(a.cout_achat)||0,
-          tva:parseFloat(a.tva)||0.2, actif:true,
-        }));
-    }
-
-    // Charges — même logique
-    if(rChs.status==='fulfilled' && rChs.value?.data) {
-      const byCode={};
-      rChs.value.data.forEach(c => {
-        if(c.annee <= newAn) byCode[String(c.code)] = c;
-      });
-      S.charges = Object.values(byCode)
-        .filter(c => c.actif !== false)
-        .map(c => ({
-          code:c.code, nom:c.nom, cat:c.categorie||'Divers',
-          tva:parseFloat(c.tva)||0.2, type:c.type||'Variable', actif:true,
-        }));
-    }
-
-    // Saisies
-    S.qty={}; S.articles.forEach(a=>{S.qty[a.code]=Array(12).fill(0);});
-    S.chMD={}; S.charges.forEach(c=>{S.chMD[c.code]=Array(12).fill(0);});
-    if(rSca.status==='fulfilled' && rSca.value?.data) {
-      rSca.value.data.forEach(r=>{
-        if(!S.qty[r.article_code]) S.qty[r.article_code]=Array(12).fill(0);
-        S.qty[r.article_code][r.mois-1]=r.quantite;
-      });
-    }
-    if(rSch.status==='fulfilled' && rSch.value?.data) {
-      rSch.value.data.forEach(r=>{
-        if(!S.chMD[r.charge_code]) S.chMD[r.charge_code]=Array(12).fill(0);
-        S.chMD[r.charge_code][r.mois-1]=r.montant;
-      });
-    }
-  }
-
-  S.uid = savedUid;
-  updPeriodPreview();
+  // 4. Recharger depuis Supabase
   renderAnneesNav();
-  recalc(); renderAll(); renderArt(); renderCh();
-  setSaved();
-  toast(`📅 Année ${newAn}`, 2000);
+  await Promise.all([loadParams(), loadArticles(), loadCharges()]);
+
+  toast(`📅 Année ${ANNEE}`);
 }
 
+// ── Navigation années ────────────────────────────────
 function renderAnneesNav() {
-  const cur = S.params.annee;
-  // Sync sidebar
-  const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = cur;
-  // Boutons rapides sidebar
+  const sbAn = el('sb-annee'); if(sbAn) sbAn.textContent = ANNEE;
   const sbAns = el('sb-annees');
   if(sbAns) {
-    const anneesDisp = [cur-1, cur, cur+1].filter(a => a >= 2020 && a <= 2040);
-    sbAns.innerHTML = anneesDisp.map(a => `
-      <button onclick="el('p-an').value=${a};changeAnnee(${a})"
-        style="flex:1;padding:3px 6px;border-radius:5px;font-size:11px;font-weight:${a===cur?'700':'400'};
-        background:${a===cur?'var(--ac)':'var(--bgc)'};color:${a===cur?'#fff':'var(--t3)'};
-        border:1px solid ${a===cur?'var(--ac)':'var(--bd)'};cursor:pointer">
-        ${a}
-      </button>`).join('');
+    const years = [ANNEE-1, ANNEE, ANNEE+1].filter(a => a >= 2020 && a <= 2040);
+    sbAns.innerHTML = years.map(a => `
+      <button onclick="changeAnnee(${a})"
+        style="flex:1;padding:3px 6px;border-radius:5px;font-size:11px;font-weight:${a===ANNEE?'700':'400'};
+        background:${a===ANNEE?'var(--ac)':'var(--bgc)'};color:${a===ANNEE?'#fff':'var(--t3)'};
+        border:1px solid ${a===ANNEE?'var(--ac)':'var(--bd)'};cursor:pointer">${a}</button>
+    `).join('');
   }
-  // Sync params tab nav
-  const nav2 = el('annees-nav');
-  if(nav2) {
-    const annees = [cur-2, cur-1, cur, cur+1].filter(a => a >= 2020 && a <= 2040);
-    nav2.innerHTML = annees.map(a => `
-      <button onclick="el('p-an').value=${a};changeAnnee(${a})"
-        style="padding:5px 14px;border-radius:var(--rs);font-size:12px;font-weight:${a===cur?'700':'500'};
-        background:${a===cur?'var(--ac)':'var(--bgc)'};color:${a===cur?'#fff':'var(--t2)'};
-        border:1px solid ${a===cur?'var(--ac)':'var(--bd)'};cursor:pointer">
-        ${a}${a===cur?' ✓':''}
-      </button>`).join('');
-  }
+  const lbl = el('params-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
 }
 
-// ═══════════════════════════════════════════════
-// CHARTS
-// ═══════════════════════════════════════════════
-function mkChart(id, type, data, opts={}) {
-  const el2 = el(id); if(!el2) return;
-  if(charts[id]) { charts[id].destroy(); delete charts[id]; }
-  const tc = gc('--t2'), cg = gc('--cg');
-  const scales = {};
-  if(type !== 'doughnut' && type !== 'pie') {
-    const yTick = opts.yCallback || (v => Math.abs(v)>=1000?(v/1000).toFixed(0)+'k €':v+'€');
-    scales.x = {grid:{color:cg},ticks:{color:tc,font:{size:10,family:'JetBrains Mono'}}};
-    scales.y = {grid:{color:cg},ticks:{color:tc,font:{size:10,family:'JetBrains Mono'},callback:yTick}};
-    if(opts.stacked) { scales.x.stacked=true; scales.y.stacked=true; }
-  }
-  charts[id] = new Chart(el2, {
-    type, data,
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display: opts.legend!==false, labels:{color:tc,font:{size:11,family:'Plus Jakarta Sans'},boxWidth:10,padding:10}}},
-      scales: Object.keys(scales).length ? scales : undefined,
-      cutout: opts.cutout,
-    }
-  });
-}
-
-function updateChartsLive() {
-  // Dashboard
-  if(charts['c-ca-ch']) {
-    charts['c-ca-ch'].data.datasets[0].data = C.caM;
-    charts['c-ca-ch'].data.datasets[1].data = C.chTotM;
-    charts['c-ca-ch'].update();
-  }
-  if(charts['c-ch-rep']) {
-    charts['c-ch-rep'].data.datasets[0].data = [C.totalChF, C.totalChV];
-    charts['c-ch-rep'].update();
-  }
-  // CA
-  if(charts['c-ca-m']) { charts['c-ca-m'].data.datasets[0].data=C.caM; charts['c-ca-m'].update(); }
-  // Charges
-  if(charts['c-ch-m']) { charts['c-ch-m'].data.datasets[0].data=C.chFixM; charts['c-ch-m'].data.datasets[1].data=C.chVarM; charts['c-ch-m'].update(); }
-  // Marge
-  if(charts['c-mrg-m']) { charts['c-mrg-m'].data.datasets[0].data=C.mrgM; charts['c-mrg-m'].data.datasets[1].data=C.rnM; charts['c-mrg-m'].update(); }
-  // Trésorerie
-  if(charts['c-treso']) { charts['c-treso'].data.datasets[0].data=C.tresoM; charts['c-treso'].update(); }
-  if(charts['c-treso-mini']) { charts['c-treso-mini'].data.datasets[0].data=C.tresoM; charts['c-treso-mini'].update(); }
-  // TVA
-  if(charts['c-tva-m']) {
-    charts['c-tva-m'].data.datasets[0].data=C.tvaCollM;
-    charts['c-tva-m'].data.datasets[1].data=C.tvaDedM.map(v=>-v);
-    charts['c-tva-m'].data.datasets[2].data=C.tvaNM;
-    charts['c-tva-m'].update();
-  }
-  // Prévisionnel
-  if(charts['c-prev']) {
-    const g = parseFloat(el('growth')?.value||10)/100;
-    charts['c-prev'].data.datasets[0].data=[C.totalCA,C.totalMrg,C.totalRN];
-    charts['c-prev'].data.datasets[1].data=[Math.round(C.totalCA*(1+g)),Math.round(C.totalMrg*(1+g)),Math.round(C.totalRN*(1+g*0.5))];
-    charts['c-prev'].update();
-  }
-}
-
-function initCharts() {
-  // Les graphes du dashboard sont créés par renderDB()
-  // initCharts ne fait rien de spécial — renderDB est appelé juste après
-}
-
-function updChartsTheme() {
-  setTimeout(() => {
-    const tc = gc('--t2'), cg = gc('--cg');
-    Object.values(charts).forEach(c => {
-      if(!c) return;
-      if(c.options.scales) {
-        ['x','y'].forEach(ax => {
-          if(c.options.scales[ax]) {
-            if(c.options.scales[ax].grid) c.options.scales[ax].grid.color=cg;
-            if(c.options.scales[ax].ticks) c.options.scales[ax].ticks.color=tc;
-          }
-        });
-      }
-      if(c.options.plugins?.legend?.labels) c.options.plugins.legend.labels.color=tc;
-      c.update();
-    });
-  }, 60);
-}
-
-// ═══════════════════════════════════════════════
-// KPI CARD HELPER
-// ═══════════════════════════════════════════════
-function kpiCard(lbl, color, val, sub, trend, tooltip='') {
-  const deltaHtml = trend !== null && trend !== undefined
-    ? `<span class="kdel ${trend>=0?'du':'dd'}">${trend>=0?'↑':'↓'} ${Math.abs(trend).toFixed(1)} %</span>`
-    : '';
-  return `<div class="kcard">
-    <div class="kacc" style="background:var(${color})"></div>
-    <div class="klbl">${lbl}</div>
-    <div class="kval">${val}</div>
-    ${deltaHtml}
-    ${sub ? `<div class="ksub">${sub}</div>` : ''}
-    ${tooltip ? `<div class="ktooltip">${tooltip}</div>` : ''}
-  </div>`;
-}
-
-function emptyState(ico, title, desc) {
-  return `<div class="empty"><div class="empty-ico">${ico}</div><div class="empty-title">${title}</div><div class="empty-desc">${desc}</div></div>`;
-}
-
-// ═══════════════════════════════════════════════
-// RENDER ALL
-// ═══════════════════════════════════════════════
-function renderAll() {
-  recalc();
-  renderDB();
-  renderCA();
-  renderCharges();
-  renderMarge();
-  renderTVA();
-  renderTreso();
-  renderPrev();
-  renderScen();
-  renderAlertsPage();
-  // renderArt() et renderCh() ne sont PAS appelés ici pour préserver le focus
-  // Ils sont appelés uniquement au chargement (startApp) et après ajout/suppression
-  renderCtrl();
-  updPeriodPreview();
-  renderAnneesNav();
-  runSim();
-}
-
-// ═══════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════
-function nav(id, elClicked) {
-  document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('active'));
-  el('pnl-'+id).classList.add('active');
-  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
-  if(elClicked) elClicked.classList.add('active');
-  closeMob();
-}
-
-function switchTab(id, tabEl) {
-  document.querySelectorAll('#pnl-params .tab-pnl').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('#pnl-params .tab').forEach(t=>t.classList.remove('active'));
+// ── UI Helpers ───────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-pnl').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el(id).classList.add('active');
-  tabEl.classList.add('active');
+  if(btn) btn.classList.add('active');
 }
 
 function toggleAdd(id) {
   el(id).classList.toggle('open');
 }
 
-// ═══════════════════════════════════════════════
-// SIDEBAR TOGGLE
-// ═══════════════════════════════════════════════
-let sbCol = false;
-function toggleSb() {
-  sbCol = !sbCol;
-  el('sb').classList.toggle('col', sbCol);
-  el('savebar').style.left = sbCol ? 'var(--swc)' : 'var(--sw)';
-  el('col-icon').innerHTML = sbCol
-    ? '<path d="M13 5l7 7-7 7"/><path d="M3 5l7 7-7 7"/>'
-    : '<path d="M11 19l-7-7 7-7"/><path d="M21 19l-7-7 7-7"/>';
-  setTimeout(() => Object.values(charts).forEach(c=>c&&c.resize()), 220);
+let _toastTimer = null;
+function toast(msg, dur=2500) {
+  let t = document.querySelector('.toast');
+  if(!t) { t = document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.style.display = 'flex';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { t.style.display='none'; }, dur);
 }
 
-function openMob()  { el('sb').classList.add('mob-open'); el('sb-ov').classList.add('open'); }
-function closeMob() { el('sb').classList.remove('mob-open'); el('sb-ov').classList.remove('open'); }
-
-// ═══════════════════════════════════════════════
-// THEME
-// ═══════════════════════════════════════════════
-function toggleTheme() {
-  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const next = dark ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('lp-theme', next);
-  el('theme-lbl').textContent = next === 'dark' ? '🌙 Thème sombre' : '☀️ Thème clair';
-  const mob = el('mob-theme'); if(mob) mob.textContent = next === 'dark' ? '🌙' : '☀️';
-  updChartsTheme();
+function exportArts() {
+  const rows = ['Code,Nom,Catégorie,PrixHT,CoutAchat,TVA'];
+  articles.forEach(a => rows.push(`${a.code},${a.nom},${a.cat},${a.pv},${a.cout},${a.tva}`));
+  const b = new Blob([rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='articles.csv'; a.click();
 }
 
-function applyTheme() {
-  const saved = localStorage.getItem('lp-theme') || 'light';
-  document.documentElement.setAttribute('data-theme', saved);
-  const lbl = el('theme-lbl'); if(lbl) lbl.textContent = saved === 'dark' ? '🌙 Thème sombre' : '☀️ Thème clair';
-  const mob = el('mob-theme'); if(mob) mob.textContent = saved === 'dark' ? '🌙' : '☀️';
+function exportChParam() {
+  const rows = ['Code,Nom,Catégorie,TVA,Type'];
+  charges.forEach(c => rows.push(`${c.code},${c.nom},${c.cat},${c.tva},${c.type}`));
+  const b = new Blob([rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download='charges.csv'; a.click();
 }
 
-// ═══════════════════════════════════════════════
-// ADD ARTICLE / CHARGE
-// ═══════════════════════════════════════════════
-function addArt() {
-  const nom = el('pa-nom').value.trim(); if(!nom) return;
-  const code = el('pa-code').value || `ART${String(S.articles.length+1).padStart(2,'0')}`;
-  const art = {code, nom, cat:el('pa-cat').value||'Divers', pv:parseFloat(el('pa-pv').value)||0, cout:parseFloat(el('pa-cout').value)||0, tva:parseFloat(el('pa-tva').value)||.2, actif:true, anneeCreation:S.params.annee};
-  S.articles.push(art);
-  S.qty[code] = Array(12).fill(0);
-  ['pa-code','pa-nom','pa-cat','pa-pv','pa-cout'].forEach(id=>el(id).value='');
-  toggleAdd('p-art-add');
-  recalc(); renderArt(); renderCA(); smartUpdate(); autoSave();
+// ── Auth ─────────────────────────────────────────────
+let authMode_ = 'login';
+function authMode(m) {
+  authMode_ = m;
+  el('tab-login').classList.toggle('active', m==='login');
+  el('tab-reg').classList.toggle('active', m==='register');
+  el('auth-btn').textContent = m==='login' ? 'Se connecter' : 'Créer mon compte';
+  el('auth-forgot').style.display = m==='login' ? '' : 'none';
+  el('auth-err').style.display = 'none';
+  el('auth-ok').style.display  = 'none';
 }
-
-function addArtFromCA() {
-  const nom = el('ca-nom').value.trim(); if(!nom) return;
-  const code = el('ca-code').value || `ART${String(S.articles.length+1).padStart(2,'0')}`;
-  S.articles.push({code, nom, cat:el('ca-cat').value||'Divers', pv:parseFloat(el('ca-pv').value)||0, cout:parseFloat(el('ca-cout').value)||0, tva:.2, actif:true, anneeCreation:S.params.annee});
-  S.qty[code] = Array(12).fill(0);
-  ['ca-code','ca-nom','ca-cat','ca-pv','ca-cout'].forEach(id=>el(id).value='');
-  toggleAdd('ca-add');
-  recalc(); renderCA(); renderArt(); smartUpdate(); autoSave();
-}
-
-function addCh() {
-  const nom = el('pc-nom').value.trim(); if(!nom) return;
-  const code = Date.now();
-  const ch = {code, nom, cat:el('pc-cat').value||'Divers', tva:parseFloat(el('pc-tva').value)||.2, type:el('pc-type').value, actif:true, anneeCreation:S.params.annee};
-  S.charges.push(ch);
-  S.chMD[code] = Array(12).fill(0);
-  ['pc-nom','pc-cat'].forEach(id=>el(id).value='');
-  toggleAdd('p-ch-add');
-  recalc(); renderCh(); renderCharges(); smartUpdate(); autoSave();
-}
-
-function addChFromPanel() {
-  const nom = el('ch-nom').value.trim(); if(!nom) return;
-  const code = Date.now();
-  S.charges.push({code, nom, cat:el('ch-cat').value||'Divers', tva:.2, type:el('ch-type').value, actif:true, anneeCreation:S.params.annee});
-  S.chMD[code] = Array(12).fill(0);
-  ['ch-nom','ch-cat'].forEach(id=>el(id).value='');
-  toggleAdd('ch-add');
-  recalc(); renderCharges(); renderCh(); smartUpdate(); autoSave();
-}
-
-// ═══════════════════════════════════════════════
-// SAVE BAR
-// ═══════════════════════════════════════════════
-function markUnsaved() {
-  const d = el('sdot'); if(d) { d.classList.remove('saved'); d.title='Sauvegarde en attente…'; }
-  const t = el('stxt'); if(t) t.textContent = '';
-}
-function setSaved() {
-  const d = el('sdot'); if(d) { d.classList.add('saved'); d.title='Toutes les modifications sont enregistrées'; }
-  const t = el('stxt'); if(t) t.textContent = 'Enregistré';
-}
-function setLoading(msg) {
-  const d = el('sdot'); if(d) { d.classList.remove('saved'); }
-  const t = el('stxt'); if(t) t.textContent = msg||'';
-}
-
-// ═══════════════════════════════════════════════
-// SUPABASE — SAVE
-// ═══════════════════════════════════════════════
-async function saveAll() {
-  if(!S.uid) return;
-  const uid = S.uid;
-  const an  = S.params.annee;
-  const d = el('sdot'); if(d) d.classList.remove('saved');
-
-  // ── 1. Backup localStorage par année ──
-  try {
-    localStorage.setItem('lp_annee_'+uid, an);
-    const bk = JSON.parse(localStorage.getItem('lp_'+uid)||'{}');
-    bk.v=5; bk.ts=Date.now();
-    if(!bk.artByYear)    bk.artByYear    = {};
-    if(!bk.chByYear)     bk.chByYear     = {};
-    if(!bk.paramsByYear) bk.paramsByYear = {};
-    if(!bk.qtyByYear)    bk.qtyByYear    = {};
-    if(!bk.chMDByYear)   bk.chMDByYear   = {};
-    bk.artByYear[an]    = S.articles;
-    bk.chByYear[an]     = S.charges;
-    bk.paramsByYear[an] = {...S.params};
-    bk.qtyByYear[an]    = S.qty;
-    bk.chMDByYear[an]   = S.chMD;
-    localStorage.setItem('lp_'+uid, JSON.stringify(bk));
-  } catch(e){}
-
-  // ── 2. Params (user_id, annee) — un upsert par année ──
-  try {
-    const p = {
-      user_id:uid, annee:an,
-      mois_debut:S.params.moisDeb, mois_fin:S.params.moisFin,
-      nom_entreprise:S.params.nomEnt||'',
-      objectif_ca:S.params.obj||0,
-      secteur:S.params.secteur||'',
-      regime_tva:S.params.regimeTVA||'TVA réelle mensuelle',
-      cle_repartition:S.params.cle||'qte',
-      is_pro:S.isPro||false,
-    };
-    if(S.params.tresoInit!==undefined) p.treso_init=S.params.tresoInit;
-
-    const {error:pE} = await sb.from('parametres').upsert(p, {onConflict:'user_id,annee'});
-    if(pE) console.warn('[save] params:', pE.message);
-  } catch(e){ console.warn('[save] params:', e.message); }
-
-  // ── 3. Articles — upsert (user_id, code, annee) ──
-  // Chaque modification en année N crée/met à jour la ligne N uniquement
-  if(S.articles.length > 0) {
-    try {
-      const rows = S.articles.map(a => ({
-        user_id:uid, code:a.code, annee:an,
-        nom:a.nom, categorie:a.cat,
-        prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif,
-      }));
-      const {error:aE} = await sb.from('articles').upsert(rows, {onConflict:'user_id,code,annee'});
-      if(aE) console.warn('[save] articles:', aE.message);
-    } catch(e){ console.warn('[save] articles:', e.message); }
-
-    try {
-      const rows=[];
-      S.articles.forEach(a=>(S.qty[a.code]||[]).forEach((q,m)=>{
-        if(q>0) rows.push({user_id:uid, article_code:a.code, mois:m+1, annee:an, quantite:q});
-      }));
-      await sb.from('saisies_ca').delete().eq('user_id',uid).eq('annee',an);
-      if(rows.length) await sb.from('saisies_ca').insert(rows);
-    } catch(e){ console.warn('[save] saisies_ca:', e.message); }
-  }
-
-  // ── 4. Charges — upsert (user_id, code, annee) ──
-  if(S.charges.length > 0) {
-    try {
-      const rows = S.charges.map(c => ({
-        user_id:uid, code:String(c.code), annee:an,
-        nom:c.nom, categorie:c.cat, tva:c.tva, type:c.type, actif:c.actif,
-      }));
-      const {error:cE} = await sb.from('charges').upsert(rows, {onConflict:'user_id,code,annee'});
-      if(cE) console.warn('[save] charges:', cE.message);
-    } catch(e){ console.warn('[save] charges:', e.message); }
-
-    try {
-      const rows=[];
-      S.charges.forEach(c=>(S.chMD[c.code]||[]).forEach((v,m)=>{
-        if(v>0) rows.push({user_id:uid, charge_code:String(c.code), mois:m+1, annee:an, montant:v});
-      }));
-      await sb.from('saisies_charges').delete().eq('user_id',uid).eq('annee',an);
-      if(rows.length) await sb.from('saisies_charges').insert(rows);
-    } catch(e){ console.warn('[save] saisies_charges:', e.message); }
-  }
-
-  setSaved();
-}
-
-// Helper: requête Supabase avec timeout
-function sbQuery(promise, ms=10000) {
-  return Promise.race([promise, new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
-}
-
-async function loadData(uid) {
-  // ── 1. Année active depuis localStorage (0ms) ──
-  try {
-    const an=parseInt(localStorage.getItem('lp_annee_'+uid));
-    if(an>=2020 && an<=2040) {
-      S.params.annee=an;
-      const e=el('p-an'); if(e) e.value=an;
-      const s=el('sb-annee'); if(s) s.textContent=an;
-    }
-  } catch(e){}
-  const anneeActive = S.params.annee;
-
-  // ── 2. Toutes les requêtes Supabase en parallèle ──
-  // Pour articles et charges : on charge TOUTES les lignes de cet user
-  // puis on applique la logique d'héritage côté client
-  const [rP, rA, rC, rSca, rSch] = await Promise.allSettled([
-    sbQuery(sb.from('parametres').select('*').eq('user_id',uid).lte('annee',anneeActive).order('annee',{ascending:false}).limit(1)),
-    sbQuery(sb.from('articles').select('*').eq('user_id',uid).order('annee',{ascending:true})),
-    sbQuery(sb.from('charges').select('*').eq('user_id',uid).order('annee',{ascending:true})),
-    sbQuery(sb.from('saisies_ca').select('article_code,mois,quantite').eq('user_id',uid).eq('annee',anneeActive)),
-    sbQuery(sb.from('saisies_charges').select('charge_code,mois,montant').eq('user_id',uid).eq('annee',anneeActive)),
-  ]);
-
-  // ── 3. Params ──
-  if(rP.status==='fulfilled' && rP.value?.data?.length>0) {
-    const p=rP.value.data[0];
-    const estAnneeExacte = p.annee === anneeActive;
-
-    S.params.moisDeb   = p.mois_debut      || 1;
-    S.params.moisFin   = p.mois_fin        || 12;
-    S.params.obj       = estAnneeExacte ? (p.objectif_ca || 0) : 0;
-
-    S.params.regimeTVA = p.regime_tva      || 'TVA réelle mensuelle';
-    S.params.nomEnt    = p.nom_entreprise  || '';
-    S.params.secteur   = p.secteur         || '';
-    S.params.cle       = p.cle_repartition || 'qte';
-    S.params.tresoInit = p.treso_init      || 0;
-    S.isPro            = p.is_pro===true;
-    S.params.annee     = anneeActive;
-    const set=(id,v)=>{const e=el(id);if(e)e.value=v;};
-    set('p-deb',S.params.moisDeb); set('p-fin',S.params.moisFin);
-    set('ent-nom',S.params.nomEnt); set('ent-obj',S.params.obj);
-    set('ent-tva',S.params.regimeTVA); set('ent-sect',S.params.secteur);
-    set('treso-init',S.params.tresoInit);
-    const d=el('db-name'); if(d) d.textContent=S.params.nomEnt||'Mon Entreprise';
-  } else if(rP.status==='rejected') console.warn('[load] params:',rP.reason?.message);
-
-  // ── 4. Articles — héritage : pour chaque code, prendre la ligne annee <= anneeActive la plus récente ──
-  if(rA.status==='fulfilled' && rA.value?.data) {
-    const byCode = {};
-    rA.value.data.forEach(a => {
-      // On garde uniquement les lignes <= anneeActive
-      if(a.annee <= anneeActive) {
-        // La ligne la plus récente gagne (tableau trié ASC donc on écrase)
-        byCode[a.code] = a;
-      }
-    });
-    // Filtrer les articles inactifs (supprimés en N → actif=false)
-    S.articles = Object.values(byCode)
-      .filter(a => a.actif !== false)
-      .map(a => ({
-        code:a.code, nom:a.nom, cat:a.categorie||'Divers',
-        pv:parseFloat(a.prix_ht)||0, cout:parseFloat(a.cout_achat)||0,
-        tva:parseFloat(a.tva)||0.2, actif:true,
-      }));
-  } else if(rA.status==='rejected') console.warn('[load] articles:',rA.reason?.message);
-
-  // ── 5. Charges — même logique d'héritage ──
-  if(rC.status==='fulfilled' && rC.value?.data) {
-    const byCode = {};
-    rC.value.data.forEach(c => {
-      if(c.annee <= anneeActive) {
-        byCode[String(c.code)] = c;
-      }
-    });
-    S.charges = Object.values(byCode)
-      .filter(c => c.actif !== false)
-      .map(c => ({
-        code:c.code, nom:c.nom, cat:c.categorie||'Divers',
-        tva:parseFloat(c.tva)||0.2, type:c.type||'Variable', actif:true,
-      }));
-  } else if(rC.status==='rejected') console.warn('[load] charges:',rC.reason?.message);
-
-  // ── 6. Saisies CA ──
-  S.articles.forEach(a=>{S.qty[a.code]=Array(12).fill(0);});
-  if(rSca.status==='fulfilled' && rSca.value?.data) {
-    rSca.value.data.forEach(r=>{
-      if(!S.qty[r.article_code]) S.qty[r.article_code]=Array(12).fill(0);
-      S.qty[r.article_code][r.mois-1]=r.quantite;
-    });
-  } else if(rSca.status==='rejected') console.warn('[load] saisies_ca:',rSca.reason?.message);
-
-  // ── 7. Saisies Charges ──
-  S.charges.forEach(c=>{S.chMD[c.code]=Array(12).fill(0);});
-  if(rSch.status==='fulfilled' && rSch.value?.data) {
-    rSch.value.data.forEach(r=>{
-      if(!S.chMD[r.charge_code]) S.chMD[r.charge_code]=Array(12).fill(0);
-      S.chMD[r.charge_code][r.mois-1]=r.montant;
-    });
-  } else if(rSch.status==='rejected') console.warn('[load] saisies_charges:',rSch.reason?.message);
-
-  // ── 8. Filet localStorage si 0 articles depuis Supabase ──
-  if(S.articles.length===0) {
-    try {
-      const raw=localStorage.getItem('lp_'+uid);
-      if(raw) {
-        const bk=JSON.parse(raw);
-        // Chercher les articles pour l'année active ou la plus proche
-        const artSrc = bk.artByYear && (bk.artByYear[anneeActive] ||
-          Object.entries(bk.artByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>parseInt(b[0])-parseInt(a[0]))[0]?.[1]);
-        if(artSrc && artSrc.length>0) {
-          S.articles = artSrc.filter(a=>a.actif!==false);
-          const chSrc = bk.chByYear && (bk.chByYear[anneeActive] ||
-            Object.entries(bk.chByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>parseInt(b[0])-parseInt(a[0]))[0]?.[1]);
-          S.charges = (chSrc||[]).filter(c=>c.actif!==false);
-          S.qty     = (bk.qtyByYear  && bk.qtyByYear[anneeActive])  || {};
-          S.chMD    = (bk.chMDByYear && bk.chMDByYear[anneeActive]) || {};
-
-          // Params : héritage depuis la plus récente ≤ anneeActive
-          const pSrc = bk.paramsByYear && (bk.paramsByYear[anneeActive] ||
-            Object.entries(bk.paramsByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>parseInt(b[0])-parseInt(a[0]))[0]?.[1]);
-          if(pSrc) {
-            // Copier tout sauf objectif CA
-            const {obj:_ignore, ...rest} = pSrc;
-            Object.assign(S.params, rest);
-            // Objectif CA : uniquement si ligne exacte pour cette année
-            const pExact = bk.paramsByYear && bk.paramsByYear[anneeActive];
-            S.params.obj = pExact ? (pExact.obj || 0) : 0;
-            S.params.annee = anneeActive;
-            // Sync DOM
-            const set=(id,v)=>{const e=el(id);if(e)e.value=v;};
-            set('ent-nom',S.params.nomEnt); set('ent-obj',S.params.obj);
-            set('ent-tva',S.params.regimeTVA); set('ent-sect',S.params.secteur);
-            const dbn=el('db-name'); if(dbn) dbn.textContent=S.params.nomEnt||'Mon Entreprise';
-            const sbAn=el('sb-annee'); if(sbAn) sbAn.textContent=anneeActive;
-          }
-        }
-      }
-    } catch(e){}
-  }
-
-  // Sync sidebar
-  const sbA=el('sb-annee'); if(sbA) sbA.textContent=S.params.annee;
-  const pA=el('p-an'); if(pA) pA.value=S.params.annee;
-  return true;
-}
-
-let authCurrentMode = 'login';
-
-function authMode(mode) {
-  authCurrentMode = mode;
-  el('tab-login').classList.toggle('active', mode==='login');
-  el('tab-reg').classList.toggle('active', mode==='register');
-  el('auth-btn').textContent = mode==='login' ? 'Se connecter' : 'Créer mon compte';
-  el('auth-forgot').style.display = mode==='login' ? '' : 'none';
-  hideAuthMsgs();
-}
-
-function showAuthErr(msg) { const e=el('auth-err'); e.textContent=msg; e.style.display='block'; el('auth-ok').style.display='none'; }
-function showAuthOk(msg)  { const e=el('auth-ok');  e.textContent=msg; e.style.display='block'; el('auth-err').style.display='none'; }
-function hideAuthMsgs()   { el('auth-err').style.display='none'; el('auth-ok').style.display='none'; }
 
 async function doAuth() {
   const email = el('auth-email').value.trim();
   const pwd   = el('auth-pwd').value;
-  const btn   = el('auth-btn');
-  hideAuthMsgs();
-  if(!email || !pwd) { showAuthErr('Veuillez remplir tous les champs.'); return; }
-  if(pwd.length < 8)  { showAuthErr('Le mot de passe doit contenir au moins 8 caractères.'); return; }
-  btn.textContent = 'Chargement…'; btn.disabled = true;
+  if(!email||!pwd) { showErr('Remplissez tous les champs.'); return; }
+  const btn = el('auth-btn'); btn.textContent='Chargement…'; btn.disabled=true;
   try {
-    if(authCurrentMode === 'login') {
-      const {data, error} = await sb.auth.signInWithPassword({email, password:pwd});
+    if(authMode_==='login') {
+      const {error} = await sb.auth.signInWithPassword({email, password:pwd});
       if(error) throw error;
-      // Succès — startApp sera appelé par onAuthStateChange
-      // On remet le bouton au cas où onAuthStateChange tarde
-      btn.textContent = 'Connexion réussie ✓';
     } else {
       const {error} = await sb.auth.signUp({email, password:pwd});
       if(error) throw error;
-      showAuthOk('✉️ Compte créé ! Un email de confirmation vous a été envoyé. Cliquez sur le lien dans l\'email pour activer votre compte, puis connectez-vous ici.');
+      showOk('Compte créé ! Vérifiez votre email puis connectez-vous.');
       authMode('login');
-      btn.textContent = 'Se connecter';
-      btn.disabled = false;
     }
-  } catch(err) {
-    const msgs = {
-      'Invalid login credentials':'Email ou mot de passe incorrect.',
-      'Email not confirmed':'Confirmez votre email avant de vous connecter.',
-      'User already registered':'Un compte existe déjà avec cet email.',
-    };
-    showAuthErr(msgs[err.message] || err.message || 'Une erreur est survenue.');
-    btn.textContent = authCurrentMode==='login' ? 'Se connecter' : 'Créer mon compte';
-    btn.disabled = false;
+  } catch(e) {
+    const msgs = {'Invalid login credentials':'Email ou mot de passe incorrect.','User already registered':'Compte déjà existant.'};
+    showErr(msgs[e.message]||e.message);
   }
+  btn.disabled=false;
+  btn.textContent = authMode_==='login'?'Se connecter':'Créer mon compte';
 }
 
 async function doForgot() {
   const email = el('auth-email').value.trim();
-  if(!email) { showAuthErr('Entrez votre email pour réinitialiser votre mot de passe.'); return; }
-  const {error} = await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
-  if(error) showAuthErr(error.message);
-  else showAuthOk('Email de réinitialisation envoyé — vérifiez votre boîte mail.');
+  if(!email) { showErr('Entrez votre email d\'abord.'); return; }
+  const {error} = await sb.auth.resetPasswordForEmail(email);
+  if(error) showErr(error.message);
+  else showOk('Email de réinitialisation envoyé.');
 }
 
+function showErr(msg) { el('auth-err').textContent=msg; el('auth-err').style.display='block'; el('auth-ok').style.display='none'; }
+function showOk(msg)  { el('auth-ok').textContent=msg;  el('auth-ok').style.display='block';  el('auth-err').style.display='none'; }
+
 async function doLogout() {
-  window._appStarted = false;
-  window._appLoading = false;
-  clearTimeout(_saveTimer); // Annuler tout autosave en attente
+  clearTimeout(_saveTimer);
+  UID = null;
   el('auth').style.display = 'flex';
-  el('onb').style.display  = 'none';
   el('app').style.display  = 'none';
-  S = {articles:[],charges:[],qty:{},chMD:{},params:{annee:2026,moisDeb:1,moisFin:12,nomEnt:'',obj:0,secteur:'',regimeTVA:'',regimeFisc:'',cle:'qte',tresoInit:0},isPro:false,uid:null};
-  const btn = el('auth-btn');
-  if(btn) { btn.textContent = 'Se connecter'; btn.disabled = false; }
   authMode('login');
-  hideAuthMsgs();
   await sb.auth.signOut();
 }
 
 function setUserUI(user) {
-  S.uid = user.id;
-  const email = user.email || '';
-  const av = email.charAt(0).toUpperCase();
-  el('sb-av').textContent = av;
-  el('sb-email').textContent = email;
+  const av = el('sb-av');    if(av) av.textContent = user.email[0].toUpperCase();
+  const em = el('sb-email'); if(em) em.textContent = user.email;
 }
 
-// ─ SMART UPDATE — met à jour KPIs + totaux SANS recréer les inputs ─
-// Appelé à chaque frappe dans les cellules de saisie
-let _saveTimer = null;
-function smartUpdate() {
-  recalc();
-
-  // ── 1. Totaux des tableaux de saisie (sans toucher aux inputs) ──
-  if(el('ca-tbl')) updateCATotals();
-  if(el('ch-tbl')) updateChTotals();
-
-  // ── 2. KPIs dashboard ──
-  updateDashboardKPIs();
-
-  // ── 3. Dashboard — alertes bar ──
-  updateDashboardAlerts();
-
-  // ── 4. Dashboard — carte seuil de rentabilité ──
-  updateSeuilCard();
-
-  // ── 5. Dashboard — top articles ──
-  updateTopArtCard();
-
-  // ── 6. Dashboard — TVA mini card ──
-  updateTVAMiniCard();
-
-  // ── 7. Graphes dashboard ──
-  updateChartsLive();
-
-  // ── 8. Modules Analyse ──
-  updateMargeModule();
-  updateTVAModule();
-  updateTresoModule();
-  updatePrevModule();
-  updateScenModule();
-
-  // ── 9. KPIs CA et Charges ──
-  updateCAKPIs();
-  updateChKPIs();
-
-  // ── 10. Alertes ──
-  renderAlertsPage();
-
-  // ── 11. Statut save ──
-  markUnsaved();
-
-  // ── 12. Autosave 2s ──
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(() => { if(S.uid) saveAll(); }, 2000);
+function applyTheme() {
+  const t = localStorage.getItem('lp-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  const lbl = el('theme-lbl'); if(lbl) lbl.textContent = t==='light' ? '🌙 Thème sombre' : '☀️ Thème clair';
+  const mob = el('mob-theme'); if(mob) mob.textContent = t==='light' ? '🌙' : '☀️';
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('lp-theme', next);
+  const lbl = el('theme-lbl'); if(lbl) lbl.textContent = next==='light'?'🌙 Thème sombre':'☀️ Thème clair';
+  const mob = el('mob-theme'); if(mob) mob.textContent = next==='light'?'🌙':'☀️';
 }
 
-function updateDashboardKPIs() {
-  const r1 = el('kpis-row1');
-  const r2 = el('kpis-row2');
-  const tvaKPI = S.params.regimeTVA === 'Franchise en base'
-    ? kpiCard('TVA','--rd', '—', 'Franchise en base — non applicable', null, 'En franchise de TVA, vous ne collectez pas de TVA sur vos ventes et ne la déduisez pas sur vos achats. ')
-    : kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null, 'Différence entre la TVA que vous avez collectée sur vos ventes et celle que vous pouvez déduire sur vos achats. C\'est le montant à reverser à l\'État.');
-  if(r1) r1.innerHTML = [
-    kpiCard('CA HT','--ac', fmt(C.totalCA)+' €', C.totalCA>0?'Chiffre d\'affaires total':'Commencez à saisir vos quantités', null, 'Chiffre d\'affaires hors taxes : total de vos ventes sur la période, avant déduction de toute charge.'),
-    kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', `Taux : ${C.txMarge.toFixed(1)} %`, null, 'Marge brute = CA HT − coûts d\'achat des marchandises. Indique combien il vous reste après avoir payé ce que vous revendez, avant de couvrir vos autres charges.'),
-    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', 'Après toutes charges', null, 'Estimation du bénéfice ou de la perte après déduction de toutes vos charges (fixes + variables) de votre marge brute. C\'est votre "profit" avant impôts.'),
-    tvaKPI,
-  ].join('');
-  if(r2) r2.innerHTML = [
-    kpiCard('Marge sur coûts variables','--tl', fmt(C.totalMrg - C.totalChV)+' €', `Taux MCV : ${C.txMCV.toFixed(1)} %`, null, 'Marge sur Coûts Variables = Marge brute − Charges variables. Montre ce qui reste pour couvrir vos charges fixes. Doit être positif pour atteindre la rentabilité.'),
-    kpiCard('Total charges','--am', fmt(C.totalCh)+' €', `Fixes : ${fmt(C.totalChF)} € · Variables : ${fmt(C.totalChV)} €`, null, 'Ensemble de vos dépenses sur la période. Les charges fixes (loyer, abonnements…) ne varient pas avec votre activité. Les charges variables évoluent avec votre volume de ventes.'),
-    kpiCard('Panier moyen','--pk', fmt(C.panierM)+' €', `Sur ${C.totalQty} unités vendues`, null, 'CA HT divisé par le nombre total d\'unités vendues. Indique la valeur moyenne générée par chaque vente.'),
-    kpiCard('Point mort','--gr', fmt(C.pointMort)+' €', C.jourLib > 0 ? `Jour de libération : le ${C.jourLib}` : 'Pas encore calculable', null, 'Niveau de CA à atteindre pour couvrir exactement toutes vos charges. En dessous : vous êtes en perte. Au-dessus : vous êtes rentable.'),
-  ].join('');
+function toggleSb() {
+  const sb = document.querySelector('.sb');
+  sb.classList.toggle('col');
+  localStorage.setItem('lp-sb-col', sb.classList.contains('col'));
 }
+function openMob()  { document.querySelector('.sb').classList.add('mob-open'); el('sb-ov').classList.add('open'); }
+function closeMob() { document.querySelector('.sb').classList.remove('mob-open'); el('sb-ov').classList.remove('open'); }
 
-function updateDashboardAlerts() {
-  const alerts = computeAlerts();
-  const dbA = el('db-alerts');
-  if(!dbA) return;
-  dbA.innerHTML = alerts.length === 0
-    ? '<div class="alrt ag"><div class="adot"></div>Aucune alerte — tout est en ordre</div>'
-    : alerts.slice(0,4).map(a => `<div class="alrt a${a.type}"><div class="adot"></div>${a.msg}</div>`).join('');
-}
-
-function updateSeuilCard() {
-  const card = el('db-seuil-card');
-  if(!card) return;
-  const pct = C.pointMort > 0 ? Math.min(C.totalCA / C.pointMort * 100, 100) : 0;
-  card.innerHTML = `
-    <div class="ct">Seuil de rentabilité</div>
-    <div class="cs">Point mort : ${fmt(C.pointMort)} €</div>
-    <div class="pw" style="height:8px;margin:14px 0 6px"><div class="pb" style="width:${pct.toFixed(1)}%;background:linear-gradient(90deg,var(--gr),#34d399)"></div></div>
-    <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--t3)">
-      <span>0 €</span>
-      <span style="color:var(--gr);font-weight:700">${pct.toFixed(0)} % atteint</span>
-      <span>${fmt(C.pointMort)} €</span>
-    </div>
-    ${C.jourLib > 0 ? `<div style="margin-top:12px;padding:10px;background:var(--grb);border-radius:var(--rs);border:1px solid rgba(14,165,114,.18);text-align:center;font-size:12px;color:var(--gr);font-weight:700">📅 Jour de libération : le ${C.jourLib} du mois</div>` : ''}
-    <div style="margin-top:14px">
-      <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--fm)">Taux de marge vs ratio CF</div>
-      <div class="tvarow"><span class="tvarow-l">Taux de marge global</span><span class="tvarow-v" style="color:var(--gr)">${C.txMarge.toFixed(1)} %</span></div>
-      <div class="tvarow" style="margin-bottom:0"><span class="tvarow-l">Ratio charges fixes / CA</span><span class="tvarow-v" style="color:${C.totalCA>0&&C.totalChF/C.totalCA>.6?'var(--rd)':'var(--gr)'}">${C.totalCA>0?(C.totalChF/C.totalCA*100).toFixed(1):0} %</span></div>
-    </div>`;
-}
-
-function updateTopArtCard() {
-  const card = el('db-top-art-card');
-  if(!card) return;
-  const colors = ['--ac','--pu','--tl','--gr','--am'];
-  const maxCA = C.artCA[0]?.totalCA || 1;
-  card.innerHTML = `
-    <div class="ct">Top articles par CA</div>
-    <div class="cs">Sur la période sélectionnée</div>
-    ${C.artCA.length === 0
-      ? emptyState('📦','Aucun article','Ajoutez des articles dans CA ou Paramètres')
-      : `<div class="toplist">${C.artCA.slice(0,5).map((a,i) => `
-          <div class="topitem">
-            <div class="toprank">${i+1}</div>
-            <div class="topname">${a.nom}</div>
-            <div class="topbarw"><div class="topbar-fill" style="width:${(a.totalCA/maxCA*100).toFixed(0)}%;background:var(${colors[i]})"></div></div>
-            <div class="topval">${fmt(a.totalCA)} €</div>
-          </div>`).join('')}</div>
-        ${C.concTop3 > 70 ? `<div style="margin-top:12px;padding:9px 12px;background:var(--amb);border:1px solid rgba(245,158,11,.2);border-radius:var(--rs);font-size:11.5px;color:var(--am);font-weight:600">⚠ Top 3 = ${C.concTop3.toFixed(1)} % du CA</div>` : ''}`
-    }`;
-}
-
-function updateTVAMiniCard() {
-  const card = el('db-tva-card');
-  if(!card) return;
-  const isFranchise = S.params.regimeTVA === 'Franchise en base';
-  card.innerHTML = `
-    <div class="ct">TVA nette</div>
-    <div class="cs">${isFranchise ? 'Franchise en base — non applicable' : 'Période en cours · Solde à reverser'}</div>
-    ${isFranchise
-      ? `<div class="abox abb" style="margin-top:14px"><div class="abox-ico">💡</div><div><div class="abox-desc">Régime franchise — vous ne collectez pas la TVA.</div></div></div>`
-      : `<div style="margin-top:12px">
-          <div class="tvarow"><span class="tvarow-l">TVA collectée</span><span class="tvarow-v" style="color:var(--gr)">+${fmt(C.totalTVAC)} €</span></div>
-          <div class="tvarow"><span class="tvarow-l">TVA déductible</span><span class="tvarow-v" style="color:var(--ac)">−${fmt(C.totalTVAD)} €</span></div>
-          <div class="tvanet" style="background:var(--rdb);border:1px solid rgba(244,63,94,.2)"><div class="tvanet-l">À reverser</div><div class="tvanet-v" style="color:var(--rd)">${fmt(C.totalTVAN)} €</div></div>
-        </div>`}
-    <div style="margin-top:14px"><div class="cs" style="font-weight:700;margin-bottom:8px">Trésorerie prévisionnelle</div><div class="cwsm"><canvas id="c-treso-mini"></canvas></div></div>`;
-  // Recréer le mini graphe tréso
-  mkChart('c-treso-mini','line',{labels:MS.slice(1),datasets:[{data:C.tresoM,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.08)',tension:.4,pointRadius:2,fill:true,borderWidth:1.5}]},{legend:false,yCallback:v=>fmtK(v)});
-}
-
-function updateMargeModule() {
-  // KPIs marge
-  const mk = el('mrg-kpis');
-  if(mk) mk.innerHTML = [
-    kpiCard('Marge brute','--gr', fmt(C.totalMrg)+' €', null, null, 'CA HT moins le coût d\'achat de vos marchandises. C\'est ce qu\'il vous reste avant de payer vos charges fixes et variables.'),
-    kpiCard('Marge sur coûts variables','--tl', fmt(C.totalMrg-C.totalChV)+' €', `${C.txMCV.toFixed(1)} % du CA`, null, 'Indique la capacité de votre activité à absorber vos charges fixes. Si ce chiffre est négatif, chaque vente aggrave votre situation.'),
-    kpiCard('Résultat net estimé','--pu', fmt(C.totalRN)+' €', null, null, 'Estimation du résultat final après toutes vos charges. Positif = bénéfice. Négatif = perte.'),
-    kpiCard('Panier moyen','--pk', fmt(C.panierM)+' €', `${C.totalQty} unités vendues`, null, 'Valeur moyenne d\'une vente unitaire. Augmenter ce chiffre (upsell, gamme premium) améliore la rentabilité sans augmenter le volume.'),
-  ].join('');
-
-  // Liste marge par article
-  const mal = el('mrg-art-list');
-  if(mal) {
-    mal.innerHTML = C.artCA.length === 0
-      ? emptyState('📊','Aucun article','Ajoutez des articles pour voir l\'analyse')
-      : C.artCA.map(a => {
-          const col = a.txMarge >= 40 ? 'var(--gr)' : a.txMarge >= 20 ? 'var(--am)' : 'var(--rd)';
-          return `<div class="mrgrow">
-            <div class="mrgname">${a.nom}</div>
-            <div style="flex:1;margin:0 10px"><div class="pw" style="margin:0"><div class="pb" style="width:${Math.max(0,Math.min(a.txMarge,100)).toFixed(0)}%;background:${col}"></div></div></div>
-            <span class="mrgtaux" style="color:${col}">${a.txMarge.toFixed(1)} %</span>
-          </div>`;
-        }).join('');
-  }
-
-  // Tableau CRA
-  const crab = el('cra-body');
-  if(crab) {
-    crab.innerHTML = C.artCRA.length === 0
-      ? `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucun article configuré</td></tr>`
-      : C.artCRA.map(a => {
-          const bc = a.txReel >= 30 ? 'bgr' : a.txReel >= 15 ? 'bam' : 'brd';
-          return `<tr>
-            <td style="font-weight:600">${a.nom}</td>
-            <td style="font-family:var(--fm)">${fmt(a.cout)} €</td>
-            <td style="font-family:var(--fm);color:var(--t2)">${fmt(a.cfUnit)} €</td>
-            <td style="font-family:var(--fm);font-weight:700">${fmt(a.cra)} €</td>
-            <td style="font-family:var(--fm)">${fmt(a.pv)} €</td>
-            <td style="font-family:var(--fm);font-weight:700;color:${a.margeReelle>=0?'var(--gr)':'var(--rd)'}">${fmt(a.margeReelle)} €</td>
-            <td><span class="bdg ${bc}">${a.txReel.toFixed(1)} %</span></td>
-          </tr>`;
-        }).join('');
-  }
-
-  // Graphe marge
-  if(charts['c-mrg-m']) {
-    charts['c-mrg-m'].data.datasets[0].data = C.mrgM;
-    charts['c-mrg-m'].data.datasets[1].data = C.rnM;
-    charts['c-mrg-m'].update();
-  } else {
-    mkChart('c-mrg-m','line',{labels:MS.slice(1),datasets:[
-      {label:'Marge brute',data:C.mrgM,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.09)',tension:.4,pointRadius:3,fill:true,borderWidth:2},
-      {label:'Résultat net',data:C.rnM,borderColor:'#9b87f5',backgroundColor:'rgba(155,135,245,.07)',tension:.4,pointRadius:3,fill:true,borderWidth:2,borderDash:[5,3]},
-    ]},{});
-  }
-}
-
-function updateTVAModule() {
-  const tk = el('tva-kpis');
-  if(!tk) return;
-  const isFranchise = S.params.regimeTVA === 'Franchise en base';
-  if(isFranchise) {
-    tk.innerHTML = `<div style="grid-column:1/-1"><div class="abox abb"><div class="abox-ico">💡</div><div><div class="abox-title">Régime Franchise en base de TVA</div><div class="abox-desc">Vous n'êtes pas assujetti à la TVA — vous ne collectez pas de TVA sur vos ventes et ne la déduisez pas sur vos achats. Pour modifier votre régime, rendez-vous dans Paramètres → Entreprise.</div></div></div></div>`;
-    // Provisionnement à 0 pour tous les mois
-    const prov = el('tva-prov');
-    if(prov) prov.innerHTML = Array(12).fill(0).map((_,m) => `
-      <div class="tvarow">
-        <span class="tvarow-l">${MOIS[m+1]}</span>
-        <span class="tvarow-v" style="color:var(--t2)">0 €</span>
-      </div>`).join('');
-    return;
-  }
-  tk.innerHTML = [
-    kpiCard('TVA collectée','--gr', fmt(C.totalTVAC)+' €', 'Ventes HT × 20 %', null, 'TVA que vous avez facturée à vos clients sur vos ventes. Vous la collectez pour le compte de l\'État.'),
-    kpiCard('TVA déductible','--ac', fmt(C.totalTVAD)+' €', 'Charges × TVA', null, 'TVA payée sur vos achats professionnels, que vous pouvez récupérer en la déduisant de la TVA collectée.'),
-    kpiCard('TVA nette à reverser','--rd', fmt(C.totalTVAN)+' €', 'Collectée − Déductible', null, 'Montant que vous devez reverser à l\'État lors de votre déclaration de TVA. Provisionnez ce montant chaque mois.'),
-  ].join('');
-  if(charts['c-tva-m']) {
-    charts['c-tva-m'].data.datasets[0].data = C.tvaCollM;
-    charts['c-tva-m'].data.datasets[1].data = C.tvaDedM.map(v=>-v);
-    charts['c-tva-m'].data.datasets[2].data = C.tvaNM;
-    charts['c-tva-m'].update();
-  } else {
-    mkChart('c-tva-m','bar',{labels:MS.slice(1),datasets:[
-      {label:'Collectée',data:C.tvaCollM,backgroundColor:'rgba(14,165,114,.72)',borderRadius:5,borderSkipped:false},
-      {label:'Déductible',data:C.tvaDedM.map(v=>-v),backgroundColor:'rgba(59,126,255,.72)',borderRadius:5,borderSkipped:false},
-      {label:'Nette',data:C.tvaNM,type:'line',borderColor:'#f43f5e',tension:.4,pointRadius:3,borderWidth:2},
-    ]},{});
-  }
-  const prov = el('tva-prov');
-  if(prov) prov.innerHTML = C.tvaNM.map((v,m) => `
-    <div class="tvarow">
-      <span class="tvarow-l">${MOIS[m+1]}</span>
-      <span class="tvarow-v" style="color:${v>0?'var(--rd)':v<0?'var(--gr)':'var(--t2)'}">${v>0?'+':''}${fmt(v)} €</span>
-    </div>`).join('');
-}
-
-function updateTresoModule() {
-  const tk = el('treso-kpis');
-  if(!tk) return;
-  const init = S.params.tresoInit || 0;
-  let s = init;
-  const tresoM2 = C.caM.map((c,m) => { s += c - C.chTotM[m]; return s; });
-  const soldeFin = tresoM2[tresoM2.length-1] || 0;
-  tk.innerHTML = [
-    kpiCard('Solde initial','--gr', fmt(init)+' €', 'Début de période', null, 'Solde bancaire au 1er jour de la période. Modifiez-le dans le champ ci-dessus.'),
-    kpiCard('Encaissements','--ac', fmt(C.totalCA)+' €', 'Total des ventes', null),
-    kpiCard('Décaissements','--am', fmt(C.totalCh)+' €', 'Total des charges', null),
-    kpiCard('Solde de fin','--gr', fmt(soldeFin)+' €', soldeFin>=0?'↑ Positif':'↓ Négatif', null, 'Solde prévisionnel en fin de période, solde initial inclus.'),
-  ].join('');
-  if(charts['c-treso']) {
-    charts['c-treso'].data.datasets[0].data = tresoM2;
-    charts['c-treso'].update();
-  } else {
-    mkChart('c-treso','line',{labels:MS.slice(1),datasets:[
-      {label:'Solde cumulé',data:tresoM2,borderColor:'#0ea572',backgroundColor:'rgba(14,165,114,.09)',tension:.4,pointRadius:4,fill:true,borderWidth:2},
-      {label:'Seuil zéro',data:Array(12).fill(0),borderColor:'rgba(244,63,94,.4)',borderDash:[5,4],pointRadius:0,borderWidth:1.5},
-    ]},{});
-  }
-  const tb = el('treso-body');
-  if(tb) {
-    let ts = init;
-    tb.innerHTML = C.caM.map((ca,m) => {
-      const dec = C.chTotM[m]; const sm = ca-dec; ts += sm;
-      return `<tr><td>${MOIS[m+1]}</td><td class="ppos">${fmt(ca)} €</td><td class="pneg">${fmt(dec)} €</td><td class="${sm>=0?'ppos':'pneg'}">${sm>=0?'+':''}${fmt(sm)} €</td><td class="${ts>=0?'ppos':'pneg'}">${fmt(ts)} €</td></tr>`;
-    }).join('');
-  }
-  const ta = el('treso-alerts');
-  if(ta) {
-    const hasMoisNeg = tresoM2.some(v=>v<0);
-    ta.innerHTML = `
-      ${!hasMoisNeg ? '<div class="abox abg"><div class="abox-ico">✅</div><div><div class="abox-title">Aucun mois en négatif</div><div class="abox-desc">Le solde reste positif sur toute la période.</div></div></div>' : '<div class="abox abr"><div class="abox-ico">⚠</div><div><div class="abox-title">Solde négatif détecté</div><div class="abox-desc">Vérifiez les mois en rouge dans le tableau.</div></div></div>'}
-      ${C.totalTVAN > 0 && S.params.regimeTVA !== 'Franchise en base' ? `<div class="abox aba"><div class="abox-ico">💡</div><div><div class="abox-title">TVA à reverser : ${fmt(C.totalTVAN)} €</div><div class="abox-desc">Anticipez ce décaissement dans votre trésorerie.</div></div></div>` : ''}`;
-  }
-}
-
-function updatePrevModule() {
-  const pk = el('prev-kpis');
-  if(!pk) return;
-  const g = parseFloat(el('growth')?.value||10) / 100;
-  const tPCA  = C.caM.reduce((s,v)=>s+Math.round(v*(1+g)),0);
-  const tPMrg = C.mrgM.reduce((s,v)=>s+Math.round(v*(1+g)),0);
-  const tPRN  = C.rnM.reduce((s,v)=>s+Math.round(v*(1+g*0.5)),0);
-  pk.innerHTML = [
-    kpiCard('CA prévisionnel N+1','--ac', fmt(tPCA)+' €', `${g>=0?'+':''}${(g*100).toFixed(0)} % vs N`, null),
-    kpiCard('Marge prévisionnelle','--gr', fmt(tPMrg)+' €', null, null),
-    kpiCard('Résultat prévisionnel','--pu', fmt(tPRN)+' €', null, null),
-  ].join('');
-  // Tableau prévisionnel
-  const pb = el('prev-body');
-  if(pb) {
-    const rows=[
-      {l:'CA HT',d:C.caM.map(v=>Math.round(v*(1+g))),c:'ppos'},
-      {l:'Charges totales',d:C.chTotM.map(v=>Math.round(v*(1+g*0.5))),c:'pneg'},
-      {l:'Marge brute',d:C.mrgM.map(v=>Math.round(v*(1+g))),c:'ppos'},
-      {l:'Résultat net',d:C.rnM.map(v=>Math.round(v*(1+g*0.5))),c:'pneu'},
-    ];
-    pb.innerHTML = rows.map(r=>{const tot=r.d.reduce((s,v)=>s+v,0);return`<tr><td>${r.l}</td>${r.d.map(v=>`<td class="${r.c}">${fmt(v)} €</td>`).join('')}<td class="${r.c}" style="font-weight:800">${fmt(tot)} €</td></tr>`;}).join('');
-  }
-  if(charts['c-prev']) {
-    charts['c-prev'].data.datasets[0].data = [C.totalCA, C.totalMrg, C.totalRN];
-    charts['c-prev'].data.datasets[1].data = [tPCA, tPMrg, tPRN];
-    charts['c-prev'].update();
-  } else {
-    mkChart('c-prev','bar',{labels:['CA HT','Marge brute','Résultat net'],datasets:[
-      {label:'N (actuel)',data:[C.totalCA,C.totalMrg,C.totalRN],backgroundColor:'rgba(59,126,255,.65)',borderRadius:5,borderSkipped:false},
-      {label:'N+1 (prévisionnel)',data:[tPCA,tPMrg,tPRN],backgroundColor:'rgba(14,165,114,.65)',borderRadius:5,borderSkipped:false},
-    ]},{});
-  }
-}
-
-function updateScenModule() {
-  const sc = el('scen-cards');
-  if(!sc) return;
-  const scens = [
-    {ico:'📉',label:'Scénario pessimiste',cls:'',tag:'brd',tagTxt:'-20 % CA',dca:-.2,dcf:0,dcv:0,dco:0},
-    {ico:'📊',label:'Situation actuelle',cls:';border-color:var(--ac);background:var(--ag)',tag:'bac',tagTxt:'Référence',dca:0,dcf:0,dcv:0,dco:0},
-    {ico:'📈',label:'Scénario optimiste',cls:'',tag:'bgr',tagTxt:'+20 % CA',dca:.2,dcf:0,dcv:.05,dco:0},
-  ];
-  sc.innerHTML = scens.map(s => {
-    const ca = C.totalCA*(1+s.dca);
-    const cout = C.coutM.reduce((ss,v)=>ss+v,0)*(1+s.dco);
-    const mrg = ca - cout;
-    const cf = C.totalChF*(1+s.dcf);
-    const cv = C.totalChV*(1+s.dcv);
-    const rn = mrg - cf - cv;
-    const col = rn >= 0 ? 'var(--gr)' : 'var(--rd)';
-    return `<div class="sccard" style="${s.cls}">
-      <div class="sccard-hdr"><span class="sccard-name">${s.ico} ${s.label}</span><span class="bdg ${s.tag}">${s.tagTxt}</span></div>
-      <div class="sccard-res" style="color:${col}">${fmt(rn)} €</div>
-      <div style="font-size:11px;color:var(--t2);margin-top:3px">Résultat net estimé</div>
-      <div class="abox ${rn>=0?'abg':'abr'}" style="margin-top:10px"><div class="abox-ico">${rn>=0?'✅':'⚠'}</div><div><div class="abox-desc">${rn>=0?'Résultat positif.':'Résultat négatif — les charges fixes ne sont plus couvertes.'}</div></div></div>
-    </div>`;
-  }).join('');
-  // Simulateur
-  runSim();
-}
-
-function updateCAKPIs() {
-  const ck = el('ca-kpis');
-  if(!ck) return;
-  const bestM  = C.caM.indexOf(Math.max(...C.caM));
-  const nonZero = C.caM.filter(v=>v>0);
-  const worstM = nonZero.length > 0 ? C.caM.indexOf(Math.min(...nonZero)) : -1;
-  ck.innerHTML = [
-    kpiCard('CA HT total','--ac', fmt(C.totalCA)+' €', null, null),
-    kpiCard('Quantités vendues','--gr', C.totalQty.toString(), null, null),
-    kpiCard('Meilleur mois','--pu', C.caM[bestM]>0?MS[bestM+1]:'—', C.caM[bestM]>0?fmt(C.caM[bestM])+' €':'', null),
-    kpiCard('Mois le plus faible','--am', worstM>=0?MS[worstM+1]:'—', worstM>=0?fmt(C.caM[worstM])+' €':'', null),
-  ].join('');
-  // Graphes CA
-  if(charts['c-ca-m']) { charts['c-ca-m'].data.datasets[0].data=C.caM; charts['c-ca-m'].update(); }
-  // Top charges toplist
-  const maxV = C.chClass[0]?.total || 1;
-  const cols2 = ['--am','--pu','--tl','--gr','--ac'];
-  const tl = el('ch-toplist');
-  if(tl) tl.innerHTML = C.chClass.slice(0,5).map((c,i)=>`
-    <div class="topitem">
-      <div class="toprank">${i+1}</div>
-      <div class="topname">${c.nom}</div>
-      <div class="topbarw"><div class="topbar-fill" style="width:${(c.total/maxV*100).toFixed(0)}%;background:var(${cols2[i]})"></div></div>
-      <div class="topval">${fmt(c.total)} €</div>
-    </div>`).join('');
-}
-
-function updateChKPIs() {
-  const ck = el('ch-kpis');
-  if(!ck) return;
-  const topCh = C.chClass[0];
-  ck.innerHTML = [
-    kpiCard('Total charges','--am', fmt(C.totalCh)+' €', null, null),
-    kpiCard('Charges fixes','--pu', fmt(C.totalChF)+' €', C.totalCh>0?`${(C.totalChF/C.totalCh*100).toFixed(1)} % du total`:'', null),
-    kpiCard('Charges variables','--tl', fmt(C.totalChV)+' €', C.totalCh>0?`${(C.totalChV/C.totalCh*100).toFixed(1)} % du total`:'', null),
-    kpiCard('Poste principal','--rd', topCh?topCh.nom:'—', topCh?fmt(topCh.total)+' €':'', null),
-  ].join('');
-  if(charts['c-ch-m']) {
-    charts['c-ch-m'].data.datasets[0].data=C.chFixM;
-    charts['c-ch-m'].data.datasets[1].data=C.chVarM;
-    charts['c-ch-m'].update();
-  }
-}
-
-// Autosave avec debounce
-let _renderTimer = null;
-function debouncedRenderAll() {
-  recalc();
-  smartUpdate();
-}
-
-function autoSave() {
-  markUnsaved();
-  clearTimeout(_saveTimer);
-  // Ne planifier la sauvegarde que si l'utilisateur est connecté et les données chargées
-  if(!S.uid) return;
-  _saveTimer = setTimeout(() => { if(S.uid) saveAll(); }, 1500);
-}
-
-function updateCATotals() {
-  // Met à jour les cellules de totaux par ligne et la ligne de bas
-  const rows = el('ca-tbl').querySelectorAll('tbody tr:not(.totrow)');
-  rows.forEach((row, ai) => {
-    const a = S.articles[ai]; if(!a) return;
-    const q = S.qty[a.code] || Array(12).fill(0);
-    const tot = q.reduce((s,v)=>s+v,0);
-    const cells = row.querySelectorAll('td');
-    const totCell  = cells[cells.length-3]; // avant-avant-dernière (Total qté)
-    const caCell   = cells[cells.length-2]; // avant-dernière (CA HT)
-    if(totCell) totCell.textContent = tot;
-    if(caCell)  { caCell.textContent = fmt(tot*a.pv)+' €'; caCell.className='stot'; caCell.style.color='var(--gr)'; }
-  });
-  // Ligne totaux bas
-  const totRow = el('ca-tbl').querySelector('.totrow');
-  if(totRow) {
-    const cells = totRow.querySelectorAll('td');
-    // cells[0]=colspan2, cells[1..12]=mois, cells[13]=total qte, cells[14]=CA total
-    Array(12).fill(0).forEach((_,m) => {
-      const s = S.articles.reduce((ss,a)=>ss+(S.qty[a.code]?.[m]||0)*a.pv,0);
-      if(cells[m+1]) cells[m+1].textContent = fmt(s)+' €';
-    });
-    if(cells[13]) cells[13].textContent = C.totalQty;
-    if(cells[14]) cells[14].textContent = fmt(C.totalCA)+' €';
-  }
-}
-
-function updateChTotals() {
-  const rows = el('ch-tbl').querySelectorAll('tbody tr:not(.totrow)');
-  rows.forEach((row, ci) => {
-    const c = S.charges[ci]; if(!c) return;
-    const d = S.chMD[c.code] || Array(12).fill(0);
-    const tot = d.reduce((s,v)=>s+v,0);
-    const cells = row.querySelectorAll('td');
-    const totCell = cells[cells.length-2];
-    if(totCell) { totCell.textContent = fmt(tot)+' €'; totCell.className='stot'; totCell.style.color='var(--am)'; }
-  });
-  const totRow = el('ch-tbl').querySelector('.totrow');
-  if(totRow) {
-    const cells = totRow.querySelectorAll('td');
-    Array(12).fill(0).forEach((_,m) => {
-      if(cells[m+1]) cells[m+1].textContent = fmt(C.chTotM[m])+' €';
-    });
-    if(cells[13]) cells[13].textContent = fmt(C.totalCh)+' €';
-  }
-}
-
-// ─── updateKPIs remplacé par les fonctions granulaires dans smartUpdate ───
-function doUpgrade() {
-  // window.open DOIT être synchrone au clic — sinon le navigateur bloque le popup
-  const email = S.uid ? (el('sb-email')?.textContent||'') : '';
-  const url = LEMON_URL + (email ? `?checkout[email]=${encodeURIComponent(email)}` : '');
-  window.open(url, '_blank');
-}
-
-function checkUpgrade() {
-  const p = new URLSearchParams(window.location.search);
-  if(p.get('upgraded') === 'true') {
-    window.history.replaceState({}, '', window.location.pathname);
-    setPro(true);
-    setTimeout(() => toast('🎉 Bienvenue dans LogPose Pro ! Merci pour votre confiance.', 6000), 800);
-  }
-  // Appliquer l'état Pro depuis S.isPro chargé depuis Supabase
-  if(S.isPro) setPro(false); // false = pas de toast
-}
-
-function setPro(showToast=false) {
-  S.isPro = true;
-  const plan = el('sb-plan');
-  const btn  = el('sb-upgrade');
-  if(plan) { plan.textContent = '⭐ Pro'; plan.style.color = 'var(--am)'; }
-  if(btn)  btn.style.display = 'none';
-  // Sauvegarder is_pro en base
-  if(S.uid) {
-    sb.from('parametres').upsert({user_id:S.uid, is_pro:true},{onConflict:'user_id'}).catch(e=>console.warn('is_pro save:',e));
-  }
-}
-
-// ═══════════════════════════════════════════════
-// ONBOARDING
-// ═══════════════════════════════════════════════
-let onbStep = 1;
-const onbData = {};
-
-function renderOnb() {
-  const steps = [
-    {
-      title:'Bienvenue sur LogPose 🧭',
-      desc:'Votre espace de pilotage financier est prêt. Configurez-le en 2 minutes.',
-      body:`
-        <div class="onb-feat"><div class="onb-feat-ico" style="background:rgba(59,126,255,.15)">📊</div><div><div class="onb-feat-title">Tableau de bord en temps réel</div><div class="onb-feat-desc">CA, marge, TVA, trésorerie — tous vos chiffres en un coup d'œil.</div></div></div>
-        <div class="onb-feat"><div class="onb-feat-ico" style="background:rgba(14,165,114,.15)">🧮</div><div><div class="onb-feat-title">Indicateurs intelligents</div><div class="onb-feat-desc">Point mort, coût de revient, jour de libération, alertes automatiques.</div></div></div>
-        <div class="onb-feat"><div class="onb-feat-ico" style="background:rgba(245,158,11,.15)">🔄</div><div><div class="onb-feat-title">Fini le copier-coller Excel</div><div class="onb-feat-desc">Saisissez une fois, tout se propage automatiquement.</div></div></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px">
-          <span onclick="finishOnb()" style="font-size:12px;color:var(--t3);cursor:pointer;text-decoration:underline">Passer</span>
-          <button class="btn btn-p" onclick="nextOnb()">Commencer →</button>
-        </div>`
-    },
-    {
-      title:'Votre entreprise',
-      desc:'Ces informations personnalisent votre tableau de bord.',
-      body:`
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
-          <div><label class="flbl">Nom de l'entreprise</label><input class="finp" type="text" id="ob-nom" placeholder="Ex : Ma Boutique SARL" oninput="onbData.nom=this.value"></div>
-          <div><label class="flbl">Secteur d'activité</label><select class="fsel" onchange="onbData.sect=this.value"><option>Commerce de détail</option><option>E-commerce</option><option>Prestation de service</option><option>Restauration / Food</option><option>BTP / Artisanat</option><option>Autre</option></select></div>
-          <div><label class="flbl">Objectif CA annuel (€)</label><input class="finp" type="number" placeholder="120000" oninput="onbData.obj=parseFloat(this.value)||0"></div>
-          <div><label class="flbl">Régime TVA</label><select class="fsel" onchange="onbData.tva=this.value"><option>TVA réelle mensuelle</option><option>TVA réelle trimestrielle</option><option>Franchise en base</option></select></div>
-        </div>
-        <div style="display:flex;justify-content:space-between">
-          <button class="btn btn-g" onclick="prevOnb()">← Retour</button>
-          <button class="btn btn-p" onclick="nextOnb()">Suivant →</button>
-        </div>`
-    },
-    {
-      title:'Votre première période',
-      desc:'Définissez la période à analyser en priorité.',
-      body:`
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px">
-          <div><label class="flbl">Année analysée</label><input class="finp" type="number" value="2026" oninput="onbData.annee=parseInt(this.value)||2026"></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div><label class="flbl">Mois de début</label><select class="fsel" onchange="onbData.deb=parseInt(this.value)">${MOIS.slice(1).map((m,i)=>`<option value="${i+1}" ${i===0?'selected':''}>${m}</option>`).join('')}</select></div>
-            <div><label class="flbl">Mois de fin</label><select class="fsel" onchange="onbData.fin=parseInt(this.value)">${MOIS.slice(1).map((m,i)=>`<option value="${i+1}" ${i===11?'selected':''}>${m}</option>`).join('')}</select></div>
-          </div>
-          <div style="padding:10px 13px;background:var(--ag);border-radius:var(--rs);font-size:12px;color:var(--ac);font-weight:600">💡 Vous pourrez ajouter vos articles et charges dans les Paramètres.</div>
-        </div>
-        <div style="display:flex;justify-content:space-between">
-          <button class="btn btn-g" onclick="prevOnb()">← Retour</button>
-          <button class="btn btn-p" onclick="finishOnb()">Accéder à LogPose 🧭</button>
-        </div>`
-    }
-  ];
-  const s = steps[onbStep-1];
-  el('onb-body').innerHTML = `<h2 style="font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:8px">${s.title}</h2><p style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:22px">${s.desc}</p>${s.body}`;
-  [1,2,3].forEach(i => { const e=el('os'+i); if(e) e.classList.toggle('done',i<=onbStep); });
-}
-
-function nextOnb() { if(onbStep<3){onbStep++;renderOnb();} }
-function prevOnb() { if(onbStep>1){onbStep--;renderOnb();} }
-
-async function finishOnb() {
-  // Appliquer les données d'onboarding à S.params
-  if(onbData.nom)   { S.params.nomEnt = onbData.nom; const e=el('ent-nom'); if(e) e.value=onbData.nom; const n=el('db-name'); if(n) n.textContent=onbData.nom; }
-  if(onbData.annee) { S.params.annee   = onbData.annee; const e=el('p-an');  if(e) e.value=onbData.annee; }
-  if(onbData.deb)   { S.params.moisDeb = onbData.deb;   const e=el('p-deb'); if(e) e.value=onbData.deb; }
-  if(onbData.fin)   { S.params.moisFin = onbData.fin;   const e=el('p-fin'); if(e) e.value=onbData.fin; }
-  if(onbData.obj)   { S.params.obj = onbData.obj; }
-  // Afficher l'app
-  el('onb').style.display = 'none';
-  el('app').style.display = 'flex';
-  recalc();
-  renderAll();
-  renderArt();
-  renderCh();
-  setSaved();
-  // Sauvegarder après affichage
-  setTimeout(() => saveAll(), 600);
-}
-
-// ═══════════════════════════════════════════════
-// EXPORTS CSV
-// ═══════════════════════════════════════════════
-function dlCSV(data, name) {
-  const b = new Blob([data],{type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(b);
-  a.download = name;
-  a.click();
-}
-function exportArts()    { dlCSV('Code,Nom,Catégorie,PrixHT,CoutAchat,TVA,Actif\n'+S.articles.map(a=>`${a.code},${a.nom},${a.cat},${a.pv},${a.cout},${a.tva},${a.actif}`).join('\n'),'logpose-articles.csv'); }
-function exportChParam() { dlCSV('Code,Nom,Catégorie,TVA,Type,Actif\n'+S.charges.map(c=>`${c.code},${c.nom},${c.cat},${c.tva},${c.type},${c.actif}`).join('\n'),'logpose-charges.csv'); }
-function exportCA()      { dlCSV('Article,'+MS.slice(1).join(',')+',Total\n'+S.articles.map(a=>{const q=S.qty[a.code]||[];return`${a.nom},${q.join(',')},${q.reduce((s,v)=>s+v,0)}`;}).join('\n'),'logpose-ca.csv'); }
-function exportCharges() { dlCSV('Charge,'+MS.slice(1).join(',')+',Total\n'+S.charges.map(c=>{const d=S.chMD[c.code]||[];return`${c.nom},${d.join(',')},${d.reduce((s,v)=>s+v,0)}`;}).join('\n'),'logpose-charges.csv'); }
-function exportTreso()   {
-  let s=0, rows='Mois,Encaissements,Décaissements,Solde mois,Solde cumulé\n';
-  C.caM.forEach((ca,i)=>{const dec=C.chTotM[i],sm=ca-dec;s+=sm;rows+=`${MOIS[i+1]},${ca},${dec},${sm},${s}\n`;});
-  dlCSV(rows,'logpose-tresorerie.csv');
-}
-
-// ═══════════════════════════════════════════════
-// DÉMARRAGE
-// ═══════════════════════════════════════════════
+// ── Démarrage ────────────────────────────────────────
 async function startApp(user) {
+  UID = null; // Bloquer saves pendant chargement
   setUserUI(user);
-  S.uid = null;
   el('auth').style.display = 'none';
-  el('onb').style.display  = 'none';
   el('app').style.display  = 'flex';
-  await loadData(user.id);
-  S.uid = user.id;
-  recalc();
-  renderAll();
-  renderArt();
-  renderCh();
+
+  // Restaurer année depuis localStorage (instantané)
+  const savedAn = parseInt(localStorage.getItem('lp_annee_'+user.id));
+  if(savedAn >= 2020 && savedAn <= 2040) ANNEE = savedAn;
+
+  // Tenter restauration locale en attendant Supabase
+  UID = user.id;
+  restoreParamsFromLocal();
+  renderAnneesNav();
+
+  // Charger depuis Supabase (peut prendre plusieurs secondes sur plan gratuit)
+  await Promise.all([loadParams(), loadArticles(), loadCharges()]);
   setSaved();
-  checkUpgrade();
 }
 
-
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
-  window._appStarted = false;
-  window._appLoading = false;
-
-  async function tryStartApp(user) {
-    if(window._appLoading) return;
-    window._appLoading = true;
-    window._appStarted = true;
-    try {
-      await startApp(user);
-    } finally {
-      window._appLoading = false;
-    }
+  // Restaurer état sidebar
+  if(localStorage.getItem('lp-sb-col')==='true') {
+    document.querySelector('.sb')?.classList.add('col');
   }
 
-  // Supabase v2 envoie INITIAL_SESSION quand le client est prêt (token rafraîchi)
-  // C'est le bon moment pour charger les données — les requêtes ne timeouteront pas
+  let started = false;
   sb.auth.onAuthStateChange(async (event, session) => {
-    if((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && session && !window._appStarted) {
-      await tryStartApp(session.user);
-    } else if(event === 'SIGNED_IN' && session && !window._appStarted) {
-      await tryStartApp(session.user);
-    } else if(event === 'SIGNED_OUT') {
-      window._appStarted = false;
-      window._appLoading = false;
+    if((event==='INITIAL_SESSION'||event==='SIGNED_IN') && session && !started) {
+      started = true;
+      await startApp(session.user);
+    } else if(event==='SIGNED_OUT') {
+      started = false;
+      UID = null;
       el('auth').style.display = 'flex';
-      el('onb').style.display  = 'none';
       el('app').style.display  = 'none';
     }
   });
-
-  // Ne pas appeler getSession() séparément — INITIAL_SESSION s'en charge
-  // getSession() déclenchait startApp trop tôt, avant que le token soit prêt
 });
 </script>
 </body>
