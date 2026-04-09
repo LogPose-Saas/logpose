@@ -636,15 +636,23 @@ function setSaved()    { const d=$('sdot'); if(d) d.classList.add('saved'); cons
 async function loadParams() {
   if(!UID) return;
   try {
+    // Charger TOUTES les lignes ≤ ANNEE pour cet user
     const {data, error} = await sbq(
-      DB.from('parametres').select('*').eq('user_id',UID).lte('annee',ANNEE).order('annee',{ascending:false}).limit(1)
+      DB.from('parametres').select('*').eq('user_id',UID).lte('annee',ANNEE).order('annee',{ascending:false})
     );
     if(error) { console.warn('[params]', error.message); return; }
-    console.log('[params] annee active='+ANNEE+' lignes trouvées='+( data?data.length:0), data&&data[0]?'annee_ligne='+data[0].annee:'');
-    if(!data || !data.length) { console.warn('[params] aucune ligne ≤'+ANNEE); return; }
-    const row = data[0];
+    if(!data || !data.length) return;
+
+    // Trouver la ligne exacte pour ANNEE si elle existe ET est non vide
+    const ligneExacte    = data.find(r => r.annee === ANNEE && (r.nom_entreprise || r.regime_tva !== 'TVA réelle mensuelle' || r.secteur));
+    // Trouver la ligne la plus récente < ANNEE (héritage)
+    const ligneHeritee   = data.find(r => r.annee < ANNEE);
+
+    // Priorité : ligne exacte non vide > héritage
+    const row = ligneExacte || ligneHeritee;
+    if(!row) return;
+
     const exact = row.annee === ANNEE;
-    console.log('[params] exact='+exact+' nom='+row.nom_entreprise+' tva='+row.regime_tva+' obj='+row.objectif_ca);
     P.nomEnt    = row.nom_entreprise || '';
     P.secteur   = row.secteur        || '';
     P.regimeTVA = row.regime_tva     || 'TVA réelle mensuelle';
@@ -654,14 +662,23 @@ async function loadParams() {
     P.moisDeb   = row.mois_debut     || 1;
     P.moisFin   = row.mois_fin       || 12;
     P.tresoInit = row.treso_init     || 0;
-    P.obj       = exact ? (row.objectif_ca || 0) : 0;
+    // Objectif CA : uniquement si ligne exacte pour cette année
+    const ligneObjExacte = data.find(r => r.annee === ANNEE);
+    P.obj = ligneObjExacte ? (ligneObjExacte.objectif_ca || 0) : 0;
+
     paramsLoaded = true;
     renderEntreprise();
   } catch(e) { console.warn('[params timeout]', e.message); }
 }
 
 async function saveParams() {
-  if(!UID) return;
+  if(!UID || !paramsLoaded) return;
+  // Ne pas sauvegarder une ligne vide — ça bloquerait l'héritage des années futures
+  const estVide = !P.nomEnt && !P.secteur && P.regimeTVA === 'TVA réelle mensuelle'
+    && P.regimeFisc === 'IS — Impôt sur les sociétés' && P.devise === '€ Euro'
+    && P.cle === 'qte' && P.obj === 0;
+  if(estVide) return; // Rien à sauvegarder — l'héritage s'appliquera
+
   try {
     const {error} = await DB.from('parametres').upsert({
       user_id:UID, annee:ANNEE,
