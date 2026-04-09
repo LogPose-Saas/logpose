@@ -1489,25 +1489,20 @@ function updArtCout(i, val) {
 function delArtAt(i) {
   const a = S.articles[i]; if(!a) return;
   if(!confirm(`Supprimer "${a.nom}" à partir de ${S.params.annee} ?`)) return;
-  // Marquer annee_suppression en BDD (ne touche pas aux années précédentes)
+  // Insérer une ligne actif=false pour l'année active
+  // Par héritage, toutes les années futures verront actif=false
+  // Les années passées gardent leur propre ligne (inchangée)
   if(S.uid) {
-    sb.from('articles')
-      .update({annee_suppression: S.params.annee})
-      .eq('user_id', S.uid).eq('code', a.code)
-      .then(({error:e}) => { if(e) console.warn('[del art]', e.message); });
+    sb.from('articles').upsert({
+      user_id:S.uid, code:a.code, annee:S.params.annee,
+      nom:a.nom, categorie:a.cat, prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:false,
+    }, {onConflict:'user_id,code,annee'})
+    .then(({error:e}) => { if(e) console.warn('[del art]', e.message); });
   }
-  // Retirer de la mémoire courante seulement
   S.articles.splice(i,1);
   delete S.qty[a.code];
-  // Mettre à jour le backup localStorage
-  try {
-    const bk = JSON.parse(localStorage.getItem('lp_'+S.uid)||'{}');
-    if(bk.articles) bk.articles = bk.articles.map(x =>
-      x.code===a.code ? {...x, anneeSupp:S.params.annee} : x
-    );
-    localStorage.setItem('lp_'+S.uid, JSON.stringify(bk));
-  } catch(e){}
-  recalc(); renderArt(); renderCA(); renderCtrl(); smartUpdate(); autoSave();
+  recalc(); renderArt(); renderCA(); renderCtrl(); smartUpdate();
+  // Pas d'autoSave ici — on a déjà écrit directement en BDD
 }
 
 function renderCh() {
@@ -1549,21 +1544,15 @@ function delChAt(i) {
   const c = S.charges[i]; if(!c) return;
   if(!confirm(`Supprimer "${c.nom}" à partir de ${S.params.annee} ?`)) return;
   if(S.uid) {
-    sb.from('charges')
-      .update({annee_suppression: S.params.annee})
-      .eq('user_id', S.uid).eq('code', String(c.code))
-      .then(({error:e}) => { if(e) console.warn('[del ch]', e.message); });
+    sb.from('charges').upsert({
+      user_id:S.uid, code:String(c.code), annee:S.params.annee,
+      nom:c.nom, categorie:c.cat, tva:c.tva, type:c.type, actif:false,
+    }, {onConflict:'user_id,code,annee'})
+    .then(({error:e}) => { if(e) console.warn('[del ch]', e.message); });
   }
   S.charges.splice(i,1);
   delete S.chMD[c.code];
-  try {
-    const bk = JSON.parse(localStorage.getItem('lp_'+S.uid)||'{}');
-    if(bk.charges) bk.charges = bk.charges.map(x =>
-      String(x.code)===String(c.code) ? {...x, anneeSupp:S.params.annee} : x
-    );
-    localStorage.setItem('lp_'+S.uid, JSON.stringify(bk));
-  } catch(e){}
-  recalc(); renderCh(); renderCharges(); renderCtrl(); smartUpdate(); autoSave();
+  recalc(); renderCh(); renderCharges(); renderCtrl(); smartUpdate();
 }
 
 function renderCtrl() {
@@ -1595,101 +1584,95 @@ async function changeAnnee(val) {
   const newAn = parseInt(val)||2026;
   if(newAn === S.params.annee) return;
 
-  // Écrire la nouvelle année dans localStorage EN PREMIER — avant tout réseau
-  // Si l'user refresh pendant la sauvegarde, il reviendra sur la bonne année
+  // Écrire la nouvelle année dans localStorage EN PREMIER
   if(S.uid) try { localStorage.setItem('lp_annee_'+S.uid, newAn); } catch(e){}
 
-  // Annuler tout autosave en attente puis sauvegarder l'année courante
+  // Sauvegarder l'année courante avant de changer
   clearTimeout(_saveTimer);
   if(S.uid) await saveAll();
 
-  // 3. Reprise du solde de fin de l'année précédente → trésorerie initiale
+  // Reprise tréso N→N+1
   if(newAn === S.params.annee + 1) {
     let s = S.params.tresoInit || 0;
-    C.caM.forEach((ca, m) => { s += ca - C.chTotM[m]; });
+    C.caM.forEach((ca,m) => { s += ca - C.chTotM[m]; });
     S.params.tresoInit = Math.round(s);
-    const eTi = el('treso-init'); if(eTi) eTi.value = S.params.tresoInit;
   } else {
-    // Pour les autres changements d'année, remettre tréso initiale à 0
-    // (l'utilisateur peut la modifier manuellement)
+    S.params.tresoInit = 0;
   }
 
-  // 4. Changer l'année dans S.params
   S.params.annee = newAn;
   const pAn = el('p-an'); if(pAn) pAn.value = newAn;
-  // Sauvegarder immédiatement dans localStorage pour le refresh
-  try { localStorage.setItem('lp_annee_' + S.uid, newAn); } catch(e) {}
 
-  // 5. Vider les saisies en mémoire (on va recharger depuis Supabase)
-  S.qty  = {};
-  S.chMD = {};
-  S.articles.forEach(a => { S.qty[a.code]  = Array(12).fill(0); });
-  S.charges.forEach(c  => { S.chMD[c.code] = Array(12).fill(0); });
-
-  // 6. Bloquer l'autosave pendant le rechargement
   const savedUid = S.uid;
-  S.uid = null;
+  S.uid = null; // Bloquer autosave pendant rechargement
 
-  // 7. Recharger tout pour la nouvelle année depuis Supabase en parallèle
   if(savedUid) {
-    const [rP2, rSca, rSch, rArts, rChs] = await Promise.allSettled([
+    // Toutes les requêtes en parallèle
+    const [rP, rSca, rSch, rArts, rChs] = await Promise.allSettled([
       sbQuery(sb.from('parametres').select('*').eq('user_id',savedUid).lte('annee',newAn).order('annee',{ascending:false}).limit(1)),
       sbQuery(sb.from('saisies_ca').select('article_code,mois,quantite').eq('user_id',savedUid).eq('annee',newAn)),
       sbQuery(sb.from('saisies_charges').select('charge_code,mois,montant').eq('user_id',savedUid).eq('annee',newAn)),
-      sbQuery(sb.from('articles').select('*').eq('user_id',savedUid)),
-      sbQuery(sb.from('charges').select('*').eq('user_id',savedUid)),
+      sbQuery(sb.from('articles').select('*').eq('user_id',savedUid).order('annee',{ascending:true})),
+      sbQuery(sb.from('charges').select('*').eq('user_id',savedUid).order('annee',{ascending:true})),
     ]);
 
-    // Params de la nouvelle année (héritage depuis année précédente si pas de ligne)
-    if(rP2.status==='fulfilled' && rP2.value?.data?.length>0) {
-      const p=rP2.value.data[0];
-      S.params.obj       = p.objectif_ca     || 0; // Indépendant par année
-      S.params.regimeTVA = p.regime_tva      || S.params.regimeTVA;
-      S.params.nomEnt    = p.nom_entreprise  || S.params.nomEnt;
-      S.params.secteur   = p.secteur         || S.params.secteur;
-      S.params.cle       = p.cle_repartition || S.params.cle;
-      S.params.tresoInit = p.treso_init      || 0;
-      S.params.moisDeb   = p.mois_debut      || S.params.moisDeb;
-      S.params.moisFin   = p.mois_fin        || S.params.moisFin;
+    // Params — héritage depuis la ligne la plus récente ≤ newAn
+    if(rP.status==='fulfilled' && rP.value?.data?.length>0) {
+      const p=rP.value.data[0];
+      S.params.obj       = p.objectif_ca     || 0;
+      S.params.regimeTVA = p.regime_tva      || 'TVA réelle mensuelle';
+      S.params.nomEnt    = p.nom_entreprise  || '';
+      S.params.secteur   = p.secteur         || '';
+      S.params.cle       = p.cle_repartition || 'qte';
+      S.params.moisDeb   = p.mois_debut      || 1;
+      S.params.moisFin   = p.mois_fin        || 12;
+      if(newAn !== S.params.annee + 1) S.params.tresoInit = p.treso_init || 0;
       const set=(id,v)=>{const e=el(id);if(e)e.value=v;};
       set('ent-nom',S.params.nomEnt); set('ent-obj',S.params.obj);
       set('ent-tva',S.params.regimeTVA); set('ent-sect',S.params.secteur);
       set('treso-init',S.params.tresoInit);
+      const dbn=el('db-name'); if(dbn) dbn.textContent=S.params.nomEnt||'Mon Entreprise';
     }
 
-    // Articles filtrés pour la nouvelle année
-    if(rArts.status==='fulfilled' && rArts.value?.data?.length>0) {
-      S.articles=rArts.value.data
-        .filter(a=>{
-          const cree = a.annee_creation===null||a.annee_creation===undefined ? true : a.annee_creation<=newAn;
-          const supprime = a.annee_suppression!==null&&a.annee_suppression!==undefined&&a.annee_suppression<=newAn;
-          return cree && !supprime;
-        })
-        .map(a=>({code:a.code,nom:a.nom,cat:a.categorie||'Divers',pv:parseFloat(a.prix_ht)||0,cout:parseFloat(a.cout_achat)||0,tva:parseFloat(a.tva)||0.2,actif:a.actif!==false,anneeCreation:a.annee_creation,anneeSupp:a.annee_suppression||null}));
+    // Articles — héritage : ligne la plus récente ≤ newAn par code
+    if(rArts.status==='fulfilled' && rArts.value?.data) {
+      const byCode={};
+      rArts.value.data.forEach(a => {
+        if(a.annee <= newAn) byCode[a.code] = a;
+      });
+      S.articles = Object.values(byCode)
+        .filter(a => a.actif !== false)
+        .map(a => ({
+          code:a.code, nom:a.nom, cat:a.categorie||'Divers',
+          pv:parseFloat(a.prix_ht)||0, cout:parseFloat(a.cout_achat)||0,
+          tva:parseFloat(a.tva)||0.2, actif:true,
+        }));
     }
 
-    // Charges filtrées
-    if(rChs.status==='fulfilled' && rChs.value?.data?.length>0) {
-      S.charges=rChs.value.data
-        .filter(c=>{
-          const cree = c.annee_creation===null||c.annee_creation===undefined ? true : c.annee_creation<=newAn;
-          const supprime = c.annee_suppression!==null&&c.annee_suppression!==undefined&&c.annee_suppression<=newAn;
-          return cree && !supprime;
-        })
-        .map(c=>({code:c.code,nom:c.nom,cat:c.categorie||'Divers',tva:parseFloat(c.tva)||0.2,type:c.type||'Variable',actif:c.actif!==false,anneeCreation:c.annee_creation,anneeSupp:c.annee_suppression||null}));
+    // Charges — même logique
+    if(rChs.status==='fulfilled' && rChs.value?.data) {
+      const byCode={};
+      rChs.value.data.forEach(c => {
+        if(c.annee <= newAn) byCode[String(c.code)] = c;
+      });
+      S.charges = Object.values(byCode)
+        .filter(c => c.actif !== false)
+        .map(c => ({
+          code:c.code, nom:c.nom, cat:c.categorie||'Divers',
+          tva:parseFloat(c.tva)||0.2, type:c.type||'Variable', actif:true,
+        }));
     }
 
-    // Saisies — vider et recharger pour la nouvelle année
+    // Saisies
     S.qty={}; S.articles.forEach(a=>{S.qty[a.code]=Array(12).fill(0);});
     S.chMD={}; S.charges.forEach(c=>{S.chMD[c.code]=Array(12).fill(0);});
-
-    if(rSca.status==='fulfilled'&&rSca.value?.data) {
+    if(rSca.status==='fulfilled' && rSca.value?.data) {
       rSca.value.data.forEach(r=>{
         if(!S.qty[r.article_code]) S.qty[r.article_code]=Array(12).fill(0);
         S.qty[r.article_code][r.mois-1]=r.quantite;
       });
     }
-    if(rSch.status==='fulfilled'&&rSch.value?.data) {
+    if(rSch.status==='fulfilled' && rSch.value?.data) {
       rSch.value.data.forEach(r=>{
         if(!S.chMD[r.charge_code]) S.chMD[r.charge_code]=Array(12).fill(0);
         S.chMD[r.charge_code][r.mois-1]=r.montant;
@@ -1697,29 +1680,10 @@ async function changeAnnee(val) {
     }
   }
 
-  // 8. Restaurer l'uid et mettre à jour l'UI
   S.uid = savedUid;
-
-  // 9. Sauvegarder l'année active dans parametres (upsert par user_id,annee)
-  if(S.uid) {
-    sb.from('parametres').upsert({
-      user_id:S.uid, annee:newAn,
-      treso_init:S.params.tresoInit||0,
-      nom_entreprise:S.params.nomEnt||'',
-      objectif_ca:S.params.obj||0,
-      secteur:S.params.secteur||'',
-      regime_tva:S.params.regimeTVA||'TVA réelle mensuelle',
-      cle_repartition:S.params.cle||'qte',
-    }, {onConflict:'user_id,annee'}).then(({error:e})=>{ if(e) console.warn('[changeAnnee] params upsert:',e.message); });
-  }
-
-  // 10. Tout rerendre
   updPeriodPreview();
   renderAnneesNav();
-  recalc();
-  renderAll();
-  renderCA();
-  renderCharges();
+  recalc(); renderAll(); renderArt(); renderCh();
   setSaved();
   toast(`📅 Année ${newAn}`, 2000);
 }
@@ -2011,29 +1975,31 @@ async function saveAll() {
   const an  = S.params.annee;
   const d = el('sdot'); if(d) d.classList.remove('saved');
 
-  // ── Backup localStorage (par année) ──
+  // ── 1. Backup localStorage par année ──
   try {
     localStorage.setItem('lp_annee_'+uid, an);
     const bk = JSON.parse(localStorage.getItem('lp_'+uid)||'{}');
-    bk.v=4; bk.ts=Date.now();
-    bk.articles = S.articles;
-    bk.charges  = S.charges;
+    bk.v=5; bk.ts=Date.now();
+    if(!bk.artByYear)    bk.artByYear    = {};
+    if(!bk.chByYear)     bk.chByYear     = {};
     if(!bk.paramsByYear) bk.paramsByYear = {};
     if(!bk.qtyByYear)    bk.qtyByYear    = {};
     if(!bk.chMDByYear)   bk.chMDByYear   = {};
+    bk.artByYear[an]    = S.articles;
+    bk.chByYear[an]     = S.charges;
     bk.paramsByYear[an] = {...S.params};
     bk.qtyByYear[an]    = S.qty;
     bk.chMDByYear[an]   = S.chMD;
     localStorage.setItem('lp_'+uid, JSON.stringify(bk));
   } catch(e){}
 
-  // ── Params : une ligne par (user_id, annee) ──
+  // ── 2. Params (user_id, annee) — un upsert par année ──
   try {
     const p = {
       user_id:uid, annee:an,
       mois_debut:S.params.moisDeb, mois_fin:S.params.moisFin,
       nom_entreprise:S.params.nomEnt||'',
-      objectif_ca:S.params.obj||0,         // Indépendant par année
+      objectif_ca:S.params.obj||0,
       secteur:S.params.secteur||'',
       regime_tva:S.params.regimeTVA||'TVA réelle mensuelle',
       cle_repartition:S.params.cle||'qte',
@@ -2044,45 +2010,44 @@ async function saveAll() {
     if(pE) console.warn('[save] params:', pE.message);
   } catch(e){ console.warn('[save] params:', e.message); }
 
-  // ── Articles : upsert (pas delete+insert) pour préserver annee_suppression ──
-  if(S.articles.length>0) {
+  // ── 3. Articles — upsert (user_id, code, annee) ──
+  // Chaque modification en année N crée/met à jour la ligne N uniquement
+  if(S.articles.length > 0) {
     try {
-      const rows = S.articles.map(a=>({
-        user_id:uid, code:a.code, nom:a.nom, categorie:a.cat,
+      const rows = S.articles.map(a => ({
+        user_id:uid, code:a.code, annee:an,
+        nom:a.nom, categorie:a.cat,
         prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif,
-        annee_creation: a.anneeCreation, // Jamais de fallback — doit être explicite
-        annee_suppression: a.anneeSupp || null,
       }));
-      const {error:aE} = await sb.from('articles').upsert(rows, {onConflict:'user_id,code'});
+      const {error:aE} = await sb.from('articles').upsert(rows, {onConflict:'user_id,code,annee'});
       if(aE) console.warn('[save] articles:', aE.message);
     } catch(e){ console.warn('[save] articles:', e.message); }
 
     try {
       const rows=[];
       S.articles.forEach(a=>(S.qty[a.code]||[]).forEach((q,m)=>{
-        if(q>0) rows.push({user_id:uid,article_code:a.code,mois:m+1,annee:an,quantite:q});
+        if(q>0) rows.push({user_id:uid, article_code:a.code, mois:m+1, annee:an, quantite:q});
       }));
       await sb.from('saisies_ca').delete().eq('user_id',uid).eq('annee',an);
       if(rows.length) await sb.from('saisies_ca').insert(rows);
     } catch(e){ console.warn('[save] saisies_ca:', e.message); }
   }
 
-  if(S.charges.length>0) {
+  // ── 4. Charges — upsert (user_id, code, annee) ──
+  if(S.charges.length > 0) {
     try {
-      const rows = S.charges.map(c=>({
-        user_id:uid, code:String(c.code), nom:c.nom, categorie:c.cat,
-        tva:c.tva, type:c.type, actif:c.actif,
-        annee_creation: c.anneeCreation, // Jamais de fallback
-        annee_suppression: c.anneeSupp || null,
+      const rows = S.charges.map(c => ({
+        user_id:uid, code:String(c.code), annee:an,
+        nom:c.nom, categorie:c.cat, tva:c.tva, type:c.type, actif:c.actif,
       }));
-      const {error:cE} = await sb.from('charges').upsert(rows, {onConflict:'user_id,code'});
+      const {error:cE} = await sb.from('charges').upsert(rows, {onConflict:'user_id,code,annee'});
       if(cE) console.warn('[save] charges:', cE.message);
     } catch(e){ console.warn('[save] charges:', e.message); }
 
     try {
       const rows=[];
       S.charges.forEach(c=>(S.chMD[c.code]||[]).forEach((v,m)=>{
-        if(v>0) rows.push({user_id:uid,charge_code:String(c.code),mois:m+1,annee:an,montant:v});
+        if(v>0) rows.push({user_id:uid, charge_code:String(c.code), mois:m+1, annee:an, montant:v});
       }));
       await sb.from('saisies_charges').delete().eq('user_id',uid).eq('annee',an);
       if(rows.length) await sb.from('saisies_charges').insert(rows);
@@ -2098,7 +2063,7 @@ function sbQuery(promise, ms=6000) {
 }
 
 async function loadData(uid) {
-  // ── Étape 1 : année active depuis localStorage (instantané) ──
+  // ── 1. Année active depuis localStorage (0ms) ──
   try {
     const an=parseInt(localStorage.getItem('lp_annee_'+uid));
     if(an>=2020 && an<=2040) {
@@ -2107,33 +2072,32 @@ async function loadData(uid) {
       const s=el('sb-annee'); if(s) s.textContent=an;
     }
   } catch(e){}
-  const anneeActive=S.params.annee;
+  const anneeActive = S.params.annee;
 
-  // ── Étape 2 : requêtes Supabase en parallèle ──
+  // ── 2. Toutes les requêtes Supabase en parallèle ──
+  // Pour articles et charges : on charge TOUTES les lignes de cet user
+  // puis on applique la logique d'héritage côté client
   const [rP, rA, rC, rSca, rSch] = await Promise.allSettled([
-    // Params : chercher l'année active, puis fallback sur la plus récente année ≤ active
     sbQuery(sb.from('parametres').select('*').eq('user_id',uid).lte('annee',anneeActive).order('annee',{ascending:false}).limit(1)),
-    sbQuery(sb.from('articles').select('*').eq('user_id',uid)),
-    sbQuery(sb.from('charges').select('*').eq('user_id',uid)),
+    sbQuery(sb.from('articles').select('*').eq('user_id',uid).order('annee',{ascending:true})),
+    sbQuery(sb.from('charges').select('*').eq('user_id',uid).order('annee',{ascending:true})),
     sbQuery(sb.from('saisies_ca').select('article_code,mois,quantite').eq('user_id',uid).eq('annee',anneeActive)),
     sbQuery(sb.from('saisies_charges').select('charge_code,mois,montant').eq('user_id',uid).eq('annee',anneeActive)),
   ]);
 
-  // ── Étape 3 : traiter résultats ──
-
-  // Params — prend la ligne la plus récente ≤ anneeActive (héritage vers le futur)
+  // ── 3. Params ──
   if(rP.status==='fulfilled' && rP.value?.data?.length>0) {
-    const p=rP.value.data[0]; // La plus récente ≤ anneeActive
+    const p=rP.value.data[0];
     S.params.moisDeb   = p.mois_debut      || 1;
     S.params.moisFin   = p.mois_fin        || 12;
-    S.params.obj       = p.objectif_ca     || 0; // Indépendant par année
+    S.params.obj       = p.objectif_ca     || 0;
     S.params.regimeTVA = p.regime_tva      || 'TVA réelle mensuelle';
     S.params.nomEnt    = p.nom_entreprise  || '';
     S.params.secteur   = p.secteur         || '';
     S.params.cle       = p.cle_repartition || 'qte';
     S.params.tresoInit = p.treso_init      || 0;
     S.isPro            = p.is_pro===true;
-    S.params.annee     = anneeActive; // Toujours l'année choisie par l'user
+    S.params.annee     = anneeActive;
     const set=(id,v)=>{const e=el(id);if(e)e.value=v;};
     set('p-deb',S.params.moisDeb); set('p-fin',S.params.moisFin);
     set('ent-nom',S.params.nomEnt); set('ent-obj',S.params.obj);
@@ -2142,47 +2106,43 @@ async function loadData(uid) {
     const d=el('db-name'); if(d) d.textContent=S.params.nomEnt||'Mon Entreprise';
   } else if(rP.status==='rejected') console.warn('[load] params:',rP.reason?.message);
 
-  // Articles — filtre : créé avant anneeActive ET pas supprimé
-  // annee_creation NULL = article legacy (avant la feature) → visible dans toutes les années
-  if(rA.status==='fulfilled' && rA.value?.data?.length>0) {
-    S.articles=rA.value.data
-      .filter(a=>{
-        const cree = a.annee_creation === null || a.annee_creation === undefined
-          ? true  // Legacy : toujours visible
-          : a.annee_creation <= anneeActive;
-        const supprime = a.annee_suppression !== null && a.annee_suppression !== undefined
-          && a.annee_suppression <= anneeActive;
-        return cree && !supprime;
-      })
-      .map(a=>({
+  // ── 4. Articles — héritage : pour chaque code, prendre la ligne annee <= anneeActive la plus récente ──
+  if(rA.status==='fulfilled' && rA.value?.data) {
+    const byCode = {};
+    rA.value.data.forEach(a => {
+      // On garde uniquement les lignes <= anneeActive
+      if(a.annee <= anneeActive) {
+        // La ligne la plus récente gagne (tableau trié ASC donc on écrase)
+        byCode[a.code] = a;
+      }
+    });
+    // Filtrer les articles inactifs (supprimés en N → actif=false)
+    S.articles = Object.values(byCode)
+      .filter(a => a.actif !== false)
+      .map(a => ({
         code:a.code, nom:a.nom, cat:a.categorie||'Divers',
         pv:parseFloat(a.prix_ht)||0, cout:parseFloat(a.cout_achat)||0,
-        tva:parseFloat(a.tva)||0.2, actif:a.actif!==false,
-        anneeCreation: a.annee_creation, // null = legacy
-        anneeSupp: a.annee_suppression || null,
+        tva:parseFloat(a.tva)||0.2, actif:true,
       }));
   } else if(rA.status==='rejected') console.warn('[load] articles:',rA.reason?.message);
 
-  // Charges — même filtre
-  if(rC.status==='fulfilled' && rC.value?.data?.length>0) {
-    S.charges=rC.value.data
-      .filter(c=>{
-        const cree = c.annee_creation === null || c.annee_creation === undefined
-          ? true
-          : c.annee_creation <= anneeActive;
-        const supprime = c.annee_suppression !== null && c.annee_suppression !== undefined
-          && c.annee_suppression <= anneeActive;
-        return cree && !supprime;
-      })
-      .map(c=>({
+  // ── 5. Charges — même logique d'héritage ──
+  if(rC.status==='fulfilled' && rC.value?.data) {
+    const byCode = {};
+    rC.value.data.forEach(c => {
+      if(c.annee <= anneeActive) {
+        byCode[String(c.code)] = c;
+      }
+    });
+    S.charges = Object.values(byCode)
+      .filter(c => c.actif !== false)
+      .map(c => ({
         code:c.code, nom:c.nom, cat:c.categorie||'Divers',
-        tva:parseFloat(c.tva)||0.2, type:c.type||'Variable', actif:c.actif!==false,
-        anneeCreation: c.annee_creation,
-        anneeSupp: c.annee_suppression || null,
+        tva:parseFloat(c.tva)||0.2, type:c.type||'Variable', actif:true,
       }));
   } else if(rC.status==='rejected') console.warn('[load] charges:',rC.reason?.message);
 
-  // Saisies CA
+  // ── 6. Saisies CA ──
   S.articles.forEach(a=>{S.qty[a.code]=Array(12).fill(0);});
   if(rSca.status==='fulfilled' && rSca.value?.data) {
     rSca.value.data.forEach(r=>{
@@ -2191,7 +2151,7 @@ async function loadData(uid) {
     });
   } else if(rSca.status==='rejected') console.warn('[load] saisies_ca:',rSca.reason?.message);
 
-  // Saisies Charges
+  // ── 7. Saisies Charges ──
   S.charges.forEach(c=>{S.chMD[c.code]=Array(12).fill(0);});
   if(rSch.status==='fulfilled' && rSch.value?.data) {
     rSch.value.data.forEach(r=>{
@@ -2200,27 +2160,25 @@ async function loadData(uid) {
     });
   } else if(rSch.status==='rejected') console.warn('[load] saisies_charges:',rSch.reason?.message);
 
-  // ── Étape 4 : filet localStorage si 0 articles ──
+  // ── 8. Filet localStorage si 0 articles depuis Supabase ──
   if(S.articles.length===0) {
     try {
       const raw=localStorage.getItem('lp_'+uid);
       if(raw) {
         const bk=JSON.parse(raw);
-        if(bk.articles?.length>0) {
-          S.articles=(bk.articles||[]).filter(a=>{
-            const cree = a.anneeCreation===null||a.anneeCreation===undefined ? true : a.anneeCreation<=anneeActive;
-            const supprime=a.anneeSupp!==null && a.anneeSupp!==undefined && a.anneeSupp<=anneeActive;
-            return cree && !supprime;
-          });
-          S.charges=(bk.charges||[]).filter(c=>{
-            const cree = c.anneeCreation===null||c.anneeCreation===undefined ? true : c.anneeCreation<=anneeActive;
-            const supprime=c.anneeSupp!==null && c.anneeSupp!==undefined && c.anneeSupp<=anneeActive;
-            return cree && !supprime;
-          });
-          S.qty  =(bk.qtyByYear  &&bk.qtyByYear[anneeActive])  ||{};
-          S.chMD =(bk.chMDByYear &&bk.chMDByYear[anneeActive]) ||{};
-          if(bk.paramsByYear&&bk.paramsByYear[anneeActive]) Object.assign(S.params,bk.paramsByYear[anneeActive]);
-          S.params.annee=anneeActive;
+        // Chercher les articles pour l'année active ou la plus proche
+        const artSrc = bk.artByYear && (bk.artByYear[anneeActive] || 
+          Object.entries(bk.artByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>b[0]-a[0])[0]?.[1]);
+        if(artSrc && artSrc.length>0) {
+          S.articles = artSrc.filter(a=>a.actif!==false);
+          const chSrc = bk.chByYear && (bk.chByYear[anneeActive] ||
+            Object.entries(bk.chByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>b[0]-a[0])[0]?.[1]);
+          S.charges  = (chSrc||[]).filter(c=>c.actif!==false);
+          S.qty      = (bk.qtyByYear  && bk.qtyByYear[anneeActive])  || {};
+          S.chMD     = (bk.chMDByYear && bk.chMDByYear[anneeActive]) || {};
+          const pSrc = bk.paramsByYear && (bk.paramsByYear[anneeActive] ||
+            Object.entries(bk.paramsByYear).filter(([y])=>parseInt(y)<=anneeActive).sort((a,b)=>b[0]-a[0])[0]?.[1]);
+          if(pSrc) { Object.assign(S.params, pSrc); S.params.annee=anneeActive; }
         }
       }
     } catch(e){}
