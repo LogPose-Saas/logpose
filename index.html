@@ -684,23 +684,80 @@ function setSaved()    { const d=$('sdot'); if(d) d.classList.add('saved'); cons
 // ════════════════════════════════════════════════════════
 async function loadParams() {
   if(!UID) return;
+
+  // Reset propre à chaque changement d'année
+  P = {
+    nomEnt: '',
+    secteur: '',
+    regimeTVA: 'TVA réelle mensuelle',
+    regimeFisc: 'IS — Impôt sur les sociétés',
+    devise: '€ Euro',
+    cle: 'qte',
+    obj: 0,
+    tresoInit: 0,
+    moisDeb: 1,
+    moisFin: 12,
+  };
+
   try {
-    const {data, error} = await sbq(
-      DB.from('parametres').select('*').eq('user_id',UID).eq('annee',ANNEE).single()
+    // 1) On tente de charger l'année active
+    const { data, error } = await sbq(
+      DB.from('parametres')
+        .select('*')
+        .eq('user_id', UID)
+        .eq('annee', ANNEE)
+        .single()
     );
-    if(error && error.code !== 'PGRST116') { console.warn('[params]', error.message); return; }
-    if(data) {
-      P.nomEnt    = data.nom_entreprise || '';
-      P.secteur   = data.secteur        || '';
-      P.regimeTVA = data.regime_tva     || 'TVA réelle mensuelle';
-      P.regimeFisc= data.regime_fiscal  || 'IS — Impôt sur les sociétés';
-      P.devise    = data.devise         || '€ Euro';
-      P.cle       = data.cle_repartition|| 'qte';
-      P.moisDeb   = data.mois_debut     || 1;
-      P.moisFin   = data.mois_fin       || 12;
-      P.tresoInit = data.treso_init     || 0;
-      P.obj       = data.objectif_ca    || 0;
+
+    if (error && error.code !== 'PGRST116') {
+      console.warn('[params]', error.message);
+      return;
     }
+
+    if (data) {
+      // Si la ligne existe pour l'année active : on la prend telle quelle
+      P.nomEnt     = data.nom_entreprise  || '';
+      P.secteur    = data.secteur         || '';
+      P.regimeTVA  = data.regime_tva      || 'TVA réelle mensuelle';
+      P.regimeFisc = data.regime_fiscal   || 'IS — Impôt sur les sociétés';
+      P.devise     = data.devise          || '€ Euro';
+      P.cle        = data.cle_repartition || 'qte';
+      P.moisDeb    = data.mois_debut      || 1;
+      P.moisFin    = data.mois_fin        || 12;
+      P.tresoInit  = data.treso_init      || 0;
+      P.obj        = data.objectif_ca     || 0;
+    } else {
+      // 2) Sinon : on hérite de la dernière année précédente disponible
+      const { data: prevRows, error: prevError } = await sbq(
+        DB.from('parametres')
+          .select('*')
+          .eq('user_id', UID)
+          .lt('annee', ANNEE)
+          .order('annee', { ascending: false })
+          .limit(1)
+      );
+
+      if (prevError) {
+        console.warn('[params prev]', prevError.message);
+      } else if (prevRows && prevRows.length) {
+        const prev = prevRows[0];
+
+        // Champs à répliquer comme Articles / Charges
+        P.nomEnt  = prev.nom_entreprise || '';
+        P.secteur = prev.secteur        || '';
+        P.devise  = prev.devise         || '€ Euro';
+
+        // Champs qui restent indépendants
+        P.obj = 0;
+      }
+    }
+
+    paramsLoaded = true;
+    renderEntreprise();
+  } catch (e) {
+    console.warn('[params timeout]', e.message);
+  }
+}
     // Pas de ligne pour cette année = champs vides, l'user saisit
     paramsLoaded = true;
     renderEntreprise();
