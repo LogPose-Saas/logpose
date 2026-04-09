@@ -378,43 +378,38 @@ const intNum = (v,d=0) => { const n = parseInt(v,10); return Number.isFinite(n) 
 const esc = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 const fmtEuro = v => num(v).toLocaleString('fr-FR',{maximumFractionDigits:0}) + ' €';
 function normalizeSelectValue(id, value){
-  const el = $(id);
-  if(!el) return value ?? '';
   const raw = String(value ?? '').trim();
-  const options = Array.from(el.options).map(o => String(o.value ?? '').trim());
-  if(options.includes(raw)) return raw;
-
   const v = raw.toLowerCase();
 
   if(id === 'ent-sect'){
-    if(v.includes('commerce')) return 'Commerce de détail';
+    if(v.includes('commerce de detail') || v.includes('commerce de détail')) return 'Commerce de détail';
     if(v.includes('e-commerce') || v.includes('ecommerce')) return 'E-commerce';
     if(v.includes('prestation')) return 'Prestation de service';
     if(v.includes('restauration') || v.includes('food')) return 'Restauration / Food';
     if(v.includes('btp') || v.includes('artisan')) return 'BTP / Artisanat';
     if(v.includes('autre')) return 'Autre';
-    return 'Commerce de détail';
+    return raw;
   }
 
   if(id === 'ent-dev'){
     if(v.includes('€') || v.includes('euro')) return '€ Euro';
     if(v.includes('$') || v.includes('dollar')) return '$ Dollar';
     if(v.includes('£') || v.includes('livre')) return '£ Livre sterling';
-    return '€ Euro';
+    return raw;
   }
 
   if(id === 'ent-tva'){
     if(v.includes('mens')) return 'TVA réelle mensuelle';
     if(v.includes('trimes')) return 'TVA réelle trimestrielle';
     if(v.includes('franchise')) return 'Franchise en base';
-    return 'TVA réelle mensuelle';
+    return raw;
   }
 
   if(id === 'ent-fisc'){
     if(v.startsWith('is')) return 'IS — Impôt sur les sociétés';
     if(v.startsWith('ir')) return 'IR — Impôt sur le revenu';
     if(v.includes('micro')) return 'Micro-entreprise';
-    return 'IS — Impôt sur les sociétés';
+    return raw;
   }
 
   return raw;
@@ -511,23 +506,57 @@ async function saveParams(){
 }
 
 function renderEntreprise(){
-  const setVal=(id,v)=>{
-    const el=$(id);
+  const setInput = (id, value) => {
+    const el = $(id);
     if(!el) return;
-    if(el.tagName === 'SELECT') el.value = normalizeSelectValue(id, v);
-    else el.value = v;
+    el.value = value ?? '';
   };
-  setVal('ent-nom',P.nomEnt);
-  setVal('ent-sect',P.secteur);
-  setVal('ent-obj',P.obj);
-  setVal('ent-tva',P.regimeTVA);
-  setVal('ent-fisc',P.regimeFisc);
-  setVal('ent-dev',P.devise);
-  document.querySelectorAll('input[name="cle"]').forEach(r=>r.checked=r.value===P.cle);
+
+  setInput('ent-nom', P.nomEnt);
+  setInput('ent-obj', P.obj);
+
+  setSelectExactOrClosest('ent-sect', P.secteur, 0);
+  setSelectExactOrClosest('ent-tva', P.regimeTVA, 0);
+  setSelectExactOrClosest('ent-fisc', P.regimeFisc, 0);
+  setSelectExactOrClosest('ent-dev', P.devise, 0);
+
+  document.querySelectorAll('input[name="cle"]').forEach(r => r.checked = r.value === P.cle);
   refreshYearLabels();
 }
 
-function bindEntreprise(){
+function simplifySelectText(v){
+  return String(v ?? '')
+    .toLowerCase()
+    .trim()
+    .split('—').join('-')
+    .split('–').join('-')
+    .split('  ').join(' ');
+}
+
+function setSelectExactOrClosest(id, value, fallbackIndex = 0){
+  const el = $(id);
+  if(!el) return;
+
+  const normalized = simplifySelectText(normalizeSelectValue(id, value));
+  const options = Array.from(el.options);
+
+  let found = options.find(opt =>
+    simplifySelectText(opt.value) === normalized ||
+    simplifySelectText(opt.textContent) === normalized
+  );
+
+  if(!found){
+    found = options.find(opt => {
+      const ov = simplifySelectText(opt.value);
+      const ot = simplifySelectText(opt.textContent);
+      return ov.includes(normalized) || normalized.includes(ov) || ot.includes(normalized) || normalized.includes(ot);
+    });
+  }
+
+  el.selectedIndex = found ? options.indexOf(found) : fallbackIndex;
+}
+
+function bi
   $('ent-nom').addEventListener('input',e=>{P.nomEnt=e.target.value; schedSave();});
   $('ent-sect').addEventListener('change',e=>{P.secteur=e.target.value; schedSave();});
   $('ent-obj').addEventListener('input',e=>{P.obj=num(e.target.value,0); schedSave();});
