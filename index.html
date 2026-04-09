@@ -422,6 +422,13 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
       <!-- Navigation -->
       <div class="sb-sect">
+        <div class="sb-lbl">Saisie</div>
+        <div class="sb-item" id="nav-ca">
+          <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+          <span>Chiffre d'affaires</span>
+        </div>
+      </div>
+      <div class="sb-sect">
         <div class="sb-lbl">Configuration</div>
         <div class="sb-item active" id="nav-params">
           <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg></span>
@@ -580,9 +587,49 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           </label>
         </div>
       </div>
-    </div>
+    <!-- CHIFFRE D'AFFAIRES -->
+    <div id="pnl-ca" style="display:none">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Chiffre d'affaires</div>
+          <div class="page-sub">Saisie des quantités · Année <span id="ca-annee-lbl">2026</span></div>
+        </div>
+      </div>
 
-  </main>
+      <!-- KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+        <div class="card" style="margin:0;padding:16px">
+          <div class="klbl">CA HT total</div>
+          <div class="kval" id="ca-kpi-caht">0 €</div>
+        </div>
+        <div class="card" style="margin:0;padding:16px">
+          <div class="klbl">Marge brute</div>
+          <div class="kval" id="ca-kpi-marge">0 €</div>
+        </div>
+        <div class="card" style="margin:0;padding:16px">
+          <div class="klbl">Taux de marge</div>
+          <div class="kval" id="ca-kpi-txmarge">0 %</div>
+        </div>
+      </div>
+
+      <!-- Tableau de saisie -->
+      <div class="card">
+        <div class="tbl-hdr">
+          <div><div class="ct">Saisie des quantités</div><div class="cs">Quantités vendues par article et par mois</div></div>
+        </div>
+        <div id="ca-empty" style="display:none" class="empty">
+          <div class="empty-ico">📦</div>
+          <div class="empty-title">Aucun article configuré</div>
+          <div class="empty-desc">Ajoutez des articles dans Paramètres → Articles</div>
+        </div>
+        <div style="overflow-x:auto" id="ca-tbl-wrap">
+          <table class="stbl" id="ca-tbl">
+            <thead id="ca-thead"></thead>
+            <tbody id="ca-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 </div>
 
 <!-- SAVE BAR -->
@@ -883,6 +930,122 @@ function renderCharges() {
 }
 
 // ════════════════════════════════════════════════════════
+// CHIFFRE D'AFFAIRES
+// ════════════════════════════════════════════════════════
+const MOIS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+let qty = {}; // {code: [12 valeurs]}
+
+async function loadCA() {
+  if(!UID) return;
+  // Initialiser qty avec 0 pour chaque article
+  qty = {};
+  articles.forEach(a => { qty[a.code] = Array(12).fill(0); });
+  try {
+    const {data, error} = await sbq(
+      DB.from('saisies_ca').select('article_code,mois,quantite')
+        .eq('user_id', UID).eq('annee', ANNEE)
+    );
+    if(error) { console.warn('[ca]', error.message); }
+    else {
+      (data||[]).forEach(r => {
+        if(qty[r.article_code]) qty[r.article_code][r.mois-1] = r.quantite;
+      });
+    }
+  } catch(e) { console.warn('[ca timeout]', e.message); }
+  renderCA();
+}
+
+async function saveQty(code, mois, val) {
+  if(!UID) return;
+  val = parseFloat(val) || 0;
+  qty[code][mois] = val;
+  updateCAKpis();
+  if(val === 0) {
+    await DB.from('saisies_ca').delete()
+      .eq('user_id',UID).eq('annee',ANNEE).eq('article_code',code).eq('mois',mois+1);
+  } else {
+    await DB.from('saisies_ca').upsert({
+      user_id:UID, article_code:code, annee:ANNEE, mois:mois+1, quantite:val,
+    }, {onConflict:'user_id,article_code,annee,mois'});
+  }
+  setSaved();
+}
+
+function renderCA() {
+  const lbl = $('ca-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+
+  if(!articles.length) {
+    $('ca-empty').style.display = 'block';
+    $('ca-tbl-wrap').style.display = 'none';
+    updateCAKpis();
+    return;
+  }
+  $('ca-empty').style.display = 'none';
+  $('ca-tbl-wrap').style.display = '';
+
+  // Header
+  $('ca-thead').innerHTML = `<tr>
+    <th style="text-align:left;min-width:80px">Code</th>
+    <th style="text-align:left;min-width:130px">Article</th>
+    <th>PV HT</th>
+    ${MOIS.map(m => `<th>${m}</th>`).join('')}
+    <th>Total qté</th>
+    <th>CA HT</th>
+  </tr>`;
+
+  // Lignes
+  $('ca-tbody').innerHTML = articles.map(a => {
+    const q = qty[a.code] || Array(12).fill(0);
+    const totQty = q.reduce((s,v) => s+v, 0);
+    const totCA  = totQty * a.pv;
+    return `<tr>
+      <td style="color:var(--t3);font-family:var(--fm);font-size:11px">${a.code}</td>
+      <td style="font-weight:500">${a.nom}</td>
+      <td style="font-family:var(--fm);color:var(--t2)">${a.pv.toFixed(2)} €</td>
+      ${q.map((v,m) => `<td>
+        <input class="sinp" type="number" min="0" value="${v||''}" placeholder="0"
+          onchange="saveQty('${a.code}',${m},this.value)">
+      </td>`).join('')}
+      <td class="stot">${totQty}</td>
+      <td class="stot">${totCA.toFixed(0)} €</td>
+    </tr>`;
+  }).join('');
+
+  // Ligne totaux
+  const totParMois = MOIS.map((_,m) =>
+    articles.reduce((s,a) => s + (qty[a.code]||[])[m] || 0, 0)
+  );
+  const totGlobal = totParMois.reduce((s,v) => s+v, 0);
+  const caGlobal  = articles.reduce((s,a) => {
+    const t = (qty[a.code]||[]).reduce((x,v)=>x+v,0);
+    return s + t * a.pv;
+  }, 0);
+
+  $('ca-tbody').innerHTML += `<tr class="totrow">
+    <td colspan="3" style="text-align:left;font-weight:700">TOTAL</td>
+    ${totParMois.map(v => `<td class="stot">${v||''}</td>`).join('')}
+    <td class="stot">${totGlobal}</td>
+    <td class="stot">${caGlobal.toFixed(0)} €</td>
+  </tr>`;
+
+  updateCAKpis();
+}
+
+function updateCAKpis() {
+  let caHT = 0, marge = 0;
+  articles.forEach(a => {
+    const totQty = (qty[a.code]||[]).reduce((s,v)=>s+v,0);
+    caHT  += totQty * a.pv;
+    marge += totQty * (a.pv - a.cout);
+  });
+  const txMarge = caHT > 0 ? marge/caHT*100 : 0;
+  const fmt = v => v.toLocaleString('fr-FR', {maximumFractionDigits:0}) + ' €';
+  const e1=$('ca-kpi-caht');   if(e1) e1.textContent = fmt(caHT);
+  const e2=$('ca-kpi-marge');  if(e2) e2.textContent = fmt(marge);
+  const e3=$('ca-kpi-txmarge');if(e3) e3.textContent = txMarge.toFixed(1) + ' %';
+}
+
+// ════════════════════════════════════════════════════════
 // NAVIGATION ANNÉES
 // ════════════════════════════════════════════════════════
 async function changeAnnee(n) {
@@ -899,6 +1062,7 @@ async function changeAnnee(n) {
          cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
   renderAnneesNav();
   await Promise.all([loadParams(), loadArticles(), loadCharges()]);
+  await loadCA();
 }
 
 function renderAnneesNav() {
@@ -990,6 +1154,7 @@ async function startApp(user) {
   const em=$('sb-email'); if(em) em.textContent=user.email;
   renderAnneesNav();
   await Promise.all([loadParams(), loadArticles(), loadCharges()]);
+  await loadCA();
   setSaved();
 }
 
@@ -1035,7 +1200,15 @@ document.addEventListener('DOMContentLoaded', () => {
   $('btn-year-prev').addEventListener('click', () => changeAnnee(ANNEE-1));
   $('btn-year-next').addEventListener('click', () => changeAnnee(ANNEE+1));
 
-  // Tabs paramètres
+  // Navigation sidebar
+  function showPanel(panelId, navId) {
+    ['pnl-params','pnl-ca'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
+    ['nav-params','nav-ca'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
+    const p=$(panelId); if(p) p.style.display='block';
+    const n=$(navId);   if(n) n.classList.add('active');
+  }
+  $('nav-params').addEventListener('click', () => showPanel('pnl-params','nav-params'));
+  $('nav-ca').addEventListener('click',     () => showPanel('pnl-ca','nav-ca'));
   [['tab-articles','p-articles'],['tab-charges','p-charges'],['tab-entreprise','p-entreprise']].forEach(([tid,pid]) => {
     $(tid).addEventListener('click', () => {
       document.querySelectorAll('.tab-pnl').forEach(p => p.classList.remove('active'));
