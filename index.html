@@ -620,8 +620,13 @@ let charges  = [];
 const $ = id => document.getElementById(id);
 const sbq = (p, ms=12000) => Promise.race([p, new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
 
+let paramsLoaded = false; // Empêche toute sauvegarde avant le 1er chargement réussi
+
 let _saveTimer = null;
-function schedSave() { markUnsaved(); clearTimeout(_saveTimer); _saveTimer = setTimeout(saveParams, 1500); }
+function schedSave() {
+  if(!paramsLoaded) return; // Ne pas sauvegarder avant le 1er chargement
+  markUnsaved(); clearTimeout(_saveTimer); _saveTimer = setTimeout(saveParams, 1500);
+}
 function markUnsaved() { const d=$('sdot'); if(d) d.classList.remove('saved'); }
 function setSaved()    { const d=$('sdot'); if(d) d.classList.add('saved'); const t=$('stxt'); if(t) t.textContent='Enregistré'; }
 
@@ -650,6 +655,7 @@ async function loadParams() {
     P.moisFin   = row.mois_fin       || 12;
     P.tresoInit = row.treso_init     || 0;
     P.obj       = exact ? (row.objectif_ca || 0) : 0;
+    paramsLoaded = true;
     renderEntreprise();
   } catch(e) { console.warn('[params timeout]', e.message); }
 }
@@ -885,6 +891,7 @@ async function changeAnnee(n) {
   clearTimeout(_saveTimer);
   await saveParams();
   ANNEE = n;
+  paramsLoaded = false; // Bloquer saves pendant rechargement
   localStorage.setItem('lp_annee_'+UID, ANNEE);
   P = { nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
          regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
