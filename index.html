@@ -47,6 +47,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bds);border-radius:99px}
+
+/* ═══ AUTH ═══ */
 #auth{position:fixed;inset:0;background:var(--bg);z-index:900;display:flex;align-items:center;justify-content:center}
 .auth-card{background:var(--bgc);border:1px solid var(--bd);border-radius:20px;padding:40px;max-width:420px;width:90%;box-shadow:var(--sh)}
 .auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px}
@@ -68,12 +70,29 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .btn-p{background:var(--ac);color:#fff}.btn-p:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 4px 14px rgba(59,126,255,.35)}
 .btn-g{background:transparent;color:var(--t2);border:1px solid var(--bd)}.btn-g:hover{border-color:var(--bds);color:var(--t1);background:var(--bgc)}
 .btn-sm{padding:6px 13px;font-size:12px}
+.btn-xs{padding:4px 9px;font-size:11px}
 .btn-full{width:100%;justify-content:center}
+
+/* ═══ ONBOARDING ═══ */
+#onb{position:fixed;inset:0;background:var(--bg);z-index:800;display:none;align-items:center;justify-content:center}
+.onb-card{background:var(--bgc);border:1px solid var(--bd);border-radius:20px;padding:40px;max-width:520px;width:90%;box-shadow:var(--sh)}
+.onb-steps{display:flex;gap:6px;margin-bottom:28px}
+.onb-step{flex:1;height:3px;border-radius:99px;background:var(--bd);transition:background var(--tr)}
+.onb-step.done{background:var(--ac)}
+.onb-feat{display:flex;align-items:flex-start;gap:11px;padding:11px 14px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd);margin-bottom:8px}
+.onb-feat-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.onb-feat-title{font-size:12.5px;font-weight:600;margin-bottom:2px}
+.onb-feat-desc{font-size:11px;color:var(--t2);line-height:1.5}
+
+/* ═══ APP LAYOUT ═══ */
 #app{display:none;min-height:100vh}
+
+/* ── SIDEBAR ── */
 .sb{width:var(--sw);background:var(--bgs);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:width var(--tr);overflow:hidden}
 .sb.col{width:var(--swc)}
 .main{margin-left:var(--sw);flex:1;padding:24px 28px 90px;min-height:100vh;transition:margin-left var(--tr)}
 .sb.col~.main,.sb.col~.savebar{margin-left:var(--swc)}
+
 .sb-logo{padding:18px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;min-height:65px}
 .sb-icon{width:32px;height:32px;background:var(--ac);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .sb-texts{overflow:hidden;white-space:nowrap}
@@ -87,13 +106,17 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .sb-item.active{background:var(--ag);color:var(--ac);font-weight:600}
 .sb-ico{width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:.65}
 .sb-item.active .sb-ico{opacity:1}
+.sb-badge{margin-left:auto;font-size:9px;font-weight:700;background:var(--rdb);color:var(--rd);padding:1px 6px;border-radius:99px;font-family:var(--fm)}
 .sb-bottom{padding:10px;border-top:1px solid var(--bd)}
 .sb-user{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bgc);border-radius:var(--rs);border:1px solid var(--bd);margin-bottom:8px;min-width:0}
 .sb-avatar{width:26px;height:26px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
 .sb-uinfo{flex:1;overflow:hidden;min-width:0}
 .sb-uemail{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-uplan{font-size:9px;font-weight:700;color:var(--gr);font-family:var(--fm);text-transform:uppercase;letter-spacing:.05em;margin-top:1px}
 .sb-logout{width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);border-radius:5px;transition:all var(--tr);flex-shrink:0}
 .sb-logout:hover{color:var(--rd)}
+.sb-upgrade{display:block;padding:7px 10px;background:linear-gradient(135deg,var(--ac),var(--pu));color:#fff;border-radius:var(--rs);font-size:11px;font-weight:700;text-align:center;text-decoration:none;margin-bottom:8px;transition:opacity var(--tr);cursor:pointer;border:none;width:100%}
+.sb-upgrade:hover{opacity:.85}
 .sb-col-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;color:var(--t2);font-size:12px;font-weight:500;border:1px solid var(--bd);background:transparent;transition:all var(--tr);width:100%;white-space:nowrap}
 .sb-col-btn:hover{background:var(--bgc);color:var(--t1);border-color:var(--bds)}
 .theme-btn{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bgc);border-radius:var(--rs);cursor:pointer;border:1px solid var(--bd);transition:all var(--tr);margin-top:6px}
@@ -103,6 +126,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 [data-theme="light"] .tog{background:var(--ac)}
 .tog-k{width:13px;height:13px;background:var(--t1);border-radius:50%;position:absolute;top:2px;left:2px;transition:all var(--tr)}
 [data-theme="light"] .tog-k{transform:translateX(13px);background:#fff}
+
+/* ── SIDEBAR YEAR SELECTOR ── */
 .sb-year-block{padding:10px 12px 8px;border-bottom:1px solid var(--bd);margin-bottom:4px}
 .sb-year-label{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-family:var(--fm);margin-bottom:6px}
 .sb-year-row{display:flex;align-items:center;gap:5px}
@@ -110,12 +135,20 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .sb-year-btn:hover{background:var(--ac);color:#fff;border-color:var(--ac)}
 .sb-year-val{flex:1;text-align:center;font-size:13px;font-weight:700;font-family:var(--fm);color:var(--t1)}
 .sb-year-btns{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+/* Collapsed : ne montrer que les flèches et l'année centrés, masquer les boutons rapides */
 .sb.col .sb-year-label,.sb.col .sb-year-btns{display:none}
 .sb.col .sb-year-block{padding:8px 4px}
 .sb.col .sb-year-row{flex-direction:column;gap:2px;align-items:center}
 .sb.col .sb-year-val{font-size:10px;font-weight:700}
 .sb.col .sb-year-btn{width:20px;height:16px;font-size:11px}
-.sb.col .sb-texts,.sb.col .sb-lbl,.sb.col .sb-item span:not(.sb-ico),.sb.col .sb-uinfo,.sb.col .sb-logout,.sb.col .theme-txt,.sb.col .tog,.sb.col .col-txt{display:none}
+
+/* ── COLLAPSED SIDEBAR ── */
+.sb.col .sb-texts,.sb.col .sb-lbl,
+.sb.col .sb-item span:not(.sb-ico),
+.sb.col .sb-badge,.sb.col .sb-uinfo,
+.sb.col .sb-logout,.sb.col #sb-upgrade,
+.sb.col .theme-txt,.sb.col .tog,
+.sb.col .col-txt{display:none}
 .sb.col .sb-logo{padding:16px;justify-content:center}
 .sb.col .sb-sect{padding:0 6px}
 .sb.col .sb-item{padding:10px;justify-content:center;gap:0}
@@ -125,20 +158,68 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .sb.col .sb-user{justify-content:center;padding:8px;border:none;background:transparent}
 .sb.col .sb-col-btn{justify-content:center;padding:9px;width:auto;margin:0 auto}
 .sb.col .theme-btn{justify-content:center;border:none;background:transparent;padding:9px}
+
+/* ── MOBILE ── */
+.mob-hdr{display:none;align-items:center;gap:12px;padding:12px 16px;background:var(--bgs);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:99}
+.mob-menu{width:36px;height:36px;border-radius:8px;background:var(--bgc);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.sb-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+
+/* ── TOPBAR ── */
 .topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:14px;flex-wrap:wrap}
 .page-title{font-size:20px;font-weight:700;letter-spacing:-.4px}
 .page-sub{font-size:12px;color:var(--t2);margin-top:2px}
+.page-actions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
+
+/* ── PANELS ── */
+.pnl{display:none}.pnl.active{display:block}
+.tab-pnl{display:none}.tab-pnl.active{display:block}
+
+/* ── CARDS ── */
+.card{background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);padding:20px;margin-bottom:14px;transition:border-color var(--tr)}
+.ct{font-size:14px;font-weight:700;letter-spacing:-.2px;margin-bottom:3px}
+.cs{font-size:11.5px;color:var(--t2);line-height:1.5}
+
+/* ── SECTION LABEL ── */
+.slbl{font-size:10px;font-weight:700;font-family:var(--fm);letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+
+/* ── TABS ── */
 .tabs{display:flex;gap:3px;background:var(--bgs);border:1px solid var(--bd);border-radius:10px;padding:3px;margin-bottom:20px;width:fit-content;flex-wrap:wrap}
 .tab{padding:7px 16px;border-radius:7px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all var(--tr)}
 .tab:hover{color:var(--t1)}
 .tab.active{background:var(--bgc);color:var(--t1);font-weight:700;box-shadow:0 1px 5px rgba(0,0,0,.12)}
-.tab-pnl{display:none}.tab-pnl.active{display:block}
-.card{background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);padding:20px;margin-bottom:14px;transition:border-color var(--tr)}
-.ct{font-size:14px;font-weight:700;letter-spacing:-.2px;margin-bottom:3px}
-.cs{font-size:11.5px;color:var(--t2);line-height:1.5}
-.slbl{font-size:10px;font-weight:700;font-family:var(--fm);letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+
+/* ── KPI ── */
+.kgrid{display:grid;gap:12px;margin-bottom:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.kcard{background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden;transition:all var(--tr)}
+.kcard:hover{border-color:var(--bds);box-shadow:var(--sh);transform:translateY(-1px)}
+.kacc{position:absolute;top:0;left:0;right:0;height:2.5px;border-radius:var(--r) var(--r) 0 0}
 .klbl{font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--t2);margin-bottom:9px;font-family:var(--fm)}
 .kval{font-size:24px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:6px}
+.kdel{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px}
+.du{background:var(--grb);color:var(--gr)}.dd{background:var(--rdb);color:var(--rd)}.dn{background:var(--amb);color:var(--am)}
+.ksub{font-size:10.5px;color:var(--t3);margin-top:4px}
+
+/* ── ALERTS BAR ── */
+.alerts{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.alrt{display:flex;align-items:center;gap:7px;padding:6px 13px;border-radius:99px;font-size:12px;font-weight:600}
+.ar{background:var(--rdb);color:var(--rd);border:1px solid rgba(244,63,94,.2)}
+.aa{background:var(--amb);color:var(--am);border:1px solid rgba(245,158,11,.2)}
+.ag{background:var(--grb);color:var(--gr);border:1px solid rgba(14,165,114,.2)}
+.adot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 1.8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── CHARTS ── */
+.cg2{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:14px}
+.cg3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.cgeq{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.cw{position:relative;height:190px}
+.cwlg{position:relative;height:230px}
+.cwsm{position:relative;height:120px}
+
+/* ── TABLE ── */
 .tbl-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
 .dtbl{width:100%;border-collapse:collapse}
 .dtbl th{font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:7px 11px;text-align:left;border-bottom:1px solid var(--bd)}
@@ -147,12 +228,13 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .dtbl tr:hover td{background:var(--bgh)}
 .tdinp{background:transparent;border:1px solid transparent;border-radius:5px;padding:4px 8px;color:var(--t1);font-family:var(--f);font-size:13px;transition:all var(--tr);outline:none;width:100%;-webkit-appearance:none;appearance:none}
 .tdinp:focus{background:var(--in);border-color:var(--bdf);box-shadow:0 0 0 2px var(--ag)}
-.tdinp[readonly]{opacity:.6;cursor:not-allowed}
 .tdsel{background:transparent;border:1px solid transparent;border-radius:5px;padding:4px 22px 4px 8px;color:var(--t1);font-family:var(--f);font-size:13px;transition:all var(--tr);outline:none;width:100%;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b85a8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;cursor:pointer}
 .tdsel:focus{background-color:var(--in);border-color:var(--bdf)}
 .tdsel option{background:var(--bgc)}
 .delbtn{width:26px;height:26px;border-radius:5px;background:transparent;border:none;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all var(--tr)}
 .delbtn:hover{background:var(--rdb);color:var(--rd)}
+
+/* ── SAISIE TABLE ── */
 .stbl{width:100%;border-collapse:collapse;font-size:12px}
 .stbl th{font-size:9px;font-weight:700;font-family:var(--fm);letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:6px 8px;text-align:center;border-bottom:1px solid var(--bd);white-space:nowrap}
 .stbl th:first-child,.stbl th:nth-child(2){text-align:left}
@@ -162,32 +244,140 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .sinp{width:64px;background:transparent;border:1px solid transparent;border-radius:5px;padding:4px 5px;color:var(--t1);font-family:var(--fm);font-size:12px;text-align:center;outline:none;transition:all var(--tr)}
 .sinp:focus{background:var(--in);border-color:var(--bdf);box-shadow:0 0 0 2px var(--ag)}
 .stot{font-family:var(--fm);font-size:12px;font-weight:700;color:var(--ac)}
+
+/* ── ADD ROW ── */
 .addrow{display:none;gap:7px;padding:10px;background:var(--bgs);border-radius:var(--rs);border:1px dashed var(--bd);margin-top:10px;flex-wrap:wrap;align-items:center}
 .addrow.open{display:flex}
 .addrow input,.addrow select{flex:1;min-width:80px;background:var(--in);border:1px solid var(--bd);border-radius:var(--rs);padding:7px 10px;color:var(--t1);font-family:var(--f);font-size:13px;outline:none;transition:border-color var(--tr);-webkit-appearance:none;appearance:none}
 .addrow input:focus,.addrow select:focus{border-color:var(--bdf)}
 .addrow select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b85a8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:24px;cursor:pointer}
+.addrow select option{background:var(--bgc)}
+
+/* ── BADGES ── */
+.bdg{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:99px}
+.bgr{background:var(--grb);color:var(--gr)}.bam{background:var(--amb);color:var(--am)}.brd{background:var(--rdb);color:var(--rd)}.bpu{background:var(--pub);color:var(--pu)}.btl{background:var(--tlb);color:var(--tl)}.bac{background:var(--ag);color:var(--ac)}
+
+/* ── PROGRESS ── */
 .pw{background:var(--bd);border-radius:99px;height:6px;overflow:hidden;margin:6px 0}
 .pb{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+
+/* ── TOP LIST ── */
+.toplist{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.topitem{display:flex;align-items:center;gap:9px}
+.toprank{width:20px;height:20px;border-radius:50%;background:var(--bgs);border:1px solid var(--bd);font-size:9.5px;font-family:var(--fm);font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--t3);flex-shrink:0}
+.topname{flex:1;font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbarw{width:70px;height:4px;background:var(--bd);border-radius:99px;flex-shrink:0}
+.topbar-fill{height:100%;border-radius:99px}
+.topval{font-size:11.5px;font-family:var(--fm);color:var(--t2);min-width:60px;text-align:right}
+
+/* ── TVA / TRESO ── */
+.tvarow{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd);margin-bottom:8px}
+.tvarow-l{font-size:12.5px;font-weight:500;color:var(--t2)}
+.tvarow-v{font-size:13.5px;font-family:var(--fm);font-weight:700}
+.tvanet{padding:14px;border-radius:var(--rs);text-align:center;margin-top:10px}
+.tvanet-l{font-size:10px;font-weight:700;color:var(--t2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--fm)}
+.tvanet-v{font-size:26px;font-weight:800;letter-spacing:-1.5px}
+.ptbl{width:100%;border-collapse:collapse;font-size:12px}
+.ptbl th{font-size:9px;font-weight:700;font-family:var(--fm);letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:6px 10px;text-align:right;border-bottom:1px solid var(--bd)}
+.ptbl th:first-child{text-align:left}
+.ptbl td{padding:7px 10px;border-bottom:1px solid var(--bd);text-align:right;font-family:var(--fm)}
+.ptbl td:first-child{text-align:left;font-family:var(--f);font-weight:500}
+.ptbl tr:last-child td{border-bottom:none;font-weight:700;color:var(--ac)}
+.ptbl tr:hover td{background:var(--bgh)}
+.ppos{color:var(--gr)}.pneg{color:var(--rd)}.pneu{color:var(--t2)}
+
+/* ── ALERT BOX ── */
+.abox{padding:12px 14px;border-radius:var(--rs);font-size:12.5px;margin-bottom:9px;display:flex;align-items:flex-start;gap:10px;border-left:3px solid}
+.abr{background:var(--rdb);color:var(--rd);border-color:var(--rd)}
+.aba{background:var(--amb);color:var(--am);border-color:var(--am)}
+.abg{background:var(--grb);color:var(--gr);border-color:var(--gr)}
+.abb{background:var(--ag);color:var(--ac);border-color:var(--ac)}
+.abox-ico{font-size:15px;flex-shrink:0;margin-top:1px}
+.abox-title{font-weight:700;margin-bottom:2px}
+.abox-desc{font-size:11px;opacity:.82;line-height:1.5}
+
+/* ── MARGE ROW ── */
+.mrgrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd)}
+.mrgrow:last-child{border-bottom:none}
+.mrgname{flex:1;font-size:13px;font-weight:500}
+.mrgtaux{font-family:var(--fm);font-size:13px;font-weight:700}
+
+/* ── SCENARIO ── */
+.sccard{background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);padding:18px;transition:all var(--tr)}
+.sccard:hover{border-color:var(--bds)}
+.sccard-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sccard-name{font-weight:700;font-size:13.5px}
+.sccard-res{font-size:22px;font-weight:800;letter-spacing:-.8px}
+
+/* ── RADIO ── */
 .rdopt{display:flex;align-items:center;gap:11px;cursor:pointer;padding:10px 13px;border:1px solid var(--bd);border-radius:var(--rs);transition:all var(--tr);margin-bottom:8px}
 .rdopt:has(input:checked){border-color:var(--bdf);background:var(--ag)}
 .rdopt input{accent-color:var(--ac)}
 .rdopt-title{font-size:13px;font-weight:600}
 .rdopt-sub{font-size:11px;color:var(--t2)}
-.empty{text-align:center;padding:48px 20px;color:var(--t2)}
-.empty-ico{font-size:36px;margin-bottom:12px;opacity:.5}
-.empty-title{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:6px}
-.empty-desc{font-size:13px;line-height:1.6}
+
+/* ── KPI TOOLTIP ── */
+.kcard{position:relative;cursor:default}
+.kcard .ktooltip{
+  display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:var(--bgc);border:1px solid var(--bds);border-radius:var(--rs);
+  padding:10px 13px;font-size:11.5px;color:var(--t1);line-height:1.5;
+  width:220px;z-index:200;box-shadow:var(--sh);pointer-events:none;
+  text-align:left;font-family:var(--f);font-weight:400;
+}
+.kcard .ktooltip::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:var(--bds);
+}
+.kcard:hover .ktooltip{display:block;animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(4px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ── CTRL ── */
+.ctrlgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.ctrlitem{background:var(--bgs);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 14px}
+.ctrlval{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.ctrllbl{font-size:11px;font-weight:500;color:var(--t2);margin-top:2px}
+.ctrlst{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;margin-top:6px;font-family:var(--fm)}
+
+/* ── SAVE BAR ── */
 .savebar{position:fixed;bottom:0;left:var(--sw);right:0;background:var(--bgs);border-top:1px solid var(--bd);padding:11px 26px;display:flex;align-items:center;justify-content:space-between;z-index:50;transition:left var(--tr)}
 .save-st{font-size:12px;font-weight:500;color:var(--t2);display:flex;align-items:center;gap:8px}
 .sdot{width:7px;height:7px;border-radius:50%;background:var(--am);animation:blink 1.8s infinite;flex-shrink:0}
 .sdot.saved{background:var(--gr);animation:none}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-@media(max-width:860px){.sb{transform:translateX(-100%);width:var(--sw)!important}.main,.savebar{margin-left:0!important;left:0!important}.main{padding:16px 16px 90px}}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 20px;color:var(--t2)}
+.empty-ico{font-size:36px;margin-bottom:12px;opacity:.5}
+.empty-title{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:6px}
+.empty-desc{font-size:13px;line-height:1.6}
+
+/* ── TOAST ── */
+.toast{position:fixed;top:20px;right:20px;z-index:9999;background:linear-gradient(135deg,var(--ac),var(--pu));color:#fff;padding:14px 20px;border-radius:12px;box-shadow:0 8px 32px rgba(59,126,255,.4);font-weight:600;font-size:13px;display:flex;align-items:center;gap:10px;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  .sb{transform:translateX(-100%);width:var(--sw)!important}
+  .sb.mob-open{transform:translateX(0)}
+  .sb-ov.open{display:block}
+  .main,.savebar{margin-left:0!important;left:0!important}
+  .mob-hdr{display:flex}
+  .main{padding:16px 16px 90px}
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(2,1fr)}
+  .cg2,.cgeq,.cg3{grid-template-columns:1fr}
+  .ctrlgrid{grid-template-columns:repeat(2,1fr)}
+  .tabs{overflow-x:auto;max-width:100%}
+}
+@media(max-width:520px){
+  .g4,.g3,.g2{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div id="auth">
+
+<!-- AUTH -->
+<div id="auth" style="position:fixed;inset:0;background:var(--bg);z-index:900;display:flex;align-items:center;justify-content:center">
   <div class="auth-card">
     <div class="auth-logo">
       <div class="auth-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
@@ -198,23 +388,29 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="auth-tab" id="tab-reg">Créer un compte</div>
     </div>
     <div class="auth-msg auth-err" id="auth-err"></div>
-    <div class="auth-msg auth-ok" id="auth-ok"></div>
+    <div class="auth-msg auth-ok"  id="auth-ok"></div>
     <div style="display:flex;flex-direction:column;gap:12px">
       <div><label class="flbl">Adresse e-mail</label><input class="finp" type="email" id="auth-email" placeholder="vous@exemple.com"></div>
       <div><label class="flbl">Mot de passe</label><input class="finp" type="password" id="auth-pwd" placeholder="8 caractères minimum"></div>
     </div>
     <button class="btn btn-p btn-full" id="auth-btn" style="margin-top:20px;padding:12px;font-size:14px">Se connecter</button>
-    <div style="text-align:center;margin-top:14px"><span id="auth-forgot" style="font-size:12px;color:var(--t2);cursor:pointer;text-decoration:underline">Mot de passe oublié ?</span></div>
+    <div style="text-align:center;margin-top:14px">
+      <span id="auth-forgot" style="font-size:12px;color:var(--t2);cursor:pointer;text-decoration:underline">Mot de passe oublié ?</span>
+    </div>
   </div>
 </div>
 
-<div id="app">
+<!-- APP -->
+<div id="app" style="display:none;min-height:100vh">
+
+  <!-- SIDEBAR -->
   <aside class="sb" id="sb">
     <div class="sb-logo">
       <div class="sb-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
       <div class="sb-texts"><div class="sb-name">LogPose</div><div class="sb-sub">Financial OS</div></div>
     </div>
     <div class="sb-scroll">
+      <!-- Sélecteur année -->
       <div class="sb-year-block">
         <div class="sb-year-label">Année</div>
         <div class="sb-year-row">
@@ -224,27 +420,45 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         </div>
         <div class="sb-year-btns" id="sb-annees"></div>
       </div>
+      <!-- Navigation -->
       <div class="sb-sect">
         <div class="sb-lbl">Saisie</div>
-        <div class="sb-item" id="nav-ca"><span class="sb-ico">€</span><span>Chiffre d'affaires</span></div>
+        <div class="sb-item" id="nav-ca">
+          <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+          <span>Chiffre d'affaires</span>
+        </div>
       </div>
       <div class="sb-sect">
         <div class="sb-lbl">Configuration</div>
-        <div class="sb-item active" id="nav-params"><span class="sb-ico">⚙</span><span>Paramètres</span></div>
+        <div class="sb-item active" id="nav-params">
+          <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg></span>
+          <span>Paramètres</span>
+        </div>
       </div>
     </div>
     <div class="sb-bottom">
       <div class="sb-user">
         <div class="sb-avatar" id="sb-av">?</div>
         <div class="sb-uinfo"><div class="sb-uemail" id="sb-email">...</div></div>
-        <div class="sb-logout" id="btn-logout" title="Se déconnecter">⎋</div>
+        <div class="sb-logout" id="btn-logout" title="Se déconnecter">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </div>
       </div>
-      <button class="sb-col-btn" id="btn-toggle-sb"><span class="col-txt">Réduire</span></button>
-      <div class="theme-btn" id="btn-theme"><span class="theme-txt" id="theme-lbl">🌙 Thème sombre</span><div class="tog"><div class="tog-k"></div></div></div>
+      <button class="sb-col-btn" id="btn-toggle-sb">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19l-7-7 7-7"/><path d="M21 19l-7-7 7-7"/></svg>
+        <span class="col-txt" style="font-size:12px;font-weight:500">Réduire</span>
+      </button>
+      <div class="theme-btn" id="btn-theme">
+        <span class="theme-txt" id="theme-lbl">🌙 Thème sombre</span>
+        <div class="tog"><div class="tog-k"></div></div>
+      </div>
     </div>
   </aside>
 
+  <!-- MAIN -->
   <main class="main">
+
+    <!-- PARAMÈTRES -->
     <div id="pnl-params">
       <div class="topbar">
         <div>
@@ -259,11 +473,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="tab" id="tab-entreprise">🏢 Entreprise</div>
       </div>
 
+      <!-- Articles -->
       <div id="p-articles" class="tab-pnl active">
         <div class="card">
           <div class="tbl-hdr">
             <div><div class="ct">Table articles</div><div class="cs">Répliqué automatiquement sur les années suivantes</div></div>
-            <div style="display:flex;gap:8px"><button class="btn btn-g btn-sm" id="btn-add-art">+ Ajouter</button></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-g btn-sm" id="btn-add-art">+ Ajouter</button>
+            </div>
           </div>
           <div class="addrow" id="p-art-add">
             <input type="text" id="pa-code" placeholder="Code (REF01)" style="max-width:100px">
@@ -271,7 +488,10 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
             <input type="text" id="pa-cat" placeholder="Catégorie" style="max-width:110px">
             <input type="number" id="pa-pv" placeholder="Prix HT €" style="max-width:90px" step="0.01">
             <input type="number" id="pa-cout" placeholder="Coût achat €" style="max-width:90px" step="0.01">
-            <select id="pa-tva" style="max-width:90px"><option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option><option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option></select>
+            <select id="pa-tva" style="max-width:90px">
+              <option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option>
+              <option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option>
+            </select>
             <button class="btn btn-p btn-sm" id="btn-add-art-ok">Ajouter</button>
             <button class="btn btn-g btn-sm" id="btn-add-art-cancel">Annuler</button>
           </div>
@@ -284,16 +504,22 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         </div>
       </div>
 
+      <!-- Charges -->
       <div id="p-charges" class="tab-pnl">
         <div class="card">
           <div class="tbl-hdr">
             <div><div class="ct">Table charges</div><div class="cs">Répliqué automatiquement sur les années suivantes</div></div>
-            <div style="display:flex;gap:8px"><button class="btn btn-g btn-sm" id="btn-add-ch">+ Ajouter</button></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-g btn-sm" id="btn-add-ch">+ Ajouter</button>
+            </div>
           </div>
           <div class="addrow" id="p-ch-add">
             <input type="text" id="pc-nom" placeholder="Nom de la charge" style="flex:2">
             <input type="text" id="pc-cat" placeholder="Catégorie" style="max-width:120px">
-            <select id="pc-tva" style="max-width:90px"><option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option><option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option></select>
+            <select id="pc-tva" style="max-width:90px">
+              <option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option>
+              <option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option>
+            </select>
             <select id="pc-type" style="max-width:105px"><option value="Variable">Variable</option><option value="Fixe">Fixe</option></select>
             <button class="btn btn-p btn-sm" id="btn-add-ch-ok">Ajouter</button>
             <button class="btn btn-g btn-sm" id="btn-add-ch-cancel">Annuler</button>
@@ -306,528 +532,744 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           </div>
           <div style="margin-top:14px;padding:13px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)">
             <div class="slbl" style="margin-bottom:8px">Répartition Fixe / Variable</div>
-            <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--t2);margin-bottom:5px"><span id="rep-f">Fixe : 0</span><span id="rep-v">Variable : 0</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;color:var(--t2);margin-bottom:5px">
+              <span id="rep-f">Fixe : 0</span><span id="rep-v">Variable : 0</span>
+            </div>
             <div class="pw" style="margin:0"><div class="pb" id="rep-bar" style="width:0%;background:linear-gradient(90deg,var(--pu),var(--tl))"></div></div>
           </div>
         </div>
       </div>
 
+      <!-- Entreprise -->
       <div id="p-entreprise" class="tab-pnl">
         <div class="slbl">Informations générales</div>
         <div class="card">
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px">
-            <div><label class="flbl">Nom de l'entreprise</label><input class="finp" id="ent-nom" type="text" placeholder="Mon Entreprise"></div>
-            <div><label class="flbl">Secteur</label><select class="fsel" id="ent-sect"><option>Commerce de détail</option><option>E-commerce</option><option>Prestation de service</option><option>Restauration / Food</option><option>BTP / Artisanat</option><option>Autre</option></select></div>
-            <div><label class="flbl">Objectif CA annuel (€)</label><input class="finp" id="ent-obj" type="number" placeholder="0"></div>
+            <div><label class="flbl">Nom de l'entreprise</label>
+              <input class="finp" id="ent-nom" type="text" placeholder="Mon Entreprise"></div>
+            <div><label class="flbl">Secteur</label>
+              <select class="fsel" id="ent-sect">
+                <option>Commerce de détail</option><option>E-commerce</option>
+                <option>Prestation de service</option><option>Restauration / Food</option>
+                <option>BTP / Artisanat</option><option>Autre</option>
+              </select></div>
+            <div><label class="flbl">Objectif CA annuel (€)</label>
+              <input class="finp" id="ent-obj" type="number" placeholder="0"></div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
-            <div><label class="flbl">Régime TVA</label><select class="fsel" id="ent-tva"><option>TVA réelle mensuelle</option><option>TVA réelle trimestrielle</option><option>Franchise en base</option></select></div>
-            <div><label class="flbl">Régime fiscal</label><select class="fsel" id="ent-fisc"><option>IS — Impôt sur les sociétés</option><option>IR — Impôt sur le revenu</option><option>Micro-entreprise</option></select></div>
-            <div><label class="flbl">Devise</label><select class="fsel" id="ent-dev"><option>€ Euro</option><option>$ Dollar</option><option>£ Livre sterling</option></select></div>
+            <div><label class="flbl">Régime TVA</label>
+              <select class="fsel" id="ent-tva">
+                <option>TVA réelle mensuelle</option>
+                <option>TVA réelle trimestrielle</option>
+                <option>Franchise en base</option>
+              </select></div>
+            <div><label class="flbl">Régime fiscal</label>
+              <select class="fsel" id="ent-fisc">
+                <option>IS — Impôt sur les sociétés</option>
+                <option>IR — Impôt sur le revenu</option>
+                <option>Micro-entreprise</option>
+              </select></div>
+            <div><label class="flbl">Devise</label>
+              <select class="fsel" id="ent-dev">
+                <option>€ Euro</option><option>$ Dollar</option><option>£ Livre sterling</option>
+              </select></div>
           </div>
         </div>
         <div class="slbl" style="margin-top:16px">Clé de répartition des charges fixes</div>
         <div class="card">
-          <label class="rdopt"><input type="radio" name="cle" value="qte" id="cle-qte" checked><div><div class="rdopt-title">Prorata des quantités vendues</div><div class="rdopt-sub">Recommandé · Simple et universel</div></div></label>
-          <label class="rdopt"><input type="radio" name="cle" value="ca" id="cle-ca"><div><div class="rdopt-title">Prorata du CA HT</div><div class="rdopt-sub">Si les prix varient beaucoup entre articles</div></div></label>
+          <label class="rdopt"><input type="radio" name="cle" value="qte" id="cle-qte" checked>
+            <div><div class="rdopt-title">Prorata des quantités vendues</div>
+            <div class="rdopt-sub">Recommandé · Simple et universel</div></div>
+          </label>
+          <label class="rdopt"><input type="radio" name="cle" value="ca" id="cle-ca">
+            <div><div class="rdopt-title">Prorata du CA HT</div>
+            <div class="rdopt-sub">Si les prix varient beaucoup entre articles</div></div>
+          </label>
+        </div>
+      </div>
+    <!-- CHIFFRE D'AFFAIRES -->
+    <div id="pnl-ca" style="display:none">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Chiffre d'affaires</div>
+          <div class="page-sub">Saisie des quantités · Année <span id="ca-annee-lbl">2026</span></div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+        <div class="card" style="margin:0;padding:16px">
+          <div class="klbl">CA HT total</div>
+          <div class="kval" id="ca-kpi-caht">0 €</div>
+        </div>
+        <div class="card" style="margin:0;padding:16px">
+          <div class="klbl">Marge brute</div>
+          <div class="kval" id="ca-kpi-marge">0 €</div>
+        </div>
+        <div class="card" style="margin:0;padding:16px">
+          <div class="klbl">Taux de marge</div>
+          <div class="kval" id="ca-kpi-txmarge">0 %</div>
+        </div>
+      </div>
+
+      <!-- Tableau de saisie -->
+      <div class="card">
+        <div class="tbl-hdr">
+          <div><div class="ct">Saisie des quantités</div><div class="cs">Quantités vendues par article et par mois</div></div>
+        </div>
+        <div id="ca-empty" style="display:none" class="empty">
+          <div class="empty-ico">📦</div>
+          <div class="empty-title">Aucun article configuré</div>
+          <div class="empty-desc">Ajoutez des articles dans Paramètres → Articles</div>
+        </div>
+        <div style="overflow-x:auto" id="ca-tbl-wrap">
+          <table class="stbl" id="ca-tbl">
+            <thead id="ca-thead"></thead>
+            <tbody id="ca-tbody"></tbody>
+          </table>
         </div>
       </div>
     </div>
-
-    <div id="pnl-ca" style="display:none">
-      <div class="topbar"><div><div class="page-title">Chiffre d'affaires</div><div class="page-sub">Saisie des quantités · Année <span id="ca-annee-lbl">2026</span></div></div></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-        <div class="card" style="margin:0;padding:16px"><div class="klbl">CA HT total</div><div class="kval" id="ca-kpi-caht">0 €</div></div>
-        <div class="card" style="margin:0;padding:16px"><div class="klbl">Marge brute</div><div class="kval" id="ca-kpi-marge">0 €</div></div>
-        <div class="card" style="margin:0;padding:16px"><div class="klbl">Taux de marge</div><div class="kval" id="ca-kpi-txmarge">0 %</div></div>
-      </div>
-      <div class="card">
-        <div class="tbl-hdr"><div><div class="ct">Saisie des quantités</div><div class="cs">Quantités vendues par article et par mois</div></div></div>
-        <div id="ca-empty" style="display:none" class="empty"><div class="empty-ico">📦</div><div class="empty-title">Aucun article configuré</div><div class="empty-desc">Ajoutez des articles dans Paramètres → Articles</div></div>
-        <div style="overflow-x:auto" id="ca-tbl-wrap"><table class="stbl" id="ca-tbl"><thead id="ca-thead"></thead><tbody id="ca-tbody"></tbody></table></div>
-      </div>
-    </div>
-  </main>
 </div>
 
-<div class="savebar"><div class="save-st"><div class="sdot saved" id="sdot"></div><span id="stxt" style="font-size:11px;color:var(--t3)">Enregistré</span></div></div>
+<!-- SAVE BAR -->
+<div class="savebar">
+  <div class="save-st">
+    <div class="sdot saved" id="sdot"></div>
+    <span id="stxt" style="font-size:11px;color:var(--t3)">Enregistré</span>
+  </div>
+</div>
 
 <script>
+// ════════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════════
 const SUPA_URL = 'https://ppmdabvtdoaodzzjqqsc.supabase.co';
 const SUPA_KEY = 'sb_publishable_Bx3WGtuoNlSlQU5MBtJsnQ_Fljdsow1';
 const DB = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-let UID = null;
+// ════════════════════════════════════════════════════════
+// ÉTAT
+// ════════════════════════════════════════════════════════
+let UID   = null;
 let ANNEE = 2026;
-const DEFAULT_PARAMS = Object.freeze({ nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle', regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro', cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 });
-let P = {...DEFAULT_PARAMS};
+let P = {  // paramètres entreprise de l'année active
+  nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
+  regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
+  cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12,
+};
 let articles = [];
-let charges = [];
-let qty = {};
-let paramsLoaded = false;
-let paramsModifie = false;
-let _saveTimer = null;
-let authMode = 'login';
+let charges  = [];
 
-const MOIS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
 const $ = id => document.getElementById(id);
 const sbq = (p, ms=12000) => Promise.race([p, new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
-const cloneDefaultParams = () => ({...DEFAULT_PARAMS});
-const num = (v,d=0) => { const n = parseFloat(v); return Number.isFinite(n) ? n : d; };
-const intNum = (v,d=0) => { const n = parseInt(v,10); return Number.isFinite(n) ? n : d; };
-const esc = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-const fmtEuro = v => num(v).toLocaleString('fr-FR',{maximumFractionDigits:0}) + ' €';
-function normalizeSelectValue(id, value){
-  const raw = String(value ?? '').trim();
-  const v = raw.toLowerCase();
 
-  if(id === 'ent-sect'){
-    if(v.includes('commerce de detail') || v.includes('commerce de détail')) return 'Commerce de détail';
-    if(v.includes('e-commerce') || v.includes('ecommerce')) return 'E-commerce';
-    if(v.includes('prestation')) return 'Prestation de service';
-    if(v.includes('restauration') || v.includes('food')) return 'Restauration / Food';
-    if(v.includes('btp') || v.includes('artisan')) return 'BTP / Artisanat';
-    if(v.includes('autre')) return 'Autre';
-    return raw;
-  }
+let paramsLoaded = false;
+let paramsModifie = false; // true uniquement quand l'user a changé un champ
 
-  if(id === 'ent-dev'){
-    if(v.includes('€') || v.includes('euro')) return '€ Euro';
-    if(v.includes('$') || v.includes('dollar')) return '$ Dollar';
-    if(v.includes('£') || v.includes('livre')) return '£ Livre sterling';
-    return raw;
-  }
-
-  if(id === 'ent-tva'){
-    if(v.includes('mens')) return 'TVA réelle mensuelle';
-    if(v.includes('trimes')) return 'TVA réelle trimestrielle';
-    if(v.includes('franchise')) return 'Franchise en base';
-    return raw;
-  }
-
-  if(id === 'ent-fisc'){
-    if(v.startsWith('is')) return 'IS — Impôt sur les sociétés';
-    if(v.startsWith('ir')) return 'IR — Impôt sur le revenu';
-    if(v.includes('micro')) return 'Micro-entreprise';
-    return raw;
-  }
-
-  return raw;
+let _saveTimer = null;
+function schedSave() {
+  if(!paramsLoaded) return;
+  paramsModifie = true; // L'user a modifié quelque chose
+  markUnsaved(); clearTimeout(_saveTimer); _saveTimer = setTimeout(saveParams, 1500);
 }
-const currentUserYearKey = () => UID ? `lp_annee_${UID}` : 'lp_annee';
-const isCAPanelVisible = () => { const p = $('pnl-ca'); return !!p && p.style.display !== 'none'; };
-function markUnsaved(){ const d=$('sdot'); if(d)d.classList.remove('saved'); const t=$('stxt'); if(t)t.textContent='Modification en attente...'; }
-function setSaved(){ const d=$('sdot'); if(d)d.classList.add('saved'); const t=$('stxt'); if(t)t.textContent='Enregistré'; }
-function schedSave(){ if(!paramsLoaded) return; paramsModifie=true; markUnsaved(); clearTimeout(_saveTimer); _saveTimer=setTimeout(saveParams,1500); }
-function refreshYearLabels(){ const a=$('sb-annee'); if(a)a.textContent=ANNEE; const p=$('params-annee-lbl'); if(p)p.textContent=ANNEE; const c=$('ca-annee-lbl'); if(c)c.textContent=ANNEE; }
-function showPanel(panelId, navId){ ['pnl-params','pnl-ca'].forEach(id=>{const e=$(id); if(e)e.style.display='none';}); ['nav-params','nav-ca'].forEach(id=>{const e=$(id); if(e)e.classList.remove('active');}); const p=$(panelId); if(p)p.style.display='block'; const n=$(navId); if(n)n.classList.add('active'); }
-function articleInputId(code, mois){ return `q_${String(code).replace(/[^a-zA-Z0-9_-]/g,'_')}_${mois}`; }
+function markUnsaved() { const d=$('sdot'); if(d) d.classList.remove('saved'); }
+function setSaved()    { const d=$('sdot'); if(d) d.classList.add('saved'); const t=$('stxt'); if(t) t.textContent='Enregistré'; }
 
-async function fetchInheritedRows(tableName, keyField){
-  if(!UID) return [];
-  try{
-    const {data,error} = await sbq(DB.from(tableName).select('*').eq('user_id',UID).lte('annee',ANNEE).order('annee',{ascending:false}));
-    if(error){ console.warn(`[${tableName}]`, error.message); return []; }
-    const seen = new Set();
-    const latest = [];
-    for(const row of (data||[])){
-      const key = String(row[keyField] ?? '');
-      if(!key || seen.has(key)) continue;
-      seen.add(key);
-      latest.push(row);
-    }
-    return latest;
-  }catch(e){ console.warn(`[${tableName} timeout]`, e.message); return []; }
-}
-
-async function loadParams(){
+// ════════════════════════════════════════════════════════
+// PARAMÈTRES ENTREPRISE
+// ════════════════════════════════════════════════════════
+async function loadParams() {
   if(!UID) return;
-  P = cloneDefaultParams();
-  try{
-    const {data,error} = await sbq(
-      DB.from('parametres')
-        .select('*')
-        .eq('user_id',UID)
-        .lte('annee',ANNEE)
-        .order('annee',{ascending:false})
+  try {
+    const {data, error} = await sbq(
+      DB.from('parametres').select('*').eq('user_id',UID).eq('annee',ANNEE).single()
     );
-
-    if(error){
-      console.warn('[params]', error.message);
-      return;
+    if(error && error.code !== 'PGRST116') { console.warn('[params]', error.message); return; }
+    if(data) {
+      P.nomEnt    = data.nom_entreprise || '';
+      P.secteur   = data.secteur        || '';
+      P.regimeTVA = data.regime_tva     || 'TVA réelle mensuelle';
+      P.regimeFisc= data.regime_fiscal  || 'IS — Impôt sur les sociétés';
+      P.devise    = data.devise         || '€ Euro';
+      P.cle       = data.cle_repartition|| 'qte';
+      P.moisDeb   = data.mois_debut     || 1;
+      P.moisFin   = data.mois_fin       || 12;
+      P.tresoInit = data.treso_init     || 0;
+      P.obj       = data.objectif_ca    || 0;
     }
-
-    const rows = data || [];
-    const current = rows.find(r => intNum(r.annee) === ANNEE);
-
-    if(current){
-      P.nomEnt     = current.nom_entreprise  || '';
-      P.secteur    = current.secteur         || '';
-      P.regimeTVA  = current.regime_tva      || DEFAULT_PARAMS.regimeTVA;
-      P.regimeFisc = current.regime_fiscal   || DEFAULT_PARAMS.regimeFisc;
-      P.devise     = current.devise          || DEFAULT_PARAMS.devise;
-      P.cle        = current.cle_repartition || DEFAULT_PARAMS.cle;
-      P.obj        = num(current.objectif_ca, 0);
-      P.tresoInit  = num(current.treso_init, 0);
-      P.moisDeb    = intNum(current.mois_debut, 1);
-      P.moisFin    = intNum(current.mois_fin, 12);
-    } else {
-      const prev = rows.find(r => intNum(r.annee) < ANNEE);
-
-      if(prev){
-        P.nomEnt  = prev.nom_entreprise || '';
-        P.secteur = prev.secteur || '';
-        P.devise  = prev.devise || DEFAULT_PARAMS.devise;
-      }
-
-      P.regimeTVA  = DEFAULT_PARAMS.regimeTVA;
-      P.regimeFisc = DEFAULT_PARAMS.regimeFisc;
-      P.cle        = DEFAULT_PARAMS.cle;
-      P.obj        = 0;
-      P.tresoInit  = 0;
-      P.moisDeb    = 1;
-      P.moisFin    = 12;
-    }
-
+    // Pas de ligne pour cette année = champs vides, l'user saisit
     paramsLoaded = true;
-    paramsModifie = false;
     renderEntreprise();
-  }catch(e){
-    console.warn('[params timeout]', e.message);
-  }
+  } catch(e) { console.warn('[params timeout]', e.message); }
 }
 
-async function saveParams(){
+async function saveParams() {
   if(!UID || !paramsLoaded || !paramsModifie) return;
-  try{
-    const {error} = await DB.from('parametres').upsert({ user_id:UID, annee:ANNEE, nom_entreprise:P.nomEnt, secteur:P.secteur, regime_tva:P.regimeTVA, regime_fiscal:P.regimeFisc, devise:P.devise, cle_repartition:P.cle, objectif_ca:P.obj, treso_init:P.tresoInit, mois_debut:P.moisDeb, mois_fin:P.moisFin }, {onConflict:'user_id,annee'});
-    if(error) console.warn('[save params]', error.message); else { paramsModifie=false; setSaved(); }
-  }catch(e){ console.warn('[save params timeout]', e.message); }
+  try {
+    const {error} = await DB.from('parametres').upsert({
+      user_id:UID, annee:ANNEE,
+      nom_entreprise:P.nomEnt,    secteur:P.secteur,
+      regime_tva:P.regimeTVA,     regime_fiscal:P.regimeFisc,
+      devise:P.devise,            cle_repartition:P.cle,
+      objectif_ca:P.obj,          treso_init:P.tresoInit,
+      mois_debut:P.moisDeb,       mois_fin:P.moisFin,
+    }, {onConflict:'user_id,annee'});
+    if(error) console.warn('[save params]', error.message);
+    else { paramsModifie = false; setSaved(); }
+  } catch(e) { console.warn('[save params timeout]', e.message); }
 }
 
-function renderEntreprise(){
-  const setInput = (id, value) => {
-    const el = $(id);
-    if(!el) return;
-    el.value = value ?? '';
-  };
-
-  setInput('ent-nom', P.nomEnt);
-  setInput('ent-obj', P.obj);
-
-  setSelectExactOrClosest('ent-sect', P.secteur, 0);
-  setSelectExactOrClosest('ent-tva', P.regimeTVA, 0);
-  setSelectExactOrClosest('ent-fisc', P.regimeFisc, 0);
-  setSelectExactOrClosest('ent-dev', P.devise, 0);
-
+function renderEntreprise() {
+  const set = (id, v) => { const e=$(id); if(e) e.value=v; };
+  set('ent-nom',  P.nomEnt);
+  set('ent-sect', P.secteur);
+  set('ent-obj',  P.obj);
+  set('ent-tva',  P.regimeTVA);
+  set('ent-fisc', P.regimeFisc);
+  set('ent-dev',  P.devise);
   document.querySelectorAll('input[name="cle"]').forEach(r => r.checked = r.value === P.cle);
-  refreshYearLabels();
+  const lbl = $('params-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+  const dbn = $('db-name'); if(dbn) dbn.textContent = P.nomEnt || 'Mon Entreprise';
 }
 
-function simplifySelectText(v){
-  return String(v ?? '')
-    .toLowerCase()
-    .trim()
-    .split('—').join('-')
-    .split('–').join('-')
-    .split('  ').join(' ');
-}
-
-function setSelectExactOrClosest(id, value, fallbackIndex = 0){
-  const el = $(id);
-  if(!el) return;
-
-  const normalized = simplifySelectText(normalizeSelectValue(id, value));
-  const options = Array.from(el.options);
-
-  let found = options.find(opt =>
-    simplifySelectText(opt.value) === normalized ||
-    simplifySelectText(opt.textContent) === normalized
+function bindEntreprise() {
+  $('ent-nom').addEventListener('input',   e => { P.nomEnt    =e.target.value;              schedSave(); });
+  $('ent-sect').addEventListener('change', e => { P.secteur   =e.target.value;              schedSave(); });
+  $('ent-obj').addEventListener('input',   e => { P.obj       =parseFloat(e.target.value)||0;schedSave(); });
+  $('ent-tva').addEventListener('change',  e => { P.regimeTVA =e.target.value;              schedSave(); });
+  $('ent-fisc').addEventListener('change', e => { P.regimeFisc=e.target.value;              schedSave(); });
+  $('ent-dev').addEventListener('change',  e => { P.devise    =e.target.value;              schedSave(); });
+  document.querySelectorAll('input[name="cle"]').forEach(r =>
+    r.addEventListener('change', e => { P.cle=e.target.value; schedSave(); })
   );
-
-  if(!found){
-    found = options.find(opt => {
-      const ov = simplifySelectText(opt.value);
-      const ot = simplifySelectText(opt.textContent);
-      return ov.includes(normalized) || normalized.includes(ov) || ot.includes(normalized) || normalized.includes(ot);
-    });
-  }
-
-  el.selectedIndex = found ? options.indexOf(found) : fallbackIndex;
 }
 
-function bi
-  $('ent-nom').addEventListener('input',e=>{P.nomEnt=e.target.value; schedSave();});
-  $('ent-sect').addEventListener('change',e=>{P.secteur=e.target.value; schedSave();});
-  $('ent-obj').addEventListener('input',e=>{P.obj=num(e.target.value,0); schedSave();});
-  $('ent-tva').addEventListener('change',e=>{P.regimeTVA=e.target.value; schedSave();});
-  $('ent-fisc').addEventListener('change',e=>{P.regimeFisc=e.target.value; schedSave();});
-  $('ent-dev').addEventListener('change',e=>{P.devise=e.target.value; schedSave();});
-  document.querySelectorAll('input[name="cle"]').forEach(r=>r.addEventListener('change',e=>{P.cle=e.target.value; schedSave();}));
-}
-
-async function loadArticles(){
+// ════════════════════════════════════════════════════════
+// ARTICLES
+// ════════════════════════════════════════════════════════
+async function loadArticles() {
   if(!UID) return;
-  const rows = await fetchInheritedRows('articles','code');
-  articles = rows.filter(r=>r.actif !== false).map(r=>({ code:r.code, nom:r.nom||'', cat:r.categorie||'Divers', pv:num(r.prix_ht,0), cout:num(r.cout_achat,0), tva:num(r.tva,0.2), actif:r.actif !== false }));
-  renderArticles();
+  try {
+    const {data, error} = await sbq(DB.from('articles').select('*').eq('user_id',UID).order('annee',{ascending:true}));
+    if(error) { console.warn('[articles]', error.message); return; }
+    const byCode = {};
+    (data||[]).forEach(r => { if(r.annee <= ANNEE) byCode[r.code] = r; });
+    articles = Object.values(byCode).filter(r => r.actif !== false).map(r => ({
+      code:r.code, nom:r.nom, cat:r.categorie||'Divers',
+      pv:parseFloat(r.prix_ht)||0, cout:parseFloat(r.cout_achat)||0,
+      tva:parseFloat(r.tva)||0.2, actif:true,
+    }));
+    renderArticles();
+  } catch(e) { console.warn('[articles timeout]', e.message); }
 }
 
-function articleExists(code, ignoreIndex=-1){
-  const c = String(code||'').trim().toLowerCase();
-  return articles.some((a,i)=>i!==ignoreIndex && String(a.code||'').trim().toLowerCase()===c);
-}
-
-async function upsertArticle(a){
+async function upsertArticle(a) {
   if(!UID) return;
-  markUnsaved();
-  const {error} = await DB.from('articles').upsert({ user_id:UID, code:String(a.code||'').trim(), annee:ANNEE, nom:a.nom||'', categorie:a.cat||'Divers', prix_ht:num(a.pv,0), cout_achat:num(a.cout,0), tva:num(a.tva,0.2), actif:a.actif !== false }, {onConflict:'user_id,code,annee'});
+  const {error} = await DB.from('articles').upsert({
+    user_id:UID, code:a.code, annee:ANNEE,
+    nom:a.nom, categorie:a.cat, prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif,
+  }, {onConflict:'user_id,code,annee'});
   if(error) console.warn('[upsert article]', error.message); else setSaved();
 }
 
-async function addArt(){
-  const nom = $('pa-nom').value.trim();
-  if(!nom) return;
-  const code = ($('pa-code').value.trim() || 'ART'+String(articles.length+1).padStart(2,'0')).toUpperCase();
-  if(articleExists(code)){ alert('Ce code article existe déjà pour cette structure.'); return; }
-  const a = { code, nom, cat:$('pa-cat').value.trim()||'Divers', pv:num($('pa-pv').value,0), cout:num($('pa-cout').value,0), tva:num($('pa-tva').value,0.2), actif:true };
+function addArt() {
+  const nom  = $('pa-nom').value.trim();  if(!nom) return;
+  const code = $('pa-code').value.trim() || 'ART'+String(articles.length+1).padStart(2,'0');
+  const a = {
+    code, nom, cat:$('pa-cat').value||'Divers',
+    pv:parseFloat($('pa-pv').value)||0, cout:parseFloat($('pa-cout').value)||0,
+    tva:parseFloat($('pa-tva').value)||0.2, actif:true,
+  };
   articles.push(a);
-  ['pa-code','pa-nom','pa-cat','pa-pv','pa-cout'].forEach(id=>{const el=$(id); if(el) el.value='';});
+  ['pa-code','pa-nom','pa-cat','pa-pv','pa-cout'].forEach(id => $(id).value='');
   $('p-art-add').classList.remove('open');
+  upsertArticle(a);
   renderArticles();
-  await upsertArticle(a);
-  if(isCAPanelVisible()) await loadCA();
 }
 
-async function delArt(i){
+async function delArt(i) {
   const a = articles[i]; if(!a) return;
   if(!confirm(`Supprimer "${a.nom}" à partir de ${ANNEE} ?`)) return;
-  articles.splice(i,1); renderArticles(); if(isCAPanelVisible()) await loadCA();
-  markUnsaved();
-  const {error} = await DB.from('articles').upsert({ user_id:UID, code:String(a.code||'').trim(), annee:ANNEE, nom:a.nom||'', categorie:a.cat||'Divers', prix_ht:num(a.pv,0), cout_achat:num(a.cout,0), tva:num(a.tva,0.2), actif:false }, {onConflict:'user_id,code,annee'});
-  if(error) console.warn('[del art]', error.message); else setSaved();
-}
-
-async function renameArticle(index, newCodeRaw){
-  const a = articles[index]; if(!a) return;
-  const oldCode = String(a.code||'').trim();
-  const newCode = String(newCodeRaw||'').trim().toUpperCase();
-  if(!newCode || newCode === oldCode){ renderArticles(); return; }
-  if(articleExists(newCode, index)){ alert('Ce code article existe déjà.'); renderArticles(); return; }
-  markUnsaved();
-
-  const currentQty = qty[oldCode] ? [...qty[oldCode]] : Array(12).fill(0);
-
-  // 1) Créer la nouvelle version active sur le nouveau code
-  const {error:newErr} = await DB.from('articles').upsert({
-    user_id:UID, code:newCode, annee:ANNEE,
-    nom:a.nom||'', categorie:a.cat||'Divers', prix_ht:num(a.pv,0), cout_achat:num(a.cout,0), tva:num(a.tva,0.2), actif:a.actif !== false
-  }, {onConflict:'user_id,code,annee'});
-  if(newErr){ console.warn('[rename article new]', newErr.message); renderArticles(); return; }
-
-  // 2) Désactiver l'ancien code à partir de l'année courante
-  const {error:oldErr} = await DB.from('articles').upsert({
-    user_id:UID, code:oldCode, annee:ANNEE,
-    nom:a.nom||'', categorie:a.cat||'Divers', prix_ht:num(a.pv,0), cout_achat:num(a.cout,0), tva:num(a.tva,0.2), actif:false
-  }, {onConflict:'user_id,code,annee'});
-  if(oldErr){ console.warn('[rename article old]', oldErr.message); }
-
-  // 3) Migrer les saisies CA de l'année active
-  for(let m=0;m<12;m++){
-    const val = num(currentQty[m],0);
-    if(val>0){
-      const {error:qErr} = await DB.from('saisies_ca').upsert({ user_id:UID, article_code:newCode, annee:ANNEE, mois:m+1, quantite:val }, {onConflict:'user_id,article_code,annee,mois'});
-      if(qErr) console.warn('[rename qty upsert]', qErr.message);
-    }
+  articles.splice(i,1);
+  if(UID) {
+    const {error} = await DB.from('articles').upsert({
+      user_id:UID, code:a.code, annee:ANNEE,
+      nom:a.nom, categorie:a.cat, prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:false,
+    }, {onConflict:'user_id,code,annee'});
+    if(error) console.warn('[del art]', error.message); else setSaved();
   }
-  const {error:delQtyErr} = await DB.from('saisies_ca').delete().eq('user_id',UID).eq('annee',ANNEE).eq('article_code',oldCode);
-  if(delQtyErr) console.warn('[rename qty delete]', delQtyErr.message);
-
-  articles[index].code = newCode;
-  qty[newCode] = currentQty;
-  delete qty[oldCode];
-  setSaved();
   renderArticles();
-  if(isCAPanelVisible()) await loadCA();
 }
 
-function renderArticles(){
-  const tb=$('art-tbody'); if(!tb) return;
-  if(!articles.length){ tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--t2)">Aucun article — cliquez sur + Ajouter</td></tr>'; return; }
-  const tvaOpts = sel => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']].map(([v,l])=>`<option value="${v}" ${Number(sel)===v?'selected':''}>${l}</option>`).join('');
-  tb.innerHTML = articles.map((a,i)=>{
-    const mg = a.pv>0 ? ((a.pv-a.cout)/a.pv)*100 : 0;
+function renderArticles() {
+  const tb = $('art-tbody'); if(!tb) return;
+  if(!articles.length) {
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--t2)">Aucun article — cliquez sur + Ajouter</td></tr>';
+    return;
+  }
+  const tvaOpts = sel => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
+    .map(([v,l]) => `<option value="${v}" ${sel==v?'selected':''}>${l}</option>`).join('');
+  tb.innerHTML = articles.map((a,i) => {
+    const mg = a.pv>0 ? (a.pv-a.cout)/a.pv*100 : 0;
     const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
     return `<tr>
-      <td><input class="tdinp" value="${esc(a.code)}" style="max-width:88px" title="Changer le code migrera aussi les saisies CA de l'année active" onblur="renameArticle(${i}, this.value)"></td>
-      <td><input class="tdinp" value="${esc(a.nom)}" onblur="articles[${i}].nom=this.value;upsertArticle(articles[${i}])"></td>
-      <td><input class="tdinp" value="${esc(a.cat)}" style="max-width:100px" onblur="articles[${i}].cat=this.value;upsertArticle(articles[${i}])"></td>
-      <td><input class="tdinp" type="number" value="${a.pv}" style="max-width:80px" onblur="articles[${i}].pv=parseFloat(this.value)||0;upsertArticle(articles[${i}]);renderArticles();if(isCAPanelVisible())loadCA()"></td>
-      <td><input class="tdinp" type="number" value="${a.cout}" style="max-width:80px" onblur="articles[${i}].cout=parseFloat(this.value)||0;upsertArticle(articles[${i}]);renderArticles();if(isCAPanelVisible())loadCA()"></td>
-      <td><select class="tdsel" style="max-width:78px" onchange="articles[${i}].tva=parseFloat(this.value);upsertArticle(articles[${i}])">${tvaOpts(a.tva)}</select></td>
+      <td><input class="tdinp" value="${a.code}" style="max-width:88px"
+        onblur="articles[${i}].code=this.value;upsertArticle(articles[${i}])"></td>
+      <td><input class="tdinp" value="${a.nom}"
+        onblur="articles[${i}].nom=this.value;upsertArticle(articles[${i}])"></td>
+      <td><input class="tdinp" value="${a.cat}" style="max-width:100px"
+        onblur="articles[${i}].cat=this.value;upsertArticle(articles[${i}])"></td>
+      <td><input class="tdinp" type="number" value="${a.pv}" style="max-width:80px"
+        onblur="articles[${i}].pv=parseFloat(this.value)||0;upsertArticle(articles[${i}]);renderArticles()"></td>
+      <td><input class="tdinp" type="number" value="${a.cout}" style="max-width:80px"
+        onblur="articles[${i}].cout=parseFloat(this.value)||0;upsertArticle(articles[${i}]);renderArticles()"></td>
+      <td><select class="tdsel" style="max-width:78px"
+        onchange="articles[${i}].tva=parseFloat(this.value);upsertArticle(articles[${i}])">${tvaOpts(a.tva)}</select></td>
       <td><span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span></td>
-      <td><select class="tdsel" style="max-width:70px" onchange="articles[${i}].actif=this.value==='true';upsertArticle(articles[${i}])"><option value="true" ${a.actif?'selected':''}>Oui</option><option value="false" ${!a.actif?'selected':''}>Non</option></select></td>
+      <td><select class="tdsel" style="max-width:70px"
+        onchange="articles[${i}].actif=this.value==='true';upsertArticle(articles[${i}])">
+        <option value="true" ${a.actif?'selected':''}>Oui</option>
+        <option value="false" ${!a.actif?'selected':''}>Non</option>
+      </select></td>
       <td><button class="delbtn" onclick="delArt(${i})">×</button></td>
     </tr>`;
   }).join('');
 }
 
-async function loadCharges(){
+// ════════════════════════════════════════════════════════
+// CHARGES
+// ════════════════════════════════════════════════════════
+async function loadCharges() {
   if(!UID) return;
-  const rows = await fetchInheritedRows('charges','code');
-  charges = rows.filter(r=>r.actif !== false).map(r=>({ code:String(r.code), nom:r.nom||'', cat:r.categorie||'Divers', tva:num(r.tva,0.2), type:r.type||'Variable', actif:r.actif !== false }));
-  renderCharges();
+  try {
+    const {data, error} = await sbq(DB.from('charges').select('*').eq('user_id',UID).order('annee',{ascending:true}));
+    if(error) { console.warn('[charges]', error.message); return; }
+    const byCode = {};
+    (data||[]).forEach(r => { if(r.annee <= ANNEE) byCode[String(r.code)] = r; });
+    charges = Object.values(byCode).filter(r => r.actif !== false).map(r => ({
+      code:r.code, nom:r.nom, cat:r.categorie||'Divers',
+      tva:parseFloat(r.tva)||0.2, type:r.type||'Variable', actif:true,
+    }));
+    renderCharges();
+  } catch(e) { console.warn('[charges timeout]', e.message); }
 }
 
-async function upsertCharge(c){
+async function upsertCharge(c) {
   if(!UID) return;
-  markUnsaved();
-  const {error} = await DB.from('charges').upsert({ user_id:UID, code:String(c.code), annee:ANNEE, nom:c.nom||'', categorie:c.cat||'Divers', tva:num(c.tva,0.2), type:c.type||'Variable', actif:c.actif !== false }, {onConflict:'user_id,code,annee'});
+  const {error} = await DB.from('charges').upsert({
+    user_id:UID, code:String(c.code), annee:ANNEE,
+    nom:c.nom, categorie:c.cat, tva:c.tva, type:c.type, actif:c.actif,
+  }, {onConflict:'user_id,code,annee'});
   if(error) console.warn('[upsert charge]', error.message); else setSaved();
 }
 
-async function addCh(){
+function addCh() {
   const nom = $('pc-nom').value.trim(); if(!nom) return;
-  const c = { code:String(Date.now()), nom, cat:$('pc-cat').value.trim()||'Divers', tva:num($('pc-tva').value,0.2), type:$('pc-type').value||'Variable', actif:true };
-  charges.push(c); ['pc-nom','pc-cat'].forEach(id=>{const el=$(id); if(el) el.value='';}); $('p-ch-add').classList.remove('open'); renderCharges(); await upsertCharge(c);
+  const c = {
+    code:String(Date.now()), nom, cat:$('pc-cat').value||'Divers',
+    tva:parseFloat($('pc-tva').value)||0.2, type:$('pc-type').value||'Variable', actif:true,
+  };
+  charges.push(c);
+  ['pc-nom','pc-cat'].forEach(id => $(id).value='');
+  $('p-ch-add').classList.remove('open');
+  upsertCharge(c);
+  renderCharges();
 }
 
-async function delCh(i){
+async function delCh(i) {
   const c = charges[i]; if(!c) return;
   if(!confirm(`Supprimer "${c.nom}" à partir de ${ANNEE} ?`)) return;
-  charges.splice(i,1); renderCharges(); markUnsaved();
-  const {error} = await DB.from('charges').upsert({ user_id:UID, code:String(c.code), annee:ANNEE, nom:c.nom||'', categorie:c.cat||'Divers', tva:num(c.tva,0.2), type:c.type||'Variable', actif:false }, {onConflict:'user_id,code,annee'});
-  if(error) console.warn('[del charge]', error.message); else setSaved();
+  charges.splice(i,1);
+  if(UID) {
+    const {error} = await DB.from('charges').upsert({
+      user_id:UID, code:String(c.code), annee:ANNEE,
+      nom:c.nom, categorie:c.cat, tva:c.tva, type:c.type, actif:false,
+    }, {onConflict:'user_id,code,annee'});
+    if(error) console.warn('[del charge]', error.message); else setSaved();
+  }
+  renderCharges();
 }
 
-function renderCharges(){
-  const tb=$('ch-tbody'); if(!tb) return;
-  if(!charges.length){ tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucune charge — cliquez sur + Ajouter</td></tr>'; $('rep-f').textContent='Fixe : 0'; $('rep-v').textContent='Variable : 0'; $('rep-bar').style.width='0%'; return; }
-  const tvaOpts = sel => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']].map(([v,l])=>`<option value="${v}" ${Number(sel)===v?'selected':''}>${l}</option>`).join('');
-  tb.innerHTML = charges.map((c,i)=>`<tr>
-    <td style="color:var(--t3);font-family:var(--fm);font-size:11px">${esc(String(c.code).slice(-6))}</td>
-    <td><input class="tdinp" value="${esc(c.nom)}" onblur="charges[${i}].nom=this.value;upsertCharge(charges[${i}])"></td>
-    <td><input class="tdinp" value="${esc(c.cat)}" style="max-width:110px" onblur="charges[${i}].cat=this.value;upsertCharge(charges[${i}])"></td>
-    <td><select class="tdsel" style="max-width:78px" onchange="charges[${i}].tva=parseFloat(this.value);upsertCharge(charges[${i}])">${tvaOpts(c.tva)}</select></td>
-    <td><select class="tdsel" style="max-width:100px" onchange="charges[${i}].type=this.value;upsertCharge(charges[${i}]);renderCharges()"><option value="Fixe" ${c.type==='Fixe'?'selected':''}>Fixe</option><option value="Variable" ${c.type==='Variable'?'selected':''}>Variable</option></select></td>
-    <td><select class="tdsel" style="max-width:70px" onchange="charges[${i}].actif=this.value==='true';upsertCharge(charges[${i}])"><option value="true" ${c.actif?'selected':''}>Oui</option><option value="false" ${!c.actif?'selected':''}>Non</option></select></td>
+function renderCharges() {
+  const tb = $('ch-tbody'); if(!tb) return;
+  if(!charges.length) {
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucune charge — cliquez sur + Ajouter</td></tr>';
+    $('rep-f').textContent='Fixe : 0'; $('rep-v').textContent='Variable : 0'; $('rep-bar').style.width='0%';
+    return;
+  }
+  const tvaOpts = sel => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
+    .map(([v,l]) => `<option value="${v}" ${sel==v?'selected':''}>${l}</option>`).join('');
+  tb.innerHTML = charges.map((c,i) => `<tr>
+    <td style="color:var(--t3);font-family:var(--fm);font-size:11px">${String(c.code).slice(-6)}</td>
+    <td><input class="tdinp" value="${c.nom}"
+      onblur="charges[${i}].nom=this.value;upsertCharge(charges[${i}])"></td>
+    <td><input class="tdinp" value="${c.cat}" style="max-width:110px"
+      onblur="charges[${i}].cat=this.value;upsertCharge(charges[${i}])"></td>
+    <td><select class="tdsel" style="max-width:78px"
+      onchange="charges[${i}].tva=parseFloat(this.value);upsertCharge(charges[${i}])">${tvaOpts(c.tva)}</select></td>
+    <td><select class="tdsel" style="max-width:100px"
+      onchange="charges[${i}].type=this.value;upsertCharge(charges[${i}]);renderCharges()">
+      <option value="Fixe" ${c.type==='Fixe'?'selected':''}>Fixe</option>
+      <option value="Variable" ${c.type==='Variable'?'selected':''}>Variable</option>
+    </select></td>
+    <td><select class="tdsel" style="max-width:70px"
+      onchange="charges[${i}].actif=this.value==='true';upsertCharge(charges[${i}])">
+      <option value="true" ${c.actif?'selected':''}>Oui</option>
+      <option value="false" ${!c.actif?'selected':''}>Non</option>
+    </select></td>
     <td><button class="delbtn" onclick="delCh(${i})">×</button></td>
   </tr>`).join('');
-  const f = charges.filter(c=>c.type==='Fixe').length; $('rep-f').textContent=`Fixe : ${f}`; $('rep-v').textContent=`Variable : ${charges.length-f}`; $('rep-bar').style.width=`${charges.length ? (f/charges.length)*100 : 0}%`;
+  const f = charges.filter(c=>c.type==='Fixe').length;
+  $('rep-f').textContent=`Fixe : ${f}`;
+  $('rep-v').textContent=`Variable : ${charges.length-f}`;
+  $('rep-bar').style.width=`${charges.length?f/charges.length*100:0}%`;
 }
 
-async function loadCA(){
+// ════════════════════════════════════════════════════════
+// CHIFFRE D'AFFAIRES
+// ════════════════════════════════════════════════════════
+const MOIS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+let qty = {}; // {code: [12 valeurs]}
+
+async function loadCA() {
   if(!UID) return;
-  if(!articles.length) await loadArticles();
-  qty = {}; articles.forEach(a=>{ qty[a.code]=Array(12).fill(0); });
-  try{
-    const {data,error} = await sbq(DB.from('saisies_ca').select('article_code,mois,quantite').eq('user_id',UID).eq('annee',ANNEE));
-    if(error) console.warn('[ca]', error.message);
-    else (data||[]).forEach(r=>{ if(qty[r.article_code] !== undefined) qty[r.article_code][r.mois-1] = num(r.quantite,0); });
-  }catch(e){ console.warn('[ca timeout]', e.message); }
+
+  // Si articles est vide (timeout au démarrage), réessayer loadArticles d'abord
+  if(!articles.length) {
+    await loadArticles();
+  }
+
+  // Initialiser qty avec 0 pour chaque article
+  qty = {};
+  articles.forEach(a => { qty[a.code] = Array(12).fill(0); });
+
+  try {
+    const {data, error} = await sbq(
+      DB.from('saisies_ca').select('article_code,mois,quantite')
+        .eq('user_id', UID).eq('annee', ANNEE)
+    );
+    if(error) { console.warn('[ca]', error.message); }
+    else {
+      (data||[]).forEach(r => {
+        if(qty[r.article_code] !== undefined) qty[r.article_code][r.mois-1] = r.quantite;
+      });
+    }
+  } catch(e) { console.warn('[ca timeout]', e.message); }
   renderCA();
 }
 
-async function saveQty(code, mois, val){
-  if(!UID || !qty[code]) return;
-  val = num(val,0); qty[code][mois]=val; updateCAKpis(); markUnsaved();
-  if(val===0){
-    const {error} = await DB.from('saisies_ca').delete().eq('user_id',UID).eq('annee',ANNEE).eq('article_code',code).eq('mois',mois+1);
-    if(error) console.warn('[delete qty]', error.message);
-  }else{
-    const {error} = await DB.from('saisies_ca').upsert({ user_id:UID, article_code:code, annee:ANNEE, mois:mois+1, quantite:val }, {onConflict:'user_id,article_code,annee,mois'});
-    if(error) console.warn('[save qty]', error.message);
+async function saveQty(code, mois, val) {
+  if(!UID) return;
+  val = parseFloat(val) || 0;
+  qty[code][mois] = val;
+  updateCAKpis();
+  if(val === 0) {
+    await DB.from('saisies_ca').delete()
+      .eq('user_id',UID).eq('annee',ANNEE).eq('article_code',code).eq('mois',mois+1);
+  } else {
+    await DB.from('saisies_ca').upsert({
+      user_id:UID, article_code:code, annee:ANNEE, mois:mois+1, quantite:val,
+    }, {onConflict:'user_id,article_code,annee,mois'});
   }
   setSaved();
 }
 
-function renderCA(){
-  const lbl=$('ca-annee-lbl'); if(lbl) lbl.textContent=ANNEE;
-  if(!articles.length){ $('ca-empty').style.display='block'; $('ca-tbl-wrap').style.display='none'; updateCAKpis(); return; }
-  $('ca-empty').style.display='none'; $('ca-tbl-wrap').style.display='';
-  $('ca-thead').innerHTML = `<tr><th style="text-align:left;min-width:80px">Code</th><th style="text-align:left;min-width:130px">Article</th><th>PV HT</th>${MOIS.map(m=>`<th>${m}</th>`).join('')}<th>Total qté</th><th>CA HT</th></tr>`;
-  $('ca-tbody').innerHTML = articles.map(a=>{
+function renderCA() {
+  const lbl = $('ca-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+
+  if(!articles.length) {
+    $('ca-empty').style.display = 'block';
+    $('ca-tbl-wrap').style.display = 'none';
+    updateCAKpis();
+    return;
+  }
+  $('ca-empty').style.display = 'none';
+  $('ca-tbl-wrap').style.display = '';
+
+  // Header
+  $('ca-thead').innerHTML = `<tr>
+    <th style="text-align:left;min-width:80px">Code</th>
+    <th style="text-align:left;min-width:130px">Article</th>
+    <th>PV HT</th>
+    ${MOIS.map(m => `<th>${m}</th>`).join('')}
+    <th>Total qté</th>
+    <th>CA HT</th>
+  </tr>`;
+
+  // Lignes
+  $('ca-tbody').innerHTML = articles.map(a => {
     const q = qty[a.code] || Array(12).fill(0);
-    const totQty = q.reduce((s,v)=>s+v,0);
-    const totCA = totQty * a.pv;
-    return `<tr><td style="color:var(--t3);font-family:var(--fm);font-size:11px">${esc(a.code)}</td><td style="font-weight:500">${esc(a.nom)}</td><td style="font-family:var(--fm);color:var(--t2)">${num(a.pv).toFixed(2)} €</td>${q.map((v,m)=>`<td><input id="${articleInputId(a.code,m)}" class="sinp" type="number" min="0" value="${v||''}" placeholder="0" onchange="saveQty(${JSON.stringify(a.code)},${m},this.value)"></td>`).join('')}<td class="stot">${totQty}</td><td class="stot">${totCA.toFixed(0)} €</td></tr>`;
+    const totQty = q.reduce((s,v) => s+v, 0);
+    const totCA  = totQty * a.pv;
+    return `<tr>
+      <td style="color:var(--t3);font-family:var(--fm);font-size:11px">${a.code}</td>
+      <td style="font-weight:500">${a.nom}</td>
+      <td style="font-family:var(--fm);color:var(--t2)">${a.pv.toFixed(2)} €</td>
+      ${q.map((v,m) => `<td>
+        <input class="sinp" type="number" min="0" value="${v||''}" placeholder="0"
+          onchange="saveQty('${a.code}',${m},this.value)">
+      </td>`).join('')}
+      <td class="stot">${totQty}</td>
+      <td class="stot">${totCA.toFixed(0)} €</td>
+    </tr>`;
   }).join('');
-  const totParMois = MOIS.map((_,m)=>articles.reduce((s,a)=>s+num((qty[a.code]||[])[m],0),0));
-  const totGlobal = totParMois.reduce((s,v)=>s+v,0);
-  const caGlobal = articles.reduce((s,a)=>{ const t=(qty[a.code]||[]).reduce((x,v)=>x+num(v,0),0); return s + t*a.pv; },0);
-  $('ca-tbody').innerHTML += `<tr class="totrow"><td colspan="3" style="text-align:left;font-weight:700">TOTAL</td>${totParMois.map(v=>`<td class="stot">${v||''}</td>`).join('')}<td class="stot">${totGlobal}</td><td class="stot">${caGlobal.toFixed(0)} €</td></tr>`;
+
+  // Ligne totaux
+  const totParMois = MOIS.map((_,m) =>
+    articles.reduce((s,a) => s + (qty[a.code]||[])[m] || 0, 0)
+  );
+  const totGlobal = totParMois.reduce((s,v) => s+v, 0);
+  const caGlobal  = articles.reduce((s,a) => {
+    const t = (qty[a.code]||[]).reduce((x,v)=>x+v,0);
+    return s + t * a.pv;
+  }, 0);
+
+  $('ca-tbody').innerHTML += `<tr class="totrow">
+    <td colspan="3" style="text-align:left;font-weight:700">TOTAL</td>
+    ${totParMois.map(v => `<td class="stot">${v||''}</td>`).join('')}
+    <td class="stot">${totGlobal}</td>
+    <td class="stot">${caGlobal.toFixed(0)} €</td>
+  </tr>`;
+
   updateCAKpis();
 }
 
-function updateCAKpis(){
-  let caHT=0, marge=0; articles.forEach(a=>{ const totQty=(qty[a.code]||[]).reduce((s,v)=>s+num(v,0),0); caHT += totQty*a.pv; marge += totQty*(a.pv-a.cout); });
-  const txMarge = caHT>0 ? marge/caHT*100 : 0;
-  const e1=$('ca-kpi-caht'); if(e1) e1.textContent=fmtEuro(caHT);
-  const e2=$('ca-kpi-marge'); if(e2) e2.textContent=fmtEuro(marge);
-  const e3=$('ca-kpi-txmarge'); if(e3) e3.textContent=txMarge.toFixed(1)+' %';
+function updateCAKpis() {
+  let caHT = 0, marge = 0;
+  articles.forEach(a => {
+    const totQty = (qty[a.code]||[]).reduce((s,v)=>s+v,0);
+    caHT  += totQty * a.pv;
+    marge += totQty * (a.pv - a.cout);
+  });
+  const txMarge = caHT > 0 ? marge/caHT*100 : 0;
+  const fmt = v => v.toLocaleString('fr-FR', {maximumFractionDigits:0}) + ' €';
+  const e1=$('ca-kpi-caht');   if(e1) e1.textContent = fmt(caHT);
+  const e2=$('ca-kpi-marge');  if(e2) e2.textContent = fmt(marge);
+  const e3=$('ca-kpi-txmarge');if(e3) e3.textContent = txMarge.toFixed(1) + ' %';
 }
 
-function renderAnneesNav(){
-  refreshYearLabels();
-  const btns=$('sb-annees'); if(!btns) return;
-  const years=[ANNEE-1,ANNEE,ANNEE+1].filter(y=>y>=2020&&y<=2040);
-  btns.innerHTML = years.map(y=>`<button style="flex:1;padding:3px 6px;border-radius:5px;font-size:11px;font-weight:${y===ANNEE?700:400};cursor:pointer;background:${y===ANNEE?'var(--ac)':'var(--bgc)'};color:${y===ANNEE?'#fff':'var(--t3)'};border:1px solid ${y===ANNEE?'var(--ac)':'var(--bd)'}" data-year="${y}">${y}</button>`).join('');
-  btns.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>changeAnnee(b.dataset.year)));
+// ════════════════════════════════════════════════════════
+// NAVIGATION ANNÉES
+// ════════════════════════════════════════════════════════
+async function changeAnnee(n) {
+  n = parseInt(n);
+  if(isNaN(n) || n===ANNEE) return;
+  clearTimeout(_saveTimer);
+  await saveParams();
+  ANNEE = n;
+  paramsLoaded  = false;
+  paramsModifie = false;
+  localStorage.setItem('lp_annee_'+UID, ANNEE);
+  P = { nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
+         regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
+         cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
+  renderAnneesNav();
+  await Promise.all([loadParams(), loadArticles(), loadCharges()]);
+  await loadCA();
 }
 
-async function changeAnnee(n){
-  n=intNum(n,ANNEE); if(n===ANNEE) return;
-  clearTimeout(_saveTimer); await saveParams();
-  ANNEE=n; localStorage.setItem(currentUserYearKey(),ANNEE); paramsLoaded=false; paramsModifie=false; P=cloneDefaultParams(); articles=[]; charges=[]; qty={}; renderAnneesNav(); markUnsaved();
-  await Promise.all([loadParams(),loadArticles(),loadCharges()]); await loadCA(); setSaved();
-}
-
-function setAuthMode(m){ authMode=m; $('tab-login').classList.toggle('active',m==='login'); $('tab-reg').classList.toggle('active',m==='register'); $('auth-btn').textContent=m==='login'?'Se connecter':'Créer mon compte'; $('auth-forgot').style.display=m==='login'?'':'none'; $('auth-err').style.display='none'; $('auth-ok').style.display='none'; }
-function showErr(msg){ $('auth-err').textContent=msg; $('auth-err').style.display='block'; $('auth-ok').style.display='none'; }
-function showOk(msg){ $('auth-ok').textContent=msg; $('auth-ok').style.display='block'; $('auth-err').style.display='none'; }
-
-async function doAuth(){
-  const email=$('auth-email').value.trim(); const pwd=$('auth-pwd').value; if(!email||!pwd){ showErr('Remplissez tous les champs.'); return; }
-  const btn=$('auth-btn'); btn.textContent='Chargement…'; btn.disabled=true;
-  try{
-    if(authMode==='login'){ const {error}=await DB.auth.signInWithPassword({email,password:pwd}); if(error) throw error; }
-    else { const {error}=await DB.auth.signUp({email,password:pwd}); if(error) throw error; showOk('Compte créé ! Vérifiez votre email puis connectez-vous.'); setAuthMode('login'); }
-  }catch(e){ const map={'Invalid login credentials':'Email ou mot de passe incorrect.','User already registered':'Compte déjà existant.'}; showErr(map[e.message]||e.message||'Erreur inconnue.'); }
-  btn.disabled=false; btn.textContent=authMode==='login'?'Se connecter':'Créer mon compte';
-}
-
-async function doForgot(){ const email=$('auth-email').value.trim(); if(!email){ showErr('Entrez votre email.'); return; } const {error}=await DB.auth.resetPasswordForEmail(email); if(error) showErr(error.message); else showOk('Email envoyé.'); }
-async function doLogout(){ clearTimeout(_saveTimer); UID=null; paramsLoaded=false; paramsModifie=false; P=cloneDefaultParams(); articles=[]; charges=[]; qty={}; $('auth').style.display='flex'; $('app').style.display='none'; await DB.auth.signOut(); }
-
-async function startApp(user){
-  UID=null; $('auth').style.display='none'; $('app').style.display='flex'; UID=user.id;
-  const saved=intNum(localStorage.getItem(currentUserYearKey()),ANNEE); if(saved>=2020&&saved<=2040) ANNEE=saved;
-  const av=$('sb-av'); if(av) av.textContent=(user.email?.[0]||'?').toUpperCase(); const em=$('sb-email'); if(em) em.textContent=user.email||''; renderAnneesNav();
-  const stxt=$('stxt'); if(stxt) stxt.textContent='Connexion…'; let pret=false;
-  for(let i=0;i<6;i++){
-    try{ const {error}=await Promise.race([DB.from('parametres').select('annee').eq('user_id',UID).limit(1), new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),5000))]); if(!error){ pret=true; break; } }
-    catch(e){ if(stxt) stxt.textContent=`Réveil du serveur… (${i+1}/6)`; }
+function renderAnneesNav() {
+  const a = $('sb-annee'); if(a) a.textContent = ANNEE;
+  const lbl = $('params-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+  const btns = $('sb-annees');
+  if(btns) {
+    const years = [ANNEE-1, ANNEE, ANNEE+1].filter(y => y>=2020&&y<=2040);
+    btns.innerHTML = years.map(y => `<button
+      style="flex:1;padding:3px 6px;border-radius:5px;font-size:11px;
+      font-weight:${y===ANNEE?700:400};cursor:pointer;
+      background:${y===ANNEE?'var(--ac)':'var(--bgc)'};
+      color:${y===ANNEE?'#fff':'var(--t3)'};
+      border:1px solid ${y===ANNEE?'var(--ac)':'var(--bd)'}"
+      data-year="${y}">${y}</button>`).join('');
+    btns.querySelectorAll('button').forEach(b =>
+      b.addEventListener('click', () => changeAnnee(b.dataset.year))
+    );
   }
-  if(!pret){ if(stxt) stxt.textContent='Serveur indisponible'; return; }
-  await Promise.all([loadParams(),loadArticles(),loadCharges()]); await loadCA(); showPanel('pnl-params','nav-params'); setSaved();
 }
 
-function applyTheme(){ const t=localStorage.getItem('lp-theme')||'light'; document.documentElement.setAttribute('data-theme',t); const lbl=$('theme-lbl'); if(lbl) lbl.textContent=t==='light'?'🌙 Thème sombre':'☀️ Thème clair'; }
-function toggleTheme(){ const cur=document.documentElement.getAttribute('data-theme'); const next=cur==='light'?'dark':'light'; document.documentElement.setAttribute('data-theme',next); localStorage.setItem('lp-theme',next); const lbl=$('theme-lbl'); if(lbl) lbl.textContent=next==='light'?'🌙 Thème sombre':'☀️ Thème clair'; }
-function toggleSidebar(){ const sb=document.querySelector('.sb'); if(!sb) return; sb.classList.toggle('col'); localStorage.setItem('lp-sb-col', sb.classList.contains('col')); }
+// ════════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════════
+let authMode = 'login';
 
-document.addEventListener('DOMContentLoaded',()=>{
-  applyTheme(); const sb=document.querySelector('.sb'); if(localStorage.getItem('lp-sb-col')==='true' && sb) sb.classList.add('col');
-  $('tab-login').addEventListener('click',()=>setAuthMode('login')); $('tab-reg').addEventListener('click',()=>setAuthMode('register')); $('auth-btn').addEventListener('click',doAuth); $('auth-forgot').addEventListener('click',doForgot);
-  $('auth-email').addEventListener('keydown',e=>{ if(e.key==='Enter') doAuth(); }); $('auth-pwd').addEventListener('keydown',e=>{ if(e.key==='Enter') doAuth(); });
-  $('btn-logout').addEventListener('click',doLogout); $('btn-toggle-sb').addEventListener('click',toggleSidebar); $('btn-theme').addEventListener('click',toggleTheme); $('btn-year-prev').addEventListener('click',()=>changeAnnee(ANNEE-1)); $('btn-year-next').addEventListener('click',()=>changeAnnee(ANNEE+1));
-  $('nav-params').addEventListener('click',()=>showPanel('pnl-params','nav-params')); $('nav-ca').addEventListener('click',async()=>{ showPanel('pnl-ca','nav-ca'); await loadCA(); });
-  [['tab-articles','p-articles'],['tab-charges','p-charges'],['tab-entreprise','p-entreprise']].forEach(([tid,pid])=>$(tid).addEventListener('click',()=>{ document.querySelectorAll('.tab-pnl').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active')); $(pid).classList.add('active'); $(tid).classList.add('active'); }));
-  $('btn-add-art').addEventListener('click',()=>$('p-art-add').classList.toggle('open')); $('btn-add-art-ok').addEventListener('click',addArt); $('btn-add-art-cancel').addEventListener('click',()=>$('p-art-add').classList.remove('open'));
-  $('btn-add-ch').addEventListener('click',()=>$('p-ch-add').classList.toggle('open')); $('btn-add-ch-ok').addEventListener('click',addCh); $('btn-add-ch-cancel').addEventListener('click',()=>$('p-ch-add').classList.remove('open'));
+function setAuthMode(m) {
+  authMode = m;
+  $('tab-login').classList.toggle('active', m==='login');
+  $('tab-reg').classList.toggle('active',   m==='register');
+  $('auth-btn').textContent = m==='login' ? 'Se connecter' : 'Créer mon compte';
+  $('auth-forgot').style.display = m==='login' ? '' : 'none';
+  $('auth-err').style.display = 'none';
+  $('auth-ok').style.display  = 'none';
+}
+
+async function doAuth() {
+  const email = $('auth-email').value.trim();
+  const pwd   = $('auth-pwd').value;
+  if(!email||!pwd) { showErr('Remplissez tous les champs.'); return; }
+  const btn = $('auth-btn'); btn.textContent='Chargement…'; btn.disabled=true;
+  try {
+    if(authMode==='login') {
+      const {error} = await DB.auth.signInWithPassword({email, password:pwd});
+      if(error) throw error;
+    } else {
+      const {error} = await DB.auth.signUp({email, password:pwd});
+      if(error) throw error;
+      showOk('Compte créé ! Vérifiez votre email puis connectez-vous.');
+      setAuthMode('login');
+    }
+  } catch(e) {
+    const m = {'Invalid login credentials':'Email ou mot de passe incorrect.','User already registered':'Compte déjà existant.'};
+    showErr(m[e.message]||e.message||'Erreur inconnue.');
+  }
+  btn.disabled=false;
+  btn.textContent = authMode==='login'?'Se connecter':'Créer mon compte';
+}
+
+async function doForgot() {
+  const email = $('auth-email').value.trim();
+  if(!email) { showErr('Entrez votre email.'); return; }
+  const {error} = await DB.auth.resetPasswordForEmail(email);
+  if(error) showErr(error.message); else showOk('Email envoyé.');
+}
+
+function showErr(msg) { $('auth-err').textContent=msg; $('auth-err').style.display='block'; $('auth-ok').style.display='none'; }
+function showOk(msg)  { $('auth-ok').textContent=msg;  $('auth-ok').style.display='block';  $('auth-err').style.display='none'; }
+
+async function doLogout() {
+  clearTimeout(_saveTimer);
+  UID = null;
+  $('auth').style.display='flex'; $('app').style.display='none';
+  await DB.auth.signOut();
+}
+
+// ════════════════════════════════════════════════════════
+// APP START
+// ════════════════════════════════════════════════════════
+async function startApp(user) {
+  UID = null;
+  $('auth').style.display='none'; $('app').style.display='flex';
+  const saved = parseInt(localStorage.getItem('lp_annee_'+user.id));
+  if(saved>=2020&&saved<=2040) ANNEE=saved;
+  UID = user.id;
+  const av=$('sb-av'); if(av) av.textContent=user.email[0].toUpperCase();
+  const em=$('sb-email'); if(em) em.textContent=user.email;
+  renderAnneesNav();
+
+  // Ping Supabase — attend le réveil du projet (plan gratuit = jusqu'à 20s)
+  const stxt = $('stxt');
+  if(stxt) stxt.textContent = 'Connexion…';
+  let pret = false;
+  for(let i=0; i<6; i++) {
+    try {
+      const {error} = await Promise.race([
+        DB.from('parametres').select('annee').eq('user_id',UID).limit(1),
+        new Promise((_,r) => setTimeout(()=>r(new Error('timeout')),5000))
+      ]);
+      if(!error) { pret=true; break; }
+    } catch(e) {
+      if(stxt) stxt.textContent = `Réveil du serveur… (${i+1}/6)`;
+    }
+  }
+  if(!pret) { if(stxt) stxt.textContent = 'Serveur indisponible'; return; }
+
+  await loadArticles();
+  await loadCharges();
+  await loadParams();
+  await loadCA();
+  setSaved();
+}
+
+// ════════════════════════════════════════════════════════
+// THEME & SIDEBAR
+// ════════════════════════════════════════════════════════
+function applyTheme() {
+  const t = localStorage.getItem('lp-theme')||'light';
+  document.documentElement.setAttribute('data-theme',t);
+  const lbl=$('theme-lbl'); if(lbl) lbl.textContent=t==='light'?'🌙 Thème sombre':'☀️ Thème clair';
+}
+function toggleTheme() {
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='light'?'dark':'light';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('lp-theme',next);
+  const lbl=$('theme-lbl'); if(lbl) lbl.textContent=next==='light'?'🌙 Thème sombre':'☀️ Thème clair';
+}
+function toggleSidebar() {
+  document.querySelector('.sb').classList.toggle('col');
+  localStorage.setItem('lp-sb-col', document.querySelector('.sb').classList.contains('col'));
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme();
+  if(localStorage.getItem('lp-sb-col')==='true') document.querySelector('.sb').classList.add('col');
+
+  // Auth
+  $('tab-login').addEventListener('click',  () => setAuthMode('login'));
+  $('tab-reg').addEventListener('click',    () => setAuthMode('register'));
+  $('auth-btn').addEventListener('click',   doAuth);
+  $('auth-forgot').addEventListener('click',doForgot);
+  $('auth-email').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
+  $('auth-pwd').addEventListener('keydown',   e => { if(e.key==='Enter') doAuth(); });
+
+  // Sidebar
+  $('btn-logout').addEventListener('click',    doLogout);
+  $('btn-toggle-sb').addEventListener('click', toggleSidebar);
+  $('btn-theme').addEventListener('click',     toggleTheme);
+  $('btn-year-prev').addEventListener('click', () => changeAnnee(ANNEE-1));
+  $('btn-year-next').addEventListener('click', () => changeAnnee(ANNEE+1));
+
+  // Navigation sidebar
+  function showPanel(panelId, navId) {
+    ['pnl-params','pnl-ca'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
+    ['nav-params','nav-ca'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
+    const p=$(panelId); if(p) p.style.display='block';
+    const n=$(navId);   if(n) n.classList.add('active');
+  }
+  $('nav-params').addEventListener('click', () => showPanel('pnl-params','nav-params'));
+  $('nav-ca').addEventListener('click', async () => {
+    showPanel('pnl-ca','nav-ca');
+    await loadCA();
+  });
+  [['tab-articles','p-articles'],['tab-charges','p-charges'],['tab-entreprise','p-entreprise']].forEach(([tid,pid]) => {
+    $(tid).addEventListener('click', () => {
+      document.querySelectorAll('.tab-pnl').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+      $(pid).classList.add('active');
+      $(tid).classList.add('active');
+    });
+  });
+
+  // Articles
+  $('btn-add-art').addEventListener('click',    () => $('p-art-add').classList.toggle('open'));
+  $('btn-add-art-ok').addEventListener('click',  addArt);
+  $('btn-add-art-cancel').addEventListener('click', () => $('p-art-add').classList.remove('open'));
+
+  // Charges
+  $('btn-add-ch').addEventListener('click',     () => $('p-ch-add').classList.toggle('open'));
+  $('btn-add-ch-ok').addEventListener('click',   addCh);
+  $('btn-add-ch-cancel').addEventListener('click', () => $('p-ch-add').classList.remove('open'));
+
+  // Entreprise
   bindEntreprise();
-  let started=false;
-  DB.auth.onAuthStateChange(async(event,session)=>{ if((event==='INITIAL_SESSION'||event==='SIGNED_IN')&&session&&!started){ started=true; await startApp(session.user); } else if(event==='SIGNED_OUT'){ started=false; UID=null; $('auth').style.display='flex'; $('app').style.display='none'; } });
+
+  // Auth state
+  let started = false;
+  DB.auth.onAuthStateChange(async (event, session) => {
+    if((event==='INITIAL_SESSION'||event==='SIGNED_IN') && session && !started) {
+      started = true;
+      await startApp(session.user);
+    } else if(event==='SIGNED_OUT') {
+      started = false; UID = null;
+      $('auth').style.display='flex'; $('app').style.display='none';
+    }
+  });
 });
 </script>
 </body>
