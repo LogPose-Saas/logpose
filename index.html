@@ -674,14 +674,27 @@ async function loadParams() {
 async function saveParams() {
   if(!UID || !paramsLoaded || !paramsModifie) return;
   try {
-    const {error} = await DB.from('parametres').upsert({
-      user_id:UID, annee:ANNEE,
-      nom_entreprise:P.nomEnt, secteur:P.secteur,
-      regime_tva:P.regimeTVA, regime_fiscal:P.regimeFisc,
-      devise:P.devise, cle_repartition:P.cle,
-      objectif_ca:P.obj, treso_init:P.tresoInit,
-      mois_debut:P.moisDeb, mois_fin:P.moisFin,
-    }, {onConflict:'user_id,annee'});
+    // Avant de sauvegarder N, récupérer les valeurs héritées de N-1
+    // pour ne jamais écrire une ligne incomplète qui bloquerait l'héritage futur
+    const {data} = await DB.from('parametres')
+      .select('*').eq('user_id',UID).lt('annee',ANNEE)
+      .order('annee',{ascending:false}).limit(1);
+    const heritage = (data && data.length) ? data[0] : null;
+
+    const row = {
+      user_id: UID, annee: ANNEE,
+      nom_entreprise: P.nomEnt    || (heritage && heritage.nom_entreprise) || '',
+      secteur:        P.secteur   || (heritage && heritage.secteur)        || '',
+      regime_tva:     P.regimeTVA || (heritage && heritage.regime_tva)     || 'TVA réelle mensuelle',
+      regime_fiscal:  P.regimeFisc|| (heritage && heritage.regime_fiscal)  || 'IS — Impôt sur les sociétés',
+      devise:         P.devise    || (heritage && heritage.devise)         || '€ Euro',
+      cle_repartition:P.cle       || (heritage && heritage.cle_repartition)|| 'qte',
+      objectif_ca:    P.obj       || 0,
+      treso_init:     P.tresoInit || 0,
+      mois_debut:     P.moisDeb   || 1,
+      mois_fin:       P.moisFin   || 12,
+    };
+    const {error} = await DB.from('parametres').upsert(row, {onConflict:'user_id,annee'});
     if(error) console.warn('[save params]', error.message);
     else { paramsModifie = false; setSaved(); }
   } catch(e) { console.warn('[save params timeout]', e.message); }
