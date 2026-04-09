@@ -1657,26 +1657,26 @@ async function changeAnnee(val) {
       set('treso-init',S.params.tresoInit);
     }
 
-    // Articles filtrés pour la nouvelle année (créés avant, pas supprimés)
+    // Articles filtrés pour la nouvelle année
     if(rArts.status==='fulfilled' && rArts.value?.data?.length>0) {
       S.articles=rArts.value.data
         .filter(a=>{
-          const cree=(a.annee_creation||2020)<=newAn;
-          const supprime=a.annee_suppression!==null&&a.annee_suppression!==undefined&&a.annee_suppression<=newAn;
+          const cree = a.annee_creation===null||a.annee_creation===undefined ? true : a.annee_creation<=newAn;
+          const supprime = a.annee_suppression!==null&&a.annee_suppression!==undefined&&a.annee_suppression<=newAn;
           return cree && !supprime;
         })
-        .map(a=>({code:a.code,nom:a.nom,cat:a.categorie||'Divers',pv:parseFloat(a.prix_ht)||0,cout:parseFloat(a.cout_achat)||0,tva:parseFloat(a.tva)||0.2,actif:a.actif!==false,anneeCreation:a.annee_creation||2020,anneeSupp:a.annee_suppression||null}));
+        .map(a=>({code:a.code,nom:a.nom,cat:a.categorie||'Divers',pv:parseFloat(a.prix_ht)||0,cout:parseFloat(a.cout_achat)||0,tva:parseFloat(a.tva)||0.2,actif:a.actif!==false,anneeCreation:a.annee_creation,anneeSupp:a.annee_suppression||null}));
     }
 
     // Charges filtrées
     if(rChs.status==='fulfilled' && rChs.value?.data?.length>0) {
       S.charges=rChs.value.data
         .filter(c=>{
-          const cree=(c.annee_creation||2020)<=newAn;
-          const supprime=c.annee_suppression!==null&&c.annee_suppression!==undefined&&c.annee_suppression<=newAn;
+          const cree = c.annee_creation===null||c.annee_creation===undefined ? true : c.annee_creation<=newAn;
+          const supprime = c.annee_suppression!==null&&c.annee_suppression!==undefined&&c.annee_suppression<=newAn;
           return cree && !supprime;
         })
-        .map(c=>({code:c.code,nom:c.nom,cat:c.categorie||'Divers',tva:parseFloat(c.tva)||0.2,type:c.type||'Variable',actif:c.actif!==false,anneeCreation:c.annee_creation||2020,anneeSupp:c.annee_suppression||null}));
+        .map(c=>({code:c.code,nom:c.nom,cat:c.categorie||'Divers',tva:parseFloat(c.tva)||0.2,type:c.type||'Variable',actif:c.actif!==false,anneeCreation:c.annee_creation,anneeSupp:c.annee_suppression||null}));
     }
 
     // Saisies — vider et recharger pour la nouvelle année
@@ -2047,12 +2047,10 @@ async function saveAll() {
   // ── Articles : upsert (pas delete+insert) pour préserver annee_suppression ──
   if(S.articles.length>0) {
     try {
-      // UPSERT uniquement — ne jamais DELETE tous les articles
-      // Les articles des autres années restent intacts en base
       const rows = S.articles.map(a=>({
         user_id:uid, code:a.code, nom:a.nom, categorie:a.cat,
         prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif,
-        annee_creation: a.anneeCreation || an,
+        annee_creation: a.anneeCreation, // Jamais de fallback — doit être explicite
         annee_suppression: a.anneeSupp || null,
       }));
       const {error:aE} = await sb.from('articles').upsert(rows, {onConflict:'user_id,code'});
@@ -2069,13 +2067,12 @@ async function saveAll() {
     } catch(e){ console.warn('[save] saisies_ca:', e.message); }
   }
 
-  // ── Charges : même logique UPSERT ──
   if(S.charges.length>0) {
     try {
       const rows = S.charges.map(c=>({
         user_id:uid, code:String(c.code), nom:c.nom, categorie:c.cat,
         tva:c.tva, type:c.type, actif:c.actif,
-        annee_creation: c.anneeCreation || an,
+        annee_creation: c.anneeCreation, // Jamais de fallback
         annee_suppression: c.anneeSupp || null,
       }));
       const {error:cE} = await sb.from('charges').upsert(rows, {onConflict:'user_id,code'});
@@ -2145,20 +2142,24 @@ async function loadData(uid) {
     const d=el('db-name'); if(d) d.textContent=S.params.nomEnt||'Mon Entreprise';
   } else if(rP.status==='rejected') console.warn('[load] params:',rP.reason?.message);
 
-  // Articles — filtre : créé avant anneeActive ET pas supprimé avant anneeActive
+  // Articles — filtre : créé avant anneeActive ET pas supprimé
+  // annee_creation NULL = article legacy (avant la feature) → visible dans toutes les années
   if(rA.status==='fulfilled' && rA.value?.data?.length>0) {
     S.articles=rA.value.data
       .filter(a=>{
-        const cree=(a.annee_creation||2020)<=anneeActive;
-        const supprime=a.annee_suppression!==null && a.annee_suppression!==undefined && a.annee_suppression<=anneeActive;
+        const cree = a.annee_creation === null || a.annee_creation === undefined
+          ? true  // Legacy : toujours visible
+          : a.annee_creation <= anneeActive;
+        const supprime = a.annee_suppression !== null && a.annee_suppression !== undefined
+          && a.annee_suppression <= anneeActive;
         return cree && !supprime;
       })
       .map(a=>({
         code:a.code, nom:a.nom, cat:a.categorie||'Divers',
         pv:parseFloat(a.prix_ht)||0, cout:parseFloat(a.cout_achat)||0,
         tva:parseFloat(a.tva)||0.2, actif:a.actif!==false,
-        anneeCreation:a.annee_creation||2020,
-        anneeSupp:a.annee_suppression||null,
+        anneeCreation: a.annee_creation, // null = legacy
+        anneeSupp: a.annee_suppression || null,
       }));
   } else if(rA.status==='rejected') console.warn('[load] articles:',rA.reason?.message);
 
@@ -2166,15 +2167,18 @@ async function loadData(uid) {
   if(rC.status==='fulfilled' && rC.value?.data?.length>0) {
     S.charges=rC.value.data
       .filter(c=>{
-        const cree=(c.annee_creation||2020)<=anneeActive;
-        const supprime=c.annee_suppression!==null && c.annee_suppression!==undefined && c.annee_suppression<=anneeActive;
+        const cree = c.annee_creation === null || c.annee_creation === undefined
+          ? true
+          : c.annee_creation <= anneeActive;
+        const supprime = c.annee_suppression !== null && c.annee_suppression !== undefined
+          && c.annee_suppression <= anneeActive;
         return cree && !supprime;
       })
       .map(c=>({
         code:c.code, nom:c.nom, cat:c.categorie||'Divers',
         tva:parseFloat(c.tva)||0.2, type:c.type||'Variable', actif:c.actif!==false,
-        anneeCreation:c.annee_creation||2020,
-        anneeSupp:c.annee_suppression||null,
+        anneeCreation: c.annee_creation,
+        anneeSupp: c.annee_suppression || null,
       }));
   } else if(rC.status==='rejected') console.warn('[load] charges:',rC.reason?.message);
 
@@ -2204,12 +2208,12 @@ async function loadData(uid) {
         const bk=JSON.parse(raw);
         if(bk.articles?.length>0) {
           S.articles=(bk.articles||[]).filter(a=>{
-            const cree=(a.anneeCreation||2020)<=anneeActive;
+            const cree = a.anneeCreation===null||a.anneeCreation===undefined ? true : a.anneeCreation<=anneeActive;
             const supprime=a.anneeSupp!==null && a.anneeSupp!==undefined && a.anneeSupp<=anneeActive;
             return cree && !supprime;
           });
           S.charges=(bk.charges||[]).filter(c=>{
-            const cree=(c.anneeCreation||2020)<=anneeActive;
+            const cree = c.anneeCreation===null||c.anneeCreation===undefined ? true : c.anneeCreation<=anneeActive;
             const supprime=c.anneeSupp!==null && c.anneeSupp!==undefined && c.anneeSupp<=anneeActive;
             return cree && !supprime;
           });
