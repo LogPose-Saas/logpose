@@ -391,17 +391,17 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div><div class="auth-brand">LogPose</div><div style="font-size:9px;color:var(--t3);font-family:var(--fm);letter-spacing:.1em;text-transform:uppercase">Financial OS</div></div>
     </div>
     <div class="auth-tabs">
-      <div class="auth-tab active" id="tab-login" onclick="authMode('login')">Connexion</div>
-      <div class="auth-tab" id="tab-reg" onclick="authMode('register')">Créer un compte</div>
+      <div class="auth-tab active" id="tab-login">Connexion</div>
+      <div class="auth-tab" id="tab-reg">Créer un compte</div>
     </div>
     <div class="auth-msg auth-err" id="auth-err"></div>
     <div class="auth-msg auth-ok" id="auth-ok"></div>
     <div style="display:flex;flex-direction:column;gap:12px">
-      <div><label class="flbl">Adresse e-mail</label><input class="finp" type="email" id="auth-email" placeholder="vous@exemple.com" onkeydown="if(event.key==='Enter')doAuth()"></div>
-      <div><label class="flbl">Mot de passe</label><input class="finp" type="password" id="auth-pwd" placeholder="8 caractères minimum" onkeydown="if(event.key==='Enter')doAuth()"></div>
+      <div><label class="flbl">Adresse e-mail</label><input class="finp" type="email" id="auth-email" placeholder="vous@exemple.com"></div>
+      <div><label class="flbl">Mot de passe</label><input class="finp" type="password" id="auth-pwd" placeholder="8 caractères minimum"></div>
     </div>
-    <button class="btn btn-p btn-full" id="auth-btn" onclick="doAuth()" style="margin-top:20px;padding:12px;font-size:14px">Se connecter</button>
-    <div style="text-align:center;margin-top:14px"><span id="auth-forgot" onclick="doForgot()" style="font-size:12px;color:var(--t2);cursor:pointer;text-decoration:underline">Mot de passe oublié ?</span></div>
+    <button class="btn btn-p btn-full" id="auth-btn" style="margin-top:20px;padding:12px;font-size:14px">Se connecter</button>
+    <div style="text-align:center;margin-top:14px"><span id="auth-forgot" style="font-size:12px;color:var(--t2);cursor:pointer;text-decoration:underline">Mot de passe oublié ?</span></div>
     <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--bd);text-align:center;font-size:11px;color:var(--t3)">Données chiffrées et sécurisées · LogPose 2026</div>
   </div>
 </div>
@@ -1218,10 +1218,19 @@ async function startApp(user) {
 
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
+
   // Restaurer état sidebar
   if(localStorage.getItem('lp-sb-col')==='true') {
     document.querySelector('.sb')?.classList.add('col');
   }
+
+  // Auth listeners
+  el('tab-login').addEventListener('click', () => authMode('login'));
+  el('tab-reg').addEventListener('click',   () => authMode('register'));
+  el('auth-btn').addEventListener('click',  doAuth);
+  el('auth-forgot').addEventListener('click', doForgot);
+  el('auth-email').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
+  el('auth-pwd').addEventListener('keydown',   e => { if(e.key==='Enter') doAuth(); });
 
   let started = false;
   sb.auth.onAuthStateChange(async (event, session) => {
