@@ -1486,23 +1486,19 @@ function updArtCout(i, val) {
   recalc(); smartUpdate(); autoSave();
 }
 
-function delArtAt(i) {
+async function delArtAt(i) {
   const a = S.articles[i]; if(!a) return;
   if(!confirm(`Supprimer "${a.nom}" à partir de ${S.params.annee} ?`)) return;
-  // Insérer une ligne actif=false pour l'année active
-  // Par héritage, toutes les années futures verront actif=false
-  // Les années passées gardent leur propre ligne (inchangée)
-  if(S.uid) {
-    sb.from('articles').upsert({
-      user_id:S.uid, code:a.code, annee:S.params.annee,
-      nom:a.nom, categorie:a.cat, prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:false,
-    }, {onConflict:'user_id,code,annee'})
-    .then(({error:e}) => { if(e) console.warn('[del art]', e.message); });
-  }
   S.articles.splice(i,1);
   delete S.qty[a.code];
+  if(S.uid) {
+    const {error:e} = await sb.from('articles').upsert({
+      user_id:S.uid, code:a.code, annee:S.params.annee,
+      nom:a.nom, categorie:a.cat, prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:false,
+    }, {onConflict:'user_id,code,annee'});
+    if(e) console.warn('[del art]', e.message);
+  }
   recalc(); renderArt(); renderCA(); renderCtrl(); smartUpdate();
-  // Pas d'autoSave ici — on a déjà écrit directement en BDD
 }
 
 function renderCh() {
@@ -1540,18 +1536,21 @@ function renderCh() {
   renderCtrl();
 }
 
-function delChAt(i) {
+async function delChAt(i) {
   const c = S.charges[i]; if(!c) return;
   if(!confirm(`Supprimer "${c.nom}" à partir de ${S.params.annee} ?`)) return;
-  if(S.uid) {
-    sb.from('charges').upsert({
-      user_id:S.uid, code:String(c.code), annee:S.params.annee,
-      nom:c.nom, categorie:c.cat, tva:c.tva, type:c.type, actif:false,
-    }, {onConflict:'user_id,code,annee'})
-    .then(({error:e}) => { if(e) console.warn('[del ch]', e.message); });
-  }
+  // 1. Supprimer de la mémoire immédiatement
   S.charges.splice(i,1);
   delete S.chMD[c.code];
+  // 2. Écrire actif:false en base AVANT saveAll (qui s'exécutera ensuite)
+  if(S.uid) {
+    const {error:e} = await sb.from('charges').upsert({
+      user_id:S.uid, code:String(c.code), annee:S.params.annee,
+      nom:c.nom, categorie:c.cat, tva:c.tva, type:c.type, actif:false,
+    }, {onConflict:'user_id,code,annee'});
+    if(e) console.warn('[del ch]', e.message);
+  }
+  // 3. saveAll ne réécrira pas cette charge car elle n'est plus dans S.charges
   recalc(); renderCh(); renderCharges(); renderCtrl(); smartUpdate();
 }
 
@@ -1617,9 +1616,11 @@ async function changeAnnee(val) {
     ]);
 
     // Params — héritage depuis la ligne la plus récente ≤ newAn
+    // SAUF objectif_ca qui est indépendant par année
     if(rP.status==='fulfilled' && rP.value?.data?.length>0) {
       const p=rP.value.data[0];
-      S.params.obj       = p.objectif_ca     || 0;
+      const estAnneeExacte = p.annee === newAn;
+      S.params.obj       = estAnneeExacte ? (p.objectif_ca || 0) : 0;
       S.params.regimeTVA = p.regime_tva      || 'TVA réelle mensuelle';
       S.params.nomEnt    = p.nom_entreprise  || '';
       S.params.secteur   = p.secteur         || '';
@@ -2088,9 +2089,11 @@ async function loadData(uid) {
   // ── 3. Params ──
   if(rP.status==='fulfilled' && rP.value?.data?.length>0) {
     const p=rP.value.data[0];
+    const estAnneeExacte = p.annee === anneeActive;
     S.params.moisDeb   = p.mois_debut      || 1;
     S.params.moisFin   = p.mois_fin        || 12;
-    S.params.obj       = p.objectif_ca     || 0;
+    // Objectif CA : indépendant par année — 0 si pas de ligne exacte pour cette année
+    S.params.obj       = estAnneeExacte ? (p.objectif_ca || 0) : 0;
     S.params.regimeTVA = p.regime_tva      || 'TVA réelle mensuelle';
     S.params.nomEnt    = p.nom_entreprise  || '';
     S.params.secteur   = p.secteur         || '';
