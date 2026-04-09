@@ -655,10 +655,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 // LOGPOSE — PARAMÈTRES
 // ═══════════════════════════════════════════════════════
 
-const SUPABASE_URL = 'https://ppmdabvtdoaodzzjqqsc.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_Bx3WGtuoNlSlQU5MBtJsnQ_Fljdsow1';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 // ── État global ──────────────────────────────────────
 let UID   = null;   // user id courant
 let ANNEE = 2026;   // année active
@@ -1188,9 +1184,9 @@ function toggleTheme() {
 }
 
 function toggleSb() {
-  const sb = document.querySelector('.sb');
-  sb.classList.toggle('col');
-  localStorage.setItem('lp-sb-col', sb.classList.contains('col'));
+  const sidebar = document.querySelector('.sb');
+  sidebar.classList.toggle('col');
+  localStorage.setItem('lp-sb-col', sidebar.classList.contains('col'));
 }
 function openMob()  { document.querySelector('.sb').classList.add('mob-open'); el('sb-ov').classList.add('open'); }
 function closeMob() { document.querySelector('.sb').classList.remove('mob-open'); el('sb-ov').classList.remove('open'); }
