@@ -2007,6 +2007,7 @@ async function saveAll() {
       is_pro:S.isPro||false,
     };
     if(S.params.tresoInit!==undefined) p.treso_init=S.params.tresoInit;
+    console.log('[saveAll] params annee='+an+' regime_tva='+p.regime_tva+' obj='+p.objectif_ca);
     const {error:pE} = await sb.from('parametres').upsert(p, {onConflict:'user_id,annee'});
     if(pE) console.warn('[save] params:', pE.message);
   } catch(e){ console.warn('[save] params:', e.message); }
