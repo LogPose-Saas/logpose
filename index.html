@@ -1184,6 +1184,16 @@ async function startApp(user) {
 }
 
 // ════════════════════════════════════════════════════════
+// NAVIGATION PANELS
+// ════════════════════════════════════════════════════════
+function showPanel(panelId, navId) {
+  ['pnl-params','pnl-ca'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
+  ['nav-params','nav-ca'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
+  const p=$(panelId); if(p) p.style.display='block';
+  const n=$(navId);   if(n) n.classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════
 // THEME & SIDEBAR
 // ════════════════════════════════════════════════════════
 function applyTheme() {
@@ -1226,12 +1236,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('btn-year-next').addEventListener('click', () => changeAnnee(ANNEE+1));
 
   // Navigation sidebar
-  function showPanel(panelId, navId) {
-    ['pnl-params','pnl-ca'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
-    ['nav-params','nav-ca'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
-    const p=$(panelId); if(p) p.style.display='block';
-    const n=$(navId);   if(n) n.classList.add('active');
-  }
   $('nav-params').addEventListener('click', () => showPanel('pnl-params','nav-params'));
   $('nav-ca').addEventListener('click', async () => {
     showPanel('pnl-ca','nav-ca');
