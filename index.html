@@ -341,11 +341,23 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .ctrlst{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;margin-top:6px;font-family:var(--fm)}
 
 /* ── KPI TOOLTIPS ── */
-.kpi-tooltip-wrap { cursor:default }
+.kpi-help {
+  position:absolute;
+  bottom:10px;right:10px;
+  width:16px;height:16px;
+  border-radius:50%;
+  background:var(--bgs);
+  border:1px solid var(--bd);
+  font-size:10px;font-weight:700;
+  color:var(--t3);
+  cursor:help;
+  display:flex;align-items:center;justify-content:center;
+}
+.kpi-help:hover { background:var(--ag); border-color:var(--ac); color:var(--ac); }
 .kpi-tooltip {
   display:none;
   position:absolute;
-  bottom:calc(100% + 10px);
+  bottom:calc(100% + 8px);
   left:50%;
   transform:translateX(-50%);
   background:var(--bgc);
@@ -359,17 +371,18 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   z-index:200;
   box-shadow:var(--sh);
   pointer-events:none;
+  text-align:left;
+  font-weight:400;
 }
 .kpi-tooltip::after {
   content:'';
   position:absolute;
-  top:100%;
-  left:50%;
+  top:100%;left:50%;
   transform:translateX(-50%);
   border:5px solid transparent;
   border-top-color:var(--bds);
 }
-.kpi-tooltip-wrap.show-tip .kpi-tooltip { display:block; animation:fadeIn .2s ease; }
+.kpi-help:hover .kpi-tooltip { display:block; animation:fadeIn .15s ease; }
 
 /* ── SAVE BAR ── */
 .savebar{position:fixed;bottom:0;left:var(--sw);right:0;background:var(--bgs);border-top:1px solid var(--bd);padding:11px 26px;display:flex;align-items:center;justify-content:space-between;z-index:50;transition:left var(--tr)}
@@ -632,20 +645,20 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
       <!-- KPIs -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-        <div class="card kpi-tooltip-wrap" style="margin:0;padding:16px;position:relative;text-align:center">
+        <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
           <div class="klbl">CA HT total</div>
           <div class="kval" id="ca-kpi-caht">0 €</div>
-          <div class="kpi-tooltip">Somme de toutes vos ventes hors taxes sur l'année. Calculé en multipliant les quantités vendues par le prix HT de chaque article.</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Somme de toutes vos ventes hors taxes sur l'année. Calculé en multipliant les quantités vendues par le prix HT de chaque article.</div></div>
         </div>
-        <div class="card kpi-tooltip-wrap" style="margin:0;padding:16px;position:relative;text-align:center">
+        <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
           <div class="klbl">Marge brute</div>
           <div class="kval" id="ca-kpi-marge">0 €</div>
-          <div class="kpi-tooltip">Ce qu'il vous reste après déduction des coûts d'achat. Calculé en soustrayant le coût d'achat unitaire du prix HT, multiplié par les quantités vendues.</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Ce qu'il vous reste après déduction des coûts d'achat. Calculé en soustrayant le coût d'achat unitaire du prix HT, multiplié par les quantités vendues.</div></div>
         </div>
-        <div class="card kpi-tooltip-wrap" style="margin:0;padding:16px;position:relative;text-align:center">
+        <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
           <div class="klbl">Taux de marge</div>
           <div class="kval" id="ca-kpi-txmarge">0 %</div>
-          <div class="kpi-tooltip">Pourcentage de marge par rapport au CA HT. Un taux élevé signifie que vos produits sont vendus avec peu de coûts directs.</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Pourcentage de marge par rapport au CA HT. Un taux élevé signifie que vos produits sont vendus avec peu de coûts directs.</div></div>
         </div>
       </div>
 
@@ -1171,15 +1184,19 @@ function updateCACharts() {
   const dataLabelsLine = {
     id: 'dataLabelsLine',
     afterDatasetsDraw(chart) {
-      const {ctx, data, scales:{x,y}} = chart;
+      const {ctx, data, scales:{x,y}, chartArea} = chart;
       ctx.save();
       ctx.font = '600 10px Plus Jakarta Sans, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#3b7eff';
       data.datasets[0].data.forEach((val, i) => {
         if(!val) return;
-        const px = x.getPixelForValue(i);
+        let px = x.getPixelForValue(i);
         const py = y.getPixelForValue(val) - 10;
+        // Empêcher débordement gauche (janvier) et droite (décembre)
+        const textWidth = ctx.measureText(val.toLocaleString('fr-FR') + ' €').width;
+        if(px - textWidth/2 < chartArea.left) px = chartArea.left + textWidth/2;
+        if(px + textWidth/2 > chartArea.right) px = chartArea.right - textWidth/2;
         ctx.fillText(val.toLocaleString('fr-FR') + ' €', px, py);
       });
       ctx.restore();
@@ -1270,7 +1287,7 @@ function updateCACharts() {
         layout: { padding: 60 },
         plugins: {
           legend: { display: false },
-          tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ' : ' + ctx.parsed.toLocaleString('fr-FR') + ' €' } }
+          tooltip: { enabled: false }
         }
       }
     });
@@ -1409,22 +1426,6 @@ async function startApp(user) {
 }
 
 // ════════════════════════════════════════════════════════
-// TOOLTIPS KPI
-// ════════════════════════════════════════════════════════
-function initKpiTooltips() {
-  document.querySelectorAll('.kpi-tooltip-wrap').forEach(card => {
-    let timer = null;
-    card.addEventListener('mouseenter', () => {
-      timer = setTimeout(() => card.classList.add('show-tip'), 3000);
-    });
-    card.addEventListener('mouseleave', () => {
-      clearTimeout(timer);
-      card.classList.remove('show-tip');
-    });
-  });
-}
-
-// ════════════════════════════════════════════════════════
 // NAVIGATION PANELS
 // ════════════════════════════════════════════════════════
 function showPanel(panelId, navId) {
@@ -1460,7 +1461,6 @@ function toggleSidebar() {
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
   if(localStorage.getItem('lp-sb-col')==='true') document.querySelector('.sb').classList.add('col');
-  initKpiTooltips();
 
   // Auth
   $('tab-login').addEventListener('click',  () => setAuthMode('login'));
