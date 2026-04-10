@@ -340,6 +340,37 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .ctrllbl{font-size:11px;font-weight:500;color:var(--t2);margin-top:2px}
 .ctrlst{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;margin-top:6px;font-family:var(--fm)}
 
+/* ── KPI TOOLTIPS ── */
+.kpi-tooltip-wrap { cursor:default }
+.kpi-tooltip {
+  display:none;
+  position:absolute;
+  bottom:calc(100% + 10px);
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--bgc);
+  border:1px solid var(--bds);
+  border-radius:var(--rs);
+  padding:12px 14px;
+  font-size:12px;
+  color:var(--t2);
+  line-height:1.6;
+  width:240px;
+  z-index:200;
+  box-shadow:var(--sh);
+  pointer-events:none;
+}
+.kpi-tooltip::after {
+  content:'';
+  position:absolute;
+  top:100%;
+  left:50%;
+  transform:translateX(-50%);
+  border:5px solid transparent;
+  border-top-color:var(--bds);
+}
+.kpi-tooltip-wrap.show-tip .kpi-tooltip { display:block; animation:fadeIn .2s ease; }
+
 /* ── SAVE BAR ── */
 .savebar{position:fixed;bottom:0;left:var(--sw);right:0;background:var(--bgs);border-top:1px solid var(--bd);padding:11px 26px;display:flex;align-items:center;justify-content:space-between;z-index:50;transition:left var(--tr)}
 .save-st{font-size:12px;font-weight:500;color:var(--t2);display:flex;align-items:center;gap:8px}
@@ -601,17 +632,20 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
       <!-- KPIs -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-        <div class="card" style="margin:0;padding:16px">
+        <div class="card kpi-tooltip-wrap" style="margin:0;padding:16px;position:relative;text-align:center">
           <div class="klbl">CA HT total</div>
           <div class="kval" id="ca-kpi-caht">0 €</div>
+          <div class="kpi-tooltip">Somme de toutes vos ventes hors taxes sur l'année. Calculé en multipliant les quantités vendues par le prix HT de chaque article.</div>
         </div>
-        <div class="card" style="margin:0;padding:16px">
+        <div class="card kpi-tooltip-wrap" style="margin:0;padding:16px;position:relative;text-align:center">
           <div class="klbl">Marge brute</div>
           <div class="kval" id="ca-kpi-marge">0 €</div>
+          <div class="kpi-tooltip">Ce qu'il vous reste après déduction des coûts d'achat. Calculé en soustrayant le coût d'achat unitaire du prix HT, multiplié par les quantités vendues.</div>
         </div>
-        <div class="card" style="margin:0;padding:16px">
+        <div class="card kpi-tooltip-wrap" style="margin:0;padding:16px;position:relative;text-align:center">
           <div class="klbl">Taux de marge</div>
           <div class="kval" id="ca-kpi-txmarge">0 %</div>
+          <div class="kpi-tooltip">Pourcentage de marge par rapport au CA HT. Un taux élevé signifie que vos produits sont vendus avec peu de coûts directs.</div>
         </div>
       </div>
 
@@ -636,11 +670,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <!-- Graphiques -->
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-top:14px">
         <div class="card" style="margin:0">
-          <div class="ct" style="margin-bottom:14px">Évolution du CA mensuel</div>
+          <div class="ct" style="margin-bottom:14px">Évolution du chiffre d'affaires mensuel</div>
           <div style="height:220px"><canvas id="ca-chart-line"></canvas></div>
         </div>
         <div class="card" style="margin:0">
-          <div class="ct" style="margin-bottom:14px">CA par catégorie</div>
+          <div class="ct" style="margin-bottom:14px">Chiffre d'affaires par catégorie</div>
           <div style="height:220px"><canvas id="ca-chart-pie"></canvas></div>
         </div>
       </div>
@@ -1117,43 +1151,100 @@ let chartCALine = null;
 let chartCAPie  = null;
 
 function updateCACharts() {
-  // ── Données ──
   const caParMois = MOIS.map((_,m) =>
     articles.reduce((s,a) => s + ((qty[a.code]||[])[m] || 0) * a.pv, 0)
   );
-
-  // CA par catégorie
   const catMap = {};
   articles.forEach(a => {
     const cat = a.cat || 'Divers';
-    const total = (qty[a.code]||[]).reduce((s,v) => s + (v||0), 0) * a.pv;
+    const total = (qty[a.code]||[]).reduce((s,v) => s+(v||0), 0) * a.pv;
     catMap[cat] = (catMap[cat]||0) + total;
   });
-  const cats    = Object.keys(catMap).filter(c => catMap[c] > 0);
-  const catVals = cats.map(c => catMap[c]);
-  const colors  = ['#3b7eff','#0ea572','#f59e0b','#f43f5e','#9b87f5','#22d3c8','#f472b6','#fb923c'];
+  const cats     = Object.keys(catMap).filter(c => catMap[c] > 0);
+  const catVals  = cats.map(c => catMap[c]);
+  const catTotal = catVals.reduce((s,v) => s+v, 0);
+  const colors   = ['#3b7eff','#0ea572','#f59e0b','#f43f5e','#9b87f5','#22d3c8','#f472b6','#fb923c'];
+  const isDark   = document.documentElement.getAttribute('data-theme') === 'dark';
+  const textCol  = isDark ? '#dde6f5' : '#0c1828';
 
-  // ── Graphique ligne : CA mensuel ──
+  // Plugin : étiquettes sur la courbe
+  const dataLabelsLine = {
+    id: 'dataLabelsLine',
+    afterDatasetsDraw(chart) {
+      const {ctx, data, scales:{x,y}} = chart;
+      ctx.save();
+      ctx.font = '600 10px Plus Jakarta Sans, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#3b7eff';
+      data.datasets[0].data.forEach((val, i) => {
+        if(!val) return;
+        const px = x.getPixelForValue(i);
+        const py = y.getPixelForValue(val) - 10;
+        ctx.fillText(val.toLocaleString('fr-FR') + ' €', px, py);
+      });
+      ctx.restore();
+    }
+  };
+
+  // Plugin : labels externes camembert avec lignes de liaison
+  const outerLabels = {
+    id: 'outerLabels',
+    afterDraw(chart) {
+      const {ctx, chartArea, data} = chart;
+      const cx = (chartArea.left + chartArea.right) / 2;
+      const cy = (chartArea.top  + chartArea.bottom) / 2;
+      const meta = chart.getDatasetMeta(0);
+      const total = data.datasets[0].data.reduce((s,v) => s+v, 0);
+      if(!total) return;
+      ctx.save();
+      ctx.font = '600 11px Plus Jakarta Sans, sans-serif';
+      meta.data.forEach((arc, i) => {
+        const val  = data.datasets[0].data[i];
+        const lbl  = data.labels[i];
+        const pct  = Math.round(val/total*100);
+        const text = lbl + ' — ' + val.toLocaleString('fr-FR') + ' € — ' + pct + '%';
+        const angle = (arc.startAngle + arc.endAngle) / 2;
+        const r1 = arc.outerRadius + 8;
+        const r2 = arc.outerRadius + 18;
+        const x1 = cx + Math.cos(angle) * r1;
+        const y1 = cy + Math.sin(angle) * r1;
+        const x2 = cx + Math.cos(angle) * r2;
+        const y2 = cy + Math.sin(angle) * r2;
+        const x3 = x2 + (Math.cos(angle) > 0 ? 6 : -6);
+        ctx.strokeStyle = colors[i % colors.length];
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineTo(x3, y2);
+        ctx.stroke();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.textAlign = Math.cos(angle) > 0 ? 'left' : 'right';
+        ctx.fillText(text, x3 + (Math.cos(angle) > 0 ? 4 : -4), y2 + 4);
+      });
+      ctx.restore();
+    }
+  };
+
+  // ── Courbe CA mensuel ──
   const ctxL = $('ca-chart-line');
   if(ctxL) {
     if(chartCALine) chartCALine.destroy();
     chartCALine = new Chart(ctxL, {
       type: 'line',
+      plugins: [dataLabelsLine],
       data: {
         labels: MOIS,
         datasets: [{
-          label: 'CA HT',
-          data: caParMois,
-          borderColor: '#3b7eff',
-          backgroundColor: 'rgba(59,126,255,0.08)',
-          borderWidth: 2,
-          pointRadius: 3,
-          fill: true,
-          tension: 0.4,
+          label: 'CA HT', data: caParMois,
+          borderColor: '#3b7eff', backgroundColor: 'rgba(59,126,255,0.08)',
+          borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#3b7eff',
+          fill: true, tension: 0.4,
         }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 28 } },
         plugins: { legend: { display: false } },
         scales: {
           y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('fr-FR') + ' €' } },
@@ -1163,25 +1254,23 @@ function updateCACharts() {
     });
   }
 
-  // ── Graphique camembert : CA par catégorie ──
+  // ── Camembert CA par catégorie ──
   const ctxP = $('ca-chart-pie');
   if(ctxP && cats.length > 0) {
     if(chartCAPie) chartCAPie.destroy();
     chartCAPie = new Chart(ctxP, {
       type: 'doughnut',
+      plugins: [outerLabels],
       data: {
         labels: cats,
-        datasets: [{
-          data: catVals,
-          backgroundColor: colors.slice(0, cats.length),
-          borderWidth: 0,
-        }]
+        datasets: [{ data: catVals, backgroundColor: colors.slice(0, cats.length), borderWidth: 2, borderColor: isDark ? '#06080f' : '#fff' }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
+        layout: { padding: 60 },
         plugins: {
-          legend: { position: 'right', labels: { font: { size: 11 }, padding: 12 } },
-          tooltip: { callbacks: { label: ctx => ` ${ctx.label} : ${ctx.parsed.toLocaleString('fr-FR')} €` } }
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ' : ' + ctx.parsed.toLocaleString('fr-FR') + ' €' } }
         }
       }
     });
@@ -1320,6 +1409,22 @@ async function startApp(user) {
 }
 
 // ════════════════════════════════════════════════════════
+// TOOLTIPS KPI
+// ════════════════════════════════════════════════════════
+function initKpiTooltips() {
+  document.querySelectorAll('.kpi-tooltip-wrap').forEach(card => {
+    let timer = null;
+    card.addEventListener('mouseenter', () => {
+      timer = setTimeout(() => card.classList.add('show-tip'), 3000);
+    });
+    card.addEventListener('mouseleave', () => {
+      clearTimeout(timer);
+      card.classList.remove('show-tip');
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════════
 // NAVIGATION PANELS
 // ════════════════════════════════════════════════════════
 function showPanel(panelId, navId) {
@@ -1355,6 +1460,7 @@ function toggleSidebar() {
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
   if(localStorage.getItem('lp-sb-col')==='true') document.querySelector('.sb').classList.add('col');
+  initKpiTooltips();
 
   // Auth
   $('tab-login').addEventListener('click',  () => setAuthMode('login'));
