@@ -383,6 +383,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   border-top-color:var(--bds);
 }
 .kpi-help:hover .kpi-tooltip { display:block; animation:fadeIn .15s ease; }
+/* Dernier KPI : tooltip aligné à droite pour ne pas déborder */
+.kpi-help:last-of-type .kpi-tooltip,
+.card:last-child .kpi-help .kpi-tooltip {
+  left:auto; right:0; transform:none;
+}
+.card:last-child .kpi-help .kpi-tooltip::after {
+  left:auto; right:12px; transform:none;
+}
 
 /* ── SAVE BAR ── */
 .savebar{position:fixed;bottom:0;left:var(--sw);right:0;background:var(--bgs);border-top:1px solid var(--bd);padding:11px 26px;display:flex;align-items:center;justify-content:space-between;z-index:50;transition:left var(--tr)}
@@ -1041,7 +1049,7 @@ async function saveQty(code, mois, val) {
       const cells = row.querySelectorAll('td');
       const lastTwo = cells.length;
       cells[lastTwo-2].textContent = totQty;
-      cells[lastTwo-1].textContent = totCA.toFixed(0) + ' €';
+      cells[lastTwo-1].textContent = totCA.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
     }
   }
 
@@ -1080,7 +1088,7 @@ function updateCATotaux() {
     // cells[0] = "TOTAL" (colspan=3), puis 12 mois, puis total qté, puis CA HT
     totParMois.forEach((v,m) => { if(cells[m+1]) cells[m+1].textContent = v||''; });
     if(cells[13]) cells[13].textContent = totGlobal;
-    if(cells[14]) cells[14].textContent = caGlobal.toFixed(0) + ' €';
+    if(cells[14]) cells[14].textContent = caGlobal.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
   }
 }
 
@@ -1120,7 +1128,7 @@ function renderCA() {
           onchange="saveQty('${a.code}',${m},this.value)">
       </td>`).join('')}
       <td class="stot">${totQty}</td>
-      <td class="stot">${totCA.toFixed(0)} €</td>
+      <td class="stot">${totCA.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2})} €</td>
     </tr>`;
   }).join('');
 
@@ -1153,7 +1161,7 @@ function updateCAKpis() {
     marge += totQty * (a.pv - a.cout);
   });
   const txMarge = caHT > 0 ? marge/caHT*100 : 0;
-  const fmt = v => v.toLocaleString('fr-FR', {maximumFractionDigits:0}) + ' €';
+  const fmt = v => v.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
   const e1=$('ca-kpi-caht');    if(e1) e1.textContent = fmt(caHT);
   const e2=$('ca-kpi-marge');   if(e2) e2.textContent = fmt(marge);
   const e3=$('ca-kpi-txmarge'); if(e3) e3.textContent = txMarge.toFixed(1) + ' %';
