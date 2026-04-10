@@ -1001,6 +1001,7 @@ async function saveQty(code, mois, val) {
   // Mettre à jour la ligne TOTAL
   updateCATotaux();
   updateCAKpis();
+  updateCACharts();
 
   // Sauvegarder en base
   if(val === 0) {
