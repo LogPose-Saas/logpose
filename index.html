@@ -1094,10 +1094,10 @@ function renderAnneesNav() {
 // ════════════════════════════════════════════════════════
 // AUTH
 // ════════════════════════════════════════════════════════
-let authMode = 'login';
+let authModeActuel = 'login';
 
 function setAuthMode(m) {
-  authMode = m;
+  authModeActuel = m;
   $('tab-login').classList.toggle('active', m==='login');
   $('tab-reg').classList.toggle('active',   m==='register');
   $('auth-btn').textContent = m==='login' ? 'Se connecter' : 'Créer mon compte';
@@ -1112,7 +1112,7 @@ async function doAuth() {
   if(!email||!pwd) { showErr('Remplissez tous les champs.'); return; }
   const btn = $('auth-btn'); btn.textContent='Chargement…'; btn.disabled=true;
   try {
-    if(authMode==='login') {
+    if(authModeActuel==='login') {
       const {error} = await DB.auth.signInWithPassword({email, password:pwd});
       if(error) throw error;
     } else {
@@ -1126,7 +1126,7 @@ async function doAuth() {
     showErr(m[e.message]||e.message||'Erreur inconnue.');
   }
   btn.disabled=false;
-  btn.textContent = authMode==='login'?'Se connecter':'Créer mon compte';
+  btn.textContent = authModeActuel==='login'?'Se connecter':'Créer mon compte';
 }
 
 async function doForgot() {
