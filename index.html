@@ -380,8 +380,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   border:5px solid transparent;
   border-top-color:var(--bds);
 }
-.kpi-help:hover .kpi-tooltip { display:block; animation:fadeIn .15s ease; }
-/* Retirer les règles spécifiques au dernier KPI — plus nécessaire */
+.kpi-help:hover .kpi-tooltip { display:block; animation:fadeInDown .15s ease; }
+@keyframes fadeInDown{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── SAVE BAR ── */
 .savebar{position:fixed;bottom:0;left:var(--sw);right:0;background:var(--bgs);border-top:1px solid var(--bd);padding:11px 26px;display:flex;align-items:center;justify-content:space-between;z-index:50;transition:left var(--tr)}
