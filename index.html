@@ -358,8 +358,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   display:none;
   position:absolute;
   bottom:calc(100% + 8px);
-  left:50%;
-  transform:translateX(-50%);
+  right:0;
   background:var(--bgc);
   border:1px solid var(--bds);
   border-radius:var(--rs);
@@ -377,20 +376,12 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .kpi-tooltip::after {
   content:'';
   position:absolute;
-  top:100%;left:50%;
-  transform:translateX(-50%);
+  top:100%; right:5px;
   border:5px solid transparent;
   border-top-color:var(--bds);
 }
 .kpi-help:hover .kpi-tooltip { display:block; animation:fadeIn .15s ease; }
-/* Dernier KPI : tooltip aligné à droite pour ne pas déborder */
-.kpi-help:last-of-type .kpi-tooltip,
-.card:last-child .kpi-help .kpi-tooltip {
-  left:auto; right:0; transform:none;
-}
-.card:last-child .kpi-help .kpi-tooltip::after {
-  left:auto; right:12px; transform:none;
-}
+/* Retirer les règles spécifiques au dernier KPI — plus nécessaire */
 
 /* ── SAVE BAR ── */
 .savebar{position:fixed;bottom:0;left:var(--sw);right:0;background:var(--bgs);border-top:1px solid var(--bd);padding:11px 26px;display:flex;align-items:center;justify-content:space-between;z-index:50;transition:left var(--tr)}
@@ -1003,7 +994,7 @@ function renderCharges() {
 // ════════════════════════════════════════════════════════
 // CHIFFRE D'AFFAIRES
 // ════════════════════════════════════════════════════════
-const MOIS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+const MOIS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 let qty = {}; // {code: [12 valeurs]}
 
 async function loadCA() {
@@ -1288,7 +1279,7 @@ function updateCACharts() {
       plugins: [outerLabels],
       data: {
         labels: cats,
-        datasets: [{ data: catVals, backgroundColor: colors.slice(0, cats.length), borderWidth: 2, borderColor: isDark ? '#06080f' : '#fff' }]
+        datasets: [{ data: catVals, backgroundColor: colors.slice(0, cats.length), borderWidth: 0 }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
