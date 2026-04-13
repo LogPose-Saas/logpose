@@ -1704,9 +1704,13 @@ async function changeAnnee(n) {
          regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
          cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
   renderAnneesNav();
+  mts = {};
   await Promise.all([loadParams(), loadArticles(), loadCharges()]);
   await loadCA();
-  mts = {};
+  // Recharger le panneau charges si c'est celui qui est affiché
+  if($('pnl-charges') && $('pnl-charges').style.display !== 'none') {
+    await loadChargesData();
+  }
 }
 
 function renderAnneesNav() {
