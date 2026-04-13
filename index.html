@@ -384,7 +384,24 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 /* Suppression des règles nth-child qui causaient le débordement gauche */
 @keyframes fadeInDown{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── SAVE BAR ── */
+/* ── SKELETON / LOADING ── */
+.pnl-loading{position:relative;pointer-events:none}
+.pnl-loading::after{
+  content:'';position:absolute;inset:0;
+  background:var(--bg);opacity:.6;z-index:10;border-radius:var(--r);
+}
+.pnl-loading::before{
+  content:'';position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:28px;height:28px;z-index:11;
+  border:3px solid var(--bd);
+  border-top-color:var(--ac);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.sk-block{background:var(--bgs);border-radius:var(--rs);animation:shimmer 1.4s ease-in-out infinite}
+@keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
 .savebar{position:fixed;bottom:0;left:var(--sw);right:0;background:var(--bgs);border-top:1px solid var(--bd);padding:11px 26px;display:flex;align-items:center;justify-content:space-between;z-index:50;transition:left var(--tr)}
 .save-st{font-size:12px;font-weight:500;color:var(--t2);display:flex;align-items:center;gap:8px}
 .sdot{width:7px;height:7px;border-radius:50%;background:var(--am);animation:blink 1.8s infinite;flex-shrink:0}
@@ -927,6 +944,18 @@ const sbq = (p, ms=12000) => Promise.race([p, new Promise((_,r)=>setTimeout(()=>
 let paramsLoaded = false;
 let paramsModifie = false; // true uniquement quand l'user a changé un champ
 
+// ── Lazy load flags — année pour laquelle les données sont en mémoire ──
+let _anneeCA  = null; // année des données qty en mémoire
+let _anneeMts = null; // année des données mts en mémoire
+
+// ── Helpers skeleton ──
+function showLoading(panelId) {
+  const e = $(panelId); if(e) e.classList.add('pnl-loading');
+}
+function hideLoading(panelId) {
+  const e = $(panelId); if(e) e.classList.remove('pnl-loading');
+}
+
 let _saveTimer = null;
 function schedSave() {
   if(!paramsLoaded) return;
@@ -1196,6 +1225,12 @@ let mts = {}; // {charge_code: [12 montants TTC]}
 async function loadCA() {
   if(!UID) return;
 
+  // Lazy load : données déjà en mémoire pour cette année
+  if(_anneeCA === ANNEE && Object.keys(qty).length > 0) {
+    renderCA();
+    return;
+  }
+
   // Si articles est vide (timeout au démarrage), réessayer loadArticles d'abord
   if(!articles.length) {
     await loadArticles();
@@ -1217,6 +1252,7 @@ async function loadCA() {
       });
     }
   } catch(e) { console.warn('[ca timeout]', e.message); }
+  _anneeCA = ANNEE;
   renderCA();
 }
 
@@ -1528,6 +1564,10 @@ let chartCHPie  = null;
 
 async function _loadMtsOnly() {
   if(!UID || !charges.length) return;
+
+  // Lazy load : données déjà en mémoire pour cette année
+  if(_anneeMts === ANNEE && Object.keys(mts).length > 0) return;
+
   mts = {};
   charges.forEach(c => { mts[String(c.code)] = Array(12).fill(0); });
   try {
@@ -1542,6 +1582,7 @@ async function _loadMtsOnly() {
       });
     }
   } catch(e) { console.warn('[mts load]', e.message); }
+  _anneeMts = ANNEE;
 }
 
 async function loadChargesData() {
@@ -2092,12 +2133,25 @@ async function changeAnnee(n) {
   P = { nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
          regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
          cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
-  renderAnneesNav();
+
+  // Invalider les caches lazy load
+  _anneeCA  = null;
+  _anneeMts = null;
+  qty = {};
   mts = {};
+
+  // Skeleton sur le panneau actif
+  const panneauActif = ['pnl-dashboard','pnl-ca','pnl-charges','pnl-params']
+    .find(id => { const e=$(id); return e && e.style.display !== 'none'; });
+  if(panneauActif) showLoading(panneauActif);
+
+  renderAnneesNav();
   await Promise.all([loadParams(), loadArticles(), loadCharges()]);
   await loadCA();
-  // Toujours recharger mts (utilisé par Dashboard ET module Charges)
   await _loadMtsOnly();
+
+  if(panneauActif) hideLoading(panneauActif);
+
   // Re-render le panneau actif
   if($('pnl-charges') && $('pnl-charges').style.display !== 'none') {
     renderChargesData();
@@ -2214,7 +2268,8 @@ async function startApp(user) {
   await loadArticles();
   await loadCharges();
   await loadParams();
-  await Promise.all([loadCA(), _loadMtsOnly()]);
+  await loadCA();
+  await _loadMtsOnly();
   // Routing : Dashboard si entreprise configurée, Paramètres sinon
   if(P.nomEnt && P.nomEnt.trim() !== '') {
     showPanel('pnl-dashboard','nav-dashboard');
@@ -2306,16 +2361,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // Navigation sidebar
   $('nav-dashboard').addEventListener('click', () => {
     showPanel('pnl-dashboard','nav-dashboard');
-    renderDashboard();
+    renderDashboard(); // toujours instantané — données déjà en mémoire
   });
   $('nav-params').addEventListener('click', () => showPanel('pnl-params','nav-params'));
   $('nav-ca').addEventListener('click', async () => {
     showPanel('pnl-ca','nav-ca');
-    await loadCA();
+    if(_anneeCA !== ANNEE) {
+      showLoading('pnl-ca');
+      await loadCA();
+      hideLoading('pnl-ca');
+    } else {
+      renderCA(); // instantané
+    }
   });
   $('nav-charges').addEventListener('click', async () => {
     showPanel('pnl-charges','nav-charges');
-    await loadChargesData();
+    if(_anneeMts !== ANNEE) {
+      showLoading('pnl-charges');
+      await loadChargesData();
+      hideLoading('pnl-charges');
+    } else {
+      renderChargesData(); // instantané
+    }
   });
   [['tab-articles','p-articles'],['tab-charges','p-charges'],['tab-entreprise','p-entreprise']].forEach(([tid,pid]) => {
     $(tid).addEventListener('click', () => {
