@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LogPose — Paramètres</title>
+<title>LogPose</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -1588,6 +1588,7 @@ function updateCHTotaux() {
     charges.reduce((s,c) => s + (mts[String(c.code)]||Array(12).fill(0))[m], 0)
   );
   const totGlobal = Math.round(totParMois.reduce((s,v) => s+v, 0) * 100) / 100;
+  const rows = document.querySelectorAll('#smt-tbody tr');
   const totRow = rows[rows.length-1];
   if(totRow && totRow.classList.contains('totrow')) {
     const cells = totRow.querySelectorAll('td');
@@ -2213,8 +2214,7 @@ async function startApp(user) {
   await loadArticles();
   await loadCharges();
   await loadParams();
-  await loadCA();
-  await _loadMtsOnly();
+  await Promise.all([loadCA(), _loadMtsOnly()]);
   // Routing : Dashboard si entreprise configurée, Paramètres sinon
   if(P.nomEnt && P.nomEnt.trim() !== '') {
     showPanel('pnl-dashboard','nav-dashboard');
