@@ -466,6 +466,13 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
       <!-- Navigation -->
       <div class="sb-sect">
+        <div class="sb-lbl">Vue d'ensemble</div>
+        <div class="sb-item" id="nav-dashboard">
+          <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+          <span>Dashboard</span>
+        </div>
+      </div>
+      <div class="sb-sect">
         <div class="sb-lbl">Saisie</div>
         <div class="sb-item" id="nav-ca">
           <span class="sb-ico" style="font-size:14px;font-weight:700;opacity:.65">€</span>
@@ -478,7 +485,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
       <div class="sb-sect">
         <div class="sb-lbl">Configuration</div>
-        <div class="sb-item active" id="nav-params">
+        <div class="sb-item" id="nav-params">
           <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg></span>
           <span>Paramètres</span>
         </div>
@@ -505,6 +512,102 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
   <!-- MAIN -->
   <main class="main">
+
+    <!-- DASHBOARD -->
+    <div id="pnl-dashboard" style="display:none">
+      <div class="topbar">
+        <div>
+          <div class="page-title" id="db-title">Dashboard</div>
+          <div class="page-sub">Vue d'ensemble · Année <span id="db-annee-lbl">2026</span> · <span id="db-completude" style="color:var(--am)">Chargement…</span></div>
+        </div>
+      </div>
+
+      <!-- KPIs ligne 1 -->
+      <div class="kgrid g4" style="margin-bottom:14px">
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--ac)"></div>
+          <div class="klbl">CA HT annuel</div>
+          <div class="kval" id="db-kpi-ca">0 €</div>
+          <div id="db-kpi-ca-obj" style="font-size:11px;color:var(--t2);margin-top:6px">Objectif : —</div>
+          <div class="pw" style="margin-top:8px"><div class="pb" id="db-bar-obj" style="width:0%;background:var(--ac)"></div></div>
+          <div class="kpi-help">?<div class="kpi-tooltip">CA HT calculé depuis les quantités saisies × prix unitaires HT. La barre indique la progression vers l'objectif annuel défini dans Paramètres.</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--rd)"></div>
+          <div class="klbl">Charges HT annuelles</div>
+          <div class="kval" id="db-kpi-ch">0 €</div>
+          <div id="db-kpi-ch-sub" style="font-size:11px;color:var(--t2);margin-top:6px">TTC : 0 €</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Total des charges HT recalculé depuis les montants TTC saisis, en appliquant le taux de TVA de chaque charge.</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" id="db-res-acc" style="background:var(--gr)"></div>
+          <div class="klbl">Résultat brut</div>
+          <div class="kval" id="db-kpi-res">0 €</div>
+          <div id="db-kpi-res-sub" style="font-size:11px;color:var(--t2);margin-top:6px">CA HT − Charges HT</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Résultat brut = CA HT − Charges HT totales. Positif (vert) signifie que votre activité couvre ses charges. Négatif (rouge) = déficit.</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--pu)"></div>
+          <div class="klbl">Taux de marge brute</div>
+          <div class="kval" id="db-kpi-marge">0 %</div>
+          <div id="db-kpi-marge-sub" style="font-size:11px;color:var(--t2);margin-top:6px">Marge / CA HT</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Marge brute = CA HT − coûts d'achat directs des articles vendus. Le taux exprime ce pourcentage par rapport au CA HT.</div></div>
+        </div>
+      </div>
+
+      <!-- Graphique principal CA vs Charges -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div class="ct">CA vs Charges mensuels</div>
+            <div class="cs">Comparaison mois par mois en HT</div>
+          </div>
+          <select class="fsel" id="db-periode" style="width:auto;min-width:150px;font-size:12px">
+            <option value="mensuel">Mensuel</option>
+            <option value="trimestriel">Trimestriel</option>
+            <option value="semestriel">Semestriel</option>
+          </select>
+        </div>
+        <div style="height:240px"><canvas id="db-chart-main"></canvas></div>
+      </div>
+
+      <!-- Ligne 3 : Objectif + Tops -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
+
+        <!-- Objectif CA -->
+        <div class="card" style="margin:0">
+          <div class="ct" style="margin-bottom:4px">Progression objectif</div>
+          <div class="cs" style="margin-bottom:16px">CA HT vs objectif annuel</div>
+          <div style="position:relative;width:130px;height:130px;margin:0 auto 12px">
+            <canvas id="db-chart-obj"></canvas>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <div style="font-size:22px;font-weight:800;letter-spacing:-1px;line-height:1" id="db-obj-pct">0%</div>
+              <div style="font-size:10px;color:var(--t2);margin-top:2px">atteint</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:11px;color:var(--t2)" id="db-obj-detail">Objectif non défini</div>
+        </div>
+
+        <!-- Top articles -->
+        <div class="card" style="margin:0">
+          <div class="ct" style="margin-bottom:4px">Top articles</div>
+          <div class="cs" style="margin-bottom:12px">Par CA HT généré</div>
+          <div id="db-top-arts" class="toplist"></div>
+        </div>
+
+        <!-- Top charges -->
+        <div class="card" style="margin:0">
+          <div class="ct" style="margin-bottom:4px">Top charges</div>
+          <div class="cs" style="margin-bottom:12px">Par montant TTC annuel</div>
+          <div id="db-top-chs" class="toplist"></div>
+        </div>
+
+      </div>
+
+      <!-- Alertes -->
+      <div id="db-alertes" style="margin-bottom:14px"></div>
+
+    </div><!-- fin pnl-dashboard -->
 
     <!-- PARAMÈTRES -->
     <div id="pnl-params">
@@ -1731,6 +1834,258 @@ function updateCHCharts() {
 }
 
 // ════════════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════════════
+let chartDBMain = null;
+let chartDBObj  = null;
+
+function renderDashboard() {
+  const lbl = $('db-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+  const title = $('db-title');
+  if(title) title.textContent = P.nomEnt ? P.nomEnt : 'Dashboard';
+
+  // ── Calculs CA ──
+  let caHT = 0, margeB = 0;
+  const caParMois = Array(12).fill(0);
+  articles.forEach(a => {
+    const q = qty[a.code] || Array(12).fill(0);
+    q.forEach((v,m) => {
+      const val = v || 0;
+      caHT       += val * a.pv;
+      margeB     += val * (a.pv - a.cout);
+      caParMois[m]+= val * a.pv;
+    });
+  });
+
+  // ── Calculs Charges ──
+  let chTTC = 0, chHT = 0;
+  const chParMois = Array(12).fill(0);
+  charges.forEach(c => {
+    const k = String(c.code);
+    (mts[k]||[]).forEach((v,m) => {
+      const val = v || 0;
+      chTTC       += val;
+      chHT        += val / (1 + (c.tva||0));
+      chParMois[m]+= val / (1 + (c.tva||0));
+    });
+  });
+
+  caHT   = Math.round(caHT   * 100) / 100;
+  chHT   = Math.round(chHT   * 100) / 100;
+  chTTC  = Math.round(chTTC  * 100) / 100;
+  margeB = Math.round(margeB * 100) / 100;
+  const resultat  = Math.round((caHT - chHT) * 100) / 100;
+  const txMarge   = caHT > 0 ? Math.round(margeB / caHT * 1000) / 10 : 0;
+  const fmt = v => Math.abs(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+
+  // ── KPIs ──
+  const eCA = $('db-kpi-ca'); if(eCA) eCA.textContent = fmt(caHT);
+  const eCH = $('db-kpi-ch'); if(eCH) eCH.textContent = fmt(chHT);
+  const eCHsub = $('db-kpi-ch-sub'); if(eCHsub) eCHsub.textContent = 'TTC : ' + fmt(chTTC);
+
+  const eRes = $('db-kpi-res');
+  const eResAcc = $('db-res-acc');
+  const eResSub = $('db-kpi-res-sub');
+  if(eRes) {
+    eRes.textContent = (resultat < 0 ? '−' : '') + fmt(resultat);
+    eRes.style.color = resultat >= 0 ? 'var(--gr)' : 'var(--rd)';
+  }
+  if(eResAcc) eResAcc.style.background = resultat >= 0 ? 'var(--gr)' : 'var(--rd)';
+  if(eResSub) eResSub.textContent = 'CA HT − Charges HT';
+
+  const eMarge = $('db-kpi-marge');
+  if(eMarge) {
+    eMarge.textContent = txMarge.toFixed(1) + ' %';
+    eMarge.style.color = txMarge >= 40 ? 'var(--gr)' : txMarge >= 20 ? 'var(--am)' : 'var(--rd)';
+  }
+
+  // Objectif
+  const obj = P.obj || 0;
+  const objPct = obj > 0 ? Math.min(Math.round(caHT / obj * 100), 999) : 0;
+  const eObjLbl = $('db-kpi-ca-obj');
+  const eBarObj = $('db-bar-obj');
+  if(eObjLbl) eObjLbl.textContent = obj > 0 ? 'Objectif : ' + Math.round(obj).toLocaleString('fr-FR') + ' €' : 'Objectif non défini';
+  if(eBarObj) {
+    eBarObj.style.width = Math.min(objPct, 100) + '%';
+    eBarObj.style.background = objPct >= 100 ? 'var(--gr)' : objPct >= 60 ? 'var(--ac)' : 'var(--am)';
+  }
+
+  // ── Complétude ──
+  const moisAvecCA = caParMois.filter(v => v > 0).length;
+  const moisAvecCH = chParMois.filter(v => v > 0).length;
+  const eComp = $('db-completude');
+  if(eComp) {
+    if(moisAvecCA === 0 && moisAvecCH === 0) {
+      eComp.textContent = 'Aucune donnée saisie'; eComp.style.color = 'var(--rd)';
+    } else if(moisAvecCA === 12 && moisAvecCH >= 6) {
+      eComp.textContent = 'Données complètes ✓'; eComp.style.color = 'var(--gr)';
+    } else {
+      eComp.textContent = `CA : ${moisAvecCA}/12 mois · Charges : ${moisAvecCH}/12 mois`;
+      eComp.style.color = 'var(--am)';
+    }
+  }
+
+  // ── Graphique principal CA vs Charges ──
+  const periode = $('db-periode') ? $('db-periode').value : 'mensuel';
+  let labels, dataCA, dataCH;
+
+  if(periode === 'mensuel') {
+    labels = MOIS;
+    dataCA = caParMois.map(v => Math.round(v * 100) / 100);
+    dataCH = chParMois.map(v => Math.round(v * 100) / 100);
+  } else if(periode === 'trimestriel') {
+    labels = ['T1','T2','T3','T4'];
+    dataCA = [0,1,2,3].map(t => Math.round(caParMois.slice(t*3,t*3+3).reduce((s,v)=>s+v,0)*100)/100);
+    dataCH = [0,1,2,3].map(t => Math.round(chParMois.slice(t*3,t*3+3).reduce((s,v)=>s+v,0)*100)/100);
+  } else {
+    labels = ['S1','S2'];
+    dataCA = [Math.round(caParMois.slice(0,6).reduce((s,v)=>s+v,0)*100)/100,
+              Math.round(caParMois.slice(6).reduce((s,v)=>s+v,0)*100)/100];
+    dataCH = [Math.round(chParMois.slice(0,6).reduce((s,v)=>s+v,0)*100)/100,
+              Math.round(chParMois.slice(6).reduce((s,v)=>s+v,0)*100)/100];
+  }
+
+  const ctxMain = $('db-chart-main');
+  if(ctxMain) {
+    if(chartDBMain) chartDBMain.destroy();
+    chartDBMain = new Chart(ctxMain, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'CA HT', data: dataCA,
+            backgroundColor: 'rgba(37,99,235,0.15)', borderColor: '#2563eb',
+            borderWidth: 2, borderRadius: 4, order: 2,
+          },
+          {
+            label: 'Charges HT', data: dataCH,
+            backgroundColor: 'rgba(225,29,72,0.12)', borderColor: '#e11d48',
+            borderWidth: 2, borderRadius: 4, order: 3,
+          },
+          {
+            label: 'Résultat', type: 'line',
+            data: dataCA.map((v,i) => Math.round((v - dataCH[i]) * 100) / 100),
+            borderColor: '#059669', backgroundColor: 'transparent',
+            borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#059669',
+            tension: 0.3, order: 1,
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { font: { family: 'Plus Jakarta Sans', size: 12 }, boxWidth: 12, padding: 16 } },
+          tooltip: { callbacks: { label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €' } }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('fr-FR') + ' €' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // ── Graphique objectif (donut) ──
+  const ctxObj = $('db-chart-obj');
+  if(ctxObj) {
+    if(chartDBObj) chartDBObj.destroy();
+    const reste = obj > 0 ? Math.max(obj - caHT, 0) : 1;
+    const done  = obj > 0 ? Math.min(caHT, obj) : 0;
+    const col   = objPct >= 100 ? '#059669' : objPct >= 60 ? '#2563eb' : '#d97706';
+    chartDBObj = new Chart(ctxObj, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: obj > 0 ? [done, reste] : [0, 1],
+          backgroundColor: [col, 'var(--bd)'],
+          borderWidth: 0,
+        }]
+      },
+      options: {
+        responsive: false, cutout: '72%',
+        plugins: { legend: { display: false }, tooltip: { enabled: false } }
+      }
+    });
+  }
+  const eObjPct = $('db-obj-pct');
+  if(eObjPct) eObjPct.textContent = obj > 0 ? objPct + '%' : '—';
+  const eObjDetail = $('db-obj-detail');
+  if(eObjDetail) {
+    if(obj > 0) {
+      const manque = Math.max(obj - caHT, 0);
+      eObjDetail.textContent = manque > 0
+        ? 'Encore ' + Math.round(manque).toLocaleString('fr-FR') + ' € à réaliser'
+        : '🎉 Objectif atteint !';
+    } else {
+      eObjDetail.textContent = 'Définir un objectif dans Paramètres';
+    }
+  }
+
+  // ── Top articles ──
+  const artsSorted = articles
+    .map(a => ({ nom: a.nom, ca: Math.round((qty[a.code]||[]).reduce((s,v)=>s+(v||0),0) * a.pv * 100) / 100 }))
+    .filter(a => a.ca > 0)
+    .sort((a,b) => b.ca - a.ca)
+    .slice(0,5);
+  const maxCA = artsSorted[0]?.ca || 1;
+  const colors = ['var(--ac)','var(--gr)','var(--pu)','var(--am)','var(--tl)'];
+  const eTopArts = $('db-top-arts');
+  if(eTopArts) {
+    eTopArts.innerHTML = artsSorted.length ? artsSorted.map((a,i) => `
+      <div class="topitem">
+        <div class="toprank">${i+1}</div>
+        <div class="topname" title="${a.nom}">${a.nom}</div>
+        <div style="flex:1;margin:0 8px">
+          <div class="pw" style="margin:0"><div class="topbar-fill" style="width:${Math.round(a.ca/maxCA*100)}%;background:${colors[i]};height:4px;border-radius:99px"></div></div>
+        </div>
+        <div class="topval">${Math.round(a.ca).toLocaleString('fr-FR')} €</div>
+      </div>` ).join('')
+    : '<div style="color:var(--t3);font-size:12px;text-align:center;padding:20px 0">Aucune vente saisie</div>';
+  }
+
+  // ── Top charges ──
+  const chsSorted = charges
+    .map(c => ({ nom: c.nom, ttc: Math.round((mts[String(c.code)]||[]).reduce((s,v)=>s+(v||0),0) * 100) / 100 }))
+    .filter(c => c.ttc > 0)
+    .sort((a,b) => b.ttc - a.ttc)
+    .slice(0,5);
+  const maxCH = chsSorted[0]?.ttc || 1;
+  const colsCH = ['var(--rd)','var(--am)','var(--pu)','var(--tl)','var(--pk)'];
+  const eTopChs = $('db-top-chs');
+  if(eTopChs) {
+    eTopChs.innerHTML = chsSorted.length ? chsSorted.map((c,i) => `
+      <div class="topitem">
+        <div class="toprank">${i+1}</div>
+        <div class="topname" title="${c.nom}">${c.nom}</div>
+        <div style="flex:1;margin:0 8px">
+          <div class="pw" style="margin:0"><div class="topbar-fill" style="width:${Math.round(c.ttc/maxCH*100)}%;background:${colsCH[i]};height:4px;border-radius:99px"></div></div>
+        </div>
+        <div class="topval">${Math.round(c.ttc).toLocaleString('fr-FR')} €</div>
+      </div>` ).join('')
+    : '<div style="color:var(--t3);font-size:12px;text-align:center;padding:20px 0">Aucune charge saisie</div>';
+  }
+
+  // ── Alertes ──
+  const eAl = $('db-alertes'); if(!eAl) return;
+  const alertes = [];
+  const moisSansCA = MOIS.filter((_,m) => caParMois[m] === 0).length;
+  if(moisSansCA > 0 && moisAvecCA > 0)
+    alertes.push({ cls:'aba', ico:'⚠️', titre:`${moisSansCA} mois sans CA saisi`, desc:'Des mois sont à zéro dans le module Chiffre d\'affaires.' });
+  if(chHT > 0 && caHT > 0 && chHT / caHT > 0.8)
+    alertes.push({ cls:'abr', ico:'🔴', titre:'Ratio charges/CA > 80 %', desc:'Vos charges représentent plus de 80 % de votre CA HT. Marges sous pression.' });
+  if(resultat < 0 && caHT > 0)
+    alertes.push({ cls:'abr', ico:'📉', titre:'Résultat brut négatif', desc: 'Vos charges HT dépassent votre CA HT sur cette année.' });
+  if(!P.obj || P.obj === 0)
+    alertes.push({ cls:'abb', ico:'🎯', titre:'Objectif CA non défini', desc:'Définissez un objectif annuel dans Paramètres → Entreprise pour suivre votre progression.' });
+  eAl.innerHTML = alertes.map(a => `
+    <div class="abox ${a.cls}" style="margin-bottom:8px">
+      <div class="abox-ico">${a.ico}</div>
+      <div><div class="abox-title">${a.titre}</div><div class="abox-desc">${a.desc}</div></div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════
 // NAVIGATION ANNÉES
 // ════════════════════════════════════════════════════════
 async function changeAnnee(n) {
@@ -1749,9 +2104,12 @@ async function changeAnnee(n) {
   mts = {};
   await Promise.all([loadParams(), loadArticles(), loadCharges()]);
   await loadCA();
-  // Recharger le panneau charges si c'est celui qui est affiché
+  // Recharger le panneau actif si c'est charges ou dashboard
   if($('pnl-charges') && $('pnl-charges').style.display !== 'none') {
     await loadChargesData();
+  }
+  if($('pnl-dashboard') && $('pnl-dashboard').style.display !== 'none') {
+    renderDashboard();
   }
 }
 
@@ -1863,6 +2221,13 @@ async function startApp(user) {
   await loadCharges();
   await loadParams();
   await loadCA();
+  // Routing : Dashboard si entreprise configurée, Paramètres sinon
+  if(P.nomEnt && P.nomEnt.trim() !== '') {
+    showPanel('pnl-dashboard','nav-dashboard');
+    renderDashboard();
+  } else {
+    showPanel('pnl-params','nav-params');
+  }
   setSaved();
 }
 
@@ -1870,8 +2235,8 @@ async function startApp(user) {
 // NAVIGATION PANELS
 // ════════════════════════════════════════════════════════
 function showPanel(panelId, navId) {
-  ['pnl-params','pnl-ca','pnl-charges'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
-  ['nav-params','nav-ca','nav-charges'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
+  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
+  ['nav-dashboard','nav-params','nav-ca','nav-charges'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
   const p=$(panelId); if(p) p.style.display='block';
   const n=$(navId);   if(n) n.classList.add('active');
 }
@@ -1919,6 +2284,10 @@ document.addEventListener('DOMContentLoaded', () => {
   $('btn-year-next').addEventListener('click', () => changeAnnee(ANNEE+1));
 
   // Navigation sidebar
+  $('nav-dashboard').addEventListener('click', () => {
+    showPanel('pnl-dashboard','nav-dashboard');
+    renderDashboard();
+  });
   $('nav-params').addEventListener('click', () => showPanel('pnl-params','nav-params'));
   $('nav-ca').addEventListener('click', async () => {
     showPanel('pnl-ca','nav-ca');
@@ -1954,6 +2323,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('change', e => {
     if(e.target.id === 'ca-filtre-art') updateCACharts();
     if(e.target.id === 'ch-filtre-type') updateCHCharts();
+    if(e.target.id === 'db-periode') renderDashboard();
   });
   let started = false;
   DB.auth.onAuthStateChange(async (event, session) => {
