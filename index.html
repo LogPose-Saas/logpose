@@ -471,6 +471,10 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <span class="sb-ico" style="font-size:14px;font-weight:700;opacity:.65">€</span>
           <span>Chiffre d'affaires</span>
         </div>
+        <div class="sb-item" id="nav-charges">
+          <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>
+          <span>Charges</span>
+        </div>
       </div>
       <div class="sb-sect">
         <div class="sb-lbl">Configuration</div>
@@ -697,6 +701,79 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
 
     </div><!-- fin pnl-ca -->
+
+    <!-- SAISIE CHARGES -->
+    <div id="pnl-charges" style="display:none">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Charges</div>
+          <div class="page-sub">Saisie des montants TTC · Année <span id="ch-annee-lbl">2026</span></div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+        <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
+          <div class="klbl">Total charges TTC</div>
+          <div class="kval" id="ch-kpi-ttc">0 €</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Somme de tous les montants TTC saisis sur l'année, toutes charges confondues.</div></div>
+        </div>
+        <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
+          <div class="klbl">Total charges HT</div>
+          <div class="kval" id="ch-kpi-ht">0 €</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Montant HT recalculé selon le taux de TVA de chaque charge (TTC ÷ (1 + taux TVA)).</div></div>
+        </div>
+        <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
+          <div class="klbl">Charges fixes TTC</div>
+          <div class="kval" id="ch-kpi-fixes">0 €</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Total des charges de type "Fixe" (loyer, abonnements…) sur l'année.</div></div>
+        </div>
+        <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
+          <div class="klbl">Charges variables TTC</div>
+          <div class="kval" id="ch-kpi-vars">0 €</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Total des charges de type "Variable" (matières premières, sous-traitance…) sur l'année.</div></div>
+        </div>
+      </div>
+
+      <!-- Tableau de saisie -->
+      <div class="card">
+        <div class="tbl-hdr">
+          <div><div class="ct">Saisie des montants TTC</div><div class="cs">Montants en euros TTC par charge et par mois</div></div>
+        </div>
+        <div id="ch-empty" style="display:none" class="empty">
+          <div class="empty-ico">💸</div>
+          <div class="empty-title">Aucune charge configurée</div>
+          <div class="empty-desc">Ajoutez des charges dans Paramètres → Charges</div>
+        </div>
+        <div style="overflow-x:auto" id="ch-tbl-wrap">
+          <table class="stbl" id="ch-tbl">
+            <thead id="smt-thead"></thead>
+            <tbody id="smt-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Graphiques -->
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-top:14px">
+        <div class="card" style="margin:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div class="ct">Évolution des charges mensuelles (TTC)</div>
+            <select class="fsel" id="ch-filtre-type" style="width:auto;min-width:140px;font-size:12px">
+              <option value="">Toutes les charges</option>
+              <option value="Fixe">Fixes uniquement</option>
+              <option value="Variable">Variables uniquement</option>
+            </select>
+          </div>
+          <div style="height:220px"><canvas id="ch-chart-line"></canvas></div>
+        </div>
+        <div class="card" style="margin:0">
+          <div class="ct" style="margin-bottom:14px">Charges par catégorie (TTC)</div>
+          <div style="height:220px"><canvas id="ch-chart-pie"></canvas></div>
+        </div>
+      </div>
+
+    </div><!-- fin pnl-charges -->
+
 </div><!-- fin app -->
 
 <!-- SAVE BAR -->
@@ -1001,6 +1078,7 @@ function renderCharges() {
 // ════════════════════════════════════════════════════════
 const MOIS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 let qty = {}; // {code: [12 valeurs]}
+let mts = {}; // {charge_code: [12 montants TTC]}
 
 async function loadCA() {
   if(!UID) return;
@@ -1142,7 +1220,7 @@ function renderCA() {
     <td colspan="3" style="text-align:left;font-weight:700">TOTAL</td>
     ${totParMois.map(v => `<td class="stot">${v||''}</td>`).join('')}
     <td class="stot">${totGlobal}</td>
-    <td class="stot">${caGlobal.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2})} €</td>
+    <td class="stot">${caGlobal.toFixed(0)} €</td>
   </tr>`;
 
   // Peupler le menu filtre
@@ -1330,6 +1408,288 @@ function updateCACharts() {
 }
 
 // ════════════════════════════════════════════════════════
+// SAISIE CHARGES
+// ════════════════════════════════════════════════════════
+let chartCHLine = null;
+let chartCHPie  = null;
+
+async function loadChargesData() {
+  if(!UID) return;
+
+  if(!charges.length) {
+    await loadCharges();
+  }
+
+  mts = {};
+  charges.forEach(c => { mts[String(c.code)] = Array(12).fill(0); });
+
+  try {
+    const {data, error} = await sbq(
+      DB.from('saisies_charges').select('charge_code,mois,montant')
+        .eq('user_id', UID).eq('annee', ANNEE)
+    );
+    if(error) { console.warn('[charges data]', error.message); }
+    else {
+      (data||[]).forEach(r => {
+        const k = String(r.charge_code);
+        if(mts[k] !== undefined) mts[k][r.mois-1] = parseFloat(r.montant)||0;
+      });
+    }
+  } catch(e) { console.warn('[charges data timeout]', e.message); }
+
+  renderChargesData();
+}
+
+async function saveMt(code, mois, val) {
+  if(!UID) return;
+  val = parseFloat(val) || 0;
+  const k = String(code);
+  mts[k][mois] = val;
+
+  // Mise à jour inline du total ligne sans reconstruire le tableau
+  const chIdx = charges.findIndex(c => String(c.code) === k);
+  if(chIdx >= 0) {
+    const totTTC = mts[k].reduce((s,v) => s+v, 0);
+    const row = document.querySelector(`#smt-tbody tr:nth-child(${chIdx+1})`);
+    if(row) {
+      const cells = row.querySelectorAll('td');
+      cells[cells.length-1].textContent = totTTC.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+    }
+  }
+
+  updateCHTotaux();
+  updateCHKpis();
+  updateCHCharts();
+
+  if(val === 0) {
+    await DB.from('saisies_charges').delete()
+      .eq('user_id',UID).eq('annee',ANNEE).eq('charge_code',String(code)).eq('mois',mois+1);
+  } else {
+    await DB.from('saisies_charges').upsert({
+      user_id:UID, charge_code:String(code), annee:ANNEE, mois:mois+1, montant:val,
+    }, {onConflict:'user_id,charge_code,annee,mois'});
+  }
+  setSaved();
+}
+
+function updateCHTotaux() {
+  const totParMois = MOIS.map((_,m) =>
+    charges.reduce((s,c) => s + (mts[String(c.code)]||Array(12).fill(0))[m], 0)
+  );
+  const totGlobal = totParMois.reduce((s,v) => s+v, 0);
+
+  const rows = document.querySelectorAll('#smt-tbody tr');
+  const totRow = rows[rows.length-1];
+  if(totRow && totRow.classList.contains('totrow')) {
+    const cells = totRow.querySelectorAll('td');
+    totParMois.forEach((v,m) => { if(cells[m+1]) cells[m+1].textContent = v ? v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) : ''; });
+    if(cells[13]) cells[13].textContent = totGlobal.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+  }
+}
+
+function renderChargesData() {
+  const lbl = $('ch-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+
+  if(!charges.length) {
+    const emp = $('ch-empty'); if(emp) emp.style.display='block';
+    const wrap = $('ch-tbl-wrap'); if(wrap) wrap.style.display='none';
+    updateCHKpis();
+    return;
+  }
+  const emp = $('ch-empty'); if(emp) emp.style.display='none';
+  const wrap = $('ch-tbl-wrap'); if(wrap) wrap.style.display='';
+
+  $('smt-thead').innerHTML = `<tr>
+    <th style="text-align:left;min-width:70px">Code</th>
+    <th style="text-align:left;min-width:140px">Charge</th>
+    <th style="text-align:left;min-width:80px">Type</th>
+    ${MOIS.map(m => `<th>${m}</th>`).join('')}
+    <th>Total TTC</th>
+  </tr>`;
+
+  const typeBadge = t => t==='Fixe'
+    ? `<span class="bdg bpu">Fixe</span>`
+    : `<span class="bdg bam">Variable</span>`;
+
+  $('smt-tbody').innerHTML = charges.map((c,i) => {
+    const k = String(c.code);
+    const vals = mts[k] || Array(12).fill(0);
+    const totTTC = vals.reduce((s,v) => s+v, 0);
+    return `<tr>
+      <td style="color:var(--t3);font-family:var(--fm);font-size:11px">${String(c.code).slice(-6)}</td>
+      <td style="font-weight:500">${c.nom}</td>
+      <td>${typeBadge(c.type)}</td>
+      ${vals.map((v,m) => `<td>
+        <input class="sinp" type="number" min="0" step="0.01" value="${v||''}" placeholder="0"
+          onchange="saveMt('${k}',${m},this.value)">
+      </td>`).join('')}
+      <td class="stot">${totTTC.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
+    </tr>`;
+  }).join('');
+
+  // Ligne totaux
+  const totParMois = MOIS.map((_,m) =>
+    charges.reduce((s,c) => s + (mts[String(c.code)]||[])[m] || 0, 0)
+  );
+  const totGlobal = totParMois.reduce((s,v) => s+v, 0);
+
+  $('smt-tbody').innerHTML += `<tr class="totrow">
+    <td colspan="3" style="text-align:left;font-weight:700">TOTAL</td>
+    ${totParMois.map(v => `<td class="stot">${v ? v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) : ''}</td>`).join('')}
+    <td class="stot">${totGlobal.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
+  </tr>`;
+
+  updateCHKpis();
+  updateCHCharts();
+}
+
+function updateCHKpis() {
+  let totalTTC = 0, totalHT = 0, fixesTTC = 0, varsTTC = 0;
+  charges.forEach(c => {
+    const k = String(c.code);
+    const annuelTTC = (mts[k]||[]).reduce((s,v) => s+(v||0), 0);
+    const annuelHT  = annuelTTC / (1 + (c.tva||0));
+    totalTTC += annuelTTC;
+    totalHT  += annuelHT;
+    if(c.type === 'Fixe') fixesTTC += annuelTTC;
+    else                  varsTTC  += annuelTTC;
+  });
+  const fmt = v => v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+  const e1=$('ch-kpi-ttc');   if(e1) e1.textContent=fmt(totalTTC);
+  const e2=$('ch-kpi-ht');    if(e2) e2.textContent=fmt(totalHT);
+  const e3=$('ch-kpi-fixes'); if(e3) e3.textContent=fmt(fixesTTC);
+  const e4=$('ch-kpi-vars');  if(e4) e4.textContent=fmt(varsTTC);
+}
+
+function updateCHCharts() {
+  const filtre = $('ch-filtre-type') ? $('ch-filtre-type').value : '';
+  const chargesFiltrees = filtre ? charges.filter(c => c.type === filtre) : charges;
+
+  // Courbe mensuelle TTC
+  const chParMois = MOIS.map((_,m) =>
+    chargesFiltrees.reduce((s,c) => s + ((mts[String(c.code)]||[])[m] || 0), 0)
+  );
+
+  // Camembert par catégorie
+  const catMap = {};
+  charges.forEach(c => {
+    if(filtre && c.type !== filtre) return;
+    const cat = c.cat || 'Divers';
+    const total = (mts[String(c.code)]||[]).reduce((s,v) => s+(v||0), 0);
+    catMap[cat] = (catMap[cat]||0) + total;
+  });
+
+  const colors = ['#f43f5e','#f59e0b','#9b87f5','#22d3c8','#3b7eff','#0ea572','#f472b6','#fb923c'];
+  const cats    = Object.keys(catMap).filter(c => catMap[c] > 0);
+  const catVals = cats.map(c => catMap[c]);
+
+  // Plugin étiquettes courbe
+  const dataLabelsCH = {
+    id: 'dataLabelsCH',
+    afterDatasetsDraw(chart) {
+      const {ctx, data, scales:{x,y}, chartArea} = chart;
+      ctx.save();
+      ctx.font = '600 10px Plus Jakarta Sans, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#f43f5e';
+      data.datasets[0].data.forEach((val, i) => {
+        if(!val) return;
+        let px = x.getPixelForValue(i);
+        const py = y.getPixelForValue(val) - 10;
+        const textWidth = ctx.measureText(val.toLocaleString('fr-FR') + ' €').width;
+        if(px - textWidth/2 < chartArea.left) px = chartArea.left + textWidth/2;
+        if(px + textWidth/2 > chartArea.right) px = chartArea.right - textWidth/2;
+        ctx.fillText(val.toLocaleString('fr-FR') + ' €', px, py);
+      });
+      ctx.restore();
+    }
+  };
+
+  // Plugin labels externes camembert
+  const outerLabelsCH = {
+    id: 'outerLabelsCH',
+    afterDraw(chart) {
+      const {ctx, chartArea, data} = chart;
+      const cx = (chartArea.left + chartArea.right) / 2;
+      const cy = (chartArea.top  + chartArea.bottom) / 2;
+      const meta = chart.getDatasetMeta(0);
+      const total = data.datasets[0].data.reduce((s,v) => s+v, 0);
+      if(!total) return;
+      ctx.save();
+      ctx.font = '600 11px Plus Jakarta Sans, sans-serif';
+      meta.data.forEach((arc, i) => {
+        const val  = data.datasets[0].data[i];
+        const lbl  = data.labels[i];
+        const pct  = Math.round(val/total*100);
+        const text = lbl + ' — ' + val.toLocaleString('fr-FR') + ' € — ' + pct + '%';
+        const angle = (arc.startAngle + arc.endAngle) / 2;
+        const r1 = arc.outerRadius + 8;
+        const r2 = arc.outerRadius + 18;
+        const x1 = cx + Math.cos(angle) * r1;
+        const y1 = cy + Math.sin(angle) * r1;
+        const x2 = cx + Math.cos(angle) * r2;
+        const y2 = cy + Math.sin(angle) * r2;
+        const x3 = x2 + (Math.cos(angle) > 0 ? 6 : -6);
+        ctx.strokeStyle = colors[i % colors.length];
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.lineTo(x3,y2); ctx.stroke();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.textAlign = Math.cos(angle) > 0 ? 'left' : 'right';
+        ctx.fillText(text, x3 + (Math.cos(angle) > 0 ? 4 : -4), y2 + 4);
+      });
+      ctx.restore();
+    }
+  };
+
+  // Courbe
+  const ctxL = $('ch-chart-line');
+  if(ctxL) {
+    if(chartCHLine) chartCHLine.destroy();
+    chartCHLine = new Chart(ctxL, {
+      type: 'line',
+      plugins: [dataLabelsCH],
+      data: {
+        labels: MOIS,
+        datasets: [{
+          label: 'Charges TTC', data: chParMois,
+          borderColor: '#f43f5e', backgroundColor: 'rgba(244,63,94,0.08)',
+          borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f43f5e',
+          fill: true, tension: 0.4,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 28 } },
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('fr-FR') + ' €' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // Camembert
+  const ctxP = $('ch-chart-pie');
+  if(ctxP && cats.length > 0) {
+    if(chartCHPie) chartCHPie.destroy();
+    chartCHPie = new Chart(ctxP, {
+      type: 'doughnut',
+      plugins: [outerLabelsCH],
+      data: {
+        labels: cats,
+        datasets: [{ data: catVals, backgroundColor: colors.slice(0, cats.length), borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        layout: { padding: 60 },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } }
+      }
+    });
+  }
+}
+
+// ════════════════════════════════════════════════════════
 // NAVIGATION ANNÉES
 // ════════════════════════════════════════════════════════
 async function changeAnnee(n) {
@@ -1347,6 +1707,7 @@ async function changeAnnee(n) {
   renderAnneesNav();
   await Promise.all([loadParams(), loadArticles(), loadCharges()]);
   await loadCA();
+  mts = {};
 }
 
 function renderAnneesNav() {
@@ -1464,8 +1825,8 @@ async function startApp(user) {
 // NAVIGATION PANELS
 // ════════════════════════════════════════════════════════
 function showPanel(panelId, navId) {
-  ['pnl-params','pnl-ca'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
-  ['nav-params','nav-ca'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
+  ['pnl-params','pnl-ca','pnl-charges'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
+  ['nav-params','nav-ca','nav-charges'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
   const p=$(panelId); if(p) p.style.display='block';
   const n=$(navId);   if(n) n.classList.add('active');
 }
@@ -1518,6 +1879,10 @@ document.addEventListener('DOMContentLoaded', () => {
     showPanel('pnl-ca','nav-ca');
     await loadCA();
   });
+  $('nav-charges').addEventListener('click', async () => {
+    showPanel('pnl-charges','nav-charges');
+    await loadChargesData();
+  });
   [['tab-articles','p-articles'],['tab-charges','p-charges'],['tab-entreprise','p-entreprise']].forEach(([tid,pid]) => {
     $(tid).addEventListener('click', () => {
       document.querySelectorAll('.tab-pnl').forEach(p => p.classList.remove('active'));
@@ -1543,6 +1908,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Filtre graphique CA
   document.addEventListener('change', e => {
     if(e.target.id === 'ca-filtre-art') updateCACharts();
+    if(e.target.id === 'ch-filtre-type') updateCHCharts();
   });
   let started = false;
   DB.auth.onAuthStateChange(async (event, session) => {
