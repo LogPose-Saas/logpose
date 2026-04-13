@@ -237,12 +237,12 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
 /* ── SAISIE TABLE ── */
 .stbl{width:100%;border-collapse:collapse;font-size:12px}
-.stbl th{font-size:9px;font-weight:700;font-family:var(--fm);letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:6px 8px;text-align:center;border-bottom:1px solid var(--bd);white-space:nowrap}
+.stbl th{font-size:9px;font-weight:700;font-family:var(--fm);letter-spacing:.07em;text-transform:uppercase;color:var(--t3);padding:6px 4px;text-align:center;border-bottom:1px solid var(--bd);white-space:nowrap}
 .stbl th:first-child,.stbl th:nth-child(2){text-align:left}
-.stbl td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:center;vertical-align:middle}
+.stbl td{padding:5px 4px;border-bottom:1px solid var(--bd);text-align:center;vertical-align:middle}
 .stbl .totrow td{border-bottom:none;background:var(--bgs);font-weight:700}
 .stbl tr:not(.totrow):hover td{background:var(--bgh)}
-.sinp{width:64px;background:transparent;border:1px solid transparent;border-radius:5px;padding:4px 5px;color:var(--t1);font-family:var(--fm);font-size:12px;text-align:center;outline:none;transition:all var(--tr)}
+.sinp{width:82px;background:transparent;border:1px solid transparent;border-radius:5px;padding:4px 4px;color:var(--t1);font-family:var(--fm);font-size:11.5px;text-align:center;outline:none;transition:all var(--tr)}
 .sinp:focus{background:var(--in);border-color:var(--bdf);box-shadow:0 0 0 2px var(--ag)}
 .stot{font-family:var(--fm);font-size:12px;font-weight:700;color:var(--ac)}
 
@@ -1498,9 +1498,9 @@ function renderChargesData() {
   const wrap = $('ch-tbl-wrap'); if(wrap) wrap.style.display='';
 
   $('smt-thead').innerHTML = `<tr>
-    <th style="text-align:left;min-width:70px">Code</th>
-    <th style="text-align:left;min-width:140px">Charge</th>
-    <th style="text-align:left;min-width:80px">Type</th>
+    <th style="text-align:left;min-width:55px">Code</th>
+    <th style="text-align:left;min-width:120px">Charge</th>
+    <th style="text-align:left;min-width:70px">Type</th>
     ${MOIS.map(m => `<th>${m}</th>`).join('')}
     <th>Total TTC</th>
   </tr>`;
