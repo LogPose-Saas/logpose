@@ -367,7 +367,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   color:var(--t2);
   line-height:1.6;
   width:230px;
-  max-width:calc(100vw - 40px);
   z-index:500;
   box-shadow:var(--sh);
   pointer-events:none;
@@ -382,17 +381,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   border-top-color:var(--bds);
 }
 .kpi-help:hover .kpi-tooltip { display:block; animation:fadeInDown .15s ease; }
-/* Tooltip des KPIs en 1ère et 2ème position : s'ouvre vers la droite */
-.kgrid .kcard:nth-child(1) .kpi-tooltip,
-.kgrid .kcard:nth-child(2) .kpi-tooltip {
-  right:auto;
-  left:0;
-}
-.kgrid .kcard:nth-child(1) .kpi-tooltip::after,
-.kgrid .kcard:nth-child(2) .kpi-tooltip::after {
-  right:auto;
-  left:5px;
-}
+/* Suppression des règles nth-child qui causaient le débordement gauche */
 @keyframes fadeInDown{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── SAVE BAR ── */
@@ -2281,6 +2270,32 @@ document.addEventListener('DOMContentLoaded', () => {
   $('auth-pwd').addEventListener('keydown',   e => { if(e.key==='Enter') doAuth(); });
 
   // Sidebar
+  // Repositionnement dynamique des tooltips KPI pour éviter débordement viewport
+  document.addEventListener('mouseenter', e => {
+    const help = e.target.closest('.kpi-help');
+    if(!help) return;
+    const tip = help.querySelector('.kpi-tooltip');
+    if(!tip) return;
+    // Reset
+    tip.style.right = '0';
+    tip.style.left  = 'auto';
+    tip.style.removeProperty('--arrow-right');
+    // Calculer si le tooltip déborde à droite
+    requestAnimationFrame(() => {
+      const rect = tip.getBoundingClientRect();
+      if(rect.left < 8) {
+        // Déborde à gauche → aligner à gauche du bouton
+        tip.style.right = 'auto';
+        tip.style.left  = '0';
+      }
+      if(rect.right > window.innerWidth - 8) {
+        // Déborde à droite → aligner à droite du bouton (défaut)
+        tip.style.right = '0';
+        tip.style.left  = 'auto';
+      }
+    });
+  }, true);
+
   $('btn-logout').addEventListener('click',    doLogout);
   $('btn-toggle-sb').addEventListener('click', toggleSidebar);
   $('btn-theme').addEventListener('click',     toggleTheme);
