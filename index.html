@@ -691,7 +691,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div style="height:220px"><canvas id="ca-chart-line"></canvas></div>
         </div>
         <div class="card" style="margin:0">
-          <div class="ct" style="margin-bottom:14px">Chiffre d'affaires par catégorie</div>
+          <div class="ct" id="ca-pie-title" style="margin-bottom:14px">Chiffre d'affaires par catégorie</div>
           <div style="height:220px"><canvas id="ca-chart-pie"></canvas></div>
         </div>
       </div>
@@ -1176,7 +1176,6 @@ let chartCALine = null;
 let chartCAPie  = null;
 
 function updateCACharts() {
-  // Filtre article sélectionné
   const filtre = $('ca-filtre-art') ? $('ca-filtre-art').value : '';
   const artsFiltres = filtre ? articles.filter(a => a.code === filtre) : articles;
 
@@ -1185,19 +1184,36 @@ function updateCACharts() {
     artsFiltres.reduce((s,a) => s + ((qty[a.code]||[])[m] || 0) * a.pv, 0)
   );
 
-  // Camembert : toujours global
-  const catMap = {};
-  articles.forEach(a => {
-    const cat = a.cat || 'Divers';
-    const total = (qty[a.code]||[]).reduce((s,v) => s+(v||0), 0) * a.pv;
-    catMap[cat] = (catMap[cat]||0) + total;
-  });
+  // Camembert : global si "Tous les articles", sinon articles de la même catégorie
+  let catMap = {};
+  let pieTitle = 'Chiffre d\'affaires par catégorie';
+
+  if(!filtre) {
+    // Global : répartition par catégorie
+    articles.forEach(a => {
+      const cat = a.cat || 'Divers';
+      const total = (qty[a.code]||[]).reduce((s,v) => s+(v||0), 0) * a.pv;
+      catMap[cat] = (catMap[cat]||0) + total;
+    });
+  } else {
+    // Filtré : articles de la même catégorie que l'article sélectionné
+    const artSelectionne = articles.find(a => a.code === filtre);
+    const catCible = artSelectionne ? artSelectionne.cat : '';
+    pieTitle = `Répartition dans "${catCible}"`;
+    articles.filter(a => a.cat === catCible).forEach(a => {
+      const total = (qty[a.code]||[]).reduce((s,v) => s+(v||0), 0) * a.pv;
+      if(total > 0) catMap[a.nom] = (catMap[a.nom]||0) + total;
+    });
+  }
+
+  // Mettre à jour le titre du camembert
+  const pieT = $('ca-pie-title'); if(pieT) pieT.textContent = pieTitle;
+
   const cats     = Object.keys(catMap).filter(c => catMap[c] > 0);
   const catVals  = cats.map(c => catMap[c]);
   const catTotal = catVals.reduce((s,v) => s+v, 0);
   const colors   = ['#3b7eff','#0ea572','#f59e0b','#f43f5e','#9b87f5','#22d3c8','#f472b6','#fb923c'];
   const isDark   = document.documentElement.getAttribute('data-theme') === 'dark';
-  const textCol  = isDark ? '#dde6f5' : '#0c1828';
 
   // Plugin : étiquettes sur la courbe
   const dataLabelsLine = {
