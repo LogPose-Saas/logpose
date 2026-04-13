@@ -1526,30 +1526,28 @@ function updateCACharts() {
 let chartCHLine = null;
 let chartCHPie  = null;
 
-async function loadChargesData() {
-  if(!UID) return;
-
-  if(!charges.length) {
-    await loadCharges();
-  }
-
+async function _loadMtsOnly() {
+  if(!UID || !charges.length) return;
   mts = {};
   charges.forEach(c => { mts[String(c.code)] = Array(12).fill(0); });
-
   try {
     const {data, error} = await sbq(
       DB.from('saisies_charges').select('charge_code,mois,montant')
         .eq('user_id', UID).eq('annee', ANNEE)
     );
-    if(error) { console.warn('[charges data]', error.message); }
-    else {
+    if(!error) {
       (data||[]).forEach(r => {
         const k = String(r.charge_code);
         if(mts[k] !== undefined) mts[k][r.mois-1] = parseFloat(r.montant)||0;
       });
     }
-  } catch(e) { console.warn('[charges data timeout]', e.message); }
+  } catch(e) { console.warn('[mts load]', e.message); }
+}
 
+async function loadChargesData() {
+  if(!UID) return;
+  if(!charges.length) await loadCharges();
+  await _loadMtsOnly();
   renderChargesData();
 }
 
@@ -2097,9 +2095,11 @@ async function changeAnnee(n) {
   mts = {};
   await Promise.all([loadParams(), loadArticles(), loadCharges()]);
   await loadCA();
-  // Recharger le panneau actif si c'est charges ou dashboard
+  // Toujours recharger mts (utilisé par Dashboard ET module Charges)
+  await _loadMtsOnly();
+  // Re-render le panneau actif
   if($('pnl-charges') && $('pnl-charges').style.display !== 'none') {
-    await loadChargesData();
+    renderChargesData();
   }
   if($('pnl-dashboard') && $('pnl-dashboard').style.display !== 'none') {
     renderDashboard();
@@ -2214,6 +2214,7 @@ async function startApp(user) {
   await loadCharges();
   await loadParams();
   await loadCA();
+  await _loadMtsOnly();
   // Routing : Dashboard si entreprise configurée, Paramètres sinon
   if(P.nomEnt && P.nomEnt.trim() !== '') {
     showPanel('pnl-dashboard','nav-dashboard');
