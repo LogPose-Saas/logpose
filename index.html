@@ -1508,51 +1508,60 @@ function updateCACharts() {
   // ── Courbe CA mensuel ──
   const ctxL = $('ca-chart-line');
   if(ctxL) {
-    if(chartCALine) chartCALine.destroy();
-    chartCALine = new Chart(ctxL, {
-      type: 'line',
-      plugins: [dataLabelsLine],
-      data: {
-        labels: MOIS,
-        datasets: [{
-          label: 'CA HT', data: caParMois,
-          borderColor: '#3b7eff', backgroundColor: 'rgba(59,126,255,0.08)',
-          borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#3b7eff',
-          fill: true, tension: 0.4,
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        layout: { padding: { top: 28 } },
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('fr-FR') + ' €' } },
-          x: { grid: { display: false } }
+    if(chartCALine) {
+      // Update sans recréer
+      chartCALine.data.datasets[0].data = caParMois;
+      chartCALine.update('none');
+    } else {
+      chartCALine = new Chart(ctxL, {
+        type: 'line',
+        plugins: [dataLabelsLine],
+        data: {
+          labels: MOIS,
+          datasets: [{
+            label: 'CA HT', data: caParMois,
+            borderColor: '#3b7eff', backgroundColor: 'rgba(59,126,255,0.08)',
+            borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#3b7eff',
+            fill: true, tension: 0.4,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          layout: { padding: { top: 28 } },
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('fr-FR') + ' €' } },
+            x: { grid: { display: false } }
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   // ── Camembert CA par catégorie ──
   const ctxP = $('ca-chart-pie');
-  if(ctxP && cats.length > 0) {
-    if(chartCAPie) chartCAPie.destroy();
-    chartCAPie = new Chart(ctxP, {
-      type: 'doughnut',
-      plugins: [outerLabels],
-      data: {
-        labels: cats,
-        datasets: [{ data: catVals, backgroundColor: colors.slice(0, cats.length), borderWidth: 0 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        layout: { padding: 60 },
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false }
+  if(ctxP) {
+    if(chartCAPie && cats.length > 0) {
+      // Update labels + données
+      chartCAPie.data.labels = cats;
+      chartCAPie.data.datasets[0].data = catVals;
+      chartCAPie.data.datasets[0].backgroundColor = colors.slice(0, cats.length);
+      chartCAPie.update('none');
+    } else if(!chartCAPie && cats.length > 0) {
+      chartCAPie = new Chart(ctxP, {
+        type: 'doughnut',
+        plugins: [outerLabels],
+        data: {
+          labels: cats,
+          datasets: [{ data: catVals, backgroundColor: colors.slice(0, cats.length), borderWidth: 0 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          layout: { padding: 60 },
+          plugins: { legend: { display: false }, tooltip: { enabled: false } }
         }
-      }
-    });
+      });
+    }
   }
 }
 
@@ -1833,48 +1842,58 @@ function updateCHCharts() {
   // Courbe
   const ctxL = $('ch-chart-line');
   if(ctxL) {
-    if(chartCHLine) chartCHLine.destroy();
-    chartCHLine = new Chart(ctxL, {
-      type: 'line',
-      plugins: [dataLabelsCH],
-      data: {
-        labels: MOIS,
-        datasets: [{
-          label: 'Charges TTC', data: chParMois,
-          borderColor: '#f43f5e', backgroundColor: 'rgba(244,63,94,0.08)',
-          borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f43f5e',
-          fill: true, tension: 0.4,
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        layout: { padding: { top: 28 } },
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('fr-FR') + ' €' } },
-          x: { grid: { display: false } }
+    if(chartCHLine) {
+      chartCHLine.data.datasets[0].data = chParMois;
+      chartCHLine.update('none');
+    } else {
+      chartCHLine = new Chart(ctxL, {
+        type: 'line',
+        plugins: [dataLabelsCH],
+        data: {
+          labels: MOIS,
+          datasets: [{
+            label: 'Charges TTC', data: chParMois,
+            borderColor: '#f43f5e', backgroundColor: 'rgba(244,63,94,0.08)',
+            borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#f43f5e',
+            fill: true, tension: 0.4,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          layout: { padding: { top: 28 } },
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('fr-FR') + ' €' } },
+            x: { grid: { display: false } }
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   // Camembert
   const ctxP = $('ch-chart-pie');
-  if(ctxP && cats.length > 0) {
-    if(chartCHPie) chartCHPie.destroy();
-    chartCHPie = new Chart(ctxP, {
-      type: 'doughnut',
-      plugins: [outerLabelsCH],
-      data: {
-        labels: cats,
-        datasets: [{ data: catVals, backgroundColor: colors.slice(0, cats.length), borderWidth: 0 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        layout: { padding: 60 },
-        plugins: { legend: { display: false }, tooltip: { enabled: false } }
-      }
-    });
+  if(ctxP) {
+    if(chartCHPie && cats.length > 0) {
+      chartCHPie.data.labels = cats;
+      chartCHPie.data.datasets[0].data = catVals;
+      chartCHPie.data.datasets[0].backgroundColor = colors.slice(0, cats.length);
+      chartCHPie.update('none');
+    } else if(!chartCHPie && cats.length > 0) {
+      chartCHPie = new Chart(ctxP, {
+        type: 'doughnut',
+        plugins: [outerLabelsCH],
+        data: {
+          labels: cats,
+          datasets: [{ data: catVals, backgroundColor: colors.slice(0, cats.length), borderWidth: 0 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          layout: { padding: 60 },
+          plugins: { legend: { display: false }, tooltip: { enabled: false } }
+        }
+      });
+    }
   }
 }
 
@@ -1976,50 +1995,58 @@ function renderDashboard() {
 
   const ctxMain = $('db-chart-main');
   if(ctxMain) {
-    if(chartDBMain) chartDBMain.destroy();
-    chartDBMain = new Chart(ctxMain, {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'CA HT', data: dataCA,
-            backgroundColor: 'rgba(37,99,235,0.15)', borderColor: '#2563eb',
-            borderWidth: 2, borderRadius: 4, order: 2,
-          },
-          {
-            label: 'Charges HT', data: dataCH,
-            backgroundColor: 'rgba(225,29,72,0.12)', borderColor: '#e11d48',
-            borderWidth: 2, borderRadius: 4, order: 3,
-          },
-          {
-            label: 'Résultat brut', type: 'line',
-            data: dataCA.map((v,i) => Math.round((v - dataCH[i]) * 100) / 100),
-            borderColor: '#059669', backgroundColor: 'transparent',
-            borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#059669',
-            tension: 0.3, order: 1,
-          }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: { font: { family: 'Plus Jakarta Sans', size: 12 }, boxWidth: 12, padding: 16 }
-          },
-          tooltip: {
-            callbacks: {
-              label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €'
+    if(chartDBMain) {
+      // Update labels + 3 datasets + animation courte
+      chartDBMain.data.labels = labels;
+      chartDBMain.data.datasets[0].data = dataCA;
+      chartDBMain.data.datasets[1].data = dataCH;
+      chartDBMain.data.datasets[2].data = dataCA.map((v,i) => Math.round((v - dataCH[i]) * 100) / 100);
+      chartDBMain.update('none');
+    } else {
+      chartDBMain = new Chart(ctxMain, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'CA HT', data: dataCA,
+              backgroundColor: 'rgba(37,99,235,0.15)', borderColor: '#2563eb',
+              borderWidth: 2, borderRadius: 4, order: 2,
+            },
+            {
+              label: 'Charges HT', data: dataCH,
+              backgroundColor: 'rgba(225,29,72,0.12)', borderColor: '#e11d48',
+              borderWidth: 2, borderRadius: 4, order: 3,
+            },
+            {
+              label: 'Résultat brut', type: 'line',
+              data: dataCA.map((v,i) => Math.round((v - dataCH[i]) * 100) / 100),
+              borderColor: '#059669', backgroundColor: 'transparent',
+              borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#059669',
+              tension: 0.3, order: 1,
             }
-          }
+          ]
         },
-        scales: {
-          y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('fr-FR') + ' €' } },
-          x: { grid: { display: false } }
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { font: { family: 'Plus Jakarta Sans', size: 12 }, boxWidth: 12, padding: 16 }
+            },
+            tooltip: {
+              callbacks: {
+                label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €'
+              }
+            }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('fr-FR') + ' €' } },
+            x: { grid: { display: false } }
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   // ── Progression objectif — barre linéaire ──
@@ -2134,11 +2161,16 @@ async function changeAnnee(n) {
          regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
          cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
 
-  // Invalider les caches lazy load
+  // Invalider les caches lazy load + instances graphiques
   _anneeCA  = null;
   _anneeMts = null;
   qty = {};
   mts = {};
+  // Détruire les instances Chart.js liées à l'ancienne année
+  [chartCALine, chartCAPie, chartCHLine, chartCHPie, chartDBMain].forEach(c => { if(c) c.destroy(); });
+  chartCALine = null; chartCAPie = null;
+  chartCHLine = null; chartCHPie = null;
+  chartDBMain = null;
 
   // Skeleton sur le panneau actif
   const panneauActif = ['pnl-dashboard','pnl-ca','pnl-charges','pnl-params']
