@@ -1220,7 +1220,7 @@ function renderCA() {
     <td colspan="3" style="text-align:left;font-weight:700">TOTAL</td>
     ${totParMois.map(v => `<td class="stot">${v||''}</td>`).join('')}
     <td class="stot">${totGlobal}</td>
-    <td class="stot">${caGlobal.toFixed(0)} €</td>
+    <td class="stot">${caGlobal.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
   </tr>`;
 
   // Peupler le menu filtre
