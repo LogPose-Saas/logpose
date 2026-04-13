@@ -712,27 +712,32 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
 
       <!-- KPIs -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+
+        <!-- KPI 1 : Total charges TTC + HT dessous -->
         <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
-          <div class="klbl">Total charges TTC</div>
+          <div class="klbl">Total charges</div>
           <div class="kval" id="ch-kpi-ttc">0 €</div>
-          <div class="kpi-help">?<div class="kpi-tooltip">Somme de tous les montants TTC saisis sur l'année, toutes charges confondues.</div></div>
+          <div id="ch-kpi-ht" style="font-size:12px;color:var(--t2);margin-top:4px;font-family:var(--fm)">dont 0 € HT</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Montant TTC total de toutes les charges sur l'année. Le montant HT est recalculé selon le taux de TVA de chaque charge (TTC ÷ (1 + taux)).</div></div>
         </div>
+
+        <!-- KPI 2 : Ratio charges/CA -->
         <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
-          <div class="klbl">Total charges HT</div>
-          <div class="kval" id="ch-kpi-ht">0 €</div>
-          <div class="kpi-help">?<div class="kpi-tooltip">Montant HT recalculé selon le taux de TVA de chaque charge (TTC ÷ (1 + taux TVA)).</div></div>
+          <div class="klbl">Ratio charges / CA</div>
+          <div class="kval" id="ch-kpi-ratio">— %</div>
+          <div id="ch-kpi-ratio-sub" style="font-size:12px;color:var(--t2);margin-top:4px;font-family:var(--fm)">CA HT : 0 €</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Part des charges HT dans le CA HT. Un ratio élevé réduit votre marge. Calculé sur les données saisies dans le module Chiffre d'affaires.</div></div>
         </div>
+
+        <!-- KPI 3 : Mois le plus chargé -->
         <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
-          <div class="klbl">Charges fixes TTC</div>
-          <div class="kval" id="ch-kpi-fixes">0 €</div>
-          <div class="kpi-help">?<div class="kpi-tooltip">Total des charges de type "Fixe" (loyer, abonnements…) sur l'année.</div></div>
+          <div class="klbl">Mois le plus chargé</div>
+          <div class="kval" id="ch-kpi-pic-val">0 €</div>
+          <div id="ch-kpi-pic-mois" style="font-size:12px;color:var(--t2);margin-top:4px;font-family:var(--fm)">—</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Le mois où la somme de toutes vos charges TTC est la plus élevée.</div></div>
         </div>
-        <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
-          <div class="klbl">Charges variables TTC</div>
-          <div class="kval" id="ch-kpi-vars">0 €</div>
-          <div class="kpi-help">?<div class="kpi-tooltip">Total des charges de type "Variable" (matières premières, sous-traitance…) sur l'année.</div></div>
-        </div>
+
       </div>
 
       <!-- Tableau de saisie -->
@@ -1543,21 +1548,57 @@ function renderChargesData() {
 }
 
 function updateCHKpis() {
-  let totalTTC = 0, totalHT = 0, fixesTTC = 0, varsTTC = 0;
+  let totalTTC = 0, totalHT = 0;
+  const totParMois = Array(12).fill(0);
+
   charges.forEach(c => {
     const k = String(c.code);
-    const annuelTTC = (mts[k]||[]).reduce((s,v) => s+(v||0), 0);
-    const annuelHT  = annuelTTC / (1 + (c.tva||0));
-    totalTTC += annuelTTC;
-    totalHT  += annuelHT;
-    if(c.type === 'Fixe') fixesTTC += annuelTTC;
-    else                  varsTTC  += annuelTTC;
+    const vals = mts[k] || [];
+    vals.forEach((v,m) => {
+      const val = v || 0;
+      totalTTC      += val;
+      totalHT       += val / (1 + (c.tva || 0));
+      totParMois[m] += val;
+    });
   });
-  const fmt = v => v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
-  const e1=$('ch-kpi-ttc');   if(e1) e1.textContent=fmt(totalTTC);
-  const e2=$('ch-kpi-ht');    if(e2) e2.textContent=fmt(totalHT);
-  const e3=$('ch-kpi-fixes'); if(e3) e3.textContent=fmt(fixesTTC);
-  const e4=$('ch-kpi-vars');  if(e4) e4.textContent=fmt(varsTTC);
+
+  // Arrondi propre
+  totalTTC = Math.round(totalTTC * 100) / 100;
+  totalHT  = Math.round(totalHT  * 100) / 100;
+
+  const fmt  = v => v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+  const fmt0 = v => Math.round(v).toLocaleString('fr-FR') + ' €';
+
+  // KPI 1 — Total TTC + HT
+  const e1 = $('ch-kpi-ttc'); if(e1) e1.textContent = fmt(totalTTC);
+  const e2 = $('ch-kpi-ht');  if(e2) e2.textContent = 'dont ' + fmt(totalHT) + ' HT';
+
+  // KPI 2 — Ratio charges/CA
+  const caHT = articles.reduce((s,a) => {
+    const totQty = (qty[a.code]||[]).reduce((x,v) => x+(v||0), 0);
+    return s + totQty * a.pv;
+  }, 0);
+  const ratio = caHT > 0 ? Math.round(totalHT / caHT * 1000) / 10 : null;
+  const eRatio    = $('ch-kpi-ratio');
+  const eRatioSub = $('ch-kpi-ratio-sub');
+  if(eRatio) {
+    if(ratio === null) {
+      eRatio.textContent = '— %';
+      eRatio.style.color = 'var(--t2)';
+    } else {
+      eRatio.textContent = ratio.toFixed(1) + ' %';
+      eRatio.style.color = ratio > 80 ? 'var(--rd)' : ratio > 50 ? 'var(--am)' : 'var(--gr)';
+    }
+  }
+  if(eRatioSub) eRatioSub.textContent = 'CA HT : ' + fmt(Math.round(caHT * 100) / 100);
+
+  // KPI 3 — Mois le plus chargé
+  const picVal  = Math.max(...totParMois);
+  const picIdx  = totParMois.indexOf(picVal);
+  const ePicVal  = $('ch-kpi-pic-val');
+  const ePicMois = $('ch-kpi-pic-mois');
+  if(ePicVal)  ePicVal.textContent  = picVal > 0 ? fmt(Math.round(picVal * 100) / 100) : '0 €';
+  if(ePicMois) ePicMois.textContent = picVal > 0 ? MOIS[picIdx] : '—';
 }
 
 function updateCHCharts() {
@@ -1595,16 +1636,16 @@ function updateCHCharts() {
         if(!val) return;
         let px = x.getPixelForValue(i);
         const py = y.getPixelForValue(val) - 10;
-        const textWidth = ctx.measureText(val.toLocaleString('fr-FR') + ' €').width;
+        const lbl = val.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+        const textWidth = ctx.measureText(lbl).width;
         if(px - textWidth/2 < chartArea.left) px = chartArea.left + textWidth/2;
         if(px + textWidth/2 > chartArea.right) px = chartArea.right - textWidth/2;
-        ctx.fillText(val.toLocaleString('fr-FR') + ' €', px, py);
+        ctx.fillText(lbl, px, py);
       });
       ctx.restore();
     }
   };
 
-  // Plugin labels externes camembert
   const outerLabelsCH = {
     id: 'outerLabelsCH',
     afterDraw(chart) {
@@ -1620,7 +1661,8 @@ function updateCHCharts() {
         const val  = data.datasets[0].data[i];
         const lbl  = data.labels[i];
         const pct  = Math.round(val/total*100);
-        const text = lbl + ' — ' + val.toLocaleString('fr-FR') + ' € — ' + pct + '%';
+        const valArrondi = Math.round(val).toLocaleString('fr-FR');
+        const text = lbl + ' — ' + valArrondi + ' € — ' + pct + '%';
         const angle = (arc.startAngle + arc.endAngle) / 2;
         const r1 = arc.outerRadius + 8;
         const r2 = arc.outerRadius + 18;
