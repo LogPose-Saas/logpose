@@ -518,9 +518,12 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="topbar">
         <div>
           <div class="page-title" id="db-title">Dashboard</div>
-          <div class="page-sub">Vue d'ensemble · Année <span id="db-annee-lbl">2026</span> · <span id="db-completude" style="color:var(--am)">Chargement…</span></div>
+          <div class="page-sub">Vue d'ensemble · Année <span id="db-annee-lbl">2026</span></div>
         </div>
       </div>
+
+      <!-- Alertes — en haut pour visibilité immédiate -->
+      <div id="db-alertes" style="margin-bottom:14px"></div>
 
       <!-- KPIs ligne 1 -->
       <div class="kgrid g4" style="margin-bottom:14px">
@@ -534,24 +537,24 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         </div>
         <div class="kcard" style="text-align:center">
           <div class="kacc" style="background:var(--rd)"></div>
-          <div class="klbl">Charges HT annuelles</div>
+          <div class="klbl">Charges annuelles</div>
           <div class="kval" id="db-kpi-ch">0 €</div>
-          <div id="db-kpi-ch-sub" style="font-size:11px;color:var(--t2);margin-top:6px">TTC : 0 €</div>
-          <div class="kpi-help">?<div class="kpi-tooltip">Total des charges HT recalculé depuis les montants TTC saisis, en appliquant le taux de TVA de chaque charge.</div></div>
+          <div id="db-kpi-ch-sub" style="font-size:11px;color:var(--t2);margin-top:6px">HT : 0 €</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Montant TTC total des charges saisi sur l'année. Le montant HT est recalculé en appliquant le taux de TVA de chaque charge.</div></div>
         </div>
         <div class="kcard" style="text-align:center">
           <div class="kacc" id="db-res-acc" style="background:var(--gr)"></div>
           <div class="klbl">Résultat brut</div>
           <div class="kval" id="db-kpi-res">0 €</div>
-          <div id="db-kpi-res-sub" style="font-size:11px;color:var(--t2);margin-top:6px">CA HT − Charges HT</div>
-          <div class="kpi-help">?<div class="kpi-tooltip">Résultat brut = CA HT − Charges HT totales. Positif (vert) signifie que votre activité couvre ses charges. Négatif (rouge) = déficit.</div></div>
+          <div style="font-size:11px;color:var(--t2);margin-top:6px">CA HT − Charges HT</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Résultat brut = CA HT − Charges HT. Positif = l'activité couvre ses charges. Négatif = déficit sur la période saisie.</div></div>
         </div>
         <div class="kcard" style="text-align:center">
           <div class="kacc" style="background:var(--pu)"></div>
-          <div class="klbl">Taux de marge brute</div>
+          <div class="klbl">Taux de marge commerciale</div>
           <div class="kval" id="db-kpi-marge">0 %</div>
-          <div id="db-kpi-marge-sub" style="font-size:11px;color:var(--t2);margin-top:6px">Marge / CA HT</div>
-          <div class="kpi-help">?<div class="kpi-tooltip">Marge brute = CA HT − coûts d'achat directs des articles vendus. Le taux exprime ce pourcentage par rapport au CA HT.</div></div>
+          <div style="font-size:11px;color:var(--t2);margin-top:6px">(CA − Coûts achat) / CA HT</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Marge commerciale = CA HT − coûts d'achat directs des articles. Indépendant des charges fixes. Un taux élevé indique une bonne valorisation produit.</div></div>
         </div>
       </div>
 
@@ -559,8 +562,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="card" style="margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
           <div>
-            <div class="ct">CA vs Charges mensuels</div>
-            <div class="cs">Comparaison mois par mois en HT</div>
+            <div class="ct">CA vs Charges</div>
+            <div class="cs">Comparaison en HT · CA HT, Charges HT et Résultat</div>
           </div>
           <select class="fsel" id="db-periode" style="width:auto;min-width:150px;font-size:12px">
             <option value="mensuel">Mensuel</option>
@@ -574,38 +577,39 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <!-- Ligne 3 : Objectif + Tops -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
 
-        <!-- Objectif CA -->
+        <!-- Objectif CA — barre linéaire -->
         <div class="card" style="margin:0">
           <div class="ct" style="margin-bottom:4px">Progression objectif</div>
-          <div class="cs" style="margin-bottom:16px">CA HT vs objectif annuel</div>
-          <div style="position:relative;width:130px;height:130px;margin:0 auto 12px">
-            <canvas id="db-chart-obj"></canvas>
-            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
-              <div style="font-size:22px;font-weight:800;letter-spacing:-1px;line-height:1" id="db-obj-pct">0%</div>
-              <div style="font-size:10px;color:var(--t2);margin-top:2px">atteint</div>
-            </div>
+          <div class="cs" style="margin-bottom:20px">CA HT vs objectif annuel</div>
+          <div style="text-align:center;margin-bottom:20px">
+            <div style="font-size:36px;font-weight:800;letter-spacing:-2px;line-height:1" id="db-obj-pct">—</div>
+            <div style="font-size:11px;color:var(--t2);margin-top:4px">de l'objectif atteint</div>
           </div>
-          <div style="text-align:center;font-size:11px;color:var(--t2)" id="db-obj-detail">Objectif non défini</div>
+          <div class="pw" style="height:10px;margin-bottom:10px">
+            <div class="pb" id="db-bar-obj2" style="width:0%;height:10px;background:var(--ac)"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-bottom:8px">
+            <span id="db-obj-ca-lbl">CA HT : 0 €</span>
+            <span id="db-obj-target-lbl">Obj : —</span>
+          </div>
+          <div style="text-align:center;font-size:12px;font-weight:600" id="db-obj-detail"></div>
         </div>
 
         <!-- Top articles -->
         <div class="card" style="margin:0">
-          <div class="ct" style="margin-bottom:4px">Top articles</div>
+          <div class="ct" style="margin-bottom:4px">Top 5 articles</div>
           <div class="cs" style="margin-bottom:12px">Par CA HT généré</div>
           <div id="db-top-arts" class="toplist"></div>
         </div>
 
         <!-- Top charges -->
         <div class="card" style="margin:0">
-          <div class="ct" style="margin-bottom:4px">Top charges</div>
+          <div class="ct" style="margin-bottom:4px">Top 5 charges</div>
           <div class="cs" style="margin-bottom:12px">Par montant TTC annuel</div>
           <div id="db-top-chs" class="toplist"></div>
         </div>
 
       </div>
-
-      <!-- Alertes -->
-      <div id="db-alertes" style="margin-bottom:14px"></div>
 
     </div><!-- fin pnl-dashboard -->
 
@@ -1837,7 +1841,6 @@ function updateCHCharts() {
 // DASHBOARD
 // ════════════════════════════════════════════════════════
 let chartDBMain = null;
-let chartDBObj  = null;
 
 function renderDashboard() {
   const lbl = $('db-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
@@ -1851,8 +1854,8 @@ function renderDashboard() {
     const q = qty[a.code] || Array(12).fill(0);
     q.forEach((v,m) => {
       const val = v || 0;
-      caHT       += val * a.pv;
-      margeB     += val * (a.pv - a.cout);
+      caHT        += val * a.pv;
+      margeB      += val * (a.pv - a.cout);
       caParMois[m]+= val * a.pv;
     });
   });
@@ -1874,34 +1877,14 @@ function renderDashboard() {
   chHT   = Math.round(chHT   * 100) / 100;
   chTTC  = Math.round(chTTC  * 100) / 100;
   margeB = Math.round(margeB * 100) / 100;
-  const resultat  = Math.round((caHT - chHT) * 100) / 100;
-  const txMarge   = caHT > 0 ? Math.round(margeB / caHT * 1000) / 10 : 0;
+  const resultat = Math.round((caHT - chHT) * 100) / 100;
+  const txMarge  = caHT > 0 ? Math.round(margeB / caHT * 1000) / 10 : 0;
   const fmt = v => Math.abs(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
 
-  // ── KPIs ──
+  // ── KPI 1 : CA HT ──
   const eCA = $('db-kpi-ca'); if(eCA) eCA.textContent = fmt(caHT);
-  const eCH = $('db-kpi-ch'); if(eCH) eCH.textContent = fmt(chHT);
-  const eCHsub = $('db-kpi-ch-sub'); if(eCHsub) eCHsub.textContent = 'TTC : ' + fmt(chTTC);
-
-  const eRes = $('db-kpi-res');
-  const eResAcc = $('db-res-acc');
-  const eResSub = $('db-kpi-res-sub');
-  if(eRes) {
-    eRes.textContent = (resultat < 0 ? '−' : '') + fmt(resultat);
-    eRes.style.color = resultat >= 0 ? 'var(--gr)' : 'var(--rd)';
-  }
-  if(eResAcc) eResAcc.style.background = resultat >= 0 ? 'var(--gr)' : 'var(--rd)';
-  if(eResSub) eResSub.textContent = 'CA HT − Charges HT';
-
-  const eMarge = $('db-kpi-marge');
-  if(eMarge) {
-    eMarge.textContent = txMarge.toFixed(1) + ' %';
-    eMarge.style.color = txMarge >= 40 ? 'var(--gr)' : txMarge >= 20 ? 'var(--am)' : 'var(--rd)';
-  }
-
-  // Objectif
   const obj = P.obj || 0;
-  const objPct = obj > 0 ? Math.min(Math.round(caHT / obj * 100), 999) : 0;
+  const objPct = obj > 0 ? Math.round(caHT / obj * 100) : 0;
   const eObjLbl = $('db-kpi-ca-obj');
   const eBarObj = $('db-bar-obj');
   if(eObjLbl) eObjLbl.textContent = obj > 0 ? 'Objectif : ' + Math.round(obj).toLocaleString('fr-FR') + ' €' : 'Objectif non défini';
@@ -1910,19 +1893,24 @@ function renderDashboard() {
     eBarObj.style.background = objPct >= 100 ? 'var(--gr)' : objPct >= 60 ? 'var(--ac)' : 'var(--am)';
   }
 
-  // ── Complétude ──
-  const moisAvecCA = caParMois.filter(v => v > 0).length;
-  const moisAvecCH = chParMois.filter(v => v > 0).length;
-  const eComp = $('db-completude');
-  if(eComp) {
-    if(moisAvecCA === 0 && moisAvecCH === 0) {
-      eComp.textContent = 'Aucune donnée saisie'; eComp.style.color = 'var(--rd)';
-    } else if(moisAvecCA === 12 && moisAvecCH >= 6) {
-      eComp.textContent = 'Données complètes ✓'; eComp.style.color = 'var(--gr)';
-    } else {
-      eComp.textContent = `CA : ${moisAvecCA}/12 mois · Charges : ${moisAvecCH}/12 mois`;
-      eComp.style.color = 'var(--am)';
-    }
+  // ── KPI 2 : Charges TTC en grand, HT dessous ──
+  const eCH    = $('db-kpi-ch');    if(eCH)    eCH.textContent    = fmt(chTTC);
+  const eCHsub = $('db-kpi-ch-sub'); if(eCHsub) eCHsub.textContent = 'HT : ' + fmt(chHT);
+
+  // ── KPI 3 : Résultat brut ──
+  const eRes    = $('db-kpi-res');
+  const eResAcc = $('db-res-acc');
+  if(eRes) {
+    eRes.textContent = (resultat < 0 ? '−' : '') + fmt(resultat);
+    eRes.style.color = resultat >= 0 ? 'var(--gr)' : 'var(--rd)';
+  }
+  if(eResAcc) eResAcc.style.background = resultat >= 0 ? 'var(--gr)' : 'var(--rd)';
+
+  // ── KPI 4 : Taux de marge commerciale ──
+  const eMarge = $('db-kpi-marge');
+  if(eMarge) {
+    eMarge.textContent = txMarge.toFixed(1) + ' %';
+    eMarge.style.color = txMarge >= 40 ? 'var(--gr)' : txMarge >= 20 ? 'var(--am)' : 'var(--rd)';
   }
 
   // ── Graphique principal CA vs Charges ──
@@ -1934,11 +1922,11 @@ function renderDashboard() {
     dataCA = caParMois.map(v => Math.round(v * 100) / 100);
     dataCH = chParMois.map(v => Math.round(v * 100) / 100);
   } else if(periode === 'trimestriel') {
-    labels = ['T1','T2','T3','T4'];
+    labels = ['T1 (Jan-Mar)','T2 (Avr-Juin)','T3 (Juil-Sep)','T4 (Oct-Déc)'];
     dataCA = [0,1,2,3].map(t => Math.round(caParMois.slice(t*3,t*3+3).reduce((s,v)=>s+v,0)*100)/100);
     dataCH = [0,1,2,3].map(t => Math.round(chParMois.slice(t*3,t*3+3).reduce((s,v)=>s+v,0)*100)/100);
   } else {
-    labels = ['S1','S2'];
+    labels = ['S1 (Jan-Juin)','S2 (Juil-Déc)'];
     dataCA = [Math.round(caParMois.slice(0,6).reduce((s,v)=>s+v,0)*100)/100,
               Math.round(caParMois.slice(6).reduce((s,v)=>s+v,0)*100)/100];
     dataCH = [Math.round(chParMois.slice(0,6).reduce((s,v)=>s+v,0)*100)/100,
@@ -1964,7 +1952,7 @@ function renderDashboard() {
             borderWidth: 2, borderRadius: 4, order: 3,
           },
           {
-            label: 'Résultat', type: 'line',
+            label: 'Résultat brut', type: 'line',
             data: dataCA.map((v,i) => Math.round((v - dataCH[i]) * 100) / 100),
             borderColor: '#059669', backgroundColor: 'transparent',
             borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#059669',
@@ -1975,8 +1963,15 @@ function renderDashboard() {
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'top', labels: { font: { family: 'Plus Jakarta Sans', size: 12 }, boxWidth: 12, padding: 16 } },
-          tooltip: { callbacks: { label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €' } }
+          legend: {
+            position: 'top',
+            labels: { font: { family: 'Plus Jakarta Sans', size: 12 }, boxWidth: 12, padding: 16 }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €'
+            }
+          }
         },
         scales: {
           y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('fr-FR') + ' €' } },
@@ -1986,50 +1981,50 @@ function renderDashboard() {
     });
   }
 
-  // ── Graphique objectif (donut) ──
-  const ctxObj = $('db-chart-obj');
-  if(ctxObj) {
-    if(chartDBObj) chartDBObj.destroy();
-    const reste = obj > 0 ? Math.max(obj - caHT, 0) : 1;
-    const done  = obj > 0 ? Math.min(caHT, obj) : 0;
-    const col   = objPct >= 100 ? '#059669' : objPct >= 60 ? '#2563eb' : '#d97706';
-    chartDBObj = new Chart(ctxObj, {
-      type: 'doughnut',
-      data: {
-        datasets: [{
-          data: obj > 0 ? [done, reste] : [0, 1],
-          backgroundColor: [col, 'var(--bd)'],
-          borderWidth: 0,
-        }]
-      },
-      options: {
-        responsive: false, cutout: '72%',
-        plugins: { legend: { display: false }, tooltip: { enabled: false } }
-      }
-    });
-  }
-  const eObjPct = $('db-obj-pct');
-  if(eObjPct) eObjPct.textContent = obj > 0 ? objPct + '%' : '—';
-  const eObjDetail = $('db-obj-detail');
-  if(eObjDetail) {
+  // ── Progression objectif — barre linéaire ──
+  const eObjPct     = $('db-obj-pct');
+  const eBar2       = $('db-bar-obj2');
+  const eObjCaLbl   = $('db-obj-ca-lbl');
+  const eObjTgtLbl  = $('db-obj-target-lbl');
+  const eObjDetail  = $('db-obj-detail');
+
+  if(eObjPct) {
     if(obj > 0) {
-      const manque = Math.max(obj - caHT, 0);
-      eObjDetail.textContent = manque > 0
-        ? 'Encore ' + Math.round(manque).toLocaleString('fr-FR') + ' € à réaliser'
-        : '🎉 Objectif atteint !';
+      eObjPct.textContent = objPct + '%';
+      eObjPct.style.color = objPct >= 100 ? 'var(--gr)' : objPct >= 60 ? 'var(--ac)' : 'var(--am)';
     } else {
+      eObjPct.textContent = '—';
+      eObjPct.style.color = 'var(--t3)';
+    }
+  }
+  if(eBar2) {
+    eBar2.style.width = obj > 0 ? Math.min(objPct, 100) + '%' : '0%';
+    eBar2.style.background = objPct >= 100 ? 'var(--gr)' : objPct >= 60 ? 'var(--ac)' : 'var(--am)';
+  }
+  if(eObjCaLbl)  eObjCaLbl.textContent  = 'CA HT : ' + fmt(caHT);
+  if(eObjTgtLbl) eObjTgtLbl.textContent = obj > 0 ? 'Obj : ' + Math.round(obj).toLocaleString('fr-FR') + ' €' : 'Non défini';
+  if(eObjDetail) {
+    if(obj <= 0) {
       eObjDetail.textContent = 'Définir un objectif dans Paramètres';
+      eObjDetail.style.color = 'var(--t3)';
+    } else if(objPct >= 100) {
+      eObjDetail.textContent = '🎉 Objectif atteint !';
+      eObjDetail.style.color = 'var(--gr)';
+    } else {
+      const manque = Math.round(obj - caHT);
+      eObjDetail.textContent = 'Encore ' + manque.toLocaleString('fr-FR') + ' € à réaliser';
+      eObjDetail.style.color = 'var(--t2)';
     }
   }
 
-  // ── Top articles ──
+  // ── Top 5 articles ──
+  const colors = ['var(--ac)','var(--gr)','var(--pu)','var(--am)','var(--tl)'];
   const artsSorted = articles
     .map(a => ({ nom: a.nom, ca: Math.round((qty[a.code]||[]).reduce((s,v)=>s+(v||0),0) * a.pv * 100) / 100 }))
     .filter(a => a.ca > 0)
     .sort((a,b) => b.ca - a.ca)
-    .slice(0,5);
+    .slice(0, 5);
   const maxCA = artsSorted[0]?.ca || 1;
-  const colors = ['var(--ac)','var(--gr)','var(--pu)','var(--am)','var(--tl)'];
   const eTopArts = $('db-top-arts');
   if(eTopArts) {
     eTopArts.innerHTML = artsSorted.length ? artsSorted.map((a,i) => `
@@ -2040,18 +2035,18 @@ function renderDashboard() {
           <div class="pw" style="margin:0"><div class="topbar-fill" style="width:${Math.round(a.ca/maxCA*100)}%;background:${colors[i]};height:4px;border-radius:99px"></div></div>
         </div>
         <div class="topval">${Math.round(a.ca).toLocaleString('fr-FR')} €</div>
-      </div>` ).join('')
+      </div>`).join('')
     : '<div style="color:var(--t3);font-size:12px;text-align:center;padding:20px 0">Aucune vente saisie</div>';
   }
 
-  // ── Top charges ──
+  // ── Top 5 charges ──
+  const colsCH = ['var(--rd)','var(--am)','var(--pu)','var(--tl)','var(--pk)'];
   const chsSorted = charges
     .map(c => ({ nom: c.nom, ttc: Math.round((mts[String(c.code)]||[]).reduce((s,v)=>s+(v||0),0) * 100) / 100 }))
     .filter(c => c.ttc > 0)
     .sort((a,b) => b.ttc - a.ttc)
-    .slice(0,5);
+    .slice(0, 5);
   const maxCH = chsSorted[0]?.ttc || 1;
-  const colsCH = ['var(--rd)','var(--am)','var(--pu)','var(--tl)','var(--pk)'];
   const eTopChs = $('db-top-chs');
   if(eTopChs) {
     eTopChs.innerHTML = chsSorted.length ? chsSorted.map((c,i) => `
@@ -2062,20 +2057,17 @@ function renderDashboard() {
           <div class="pw" style="margin:0"><div class="topbar-fill" style="width:${Math.round(c.ttc/maxCH*100)}%;background:${colsCH[i]};height:4px;border-radius:99px"></div></div>
         </div>
         <div class="topval">${Math.round(c.ttc).toLocaleString('fr-FR')} €</div>
-      </div>` ).join('')
+      </div>`).join('')
     : '<div style="color:var(--t3);font-size:12px;text-align:center;padding:20px 0">Aucune charge saisie</div>';
   }
 
-  // ── Alertes ──
+  // ── Alertes (remontées en haut) ──
   const eAl = $('db-alertes'); if(!eAl) return;
   const alertes = [];
-  const moisSansCA = MOIS.filter((_,m) => caParMois[m] === 0).length;
-  if(moisSansCA > 0 && moisAvecCA > 0)
-    alertes.push({ cls:'aba', ico:'⚠️', titre:`${moisSansCA} mois sans CA saisi`, desc:'Des mois sont à zéro dans le module Chiffre d\'affaires.' });
-  if(chHT > 0 && caHT > 0 && chHT / caHT > 0.8)
-    alertes.push({ cls:'abr', ico:'🔴', titre:'Ratio charges/CA > 80 %', desc:'Vos charges représentent plus de 80 % de votre CA HT. Marges sous pression.' });
   if(resultat < 0 && caHT > 0)
-    alertes.push({ cls:'abr', ico:'📉', titre:'Résultat brut négatif', desc: 'Vos charges HT dépassent votre CA HT sur cette année.' });
+    alertes.push({ cls:'abr', ico:'📉', titre:'Résultat brut négatif', desc:'Vos charges HT dépassent votre CA HT sur la période saisie.' });
+  if(chHT > 0 && caHT > 0 && chHT / caHT > 0.8)
+    alertes.push({ cls:'abr', ico:'⚠️', titre:'Ratio charges/CA > 80 %', desc:'Vos charges représentent plus de 80 % de votre CA HT. Marges sous pression.' });
   if(!P.obj || P.obj === 0)
     alertes.push({ cls:'abb', ico:'🎯', titre:'Objectif CA non défini', desc:'Définissez un objectif annuel dans Paramètres → Entreprise pour suivre votre progression.' });
   eAl.innerHTML = alertes.map(a => `
