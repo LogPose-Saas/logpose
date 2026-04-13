@@ -1476,9 +1476,7 @@ function updateCHTotaux() {
   const totParMois = MOIS.map((_,m) =>
     charges.reduce((s,c) => s + (mts[String(c.code)]||Array(12).fill(0))[m], 0)
   );
-  const totGlobal = totParMois.reduce((s,v) => s+v, 0);
-
-  const rows = document.querySelectorAll('#smt-tbody tr');
+  const totGlobal = Math.round(totParMois.reduce((s,v) => s+v, 0) * 100) / 100;
   const totRow = rows[rows.length-1];
   if(totRow && totRow.classList.contains('totrow')) {
     const cells = totRow.querySelectorAll('td');
@@ -1514,13 +1512,13 @@ function renderChargesData() {
   $('smt-tbody').innerHTML = charges.map((c,i) => {
     const k = String(c.code);
     const vals = mts[k] || Array(12).fill(0);
-    const totTTC = vals.reduce((s,v) => s+v, 0);
+    const totTTC = Math.round(vals.reduce((s,v) => s+v, 0) * 100) / 100;
     return `<tr>
       <td style="color:var(--t3);font-family:var(--fm);font-size:11px">${String(c.code).slice(-6)}</td>
       <td style="font-weight:500">${c.nom}</td>
       <td>${typeBadge(c.type)}</td>
       ${vals.map((v,m) => `<td>
-        <input class="sinp" type="number" min="0" step="0.01" value="${v||''}" placeholder="0"
+        <input class="sinp" type="number" min="0" step="0.01" value="${v ? parseFloat(v.toFixed(2)) : ''}" placeholder="0"
           onchange="saveMt('${k}',${m},this.value)">
       </td>`).join('')}
       <td class="stot">${totTTC.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
@@ -1529,13 +1527,14 @@ function renderChargesData() {
 
   // Ligne totaux
   const totParMois = MOIS.map((_,m) =>
-    charges.reduce((s,c) => s + (mts[String(c.code)]||[])[m] || 0, 0)
+    charges.reduce((s,c) => s + ((mts[String(c.code)]||[])[m] || 0), 0)
   );
-  const totGlobal = totParMois.reduce((s,v) => s+v, 0);
+  const totGlobal = Math.round(totParMois.reduce((s,v) => s+v, 0) * 100) / 100;
+  const totParMoisArrondis = totParMois.map(v => Math.round(v * 100) / 100);
 
   $('smt-tbody').innerHTML += `<tr class="totrow">
     <td colspan="3" style="text-align:left;font-weight:700">TOTAL</td>
-    ${totParMois.map(v => `<td class="stot">${v ? v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) : ''}</td>`).join('')}
+    ${totParMoisArrondis.map(v => `<td class="stot">${v ? v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) : ''}</td>`).join('')}
     <td class="stot">${totGlobal.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €</td>
   </tr>`;
 
