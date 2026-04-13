@@ -682,7 +682,12 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <!-- Graphiques -->
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-top:14px">
         <div class="card" style="margin:0">
-          <div class="ct" style="margin-bottom:14px">Évolution du chiffre d'affaires mensuel</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div class="ct">Évolution du chiffre d'affaires mensuel</div>
+            <select class="fsel" id="ca-filtre-art" style="width:auto;min-width:160px;font-size:12px">
+              <option value="">Tous les articles</option>
+            </select>
+          </div>
           <div style="height:220px"><canvas id="ca-chart-line"></canvas></div>
         </div>
         <div class="card" style="margin:0">
@@ -1140,6 +1145,14 @@ function renderCA() {
     <td class="stot">${caGlobal.toFixed(0)} €</td>
   </tr>`;
 
+  // Peupler le menu filtre
+  const filtreEl = $('ca-filtre-art');
+  if(filtreEl) {
+    const cur = filtreEl.value;
+    filtreEl.innerHTML = '<option value="">Tous les articles</option>' +
+      articles.map(a => `<option value="${a.code}" ${cur===a.code?'selected':''}>${a.nom}</option>`).join('');
+  }
+
   updateCAKpis();
   updateCACharts();
 }
@@ -1163,9 +1176,16 @@ let chartCALine = null;
 let chartCAPie  = null;
 
 function updateCACharts() {
+  // Filtre article sélectionné
+  const filtre = $('ca-filtre-art') ? $('ca-filtre-art').value : '';
+  const artsFiltres = filtre ? articles.filter(a => a.code === filtre) : articles;
+
+  // Courbe : CA mensuel selon filtre
   const caParMois = MOIS.map((_,m) =>
-    articles.reduce((s,a) => s + ((qty[a.code]||[])[m] || 0) * a.pv, 0)
+    artsFiltres.reduce((s,a) => s + ((qty[a.code]||[])[m] || 0) * a.pv, 0)
   );
+
+  // Camembert : toujours global
   const catMap = {};
   articles.forEach(a => {
     const cat = a.cat || 'Divers';
@@ -1504,7 +1524,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Entreprise
   bindEntreprise();
 
-  // Auth state
+  // Filtre graphique CA
+  document.addEventListener('change', e => {
+    if(e.target.id === 'ca-filtre-art') updateCACharts();
+  });
   let started = false;
   DB.auth.onAuthStateChange(async (event, session) => {
     if((event==='INITIAL_SESSION'||event==='SIGNED_IN') && session && !started) {
