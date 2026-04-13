@@ -384,7 +384,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 /* Suppression des règles nth-child qui causaient le débordement gauche */
 @keyframes fadeInDown{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── SKELETON / LOADING ── */
+/* ── TRANSITIONS PANNEAUX ── */
+@keyframes panelFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pnl-enter {
+  animation: panelFadeIn .25s cubic-bezier(.4,0,.2,1) forwards;
+}
 .pnl-loading{position:relative;pointer-events:none}
 .pnl-loading::after{
   content:'';position:absolute;inset:0;
@@ -1511,7 +1518,7 @@ function updateCACharts() {
     if(chartCALine) {
       // Update sans recréer
       chartCALine.data.datasets[0].data = caParMois;
-      chartCALine.update('none');
+      chartCALine.update({duration:350,easing:'easeInOutQuart'});
     } else {
       chartCALine = new Chart(ctxL, {
         type: 'line',
@@ -1546,7 +1553,7 @@ function updateCACharts() {
       chartCAPie.data.labels = cats;
       chartCAPie.data.datasets[0].data = catVals;
       chartCAPie.data.datasets[0].backgroundColor = colors.slice(0, cats.length);
-      chartCAPie.update('none');
+      chartCAPie.update({duration:400,easing:'easeInOutQuart'});
     } else if(!chartCAPie && cats.length > 0) {
       chartCAPie = new Chart(ctxP, {
         type: 'doughnut',
@@ -1844,7 +1851,7 @@ function updateCHCharts() {
   if(ctxL) {
     if(chartCHLine) {
       chartCHLine.data.datasets[0].data = chParMois;
-      chartCHLine.update('none');
+      chartCHLine.update({duration:350,easing:'easeInOutQuart'});
     } else {
       chartCHLine = new Chart(ctxL, {
         type: 'line',
@@ -1878,7 +1885,7 @@ function updateCHCharts() {
       chartCHPie.data.labels = cats;
       chartCHPie.data.datasets[0].data = catVals;
       chartCHPie.data.datasets[0].backgroundColor = colors.slice(0, cats.length);
-      chartCHPie.update('none');
+      chartCHPie.update({duration:400,easing:'easeInOutQuart'});
     } else if(!chartCHPie && cats.length > 0) {
       chartCHPie = new Chart(ctxP, {
         type: 'doughnut',
@@ -2001,7 +2008,7 @@ function renderDashboard() {
       chartDBMain.data.datasets[0].data = dataCA;
       chartDBMain.data.datasets[1].data = dataCH;
       chartDBMain.data.datasets[2].data = dataCA.map((v,i) => Math.round((v - dataCH[i]) * 100) / 100);
-      chartDBMain.update('none');
+      chartDBMain.update({duration:350,easing:'easeInOutQuart'});
     } else {
       chartDBMain = new Chart(ctxMain, {
         type: 'bar',
@@ -2318,8 +2325,14 @@ async function startApp(user) {
 function showPanel(panelId, navId) {
   ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
   ['nav-dashboard','nav-params','nav-ca','nav-charges'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
-  const p=$(panelId); if(p) p.style.display='block';
-  const n=$(navId);   if(n) n.classList.add('active');
+  const p=$(panelId);
+  if(p) {
+    p.style.display='block';
+    p.classList.remove('pnl-enter');
+    void p.offsetWidth; // force reflow pour relancer l'animation
+    p.classList.add('pnl-enter');
+  }
+  const n=$(navId); if(n) n.classList.add('active');
 }
 
 // ════════════════════════════════════════════════════════
