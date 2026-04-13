@@ -366,8 +366,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   font-size:12px;
   color:var(--t2);
   line-height:1.6;
-  width:240px;
-  z-index:200;
+  width:230px;
+  max-width:calc(100vw - 40px);
+  z-index:500;
   box-shadow:var(--sh);
   pointer-events:none;
   text-align:left;
@@ -381,6 +382,17 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   border-top-color:var(--bds);
 }
 .kpi-help:hover .kpi-tooltip { display:block; animation:fadeInDown .15s ease; }
+/* Tooltip des KPIs en 1ère et 2ème position : s'ouvre vers la droite */
+.kgrid .kcard:nth-child(1) .kpi-tooltip,
+.kgrid .kcard:nth-child(2) .kpi-tooltip {
+  right:auto;
+  left:0;
+}
+.kgrid .kcard:nth-child(1) .kpi-tooltip::after,
+.kgrid .kcard:nth-child(2) .kpi-tooltip::after {
+  right:auto;
+  left:5px;
+}
 @keyframes fadeInDown{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── SAVE BAR ── */
