@@ -1394,12 +1394,14 @@ async function upsertArticle(a) {
 }
 
 function addArt() {
-  const nom  = $('pa-nom').value.trim();  if(!nom) return;
+  const nom  = $('pa-nom').value.trim();
   const code = $('pa-code').value.trim() || 'ART'+String(articles.length+1).padStart(2,'0');
+  const pv   = parseFloat($('pa-pv').value) || 0;
+  const cout = parseFloat($('pa-cout').value) || 0;
+  if(!validateArticle(nom, $('pa-code').value.trim(), pv, cout)) return;
   const a = {
     code, nom, cat:$('pa-cat').value||'Divers',
-    pv:parseFloat($('pa-pv').value)||0, cout:parseFloat($('pa-cout').value)||0,
-    tva:parseFloat($('pa-tva').value)||0.2, actif:true,
+    pv, cout, tva:parseFloat($('pa-tva').value)||0.2, actif:true,
   };
   articles.push(a);
   ['pa-code','pa-nom','pa-cat','pa-pv','pa-cout'].forEach(id => $(id).value='');
@@ -1444,9 +1446,9 @@ function renderArticles() {
       <td><input class="tdinp" value="${a.cat}" style="max-width:100px"
         onblur="articles[${i}].cat=this.value;upsertArticle(articles[${i}])"></td>
       <td><input class="tdinp" type="number" value="${a.pv}" style="max-width:80px"
-        onblur="articles[${i}].pv=parseFloat(this.value)||0;upsertArticle(articles[${i}]);renderArticles()"></td>
+        onblur="const v=parseFloat(this.value)||0;if(v<0){this.value=0;toast('err','Prix invalide','Le prix HT ne peut pas être négatif.');return;}if(v>0&&v<articles[${i}].cout)toast('warn','Marge négative','Le prix HT est inférieur au coût d\\'achat. Votre marge sera négative.',6000);articles[${i}].pv=v;upsertArticle(articles[${i}]);renderArticles()"></td>
       <td><input class="tdinp" type="number" value="${a.cout}" style="max-width:80px"
-        onblur="articles[${i}].cout=parseFloat(this.value)||0;upsertArticle(articles[${i}]);renderArticles()"></td>
+        onblur="const v=parseFloat(this.value)||0;if(v<0){this.value=0;toast('err','Coût invalide','Le coût d\\'achat ne peut pas être négatif.');return;}if(v>articles[${i}].pv&&articles[${i}].pv>0)toast('warn','Marge négative','Le coût d\\'achat dépasse le prix HT. Votre marge sera négative.',6000);articles[${i}].cout=v;upsertArticle(articles[${i}]);renderArticles()"></td>
       <td><select class="tdsel" style="max-width:78px"
         onchange="articles[${i}].tva=parseFloat(this.value);upsertArticle(articles[${i}])">${tvaOpts(a.tva)}</select></td>
       <td><span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span></td>
@@ -1498,7 +1500,8 @@ async function upsertCharge(c) {
 }
 
 function addCh() {
-  const nom = $('pc-nom').value.trim(); if(!nom) return;
+  const nom = $('pc-nom').value.trim();
+  if(!validateCharge(nom)) return;
   const c = {
     code:String(Date.now()), nom, cat:$('pc-cat').value||'Divers',
     tva:parseFloat($('pc-tva').value)||0.2, type:$('pc-type').value||'Variable', actif:true,
@@ -1611,6 +1614,18 @@ async function loadCA() {
 async function saveQty(code, mois, val) {
   if(!UID) return;
   val = parseFloat(val) || 0;
+  const art = articles.find(a => a.code === code);
+  const nomArt = art ? art.nom : code;
+  if(!validateQty(val, nomArt)) {
+    // Remettre l'ancienne valeur dans le DOM
+    const artIdx = articles.findIndex(a => a.code === code);
+    const row = document.querySelector(`#ca-tbody tr:nth-child(${artIdx+1})`);
+    if(row) {
+      const inp = row.querySelectorAll('.sinp')[mois];
+      if(inp) inp.value = qty[code][mois] || '';
+    }
+    return;
+  }
   qty[code][mois] = val;
 
   // Mettre à jour le total de la ligne sans recréer le tableau
@@ -1966,6 +1981,20 @@ async function saveMt(code, mois, val) {
   if(!UID) return;
   val = parseFloat(val) || 0;
   const k = String(code);
+  const ch = charges.find(c => String(c.code) === k);
+  const nomCh = ch ? ch.nom : code;
+  // Historique des autres mois pour détecter valeur aberrante
+  const histoSansMois = (mts[k]||[]).filter((_,i) => i !== mois);
+  if(!validateMontant(val, nomCh, histoSansMois)) {
+    // Remettre l'ancienne valeur dans le DOM
+    const chIdx = charges.findIndex(c => String(c.code) === k);
+    const row = document.querySelector(`#smt-tbody tr:nth-child(${chIdx+1})`);
+    if(row) {
+      const inp = row.querySelectorAll('.sinp')[mois];
+      if(inp) inp.value = mts[k][mois] ? parseFloat(mts[k][mois].toFixed(2)) : '';
+    }
+    return;
+  }
   mts[k][mois] = val;
 
   // Mise à jour inline du total ligne sans reconstruire le tableau
@@ -2514,7 +2543,86 @@ function renderDashboard() {
 }
 
 // ════════════════════════════════════════════════════════
-// ONBOARDING WIZARD
+// VALIDATION SAISIES
+// ════════════════════════════════════════════════════════
+
+// Highlight rouge temporaire sur un input
+function _inputErr(id, msg) {
+  const el = $(id); if(!el) return;
+  el.style.borderColor = 'var(--rd)';
+  el.style.boxShadow   = '0 0 0 3px var(--rdb)';
+  toast('warn', 'Valeur incorrecte', msg, 4000);
+  el.focus();
+  setTimeout(() => { el.style.borderColor=''; el.style.boxShadow=''; }, 3000);
+}
+
+// Validation article (addArt + onblur inline)
+function validateArticle(nom, code, pv, cout) {
+  if(!nom || !nom.trim()) {
+    _inputErr('pa-nom', 'Le nom de l\'article est obligatoire.');
+    return false;
+  }
+  // Doublon de code
+  if(code && articles.some(a => a.code === code.trim())) {
+    _inputErr('pa-code', `Le code "${code}" existe déjà. Choisissez un code unique.`);
+    return false;
+  }
+  if(pv < 0) {
+    _inputErr('pa-pv', 'Le prix de vente ne peut pas être négatif.');
+    return false;
+  }
+  if(cout < 0) {
+    _inputErr('pa-cout', 'Le coût d\'achat ne peut pas être négatif.');
+    return false;
+  }
+  // Avertissements non bloquants
+  if(pv === 0) toast('warn', 'Prix à 0 €', `"${nom}" a un prix HT à 0 €. Cet article ne générera pas de CA.`, 5000);
+  if(pv > 0 && cout > pv) toast('warn', 'Marge négative', `Le coût d'achat de "${nom}" dépasse son prix HT. Votre marge sera négative.`, 6000);
+  return true;
+}
+
+// Validation charge (addCh)
+function validateCharge(nom) {
+  if(!nom || !nom.trim()) {
+    _inputErr('pc-nom', 'Le nom de la charge est obligatoire.');
+    return false;
+  }
+  return true;
+}
+
+// Validation quantité CA (saveQty)
+function validateQty(val, nomArticle) {
+  if(val < 0) {
+    toast('err', 'Quantité invalide', `Les quantités ne peuvent pas être négatives.`);
+    return false;
+  }
+  if(val > 99999) {
+    return window.confirm(`La quantité saisie pour "${nomArticle}" est de ${val.toLocaleString('fr-FR')}. Confirmez-vous cette valeur ?`);
+  }
+  return true;
+}
+
+// Validation montant charge (saveMt)
+function validateMontant(val, nomCharge, historiqueVals) {
+  if(val < 0) {
+    toast('err', 'Montant invalide', 'Les montants de charges ne peuvent pas être négatifs.');
+    return false;
+  }
+  if(val > 999999) {
+    return window.confirm(`Le montant saisi pour "${nomCharge}" est de ${val.toLocaleString('fr-FR')} €. Confirmez-vous cette valeur ?`);
+  }
+  // Valeur inhabituellement élevée vs moyenne des autres mois
+  if(historiqueVals && val > 0) {
+    const autresMois = historiqueVals.filter(v => v > 0);
+    if(autresMois.length >= 2) {
+      const moy = autresMois.reduce((s,v)=>s+v,0) / autresMois.length;
+      if(moy > 0 && val > moy * 10) {
+        toast('warn', 'Valeur inhabituelle', `Ce montant (${val.toLocaleString('fr-FR')} €) est plus de 10× la moyenne des autres mois (${Math.round(moy).toLocaleString('fr-FR')} €). Vérifiez la saisie.`, 7000);
+      }
+    }
+  }
+  return true;
+}
 // ════════════════════════════════════════════════════════
 let _onbStep = 1;
 
