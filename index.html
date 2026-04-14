@@ -461,7 +461,32 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .sk-block{background:var(--bgs);border-radius:var(--rs);animation:shimmer 1.4s ease-in-out infinite}
 @keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
-/* ═══ SCÉNARIOS ═══ */
+/* ═══ PRÉVISIONNEL ═══ */
+.pv-hyp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.pv-hyp{background:var(--bgc);border:2px solid var(--bd);border-radius:var(--r);padding:16px;transition:all var(--tr);cursor:pointer}
+.pv-hyp.active-cons{border-color:#0d9488;background:rgba(13,148,136,.05)}
+.pv-hyp.active-base{border-color:var(--ac);background:var(--ag)}
+.pv-hyp.active-opti{border-color:var(--gr);background:var(--grb)}
+.pv-hyp-name{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.pv-hyp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pv-hyp-lbl{font-size:11.5px;color:var(--t2);flex:1}
+.pv-hyp-inp{width:70px;background:var(--in);border:1px solid var(--bd);border-radius:6px;padding:4px 8px;color:var(--t1);font-family:var(--fm);font-size:12px;text-align:right;outline:none;transition:border-color var(--tr)}
+.pv-hyp-inp:focus{border-color:var(--bdf)}
+.pv-hyp-unit{font-size:11px;color:var(--t3);font-family:var(--fm)}
+.pv-art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px}
+.pv-art-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)}
+.pv-art-nom{flex:1;font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv-tbl{width:100%;border-collapse:collapse}
+.pv-tbl th{font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:8px 12px;border-bottom:2px solid var(--bd);text-align:right;white-space:nowrap}
+.pv-tbl th:first-child{text-align:left}
+.pv-tbl td{padding:9px 12px;border-bottom:1px solid var(--bd);font-size:12.5px;text-align:right;font-family:var(--fm)}
+.pv-tbl td:first-child{text-align:left;font-family:var(--f);font-weight:600}
+.pv-tbl .pv-yr{background:var(--bgs);font-weight:700}
+.pv-tbl tr:hover td{background:var(--bgh)}
+.pv-conv{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--rs);font-size:13px;font-weight:600;margin-bottom:14px}
+.pv-conv.ok{background:var(--grb);color:var(--gr);border:1px solid rgba(5,150,105,.2)}
+.pv-conv.warn{background:var(--amb);color:var(--am);border:1px solid rgba(217,119,6,.2)}
+.pv-conv.no{background:var(--rdb);color:var(--rd);border:1px solid rgba(225,29,72,.2)}
 .sc-tabs{display:flex;gap:4px;background:var(--bgs);border:1px solid var(--bd);border-radius:10px;padding:3px;margin-bottom:20px;width:fit-content}
 .sc-tab{padding:7px 18px;border-radius:7px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all var(--tr);white-space:nowrap}
 .sc-tab:hover{color:var(--t1)}
@@ -798,6 +823,10 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="sb-item" id="nav-scenarios">
           <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/><path d="M2 12h4"/><path d="M8 6h4"/><path d="M14 14h4"/></svg></span>
           <span>Scénarios</span>
+        </div>
+        <div class="sb-item" id="nav-previsionnel">
+          <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+          <span>Prévisionnel</span>
         </div>
       </div>
       <div class="sb-sect">
@@ -1388,6 +1417,125 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
 
     </div><!-- fin pnl-scenarios -->
+
+    <!-- PRÉVISIONNEL -->
+    <div id="pnl-previsionnel" style="display:none">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Prévisionnel</div>
+          <div class="page-sub">Projection sur 3 ans · Saisonnalité préservée · Base <span id="pv-annee-lbl">2026</span></div>
+        </div>
+      </div>
+
+      <!-- Convergence objectif -->
+      <div id="pv-conv-msg" class="pv-conv ok" style="display:none">
+        <span id="pv-conv-ico">🎯</span>
+        <span id="pv-conv-txt"></span>
+      </div>
+
+      <!-- 3 Hypothèses -->
+      <div class="pv-hyp-grid">
+        <!-- Conservateur -->
+        <div class="pv-hyp active-cons" id="pv-hyp-cons">
+          <div class="pv-hyp-name">🔵 Conservateur</div>
+          <div class="pv-hyp-row">
+            <span class="pv-hyp-lbl">Croissance CA / an</span>
+            <input class="pv-hyp-inp" type="number" id="pv-cons-ca" value="5" min="-50" max="200" step="1">
+            <span class="pv-hyp-unit">%</span>
+          </div>
+          <div class="pv-hyp-row">
+            <span class="pv-hyp-lbl">Évolution charges fixes</span>
+            <input class="pv-hyp-inp" type="number" id="pv-cons-fix" value="2" min="-50" max="100" step="1">
+            <span class="pv-hyp-unit">%</span>
+          </div>
+          <div class="pv-hyp-row">
+            <span class="pv-hyp-lbl">Évolution charges var.</span>
+            <input class="pv-hyp-inp" type="number" id="pv-cons-var" value="0" min="-50" max="100" step="1">
+            <span class="pv-hyp-unit">%</span>
+          </div>
+        </div>
+        <!-- Base -->
+        <div class="pv-hyp active-base" id="pv-hyp-base">
+          <div class="pv-hyp-name">🟢 Base</div>
+          <div class="pv-hyp-row">
+            <span class="pv-hyp-lbl">Croissance CA / an</span>
+            <input class="pv-hyp-inp" type="number" id="pv-base-ca" value="15" min="-50" max="200" step="1">
+            <span class="pv-hyp-unit">%</span>
+          </div>
+          <div class="pv-hyp-row">
+            <span class="pv-hyp-lbl">Évolution charges fixes</span>
+            <input class="pv-hyp-inp" type="number" id="pv-base-fix" value="3" min="-50" max="100" step="1">
+            <span class="pv-hyp-unit">%</span>
+          </div>
+          <div class="pv-hyp-row">
+            <span class="pv-hyp-lbl">Évolution charges var.</span>
+            <input class="pv-hyp-inp" type="number" id="pv-base-var" value="0" min="-50" max="100" step="1">
+            <span class="pv-hyp-unit">%</span>
+          </div>
+        </div>
+        <!-- Optimiste -->
+        <div class="pv-hyp active-opti" id="pv-hyp-opti">
+          <div class="pv-hyp-name">🚀 Optimiste</div>
+          <div class="pv-hyp-row">
+            <span class="pv-hyp-lbl">Croissance CA / an</span>
+            <input class="pv-hyp-inp" type="number" id="pv-opti-ca" value="30" min="-50" max="200" step="1">
+            <span class="pv-hyp-unit">%</span>
+          </div>
+          <div class="pv-hyp-row">
+            <span class="pv-hyp-lbl">Évolution charges fixes</span>
+            <input class="pv-hyp-inp" type="number" id="pv-opti-fix" value="5" min="-50" max="100" step="1">
+            <span class="pv-hyp-unit">%</span>
+          </div>
+          <div class="pv-hyp-row">
+            <span class="pv-hyp-lbl">Évolution charges var.</span>
+            <input class="pv-hyp-inp" type="number" id="pv-opti-var" value="0" min="-50" max="100" step="1">
+            <span class="pv-hyp-unit">%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coefficients par article -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div><div class="ct">Croissance par article</div><div class="cs">Surcharge individuelle · Laissez vide pour utiliser le coefficient global</div></div>
+        </div>
+        <div class="pv-art-grid" id="pv-art-grid"></div>
+      </div>
+
+      <!-- Graphique mensuel -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div class="ct">Projection mensuelle du CA HT</div>
+            <div class="cs">Saisonnalité préservée depuis les données réelles · 3 hypothèses</div>
+          </div>
+          <select class="fsel" id="pv-graph-kpi" style="width:auto;min-width:160px;font-size:12px">
+            <option value="ca">CA HT</option>
+            <option value="resultat">Résultat brut</option>
+          </select>
+        </div>
+        <div style="height:260px"><canvas id="pv-chart-main"></canvas></div>
+      </div>
+
+      <!-- Tableau synthétique annuel -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="ct" style="margin-bottom:14px">Synthèse annuelle</div>
+        <div style="overflow-x:auto">
+          <table class="pv-tbl" id="pv-tbl-annuel">
+            <thead id="pv-thead"></thead>
+            <tbody id="pv-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Besoin de financement -->
+      <div class="card">
+        <div class="ct" style="margin-bottom:4px">Besoin de financement estimé</div>
+        <div class="cs" style="margin-bottom:14px">Si votre CA double, vos coûts d'achat doublent aussi — calculé sur la base de votre BFR actuel</div>
+        <div id="pv-financement"></div>
+      </div>
+
+    </div><!-- fin pnl-previsionnel -->
 
 </div><!-- fin app -->
 
@@ -3565,7 +3713,328 @@ function scUpdateCh(code, val) {
 }
 
 // ════════════════════════════════════════════════════════
-// NAVIGATION ANNÉES
+// PRÉVISIONNEL
+// ════════════════════════════════════════════════════════
+let chartPVMain = null;
+
+function _pvLoadHyp() {
+  try {
+    const raw = localStorage.getItem('lp_pv_' + UID + '_' + ANNEE);
+    if(raw) return JSON.parse(raw);
+  } catch(e) {}
+  return {
+    cons: { ca:5,  fix:2, var:0, arts:{} },
+    base: { ca:15, fix:3, var:0, arts:{} },
+    opti: { ca:30, fix:5, var:0, arts:{} },
+  };
+}
+function _pvSaveHyp(h) {
+  try { localStorage.setItem('lp_pv_' + UID + '_' + ANNEE, JSON.stringify(h)); } catch(e) {}
+}
+
+// Calcule le CA mensuel projeté pour une hypothèse sur N années
+function _pvProjCA(hyp, nAns) {
+  // Saisonnalité : poids de chaque mois sur l'année réelle
+  const caParMoisReel = Array(12).fill(0);
+  articles.forEach(a => {
+    (qty[a.code]||[]).forEach((v,m) => { caParMoisReel[m] += (v||0) * a.pv; });
+  });
+  const caReelAnnuel = caParMoisReel.reduce((s,v)=>s+v,0);
+  const poids = caReelAnnuel > 0
+    ? caParMoisReel.map(v => v / caReelAnnuel)
+    : Array(12).fill(1/12);
+
+  // Coefficient par article
+  const artCoeffs = {};
+  articles.forEach(a => {
+    const artCoeff = hyp.arts?.[a.code];
+    artCoeffs[a.code] = artCoeff !== undefined ? artCoeff : hyp.ca;
+  });
+
+  // Générer les mois projetés
+  const moisProj = []; // [{annee, mois, ca, cout, resultat}]
+  for(let an = 1; an <= nAns; an++) {
+    for(let m = 0; m < 12; m++) {
+      let caM = 0, coutM = 0;
+      articles.forEach(a => {
+        const coeff = 1 + artCoeffs[a.code] / 100;
+        const qReel = (qty[a.code]||[])[m] || 0;
+        const qProj = qReel * Math.pow(coeff, an);
+        caM   += qProj * a.pv;
+        coutM += qProj * a.cout;
+      });
+      // Charges
+      let chFixM = 0, chVarM = 0;
+      charges.forEach(c => {
+        const k = String(c.code);
+        const annuelTTC = (mts[k]||[]).reduce((s,v)=>s+(v||0),0);
+        const annuelHT  = annuelTTC / (1 + (c.tva||0));
+        const mensuelHT = annuelHT / 12;
+        if(c.type === 'Fixe') {
+          chFixM += mensuelHT * Math.pow(1 + hyp.fix/100, an);
+        } else {
+          chVarM += mensuelHT * (1 + hyp.var/100);
+        }
+      });
+      moisProj.push({
+        annee: ANNEE + an, mois: m,
+        ca: Math.round(caM * 100)/100,
+        cout: Math.round(coutM * 100)/100,
+        chFix: Math.round(chFixM * 100)/100,
+        chVar: Math.round(chVarM * 100)/100,
+        res: Math.round((caM - coutM - chFixM - chVarM) * 100)/100,
+      });
+    }
+  }
+  return moisProj;
+}
+
+// Synthèse annuelle depuis les mois projetés
+function _pvSynth(moisProj, annee) {
+  const mois = moisProj.filter(m => m.annee === annee);
+  const sum = k => Math.round(mois.reduce((s,m)=>s+m[k],0)*100)/100;
+  const ca = sum('ca'), cout = sum('cout'), chFix = sum('chFix'), chVar = sum('chVar');
+  const res = Math.round((ca - cout - chFix - chVar)*100)/100;
+  const margeB = Math.round((ca - cout)*100)/100;
+  const txM = ca > 0 ? Math.round(margeB/ca*1000)/10 : 0;
+  const mcv = Math.round((margeB - chVar)*100)/100;
+  const txMCV = ca > 0 ? mcv/ca : 0;
+  const seuil = txMCV > 0 ? Math.round(chFix/txMCV*100)/100 : 0;
+  return { ca, cout, margeB, chFix, chVar, res, txM, seuil };
+}
+
+function renderPrevisionnel() {
+  const lbl = $('pv-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+
+  // Charger hypothèses sauvegardées
+  const hyp = _pvLoadHyp();
+
+  // Remplir les inputs
+  const setInp = (id, v) => { const e=$(id); if(e) e.value = v; };
+  setInp('pv-cons-ca',  hyp.cons.ca);  setInp('pv-cons-fix', hyp.cons.fix); setInp('pv-cons-var', hyp.cons.var);
+  setInp('pv-base-ca',  hyp.base.ca);  setInp('pv-base-fix', hyp.base.fix); setInp('pv-base-var', hyp.base.var);
+  setInp('pv-opti-ca',  hyp.opti.ca);  setInp('pv-opti-fix', hyp.opti.fix); setInp('pv-opti-var', hyp.opti.var);
+
+  // Coefficients par article
+  const artGrid = $('pv-art-grid');
+  if(artGrid) {
+    artGrid.innerHTML = articles.map(a => {
+      const vCons = hyp.cons.arts?.[a.code] !== undefined ? hyp.cons.arts[a.code] : '';
+      const vBase = hyp.base.arts?.[a.code] !== undefined ? hyp.base.arts[a.code] : '';
+      const vOpti = hyp.opti.arts?.[a.code] !== undefined ? hyp.opti.arts[a.code] : '';
+      return `<div class="pv-art-row">
+        <div class="pv-art-nom" title="${a.nom}">${a.nom}</div>
+        <input class="pv-hyp-inp" type="number" style="width:52px" placeholder="🔵" title="Conservateur %"
+          value="${vCons}" onchange="pvUpdateArt('cons','${a.code}',this.value)">
+        <input class="pv-hyp-inp" type="number" style="width:52px" placeholder="🟢" title="Base %"
+          value="${vBase}" onchange="pvUpdateArt('base','${a.code}',this.value)">
+        <input class="pv-hyp-inp" type="number" style="width:52px" placeholder="🚀" title="Optimiste %"
+          value="${vOpti}" onchange="pvUpdateArt('opti','${a.code}',this.value)">
+        <span class="pv-hyp-unit">%</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Projections 3 ans
+  const projCons = _pvProjCA(hyp.cons, 3);
+  const projBase = _pvProjCA(hyp.base, 3);
+  const projOpti = _pvProjCA(hyp.opti, 3);
+  const annees   = [ANNEE+1, ANNEE+2, ANNEE+3];
+
+  // Données réelles pour l'année de base
+  const reelCA = articles.reduce((s,a)=>s+(qty[a.code]||[]).reduce((x,v)=>x+(v||0),0)*a.pv,0);
+  const reelRes = (() => {
+    let ca=0,cout=0,chF=0,chV=0;
+    articles.forEach(a=>{const q=(qty[a.code]||[]).reduce((s,v)=>s+(v||0),0);ca+=q*a.pv;cout+=q*a.cout;});
+    charges.forEach(c=>{const k=String(c.code);const ht=(mts[k]||[]).reduce((s,v)=>s+(v||0),0)/(1+(c.tva||0));if(c.type==='Fixe')chF+=ht;else chV+=ht;});
+    return Math.round((ca-cout-chF-chV)*100)/100;
+  })();
+
+  // ── Graphique mensuel ──
+  const kpi = $('pv-graph-kpi') ? $('pv-graph-kpi').value : 'ca';
+  const labels36 = [];
+  const MOIS_COURTS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  for(let an=1;an<=3;an++) for(let m=0;m<12;m++) labels36.push(MOIS_COURTS[m]+(an===1?'':" '"+(ANNEE+an).toString().slice(2)));
+
+  const dCons = projCons.map(m => m[kpi]);
+  const dBase = projBase.map(m => m[kpi]);
+  const dOpti = projOpti.map(m => m[kpi]);
+
+  const ctxMain = $('pv-chart-main');
+  if(ctxMain) {
+    if(chartPVMain) chartPVMain.destroy();
+    chartPVMain = new Chart(ctxMain, {
+      type: 'line',
+      data: {
+        labels: labels36,
+        datasets: [
+          { label:'🔵 Conservateur', data:dCons, borderColor:'#0d9488', backgroundColor:'rgba(13,148,136,.06)',
+            borderWidth:2, pointRadius:2, tension:0.3, fill:true },
+          { label:'🟢 Base',         data:dBase, borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,.06)',
+            borderWidth:2.5, pointRadius:2, tension:0.3, fill:true },
+          { label:'🚀 Optimiste',    data:dOpti, borderColor:'#059669', backgroundColor:'rgba(5,150,105,.06)',
+            borderWidth:2, pointRadius:2, tension:0.3, fill:true },
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins: {
+          legend: { position:'top', labels:{ font:{family:'Plus Jakarta Sans',size:12}, boxWidth:12, padding:16 } },
+          tooltip: { callbacks:{ label: ctx => ctx.dataset.label+' : '+Math.round(ctx.parsed.y).toLocaleString('fr-FR')+' €' } }
+        },
+        scales: {
+          y: { ticks:{ callback: v => Math.round(v).toLocaleString('fr-FR')+' €' } },
+          x: { grid:{ display:false }, ticks:{ maxTicksLimit:18, font:{size:10} } }
+        }
+      }
+    });
+  }
+
+  // ── Tableau synthétique ──
+  const fmt  = v => Math.abs(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const fmt0 = v => Math.round(Math.abs(v)).toLocaleString('fr-FR')+' €';
+  const thead = $('pv-thead');
+  const tbody = $('pv-tbody');
+  if(thead) thead.innerHTML = `<tr>
+    <th style="text-align:left">Année</th>
+    <th>CA HT</th><th>Coûts achat</th><th>Marge brute</th><th>Charges fixes</th><th>Charges var.</th>
+    <th>Résultat</th><th>Taux marge</th><th>Seuil rent.</th>
+  </tr>`;
+
+  if(tbody) {
+    const color = (v, higher=true) => v > 0 && higher ? 'var(--gr)' : v < 0 && !higher ? 'var(--gr)' : v !== 0 ? 'var(--am)' : 'var(--t2)';
+    // Ligne réel
+    let rows = `<tr class="pv-yr">
+      <td>📊 ${ANNEE} (réel)</td>
+      ${['ca','cout','margeB','chFix','chVar','res','txM','seuil'].map((k,i) => {
+        const sv = _pvSynth([], ANNEE); // dummy pour réel
+        // On recalcule le réel directement
+        return '';
+      }).join('')}
+    </tr>`;
+    // Recalcul réel propre
+    const synthReel = (() => {
+      let ca=0,cout=0,chF=0,chV=0;
+      articles.forEach(a=>{const q=(qty[a.code]||[]).reduce((s,v)=>s+(v||0),0);ca+=q*a.pv;cout+=q*a.cout;});
+      charges.forEach(c=>{const k=String(c.code);const ht=(mts[k]||[]).reduce((s,v)=>s+(v||0),0)/(1+(c.tva||0));if(c.type==='Fixe')chF+=ht;else chV+=ht;});
+      const margeB=Math.round((ca-cout)*100)/100, res=Math.round((ca-cout-chF-chV)*100)/100;
+      const txM=ca>0?Math.round(margeB/ca*1000)/10:0;
+      const mcv=Math.round((margeB-chV)*100)/100, txMCV=ca>0?mcv/ca:0;
+      const seuil=txMCV>0?Math.round(chF/txMCV*100)/100:0;
+      return {ca:Math.round(ca*100)/100,cout:Math.round(cout*100)/100,margeB,chFix:Math.round(chF*100)/100,chVar:Math.round(chV*100)/100,res,txM,seuil};
+    })();
+
+    rows = `<tr class="pv-yr"><td>📊 ${ANNEE} (réel)</td>
+      <td>${fmt(synthReel.ca)}</td><td style="color:var(--rd)">${fmt(synthReel.cout)}</td>
+      <td style="color:var(--gr)">${fmt(synthReel.margeB)}</td><td>${fmt(synthReel.chFix)}</td>
+      <td>${fmt(synthReel.chVar)}</td>
+      <td style="color:${synthReel.res>=0?'var(--gr)':'var(--rd)'};font-weight:700">${synthReel.res<0?'−':''}${fmt(synthReel.res)}</td>
+      <td style="color:var(--pu)">${synthReel.txM.toFixed(1)} %</td>
+      <td>${fmt0(synthReel.seuil)}</td>
+    </tr>`;
+
+    annees.forEach(an => {
+      const sC = _pvSynth(projCons, an);
+      const sB = _pvSynth(projBase, an);
+      const sO = _pvSynth(projOpti, an);
+      const rowHyp = (s, emoji, col) => `<tr>
+        <td style="padding-left:20px;color:var(--t2)">${emoji}</td>
+        <td style="color:${col}">${fmt(s.ca)}</td>
+        <td style="color:var(--rd)">${fmt(s.cout)}</td>
+        <td style="color:var(--gr)">${fmt(s.margeB)}</td>
+        <td>${fmt(s.chFix)}</td><td>${fmt(s.chVar)}</td>
+        <td style="color:${s.res>=0?'var(--gr)':'var(--rd)'};font-weight:700">${s.res<0?'−':''}${fmt(s.res)}</td>
+        <td style="color:var(--pu)">${s.txM.toFixed(1)} %</td>
+        <td>${fmt0(s.seuil)}</td>
+      </tr>`;
+      rows += `<tr class="pv-yr"><td colspan="9" style="padding:6px 12px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">N+${an-ANNEE} — ${an}</td></tr>`;
+      rows += rowHyp(sC,'🔵 Conservateur','#0d9488');
+      rows += rowHyp(sB,'🟢 Base','#2563eb');
+      rows += rowHyp(sO,'🚀 Optimiste','#059669');
+    });
+    tbody.innerHTML = rows;
+  }
+
+  // ── Convergence objectif ──
+  const obj = P.obj || 0;
+  const convMsg = $('pv-conv-msg');
+  if(convMsg && obj > 0) {
+    convMsg.style.display = 'flex';
+    // Chercher dans quelle hypothèse et quel mois on atteint l'objectif
+    let trouve = null;
+    for(const [nom, proj, emoji] of [['Conservateur',projCons,'🔵'],['Base',projBase,'🟢'],['Optimiste',projOpti,'🚀']]) {
+      let cumul = reelCA;
+      for(const m of proj) {
+        if(m.mois === 0) cumul = 0; // reset chaque année
+        cumul += m.ca;
+        if(cumul >= obj && !trouve) {
+          trouve = { nom, emoji, annee:m.annee, mois:m.mois };
+          break;
+        }
+      }
+      if(trouve) break;
+    }
+    const MOIS_LONGS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    if(trouve) {
+      convMsg.className = 'pv-conv ok';
+      $('pv-conv-ico').textContent = trouve.emoji;
+      $('pv-conv-txt').textContent = `Objectif CA (${Math.round(obj).toLocaleString('fr-FR')} €) atteint en ${MOIS_LONGS[trouve.mois]} ${trouve.annee} — hypothèse ${trouve.nom}`;
+    } else {
+      convMsg.className = 'pv-conv no';
+      $('pv-conv-ico').textContent = '⚠️';
+      $('pv-conv-txt').textContent = `L'objectif CA (${Math.round(obj).toLocaleString('fr-FR')} €) n'est pas atteint sur 3 ans même en hypothèse Optimiste.`;
+    }
+  } else if(convMsg) {
+    convMsg.style.display = 'none';
+  }
+
+  // ── Besoin de financement ──
+  const pvFin = $('pv-financement');
+  if(pvFin) {
+    const bfrReel = Math.round(synthReel.cout / 12 * 100) / 100; // coût achat mensuel moyen
+    const finItems = annees.map(an => {
+      const sB = _pvSynth(projBase, an);
+      const bfrProj = Math.round(sB.cout / 12 * 100) / 100;
+      const delta = Math.round((bfrProj - bfrReel) * 100) / 100;
+      const col = delta > 0 ? 'var(--am)' : 'var(--gr)';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 13px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd);margin-bottom:8px">
+        <div style="font-size:13px;font-weight:600">N+${an-ANNEE} — ${an} <span style="font-size:11px;color:var(--t2);font-weight:400">(hypothèse Base)</span></div>
+        <div style="display:flex;gap:20px;align-items:center">
+          <div style="text-align:right">
+            <div style="font-size:10px;color:var(--t3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.06em">Coût achat mensuel</div>
+            <div style="font-family:var(--fm);font-weight:700">${fmt(bfrProj)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:10px;color:var(--t3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.06em">Besoin supplémentaire</div>
+            <div style="font-family:var(--fm);font-weight:700;color:${col}">${delta>=0?'+':''}${fmt(Math.abs(delta))}</div>
+          </div>
+        </div>
+      </div>`;
+    });
+    pvFin.innerHTML = finItems.join('') + `<div style="font-size:11px;color:var(--t3);margin-top:6px">📌 Basé sur votre coût d'achat mensuel actuel de ${fmt(bfrReel)} (hypothèse Base). Prévoyez ce montant en trésorerie supplémentaire pour financer votre croissance.</div>`;
+  }
+}
+
+// Mise à jour hypothèse depuis les inputs
+function pvUpdate() {
+  const hyp = _pvLoadHyp();
+  const getN = id => parseFloat($(id)?.value) || 0;
+  hyp.cons.ca  = getN('pv-cons-ca');  hyp.cons.fix = getN('pv-cons-fix'); hyp.cons.var = getN('pv-cons-var');
+  hyp.base.ca  = getN('pv-base-ca');  hyp.base.fix = getN('pv-base-fix'); hyp.base.var = getN('pv-base-var');
+  hyp.opti.ca  = getN('pv-opti-ca');  hyp.opti.fix = getN('pv-opti-fix'); hyp.opti.var = getN('pv-opti-var');
+  _pvSaveHyp(hyp);
+  renderPrevisionnel();
+}
+
+// Mise à jour coefficient article
+function pvUpdateArt(scenario, code, val) {
+  const hyp = _pvLoadHyp();
+  if(!hyp[scenario].arts) hyp[scenario].arts = {};
+  if(val === '' || val === null) delete hyp[scenario].arts[code];
+  else hyp[scenario].arts[code] = parseFloat(val) || 0;
+  _pvSaveHyp(hyp);
+  renderPrevisionnel();
+}
 // ════════════════════════════════════════════════════════
 async function changeAnnee(n) {
   n = parseInt(n);
@@ -3614,8 +4083,11 @@ async function changeAnnee(n) {
     renderMarge();
   }
   if($('pnl-scenarios') && $('pnl-scenarios').style.display !== 'none') {
-    _sc = null; // reset pour recharger localStorage avec nouveau UID/ANNEE
+    _sc = null;
     renderScenarios();
+  }
+  if($('pnl-previsionnel') && $('pnl-previsionnel').style.display !== 'none') {
+    renderPrevisionnel();
   }
 }
 
@@ -3747,8 +4219,8 @@ async function startApp(user) {
 // NAVIGATION PANELS
 // ════════════════════════════════════════════════════════
 function showPanel(panelId, navId) {
-  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge','pnl-scenarios'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
-  ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge','nav-scenarios'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
+  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge','pnl-scenarios','pnl-previsionnel'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
+  ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge','nav-scenarios','nav-previsionnel'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
   const p=$(panelId);
   if(p) {
     p.style.display='block';
@@ -3889,6 +4361,22 @@ document.addEventListener('DOMContentLoaded', () => {
   $('nav-scenarios').addEventListener('click', () => {
     showPanel('pnl-scenarios','nav-scenarios');
     renderScenarios();
+  });
+  $('nav-previsionnel').addEventListener('click', () => {
+    showPanel('pnl-previsionnel','nav-previsionnel');
+    renderPrevisionnel();
+  });
+
+  // Inputs hypothèses prévisionnel — recalcul en temps réel
+  ['pv-cons-ca','pv-cons-fix','pv-cons-var',
+   'pv-base-ca','pv-base-fix','pv-base-var',
+   'pv-opti-ca','pv-opti-fix','pv-opti-var'].forEach(id => {
+    const el = $(id);
+    if(el) el.addEventListener('change', pvUpdate);
+  });
+  // Toggle graphique CA/Résultat
+  document.addEventListener('change', e => {
+    if(e.target.id === 'pv-graph-kpi') renderPrevisionnel();
   });
 
   // Onglets scénarios
