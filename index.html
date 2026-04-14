@@ -3801,7 +3801,7 @@ function _pvProjCA(hyp, nAns) {
         if(c.type === 'Fixe') {
           chFixM += mensuelHT * Math.pow(1 + hyp.fix/100, an);
         } else {
-          chVarM += mensuelHT * (1 + hyp.var/100);
+          chVarM += mensuelHT * Math.pow(1 + hyp.var/100, an);
         }
       });
       moisProj.push({
