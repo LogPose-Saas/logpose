@@ -750,6 +750,13 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         </div>
       </div>
       <div class="sb-sect">
+        <div class="sb-lbl">Analyse</div>
+        <div class="sb-item" id="nav-marge">
+          <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+          <span>Marge & Rentabilité</span>
+        </div>
+      </div>
+      <div class="sb-sect">
         <div class="sb-lbl">Configuration</div>
         <div class="sb-item" id="nav-params">
           <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg></span>
@@ -1188,6 +1195,83 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
 
     </div><!-- fin pnl-charges -->
+
+    <!-- MARGE & RENTABILITÉ -->
+    <div id="pnl-marge" style="display:none">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Marge &amp; Rentabilité</div>
+          <div class="page-sub">Analyse de la performance · Année <span id="mr-annee-lbl">2026</span></div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kgrid g4" style="margin-bottom:14px">
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--ac)"></div>
+          <div class="klbl">Seuil de rentabilité</div>
+          <div class="kval" id="mr-kpi-seuil">0 €</div>
+          <div id="mr-kpi-seuil-sub" style="font-size:11px;color:var(--t2);margin-top:6px">CA min. pour couvrir les fixes</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">CA HT minimum à réaliser pour couvrir toutes vos charges fixes. Calculé via : Charges fixes HT ÷ (1 − Charges variables HT / CA HT).</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" id="mr-seuil-acc" style="background:var(--gr)"></div>
+          <div class="klbl">Atteinte du seuil</div>
+          <div class="kval" id="mr-kpi-atteinte">— %</div>
+          <div id="mr-kpi-atteinte-sub" style="font-size:11px;color:var(--t2);margin-top:6px">CA actuel vs point mort</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Pourcentage du seuil de rentabilité atteint avec votre CA HT actuel. Au-delà de 100 %, vous êtes rentable.</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--tl)"></div>
+          <div class="klbl">Marge sur coût variable</div>
+          <div class="kval" id="mr-kpi-mcv">0 €</div>
+          <div id="mr-kpi-mcv-sub" style="font-size:11px;color:var(--t2);margin-top:6px">Taux : —</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">CA HT − Coûts achat − Charges variables HT. C'est ce qui reste pour couvrir vos charges fixes puis dégager un bénéfice.</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--pu)"></div>
+          <div class="klbl">Taux de marque moyen</div>
+          <div class="kval" id="mr-kpi-marque">0 %</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:6px">Marge / Coût achat</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Différent du taux de marge : Marge brute ÷ Coût d'achat × 100. Indique combien vous gagnez par rapport à ce que vous avez payé.</div></div>
+        </div>
+      </div>
+
+      <!-- Graphique Waterfall -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="ct" style="margin-bottom:4px">Cascade de rentabilité</div>
+        <div class="cs" style="margin-bottom:16px">Du CA HT au résultat brut, étape par étape</div>
+        <div style="height:260px"><canvas id="mr-chart-waterfall"></canvas></div>
+      </div>
+
+      <!-- Tableau par article -->
+      <div class="card">
+        <div class="tbl-hdr">
+          <div><div class="ct">Rentabilité par article</div><div class="cs">Marge brute et imputation des charges fixes selon la clé de répartition</div></div>
+        </div>
+        <div id="mr-empty" style="display:none" class="empty">
+          <div class="empty-ico">📊</div>
+          <div class="empty-title">Aucune donnée disponible</div>
+          <div class="empty-desc">Saisissez des quantités dans le module Chiffre d'affaires pour voir l'analyse de rentabilité</div>
+        </div>
+        <div style="overflow-x:auto" id="mr-tbl-wrap">
+          <table class="dtbl" id="mr-tbl">
+            <thead><tr>
+              <th>Article</th>
+              <th style="text-align:right">CA HT</th>
+              <th style="text-align:right">Coût achat</th>
+              <th style="text-align:right">Marge brute</th>
+              <th style="text-align:right">Taux marge</th>
+              <th style="text-align:right">Charges fixes imputées</th>
+              <th style="text-align:right">Marge nette</th>
+              <th style="min-width:100px">Performance</th>
+            </tr></thead>
+            <tbody id="mr-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- fin pnl-marge -->
 
 </div><!-- fin app -->
 
@@ -2746,6 +2830,213 @@ function toggleAide() {
 }
 
 // ════════════════════════════════════════════════════════
+// MARGE & RENTABILITÉ
+// ════════════════════════════════════════════════════════
+let chartMRWaterfall = null;
+
+function renderMarge() {
+  const lbl = $('mr-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+  const fmt  = v => v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+  const fmt0 = v => Math.round(v).toLocaleString('fr-FR') + ' €';
+
+  // ── Calculs de base ──
+  let caHT = 0, coutAchat = 0, margeB = 0;
+  articles.forEach(a => {
+    const totQty = (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0);
+    caHT     += totQty * a.pv;
+    coutAchat+= totQty * a.cout;
+    margeB   += totQty * (a.pv - a.cout);
+  });
+
+  let chFixHT = 0, chVarHT = 0;
+  charges.forEach(c => {
+    const k = String(c.code);
+    const annuelTTC = (mts[k]||[]).reduce((s,v)=>s+(v||0),0);
+    const annuelHT  = annuelTTC / (1 + (c.tva||0));
+    if(c.type === 'Fixe') chFixHT += annuelHT;
+    else                  chVarHT += annuelHT;
+  });
+
+  caHT      = Math.round(caHT      * 100) / 100;
+  coutAchat = Math.round(coutAchat * 100) / 100;
+  margeB    = Math.round(margeB    * 100) / 100;
+  chFixHT   = Math.round(chFixHT   * 100) / 100;
+  chVarHT   = Math.round(chVarHT   * 100) / 100;
+  const resultat = Math.round((caHT - coutAchat - chFixHT - chVarHT) * 100) / 100;
+
+  // ── MCV : marge sur coût variable ──
+  const mcv    = Math.round((margeB - chVarHT) * 100) / 100;
+  const txMCV  = caHT > 0 ? Math.round(mcv / caHT * 1000) / 10 : 0;
+
+  // ── Seuil de rentabilité ──
+  // Seuil = Charges fixes / Taux de MCV
+  const txMCVdec = caHT > 0 ? mcv / caHT : 0;
+  const seuil = txMCVdec > 0 ? Math.round(chFixHT / txMCVdec * 100) / 100 : 0;
+  const atteinte = seuil > 0 ? Math.round(caHT / seuil * 100) : (caHT > 0 ? 100 : 0);
+
+  // ── Taux de marque ──
+  const txMarque = coutAchat > 0 ? Math.round(margeB / coutAchat * 1000) / 10 : 0;
+
+  // ── KPIs ──
+  const eSeuil = $('mr-kpi-seuil');
+  if(eSeuil) eSeuil.textContent = seuil > 0 ? fmt(seuil) : '—';
+
+  const eSeuilSub = $('mr-kpi-seuil-sub');
+  if(eSeuilSub) {
+    if(seuil <= 0) eSeuilSub.textContent = 'Pas de charges fixes saisies';
+    else if(caHT >= seuil) eSeuilSub.textContent = '✅ Seuil dépassé !';
+    else eSeuilSub.textContent = `Manque ${fmt0(seuil - caHT)} de CA`;
+  }
+
+  const eAtt = $('mr-kpi-atteinte');
+  const eAttAcc = $('mr-seuil-acc');
+  if(eAtt) {
+    eAtt.textContent = seuil > 0 ? atteinte + ' %' : '—';
+    eAtt.style.color = atteinte >= 100 ? 'var(--gr)' : atteinte >= 70 ? 'var(--am)' : 'var(--rd)';
+  }
+  if(eAttAcc) eAttAcc.style.background = atteinte >= 100 ? 'var(--gr)' : atteinte >= 70 ? 'var(--am)' : 'var(--rd)';
+
+  const eAttSub = $('mr-kpi-atteinte-sub');
+  if(eAttSub) eAttSub.textContent = seuil > 0
+    ? `Seuil : ${fmt0(seuil)}`
+    : 'Définir des charges fixes';
+
+  const eMCV = $('mr-kpi-mcv');
+  if(eMCV) { eMCV.textContent = fmt(mcv); eMCV.style.color = mcv >= 0 ? 'var(--gr)' : 'var(--rd)'; }
+  const eMCVsub = $('mr-kpi-mcv-sub');
+  if(eMCVsub) eMCVsub.textContent = `Taux : ${txMCV.toFixed(1)} %`;
+
+  const eMarque = $('mr-kpi-marque');
+  if(eMarque) eMarque.textContent = txMarque.toFixed(1) + ' %';
+
+  // ── Graphique Waterfall ──
+  // On simule un waterfall avec des barres flottantes Chart.js
+  const wfLabels = ['CA HT', 'Coûts achat', 'Marge brute', 'Ch. variables', 'Ch. fixes', 'Résultat'];
+  const wfBase   = [0, caHT - coutAchat, caHT - coutAchat, margeB - chVarHT, resultat < 0 ? resultat : 0, 0];
+  const wfVals   = [caHT, coutAchat, margeB, chVarHT, chFixHT, Math.abs(resultat)];
+  const wfColors = [
+    '#2563eb',
+    'rgba(225,29,72,0.75)',
+    '#0d9488',
+    'rgba(217,119,6,0.75)',
+    'rgba(124,58,237,0.75)',
+    resultat >= 0 ? '#059669' : '#e11d48',
+  ];
+
+  const ctxWF = $('mr-chart-waterfall');
+  if(ctxWF) {
+    if(chartMRWaterfall) chartMRWaterfall.destroy();
+    chartMRWaterfall = new Chart(ctxWF, {
+      type: 'bar',
+      data: {
+        labels: wfLabels,
+        datasets: [
+          {
+            label: 'Base',
+            data: wfBase,
+            backgroundColor: 'transparent',
+            borderColor: 'transparent',
+            borderSkipped: false,
+          },
+          {
+            label: 'Valeur',
+            data: wfVals,
+            backgroundColor: wfColors,
+            borderRadius: 4,
+            borderSkipped: false,
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                if(ctx.datasetIndex === 0) return null;
+                return ctx.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+              },
+              filter: item => item.datasetIndex === 1,
+            }
+          }
+        },
+        scales: {
+          x: { stacked: true, grid: { display: false } },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            ticks: { callback: v => Math.round(v).toLocaleString('fr-FR') + ' €' }
+          }
+        }
+      }
+    });
+  }
+
+  // ── Tableau par article ──
+  const artAvecCA = articles.filter(a =>
+    (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0) > 0
+  );
+
+  const mrEmpty = $('mr-empty');
+  const mrWrap  = $('mr-tbl-wrap');
+  if(!artAvecCA.length) {
+    if(mrEmpty) mrEmpty.style.display = 'block';
+    if(mrWrap)  mrWrap.style.display  = 'none';
+    return;
+  }
+  if(mrEmpty) mrEmpty.style.display = 'none';
+  if(mrWrap)  mrWrap.style.display  = '';
+
+  // Calcul de la clé de répartition des charges fixes
+  const cleQte = P.cle !== 'ca'; // true = prorata quantités, false = prorata CA
+  const totQteGlobal = artAvecCA.reduce((s,a) => s+(qty[a.code]||[]).reduce((x,v)=>x+(v||0),0),0);
+  const totCAGlobal  = artAvecCA.reduce((s,a) => s+(qty[a.code]||[]).reduce((x,v)=>x+(v||0),0)*a.pv,0);
+
+  const lignes = artAvecCA.map(a => {
+    const totQty  = (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0);
+    const artCA   = Math.round(totQty * a.pv * 100) / 100;
+    const artCout = Math.round(totQty * a.cout * 100) / 100;
+    const artMB   = Math.round((artCA - artCout) * 100) / 100;
+    const txMB    = artCA > 0 ? Math.round(artMB / artCA * 1000) / 10 : 0;
+
+    // Imputation charges fixes
+    const cle = cleQte
+      ? (totQteGlobal > 0 ? totQty / totQteGlobal : 0)
+      : (totCAGlobal  > 0 ? artCA  / totCAGlobal  : 0);
+    const fixImput = Math.round(chFixHT * cle * 100) / 100;
+    const margeNette = Math.round((artMB - fixImput) * 100) / 100;
+
+    return { nom:a.nom, artCA, artCout, artMB, txMB, fixImput, margeNette };
+  }).sort((a,b) => b.txMB - a.txMB);
+
+  const maxCA = Math.max(...lignes.map(l => l.artCA), 1);
+
+  const tb = $('mr-tbody');
+  if(tb) {
+    tb.innerHTML = lignes.map(l => {
+      const colMB = l.txMB >= 40 ? 'var(--gr)' : l.txMB >= 20 ? 'var(--am)' : 'var(--rd)';
+      const colNette = l.margeNette >= 0 ? 'var(--gr)' : 'var(--rd)';
+      const barW = Math.round(l.artCA / maxCA * 100);
+      return `<tr>
+        <td style="font-weight:600">${l.nom}</td>
+        <td style="text-align:right;font-family:var(--fm);font-size:12px">${fmt(l.artCA)}</td>
+        <td style="text-align:right;font-family:var(--fm);font-size:12px;color:var(--rd)">${fmt(l.artCout)}</td>
+        <td style="text-align:right;font-family:var(--fm);font-size:12px;color:${colMB};font-weight:700">${fmt(l.artMB)}</td>
+        <td style="text-align:right;font-family:var(--fm);font-size:12px;color:${colMB};font-weight:700">${l.txMB.toFixed(1)} %</td>
+        <td style="text-align:right;font-family:var(--fm);font-size:12px;color:var(--pu)">${fmt(l.fixImput)}</td>
+        <td style="text-align:right;font-family:var(--fm);font-size:12px;color:${colNette};font-weight:700">${fmt(l.margeNette)}</td>
+        <td>
+          <div style="background:var(--bd);border-radius:99px;height:6px;overflow:hidden">
+            <div style="width:${barW}%;height:100%;border-radius:99px;background:${colMB};transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+// ════════════════════════════════════════════════════════
 // NAVIGATION ANNÉES
 // ════════════════════════════════════════════════════════
 async function changeAnnee(n) {
@@ -2790,6 +3081,9 @@ async function changeAnnee(n) {
   }
   if($('pnl-dashboard') && $('pnl-dashboard').style.display !== 'none') {
     renderDashboard();
+  }
+  if($('pnl-marge') && $('pnl-marge').style.display !== 'none') {
+    renderMarge();
   }
 }
 
@@ -2921,8 +3215,8 @@ async function startApp(user) {
 // NAVIGATION PANELS
 // ════════════════════════════════════════════════════════
 function showPanel(panelId, navId) {
-  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
-  ['nav-dashboard','nav-params','nav-ca','nav-charges'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
+  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
+  ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
   const p=$(panelId);
   if(p) {
     p.style.display='block';
@@ -3055,6 +3349,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       renderChargesData(); // instantané
     }
+  });
+  $('nav-marge').addEventListener('click', () => {
+    showPanel('pnl-marge','nav-marge');
+    renderMarge();
   });
   [['tab-articles','p-articles'],['tab-charges','p-charges'],['tab-entreprise','p-entreprise']].forEach(([tid,pid]) => {
     $(tid).addEventListener('click', () => {
