@@ -461,7 +461,25 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .sk-block{background:var(--bgs);border-radius:var(--rs);animation:shimmer 1.4s ease-in-out infinite}
 @keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
-/* ═══ TVA ═══ */
+/* ═══ TRÉSORERIE ═══ */
+.tr-params{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.tr-param-card{background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);padding:16px}
+.tr-param-lbl{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:8px}
+.tr-param-inp{width:100%;background:var(--in);border:1px solid var(--bd);border-radius:6px;padding:7px 10px;color:var(--t1);font-family:var(--fm);font-size:14px;font-weight:700;outline:none;transition:border-color var(--tr)}
+.tr-param-inp:focus{border-color:var(--bdf);box-shadow:0 0 0 2px var(--ag)}
+.tr-param-unit{font-size:11px;color:var(--t3);margin-top:4px}
+.tr-tbl{width:100%;border-collapse:collapse}
+.tr-tbl th{font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:8px 12px;border-bottom:2px solid var(--bd);text-align:right;white-space:nowrap}
+.tr-tbl th:first-child{text-align:left}
+.tr-tbl td{padding:8px 12px;border-bottom:1px solid var(--bd);font-size:12px;text-align:right;font-family:var(--fm)}
+.tr-tbl td:first-child{text-align:left;font-family:var(--f);font-weight:500}
+.tr-tbl tr:hover td{background:var(--bgh)}
+.tr-tbl .tr-total td{background:var(--bgs);font-weight:700;border-top:2px solid var(--bd)}
+.tr-tbl .tr-tension td{background:var(--rdb)}
+.tr-solde-pos{color:var(--gr);font-weight:700}
+.tr-solde-neg{color:var(--rd);font-weight:700}
+.tr-alert-tension{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--rs);font-size:12.5px;margin-bottom:14px;background:var(--rdb);color:var(--rd);border:1px solid rgba(225,29,72,.2)}
+.tr-disclaimer{font-size:11.5px;color:var(--t3);line-height:1.6;padding:10px 14px;background:var(--bgs);border-radius:var(--rs);border-left:3px solid var(--bd);margin-top:14px}
 .tva-regime{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:var(--rs);font-size:13px;font-weight:600;margin-bottom:16px}
 .tva-regime.franchise{background:var(--amb);color:var(--am);border:1px solid rgba(217,119,6,.25)}
 .tva-regime.assujetti{background:var(--grb);color:var(--gr);border:1px solid rgba(5,150,105,.25)}
@@ -857,6 +875,10 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="sb-item" id="nav-tva">
           <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
           <span>TVA</span>
+        </div>
+        <div class="sb-item" id="nav-tresorerie">
+          <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
+          <span>Trésorerie</span>
         </div>
       </div>
       <div class="sb-sect">
@@ -1641,6 +1663,113 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
 
     </div><!-- fin pnl-tva -->
+
+    <!-- TRÉSORERIE -->
+    <div id="pnl-tresorerie" style="display:none">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Trésorerie</div>
+          <div class="page-sub">Solde bancaire prévisionnel · Année <span id="tr-annee-lbl">2026</span></div>
+        </div>
+      </div>
+
+      <!-- Alertes tension -->
+      <div id="tr-alerts"></div>
+
+      <!-- Paramètres trésorerie -->
+      <div class="tr-params">
+        <div class="tr-param-card">
+          <div class="tr-param-lbl">💰 Trésorerie initiale au 1er janvier</div>
+          <input class="tr-param-inp" type="number" id="tr-init" placeholder="0" step="100">
+          <div class="tr-param-unit">Solde bancaire réel de départ (€)</div>
+        </div>
+        <div class="tr-param-card">
+          <div class="tr-param-lbl">📅 Délai d'encaissement client</div>
+          <select class="fsel" id="tr-delai-client" style="font-size:14px;font-weight:700;padding:7px 10px">
+            <option value="0">Comptant (0 jour)</option>
+            <option value="1">30 jours</option>
+            <option value="2">60 jours</option>
+          </select>
+          <div class="tr-param-unit">Délai entre vente et encaissement</div>
+        </div>
+        <div class="tr-param-card">
+          <div class="tr-param-lbl">📦 Délai de paiement fournisseur</div>
+          <select class="fsel" id="tr-delai-fourn" style="font-size:14px;font-weight:700;padding:7px 10px">
+            <option value="0">Comptant (0 jour)</option>
+            <option value="1">30 jours</option>
+            <option value="2">60 jours</option>
+          </select>
+          <div class="tr-param-unit">Délai entre achat et décaissement</div>
+        </div>
+        <div class="tr-param-card">
+          <div class="tr-param-lbl">🧾 TVA incluse dans les flux</div>
+          <select class="fsel" id="tr-incl-tva" style="font-size:14px;font-weight:700;padding:7px 10px">
+            <option value="1">Oui — flux en TTC</option>
+            <option value="0">Non — hors TVA</option>
+          </select>
+          <div class="tr-param-unit">Inclure la TVA dans les encaissements/décaissements</div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kgrid g4" style="margin-bottom:14px">
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--gr)"></div>
+          <div class="klbl">Solde fin d'année</div>
+          <div class="kval" id="tr-kpi-fin">0 €</div>
+          <div id="tr-kpi-fin-sub" style="font-size:11px;color:var(--t2);margin-top:6px">Au 31 décembre</div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--ac)"></div>
+          <div class="klbl">Solde minimum</div>
+          <div class="kval" id="tr-kpi-min">0 €</div>
+          <div id="tr-kpi-min-sub" style="font-size:11px;color:var(--t2);margin-top:6px">Point bas de l'année</div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--pu)"></div>
+          <div class="klbl">Total encaissements</div>
+          <div class="kval" id="tr-kpi-enc">0 €</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:6px">Hors tréso. initiale</div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--rd)"></div>
+          <div class="klbl">Total décaissements</div>
+          <div class="kval" id="tr-kpi-dec">0 €</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:6px">Charges + TVA + achats</div>
+        </div>
+      </div>
+
+      <!-- Graphique solde bancaire -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="ct" style="margin-bottom:4px">Solde bancaire prévisionnel</div>
+        <div class="cs" style="margin-bottom:16px">Évolution mois par mois · Zone rouge = tension de trésorerie</div>
+        <div style="height:260px"><canvas id="tr-chart"></canvas></div>
+      </div>
+
+      <!-- Tableau mensuel -->
+      <div class="card">
+        <div class="ct" style="margin-bottom:4px">Détail mensuel</div>
+        <div class="cs" style="margin-bottom:14px">Encaissements − Décaissements − TVA = Flux net → Solde cumulé</div>
+        <div style="overflow-x:auto">
+          <table class="tr-tbl">
+            <thead><tr>
+              <th style="text-align:left">Mois</th>
+              <th>Encaissements</th>
+              <th>Achats TTC</th>
+              <th>Charges TTC</th>
+              <th>TVA nette</th>
+              <th>Flux net</th>
+              <th>Solde cumulé</th>
+            </tr></thead>
+            <tbody id="tr-tbody"></tbody>
+          </table>
+        </div>
+        <div class="tr-disclaimer">
+          ⚠️ <strong>Module indicatif</strong> — Ce tableau ne tient pas compte de tous les flux bancaires (cotisations sociales, emprunts, virements personnels, investissements...). Saisissez votre solde réel en trésorerie initiale pour une projection au plus proche de la réalité. Pour une gestion de trésorerie complète, utilisez un outil comptable dédié.
+        </div>
+      </div>
+
+    </div><!-- fin pnl-tresorerie -->
 
 </div><!-- fin app -->
 
@@ -4401,6 +4530,252 @@ function renderTVA() {
   }
 }
 
+// ════════════════════════════════════════════════════════
+// TRÉSORERIE
+// ════════════════════════════════════════════════════════
+let chartTR = null;
+
+function _trLoadParams() {
+  try {
+    const raw = localStorage.getItem('lp_tr_' + UID + '_' + ANNEE);
+    if(raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { init: 0, delaiClient: 0, delaiForun: 0, inclTVA: 1 };
+}
+function _trSaveParams(p) {
+  try { localStorage.setItem('lp_tr_' + UID + '_' + ANNEE, JSON.stringify(p)); } catch(e) {}
+}
+
+function renderTresorerie() {
+  const lbl = $('tr-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+  const MOIS_LONGS  = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const MOIS_COURTS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const fmt  = v => (v<0?'−':'')+Math.abs(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const fmt0 = v => (v<0?'−':'')+Math.round(Math.abs(v)).toLocaleString('fr-FR')+' €';
+
+  // Charger paramètres
+  const trP = _trLoadParams();
+  const initEl = $('tr-init'); if(initEl) initEl.value = trP.init || '';
+  const dcEl   = $('tr-delai-client'); if(dcEl) dcEl.value = trP.delaiClient || 0;
+  const dfEl   = $('tr-delai-fourn');  if(dfEl) dfEl.value = trP.delaiForun  || 0;
+  const tvEl   = $('tr-incl-tva');     if(tvEl) tvEl.value = trP.inclTVA !== undefined ? trP.inclTVA : 1;
+
+  const tresoInit   = parseFloat(trP.init)       || 0;
+  const delaiClient = parseInt(trP.delaiClient)  || 0;
+  const delaiForun  = parseInt(trP.delaiForun)   || 0;
+  const inclTVA     = parseInt(trP.inclTVA !== undefined ? trP.inclTVA : 1);
+  const assujetti   = _tvaIsAssujetti();
+
+  // ── Calcul flux mensuels bruts (avant décalage) ──
+  const moisData = _tvaCalcMois(); // TVA par mois
+  const fluxBruts = Array(12).fill(0).map((_,m) => {
+    // Encaissements : CA (HT ou TTC selon inclTVA)
+    let enc = 0;
+    articles.forEach(a => {
+      const q = (qty[a.code]||[])[m] || 0;
+      const caHT = q * a.pv;
+      enc += inclTVA && assujetti ? caHT * (1 + (a.tva||0.2)) : caHT;
+    });
+
+    // Décaissement achats : coût achat (HT ou TTC)
+    let achats = 0;
+    articles.forEach(a => {
+      const q = (qty[a.code]||[])[m] || 0;
+      const coutHT = q * a.cout;
+      achats += inclTVA ? coutHT * (1 + (a.tva||0.2)) : coutHT;
+    });
+
+    // Décaissement charges : déjà en TTC dans mts
+    let chTTC = 0;
+    charges.forEach(c => {
+      const k = String(c.code);
+      chTTC += (mts[k]||[])[m] || 0;
+      if(!inclTVA) {
+        const taux = c.tva || 0;
+        chTTC = chTTC / (1 + taux); // repasser en HT si pas inclTVA
+      }
+    });
+
+    // TVA nette à reverser (seulement si assujetti)
+    const tvaNette = assujetti ? Math.max(moisData[m].net, 0) : 0;
+
+    return { enc: Math.round(enc*100)/100, achats: Math.round(achats*100)/100, charges: Math.round(chTTC*100)/100, tva: Math.round(tvaNette*100)/100 };
+  });
+
+  // ── Appliquer les décalages ──
+  // Encaissements décalés de delaiClient mois
+  // Décaissements achats décalés de delaiForun mois
+  // TVA : échéance mois suivant (décalage fixe de 1)
+  const flux = Array(12).fill(0).map((_,m) => {
+    const srcEnc    = m - delaiClient >= 0 ? fluxBruts[m - delaiClient].enc     : 0;
+    const srcAchats = m - delaiForun  >= 0 ? fluxBruts[m - delaiForun].achats   : 0;
+    const srcCh     = m - delaiForun  >= 0 ? fluxBruts[m - delaiForun].charges  : 0;
+    const srcTVA    = m - 1 >= 0           ? fluxBruts[m - 1].tva               : 0; // TVA toujours M+1
+    const net = Math.round((srcEnc - srcAchats - srcCh - srcTVA) * 100) / 100;
+    return { enc:srcEnc, achats:srcAchats, charges:srcCh, tva:srcTVA, net };
+  });
+
+  // ── Soldes cumulés ──
+  let solde = tresoInit;
+  const soldes = flux.map(f => {
+    solde = Math.round((solde + f.net) * 100) / 100;
+    return solde;
+  });
+
+  const totalEnc  = Math.round(flux.reduce((s,f)=>s+f.enc,0)*100)/100;
+  const totalDec  = Math.round(flux.reduce((s,f)=>s+f.achats+f.charges+f.tva,0)*100)/100;
+  const soldeFin  = soldes[11];
+  const soldeMin  = Math.min(...soldes);
+  const moisTension = flux.map((_,i)=>soldes[i]).filter(s=>s<0).length;
+
+  // ── Alertes ──
+  const alertsEl = $('tr-alerts');
+  if(alertsEl) {
+    let alerts = '';
+    const moisNegatifs = soldes.map((s,i)=>({s,i})).filter(x=>x.s<0);
+    if(moisNegatifs.length > 0) {
+      const noms = moisNegatifs.map(x=>MOIS_COURTS[x.i]).join(', ');
+      alerts += `<div class="tr-alert-tension">🚨 <div><strong>Tension de trésorerie détectée !</strong> Solde négatif prévu en : ${noms}. Anticipez un financement ou décalez des dépenses.</div></div>`;
+    }
+    alertsEl.innerHTML = alerts;
+  }
+
+  // ── KPIs ──
+  const eF=$('tr-kpi-fin'), eFs=$('tr-kpi-fin-sub');
+  if(eF) { eF.textContent=fmt(soldeFin); eF.style.color=soldeFin>=0?'var(--gr)':'var(--rd)'; }
+  if(eFs) eFs.textContent = soldeFin >= 0 ? 'Situation saine ✅' : 'Déficit à anticiper ⚠️';
+
+  const eM=$('tr-kpi-min'), eMs=$('tr-kpi-min-sub');
+  if(eM) { eM.textContent=fmt(soldeMin); eM.style.color=soldeMin>=0?'var(--gr)':'var(--rd)'; }
+  if(eMs) {
+    const idxMin = soldes.indexOf(soldeMin);
+    eMs.textContent = idxMin >= 0 ? `En ${MOIS_LONGS[idxMin]}` : '—';
+  }
+
+  const eE=$('tr-kpi-enc'); if(eE) { eE.textContent=fmt(totalEnc); eE.style.color='var(--gr)'; }
+  const eD=$('tr-kpi-dec'); if(eD) { eD.textContent=fmt(totalDec); eD.style.color='var(--rd)'; }
+
+  // ── Graphique ──
+  const ctxTR = $('tr-chart');
+  if(ctxTR) {
+    if(chartTR) chartTR.destroy();
+
+    // Couleurs par zone positive/négative
+    const ptColors = soldes.map(s => s >= 0 ? 'rgba(5,150,105,0.9)' : 'rgba(225,29,72,0.9)');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+    // Plugin zone rouge sous zéro
+    const zeroLinePlugin = {
+      id:'zeroZone',
+      beforeDraw(chart) {
+        const {ctx, chartArea:{top,bottom,left,right}, scales:{y}} = chart;
+        const zero = y.getPixelForValue(0);
+        if(zero < bottom && zero > top) {
+          ctx.save();
+          ctx.fillStyle = 'rgba(225,29,72,0.06)';
+          ctx.fillRect(left, zero, right-left, bottom-zero);
+          ctx.restore();
+        }
+      }
+    };
+
+    chartTR = new Chart(ctxTR, {
+      type: 'line',
+      plugins: [zeroLinePlugin],
+      data: {
+        labels: MOIS_COURTS,
+        datasets: [
+          {
+            label: 'Solde bancaire',
+            data: soldes,
+            borderColor: '#2563eb',
+            backgroundColor: ctx => {
+              const g = ctx.chart.ctx.createLinearGradient(0,0,0,260);
+              g.addColorStop(0,'rgba(37,99,235,0.15)');
+              g.addColorStop(1,'rgba(37,99,235,0.01)');
+              return g;
+            },
+            borderWidth: 2.5,
+            pointRadius: 5,
+            pointBackgroundColor: ptColors,
+            pointBorderColor: ptColors,
+            tension: 0.3,
+            fill: true,
+          },
+          {
+            label: 'Flux net mensuel',
+            data: flux.map(f=>f.net),
+            borderColor: 'rgba(124,58,237,0.6)',
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            pointRadius: 3,
+            tension: 0.3,
+            borderDash: [4,3],
+            fill: false,
+          }
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins: {
+          legend: { position:'top', labels:{ font:{family:'Plus Jakarta Sans',size:12}, boxWidth:12, padding:16 } },
+          tooltip: { callbacks:{ label: ctx => ctx.dataset.label+' : '+fmt(ctx.parsed.y) } }
+        },
+        scales: {
+          x: { grid:{ display:false } },
+          y: {
+            ticks:{ callback: v => fmt0(v) },
+            grid:{ color: ctx => ctx.tick.value === 0 ? 'rgba(225,29,72,0.4)' : 'var(--bd)' }
+          }
+        }
+      }
+    });
+  }
+
+  // ── Tableau mensuel ──
+  const tbody = $('tr-tbody');
+  if(tbody) {
+    let rows = '';
+    let soldeCumul = tresoInit;
+    flux.forEach((f,i) => {
+      soldeCumul = Math.round((soldeCumul + f.net)*100)/100;
+      const tension = soldeCumul < 0;
+      const scCls = tension ? 'tr-solde-neg' : 'tr-solde-pos';
+      rows += `<tr class="${tension?'tr-tension':''}">
+        <td>${MOIS_LONGS[i]}</td>
+        <td class="tr-solde-pos">${fmt(f.enc)}</td>
+        <td style="color:var(--rd)">${f.achats>0?fmt(f.achats):'—'}</td>
+        <td style="color:var(--am)">${f.charges>0?fmt(f.charges):'—'}</td>
+        <td style="color:var(--pu)">${f.tva>0?fmt(f.tva):'—'}</td>
+        <td style="color:${f.net>=0?'var(--gr)':'var(--rd)'};font-weight:600">${fmt(f.net)}</td>
+        <td class="${scCls}">${fmt(soldeCumul)}</td>
+      </tr>`;
+    });
+    // Ligne total
+    rows += `<tr class="tr-total">
+      <td>TOTAL</td>
+      <td class="tr-solde-pos">${fmt(totalEnc)}</td>
+      <td style="color:var(--rd)">${fmt(flux.reduce((s,f)=>s+f.achats,0))}</td>
+      <td style="color:var(--am)">${fmt(flux.reduce((s,f)=>s+f.charges,0))}</td>
+      <td style="color:var(--pu)">${fmt(flux.reduce((s,f)=>s+f.tva,0))}</td>
+      <td style="color:${soldeFin-tresoInit>=0?'var(--gr)':'var(--rd)'}">${fmt(soldeFin-tresoInit)}</td>
+      <td class="${soldeFin>=0?'tr-solde-pos':'tr-solde-neg'}">${fmt(soldeFin)}</td>
+    </tr>`;
+    tbody.innerHTML = rows;
+  }
+}
+
+function trSaveAndRender() {
+  const p = {
+    init:        parseFloat($('tr-init')?.value)        || 0,
+    delaiClient: parseInt($('tr-delai-client')?.value)  || 0,
+    delaiForun:  parseInt($('tr-delai-fourn')?.value)   || 0,
+    inclTVA:     parseInt($('tr-incl-tva')?.value)      ?? 1,
+  };
+  _trSaveParams(p);
+  renderTresorerie();
+}
+
 async function changeAnnee(n) {
   n = parseInt(n);
   if(isNaN(n) || n===ANNEE) return;
@@ -4456,6 +4831,9 @@ async function changeAnnee(n) {
   }
   if($('pnl-tva') && $('pnl-tva').style.display !== 'none') {
     renderTVA();
+  }
+  if($('pnl-tresorerie') && $('pnl-tresorerie').style.display !== 'none') {
+    renderTresorerie();
   }
 }
 
@@ -4587,8 +4965,8 @@ async function startApp(user) {
 // NAVIGATION PANELS
 // ════════════════════════════════════════════════════════
 function showPanel(panelId, navId) {
-  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge','pnl-scenarios','pnl-previsionnel','pnl-tva'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
-  ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge','nav-scenarios','nav-previsionnel','nav-tva'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
+  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge','pnl-scenarios','pnl-previsionnel','pnl-tva','pnl-tresorerie'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
+  ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge','nav-scenarios','nav-previsionnel','nav-tva','nav-tresorerie'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
   const p=$(panelId);
   if(p) {
     p.style.display='block';
@@ -4737,6 +5115,15 @@ document.addEventListener('DOMContentLoaded', () => {
   $('nav-tva').addEventListener('click', () => {
     showPanel('pnl-tva','nav-tva');
     renderTVA();
+  });
+  $('nav-tresorerie').addEventListener('click', () => {
+    showPanel('pnl-tresorerie','nav-tresorerie');
+    renderTresorerie();
+  });
+  // Inputs trésorerie — recalcul en temps réel
+  ['tr-init','tr-delai-client','tr-delai-fourn','tr-incl-tva'].forEach(id => {
+    const el = $(id);
+    if(el) el.addEventListener('change', trSaveAndRender);
   });
 
   // Inputs hypothèses prévisionnel — recalcul en temps réel
