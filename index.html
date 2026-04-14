@@ -2959,36 +2959,45 @@ function renderMarge() {
   }
 
   // ── Graphique Waterfall ──
-  // Approche robuste : bar chart non-stacké avec données absolues
-  // Chaque barre représente le niveau à cette étape de la cascade
-  const wfLabels = ['CA HT', '− Coûts achat', '= Marge brute', '− Ch. variables', '− Ch. fixes', '= Résultat'];
-  const wfVals   = [caHT, margeB, margeB, margeB - chVarHT, resultat, resultat];
-  const wfColors = [
-    'rgba(37,99,235,0.85)',
-    'rgba(14,165,114,0.5)',
-    'rgba(14,165,114,0.85)',
-    'rgba(14,165,114,0.5)',
-    'rgba(14,165,114,0.5)',
+  // Simulation waterfall avec barres flottantes [min, max]
+  // Dataset 1 (invisible) = socle, Dataset 2 = barre visible
+  const wfLabels = ['CA HT', 'Coûts achat', 'Marge brute', 'Ch. variables', 'Ch. fixes', 'Résultat'];
+
+  // Chaque entrée = [base_invisible, valeur_visible]
+  // Pour les barres "pleines" (CA, Marge brute, Résultat) : base=0
+  // Pour les barres de déduction : base = niveau après déduction, val = montant déduit
+  const socles  = [0,      margeB,               0,      margeB - chVarHT,       resultat,   0];
+  const hauteurs= [caHT,   coutAchat,            margeB, chVarHT,                chFixHT,    Math.max(resultat, 0)];
+  const couleurs= [
+    'rgba(37,99,235,0.85)',    // CA HT — bleu
+    'rgba(225,29,72,0.8)',     // Coûts achat — rouge
+    'rgba(13,148,136,0.85)',   // Marge brute — teal
+    'rgba(217,119,6,0.8)',     // Ch. variables — orange
+    'rgba(124,58,237,0.8)',    // Ch. fixes — violet
     resultat >= 0 ? 'rgba(5,150,105,0.9)' : 'rgba(225,29,72,0.9)',
   ];
-  const wfBorders = ['#2563eb','#059669','#059669','#059669','#059669', resultat >= 0 ? '#059669':'#e11d48'];
+  const bordures= ['#2563eb','#e11d48','#0d9488','#d97706','#7c3aed', resultat >= 0 ? '#059669':'#e11d48'];
 
-  // Plugin étiquettes sur barres
-  const wfLabelsPlugin = {
-    id: 'wfLabels',
+  // Vraies valeurs pour les étiquettes et tooltips
+  const vraisVals = [caHT, coutAchat, margeB, chVarHT, chFixHT, resultat];
+
+  // Plugin étiquettes au-dessus/en-dessous de chaque barre
+  const wfPlugin = {
+    id: 'wfPlugin',
     afterDatasetsDraw(chart) {
       const {ctx, data, scales:{x,y}} = chart;
       ctx.save();
-      ctx.font = '700 11px Plus Jakarta Sans, sans-serif';
+      ctx.font = '600 10.5px Plus Jakarta Sans, sans-serif';
       ctx.textAlign = 'center';
-      data.datasets[0].data.forEach((val, i) => {
-        if(!val) return;
-        const px = x.getPixelForValue(i);
-        const py = y.getPixelForValue(val) - 8;
-        const labels = ['CA HT','Marge','Marge brute','MCV','MCV','Résultat'];
-        const vals   = [caHT, coutAchat, margeB, chVarHT, chFixHT, resultat];
-        ctx.fillStyle = wfBorders[i];
-        ctx.fillText(Math.round(vals[i]).toLocaleString('fr-FR') + ' €', px, py);
+      vraisVals.forEach((val, i) => {
+        if(!val && val !== 0) return;
+        const px  = x.getPixelForValue(i);
+        const top = y.getPixelForValue(socles[i] + hauteurs[i]);
+        ctx.fillStyle = bordures[i];
+        ctx.fillText(
+          Math.round(Math.abs(val)).toLocaleString('fr-FR') + ' €',
+          px, top - 6
+        );
       });
       ctx.restore();
     }
@@ -2999,34 +3008,49 @@ function renderMarge() {
     if(chartMRWaterfall) chartMRWaterfall.destroy();
     chartMRWaterfall = new Chart(ctxWF, {
       type: 'bar',
-      plugins: [wfLabelsPlugin],
+      plugins: [wfPlugin],
       data: {
         labels: wfLabels,
-        datasets: [{
-          data: wfVals,
-          backgroundColor: wfColors,
-          borderColor: wfBorders,
-          borderWidth: 2,
-          borderRadius: 5,
-        }]
+        datasets: [
+          {
+            // Socle invisible
+            data: socles,
+            backgroundColor: 'transparent',
+            borderColor: 'transparent',
+            borderWidth: 0,
+            borderSkipped: false,
+          },
+          {
+            // Barres visibles
+            data: hauteurs,
+            backgroundColor: couleurs,
+            borderColor: bordures,
+            borderWidth: 1.5,
+            borderRadius: 4,
+            borderSkipped: false,
+          }
+        ]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        layout: { padding: { top: 28 } },
+        layout: { padding: { top: 24 } },
         plugins: {
           legend: { display: false },
           tooltip: {
             callbacks: {
               label: ctx => {
-                const reels = [caHT, coutAchat, margeB, chVarHT, chFixHT, resultat];
-                return reels[ctx.dataIndex].toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
-              }
+                if(ctx.datasetIndex === 0) return null;
+                const v = vraisVals[ctx.dataIndex];
+                return (v < 0 ? '−' : '') + Math.abs(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+              },
+              filter: item => item.datasetIndex === 1,
             }
           }
         },
         scales: {
-          x: { grid: { display: false } },
+          x: { stacked: true, grid: { display: false } },
           y: {
+            stacked: true,
             beginAtZero: true,
             ticks: { callback: v => Math.round(v).toLocaleString('fr-FR') + ' €' }
           }
