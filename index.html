@@ -461,7 +461,20 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .sk-block{background:var(--bgs);border-radius:var(--rs);animation:shimmer 1.4s ease-in-out infinite}
 @keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
-/* ═══ TRÉSORERIE ═══ */
+/* ═══ FREEMIUM ═══ */
+.pro-lock{position:relative;pointer-events:none;opacity:.5}
+.pro-lock::after{content:'🔒 Pro';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--am);background:rgba(0,0,0,.01);pointer-events:all;cursor:pointer}
+.sb-item.locked{opacity:.55;position:relative}
+.sb-item.locked::after{content:'🔒';position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px}
+.sb-pro-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:var(--rs);background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:var(--f);width:100%;margin-top:8px;transition:opacity var(--tr);text-decoration:none}
+.sb-pro-btn:hover{opacity:.9}
+.sb.col .sb-pro-btn span{display:none}
+.pro-wall{text-align:center;padding:60px 20px;color:var(--t2)}
+.pro-wall-ico{font-size:40px;margin-bottom:14px}
+.pro-wall-title{font-size:18px;font-weight:700;color:var(--t1);margin-bottom:8px}
+.pro-wall-sub{font-size:13px;line-height:1.7;margin-bottom:24px}
+.pro-wall-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:14px;font-weight:700;text-decoration:none;transition:opacity var(--tr)}
+.pro-wall-btn:hover{opacity:.9}
 .tr-params{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
 .tr-param-card{background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);padding:16px}
 .tr-param-lbl{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:8px}
@@ -905,6 +918,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         <span class="col-txt">Aide & FAQ</span>
       </button>
+      <a id="btn-pro" href="https://logpose.lemonsqueezy.com/checkout/buy/9b9cfa66-d08b-4646-9e4c-06aeafb00e6c" target="_blank" class="sb-pro-btn" style="display:none">
+        ⚡ <span>Passer au Pro — 25€/mois</span>
+      </a>
       <div class="theme-btn" id="btn-theme">
         <span class="theme-txt" id="theme-lbl">🌙 Thème sombre</span>
         <div class="tog"><div class="tog-k"></div></div>
@@ -920,7 +936,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="topbar">
         <div>
           <div class="page-title" id="db-title">Dashboard</div>
-          <div class="page-sub">Vue d'ensemble · Année <span id="db-annee-lbl">2026</span></div>
+          <div class="page-sub">Vue d'ensemble · <span id="db-name"></span> · Année <span id="db-annee-lbl">2026</span></div>
         </div>
       </div>
 
@@ -1087,7 +1103,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           </div>
           <div style="overflow-x:auto">
             <table class="dtbl">
-              <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>Prix HT</th><th>Coût achat</th><th>TVA</th><th>Marge</th><th>Actif</th><th></th></tr></thead>
+              <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>Prix HT</th><th>Coût achat</th><th>TVA</th><th></th></tr></thead>
               <tbody id="art-tbody"></tbody>
             </table>
           </div>
@@ -1116,7 +1132,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           </div>
           <div style="overflow-x:auto">
             <table class="dtbl">
-              <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>TVA</th><th>Type</th><th>Actif</th><th></th></tr></thead>
+              <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>TVA</th><th>Type</th><th></th></tr></thead>
               <tbody id="ch-tbody"></tbody>
             </table>
           </div>
@@ -1187,6 +1203,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="page-sub">Saisie des quantités · Année <span id="ca-annee-lbl">2026</span></div>
         </div>
       </div>
+      <div id="ca-alertes" style="margin-bottom:14px"></div>
 
       <!-- KPIs -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
@@ -1252,8 +1269,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="page-sub">Saisie des montants TTC · Année <span id="ch-annee-lbl">2026</span></div>
         </div>
       </div>
-
-      <!-- KPIs -->
+      <div id="ch-alertes" style="margin-bottom:14px"></div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
 
         <!-- KPI 1 : Total charges TTC + HT dessous -->
@@ -1578,7 +1594,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
       <!-- Tableau synthétique annuel -->
       <div class="card" style="margin-bottom:14px">
-        <div class="ct" style="margin-bottom:14px">Synthèse annuelle</div>
+        <div class="ct" style="margin-bottom:4px">Synthèse annuelle</div>
+        <div class="cs" style="margin-bottom:14px">Le taux de marge reste constant car la projection fait évoluer les <strong>quantités</strong>, pas les prix ni les coûts d'achat. Pour simuler une variation de prix, utilisez le module <strong>Scénarios</strong>.</div>
         <div style="overflow-x:auto">
           <table class="pv-tbl" id="pv-tbl-annuel">
             <thead id="pv-thead"></thead>
@@ -1905,7 +1922,21 @@ async function saveParams() {
     if(error) {
       console.warn('[save params]', error.message);
       toast('err', 'Sauvegarde échouée', 'Les paramètres de l\'entreprise n\'ont pas été sauvegardés. Vérifiez votre connexion.');
-    } else { paramsModifie = false; setSaved(); }
+    } else {
+      paramsModifie = false;
+      setSaved();
+      // Répliquer nomEnt sur N+1 et N+2 si le champ est vide sur ces années
+      if(P.nomEnt && P.nomEnt.trim()) {
+        for(const an of [ANNEE+1, ANNEE+2]) {
+          const {data} = await DB.from('parametres').select('nom_entreprise').eq('user_id',UID).eq('annee',an).single();
+          if(!data || !data.nom_entreprise) {
+            await DB.from('parametres').upsert({
+              user_id:UID, annee:an, nom_entreprise:P.nomEnt,
+            }, {onConflict:'user_id,annee'});
+          }
+        }
+      }
+    }
   } catch(e) {
     console.warn('[save params timeout]', e.message);
     toast('warn', 'Connexion lente', 'La sauvegarde des paramètres a pris trop de temps. Réessayez dans un instant.');
@@ -1976,6 +2007,7 @@ async function upsertArticle(a) {
 }
 
 function addArt() {
+  if(!checkArticleLimit()) return;
   const nom  = $('pa-nom').value.trim();
   const code = $('pa-code').value.trim() || 'ART'+String(articles.length+1).padStart(2,'0');
   const pv   = parseFloat($('pa-pv').value) || 0;
@@ -2012,14 +2044,12 @@ async function delArt(i) {
 function renderArticles() {
   const tb = $('art-tbody'); if(!tb) return;
   if(!articles.length) {
-    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--t2)">Aucun article — cliquez sur + Ajouter</td></tr>';
+    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucun article — cliquez sur + Ajouter</td></tr>';
     return;
   }
   const tvaOpts = sel => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
     .map(([v,l]) => `<option value="${v}" ${sel==v?'selected':''}>${l}</option>`).join('');
   tb.innerHTML = articles.map((a,i) => {
-    const mg = a.pv>0 ? (a.pv-a.cout)/a.pv*100 : 0;
-    const col = mg>=40?'var(--gr)':mg>=20?'var(--am)':'var(--rd)';
     return `<tr>
       <td><input class="tdinp" value="${a.code}" style="max-width:88px"
         onblur="articles[${i}].code=this.value;upsertArticle(articles[${i}])"></td>
@@ -2033,12 +2063,6 @@ function renderArticles() {
         onblur="const v=parseFloat(this.value)||0;if(v<0){this.value=0;toast('err','Coût invalide','Le coût d\\'achat ne peut pas être négatif.');return;}if(v>articles[${i}].pv&&articles[${i}].pv>0)toast('warn','Marge négative','Le coût d\\'achat dépasse le prix HT. Votre marge sera négative.',6000);articles[${i}].cout=v;upsertArticle(articles[${i}]);renderArticles()"></td>
       <td><select class="tdsel" style="max-width:78px"
         onchange="articles[${i}].tva=parseFloat(this.value);upsertArticle(articles[${i}])">${tvaOpts(a.tva)}</select></td>
-      <td><span style="font-family:var(--fm);font-size:12.5px;color:${col};font-weight:700">${mg.toFixed(1)} %</span></td>
-      <td><select class="tdsel" style="max-width:70px"
-        onchange="articles[${i}].actif=this.value==='true';upsertArticle(articles[${i}])">
-        <option value="true" ${a.actif?'selected':''}>Oui</option>
-        <option value="false" ${!a.actif?'selected':''}>Non</option>
-      </select></td>
       <td><button class="delbtn" onclick="delArt(${i})">×</button></td>
     </tr>`;
   }).join('');
@@ -2082,6 +2106,7 @@ async function upsertCharge(c) {
 }
 
 function addCh() {
+  if(!checkChargeLimit()) return;
   const nom = $('pc-nom').value.trim();
   if(!validateCharge(nom)) return;
   const c = {
@@ -2115,7 +2140,7 @@ async function delCh(i) {
 function renderCharges() {
   const tb = $('ch-tbody'); if(!tb) return;
   if(!charges.length) {
-    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucune charge — cliquez sur + Ajouter</td></tr>';
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--t2)">Aucune charge — cliquez sur + Ajouter</td></tr>';
     $('rep-f').textContent='Fixe : 0'; $('rep-v').textContent='Variable : 0'; $('rep-bar').style.width='0%';
     return;
   }
@@ -2133,11 +2158,6 @@ function renderCharges() {
       onchange="charges[${i}].type=this.value;upsertCharge(charges[${i}]);renderCharges()">
       <option value="Fixe" ${c.type==='Fixe'?'selected':''}>Fixe</option>
       <option value="Variable" ${c.type==='Variable'?'selected':''}>Variable</option>
-    </select></td>
-    <td><select class="tdsel" style="max-width:70px"
-      onchange="charges[${i}].actif=this.value==='true';upsertCharge(charges[${i}])">
-      <option value="true" ${c.actif?'selected':''}>Oui</option>
-      <option value="false" ${!c.actif?'selected':''}>Non</option>
     </select></td>
     <td><button class="delbtn" onclick="delCh(${i})">×</button></td>
   </tr>`).join('');
@@ -2204,10 +2224,11 @@ async function saveQty(code, mois, val) {
     const row = document.querySelector(`#ca-tbody tr:nth-child(${artIdx+1})`);
     if(row) {
       const inp = row.querySelectorAll('.sinp')[mois];
-      if(inp) inp.value = qty[code][mois] || '';
+      if(inp) inp.value = (qty[code] && qty[code][mois]) ? qty[code][mois] : '';
     }
     return;
   }
+  if(!qty[code]) qty[code] = Array(12).fill(0); // guard sécurité
   qty[code][mois] = val;
 
   // Mettre à jour le total de la ligne sans recréer le tableau
@@ -2351,6 +2372,22 @@ function updateCAKpis() {
   const e1=$('ca-kpi-caht');    if(e1) e1.textContent = fmt(caHT);
   const e2=$('ca-kpi-marge');   if(e2) e2.textContent = fmt(marge);
   const e3=$('ca-kpi-txmarge'); if(e3) e3.textContent = txMarge.toFixed(1) + ' %';
+
+  // Alertes intelligentes CA
+  const eAl = $('ca-alertes'); if(!eAl) return;
+  const alertes = [];
+  // Saisonnalité : comparer meilleur mois vs pire mois
+  const caParMois = MOIS.map((_,m) => articles.reduce((s,a) => s+((qty[a.code]||[])[m]||0)*a.pv, 0));
+  const maxM = Math.max(...caParMois), minM = Math.min(...caParMois.filter(v=>v>0)||[0]);
+  if(maxM > 0 && minM > 0 && maxM / minM > 3)
+    alertes.push({cls:'abb', ico:'📊', titre:'Activité très saisonnière', desc:`Votre meilleur mois génère ${Math.round(maxM/minM)}× plus que votre pire mois. Anticipez les périodes creuses.`});
+  if(caHT > 0 && P.obj > 0) {
+    const pct = Math.round(caHT/P.obj*100);
+    if(pct >= 100) alertes.push({cls:'abg', ico:'🎯', titre:'Objectif CA atteint !', desc:`Vous avez atteint ${pct}% de votre objectif annuel (${fmt(P.obj)}).`});
+    else if(pct >= 80) alertes.push({cls:'abb', ico:'🎯', titre:`Objectif à ${pct}%`, desc:`Il vous manque ${fmt(P.obj - caHT)} pour atteindre votre objectif annuel.`});
+  }
+  if(caHT === 0 && articles.length > 0) alertes.push({cls:'aba', ico:'📝', titre:'Aucune vente saisie', desc:'Commencez à saisir vos quantités vendues pour voir vos indicateurs.'});
+  eAl.innerHTML = alertes.map(a=>`<div class="abox ${a.cls}" style="margin-bottom:8px"><span class="abox-ico">${a.ico}</span><div><div class="abox-title">${a.titre}</div><div class="abox-desc">${a.desc}</div></div></div>`).join('');
 }
 
 // Graphiques CA
@@ -2734,6 +2771,21 @@ function updateCHKpis() {
   const ePicMois = $('ch-kpi-pic-mois');
   if(ePicVal)  ePicVal.textContent  = picVal > 0 ? fmt(Math.round(picVal * 100) / 100) : '0 €';
   if(ePicMois) ePicMois.textContent = picVal > 0 ? MOIS[picIdx] : '—';
+
+  // Alertes intelligentes Charges
+  const eAl = $('ch-alertes'); if(!eAl) return;
+  const alertes = [];
+  const nbFix = charges.filter(c=>c.type==='Fixe').length;
+  const nbVar = charges.length - nbFix;
+  if(charges.length > 0 && nbFix / charges.length > 0.8)
+    alertes.push({cls:'aba', ico:'⚠️', titre:'Structure de charges rigide', desc:`${Math.round(nbFix/charges.length*100)}% de vos charges sont fixes. En cas de baisse d'activité, vos coûts restent élevés.`});
+  if(ratio !== null && ratio > 80)
+    alertes.push({cls:'abr', ico:'🔴', titre:'Ratio charges/CA critique', desc:`Vos charges HT représentent ${ratio.toFixed(1)}% de votre CA. Il reste peu de marge pour couvrir vos autres frais.`});
+  else if(ratio !== null && ratio > 50)
+    alertes.push({cls:'aba', ico:'📊', titre:'Ratio charges/CA modéré', desc:`Vos charges HT représentent ${ratio.toFixed(1)}% de votre CA. Visez sous 50% pour améliorer votre rentabilité.`});
+  if(totalTTC === 0 && charges.length > 0)
+    alertes.push({cls:'abb', ico:'📝', titre:'Aucune charge saisie', desc:'Saisissez vos montants mensuels pour calculer votre résultat réel.'});
+  eAl.innerHTML = alertes.map(a=>`<div class="abox ${a.cls}" style="margin-bottom:8px"><span class="abox-ico">${a.ico}</span><div><div class="abox-title">${a.titre}</div><div class="abox-desc">${a.desc}</div></div></div>`).join('');
 }
 
 function updateCHCharts() {
@@ -3125,6 +3177,64 @@ function renderDashboard() {
 }
 
 // ════════════════════════════════════════════════════════
+// FREEMIUM
+// ════════════════════════════════════════════════════════
+const LEMON_URL = 'https://logpose.lemonsqueezy.com/checkout/buy/9b9cfa66-d08b-4646-9e4c-06aeafb00e6c';
+const FREE_MAX_ARTICLES = 3;
+const FREE_MAX_CHARGES  = 3;
+const FREE_MODULES = ['pnl-dashboard','pnl-ca','pnl-charges','pnl-params'];
+const PRO_NAVS     = ['nav-marge','nav-scenarios','nav-previsionnel','nav-tva','nav-tresorerie'];
+
+function isPro() {
+  try { return localStorage.getItem('lp_pro_' + UID) === 'true'; } catch(e) { return false; }
+}
+
+function applyFreemium() {
+  const pro = isPro();
+  const btnPro = $('btn-pro');
+  if(btnPro) btnPro.style.display = pro ? 'none' : 'flex';
+  PRO_NAVS.forEach(id => {
+    const el = $(id); if(!el) return;
+    if(pro) el.classList.remove('locked');
+    else    el.classList.add('locked');
+  });
+}
+
+function checkProGate(panelId) {
+  if(isPro()) return true;
+  if(FREE_MODULES.includes(panelId)) return true;
+  const p = $(panelId); if(!p) return false;
+  p.style.display = 'block';
+  p.innerHTML = `<div class="pro-wall">
+    <div class="pro-wall-ico">🔒</div>
+    <div class="pro-wall-title">Fonctionnalité Pro</div>
+    <div class="pro-wall-sub">Ce module est réservé aux abonnés LogPose Pro.<br>Accédez à l'analyse de marge, scénarios, prévisionnel, TVA et trésorerie<br>pour piloter votre activité comme un expert.</div>
+    <a href="${LEMON_URL}" target="_blank" class="pro-wall-btn">⚡ Passer au Pro — 25€/mois</a>
+  </div>`;
+  return false;
+}
+
+function checkArticleLimit() {
+  if(isPro()) return true;
+  if(articles.length >= FREE_MAX_ARTICLES) {
+    toast('warn', 'Limite plan gratuit', `Le plan gratuit est limité à ${FREE_MAX_ARTICLES} articles. Passez au Pro pour en ajouter davantage.`, 0);
+    const p = $('p-art-add'); if(p) p.classList.remove('open');
+    return false;
+  }
+  return true;
+}
+
+function checkChargeLimit() {
+  if(isPro()) return true;
+  if(charges.length >= FREE_MAX_CHARGES) {
+    toast('warn', 'Limite plan gratuit', `Le plan gratuit est limité à ${FREE_MAX_CHARGES} charges. Passez au Pro pour en ajouter davantage.`, 0);
+    const p = $('p-ch-add'); if(p) p.classList.remove('open');
+    return false;
+  }
+  return true;
+}
+
+// ════════════════════════════════════════════════════════
 // VALIDATION SAISIES
 // ════════════════════════════════════════════════════════
 
@@ -3251,10 +3361,13 @@ async function onbSaveStep1() {
 
 async function onbSaveStep2() {
   const nom = $('onb-art-nom').value.trim();
-  if(!nom) return; // skip silencieux si vide
+  if(!nom) return;
+  // Générer un code unique qui n'entre pas en collision avec l'existant
+  let n = articles.length + 1;
+  let code = 'ART' + String(n).padStart(2,'0');
+  while(articles.some(a => a.code === code)) { n++; code = 'ART' + String(n).padStart(2,'0'); }
   const a = {
-    code: 'ART' + String(articles.length + 1).padStart(2,'0'),
-    nom, cat: $('onb-art-cat').value || 'Divers',
+    code, nom, cat: $('onb-art-cat').value || 'Divers',
     pv: parseFloat($('onb-art-pv').value) || 0,
     cout: parseFloat($('onb-art-cout').value) || 0,
     tva: parseFloat($('onb-art-tva').value) || 0.2,
@@ -3672,6 +3785,32 @@ function renderMarge() {
       <td style="text-align:right;font-family:var(--fm);font-size:12px;font-weight:700;color:${colTotNet}">${fmt(Math.round(totNette*100)/100)}</td>
       <td></td>
     </tr>`;
+
+    // Alertes intelligentes Marge
+    const artsFaibleMarge = lignes.filter(l => l.txMB < 20 && l.artCA > 0);
+    const artsMargeNeg = lignes.filter(l => l.margeNette < 0);
+    const mrAl = $('mr-kpi-seuil')?.closest('.kgrid');
+    const alertZone = document.createElement('div');
+    alertZone.style.cssText = 'margin-bottom:14px';
+    const alrts = [];
+    if(artsFaibleMarge.length > 0)
+      alrts.push({cls:'aba', ico:'⚠️', titre:`${artsFaibleMarge.length} article(s) à faible marge`, desc:`${artsFaibleMarge.map(l=>l.nom).join(', ')} ont un taux de marge inférieur à 20%. Considérez revoir leurs prix ou coûts.`});
+    if(artsMargeNeg.length > 0)
+      alrts.push({cls:'abr', ico:'🔴', titre:`${artsMargeNeg.length} article(s) en marge nette négative`, desc:`${artsMargeNeg.map(l=>l.nom).join(', ')} ne couvrent pas leur part de charges fixes. Ils pèsent sur votre résultat.`});
+    if(bfr > caHT * 0.3 && caHT > 0)
+      alrts.push({cls:'aba', ico:'💸', titre:'BFR élevé', desc:`Votre besoin de financement (${fmt(bfr)}) représente plus de 30% de votre CA. Anticipez votre trésorerie.`});
+    if(alrts.length > 0) {
+      const mrCard = $('mr-tbl-wrap')?.closest('.card');
+      if(mrCard) {
+        const existing = mrCard.previousElementSibling;
+        if(existing && existing.id === 'mr-alertes') existing.remove();
+        const div = document.createElement('div');
+        div.id = 'mr-alertes';
+        div.style.marginBottom = '14px';
+        div.innerHTML = alrts.map(a=>`<div class="abox ${a.cls}" style="margin-bottom:8px"><span class="abox-ico">${a.ico}</span><div><div class="abox-title">${a.titre}</div><div class="abox-desc">${a.desc}</div></div></div>`).join('');
+        mrCard.parentNode.insertBefore(div, mrCard);
+      }
+    }
   }
 }
 
@@ -3768,11 +3907,11 @@ function renderScenarios() {
   const fmt  = v => Math.abs(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
   const fmt0 = v => Math.round(Math.abs(v)).toLocaleString('fr-FR') + ' €';
   const kpiDef = [
-    { lbl:'CA HT', reel:reel.caHT,     sim:actif.caHT,     f:fmt,  higher:true  },
-    { lbl:'Résultat brut', reel:reel.resultat, sim:actif.resultat, f:v=>( v<0?'−':'')+fmt(v), higher:true },
-    { lbl:'Taux de marge', reel:reel.txMarge,  sim:actif.txMarge,  f:v=>v.toFixed(1)+' %', higher:true },
-    { lbl:'Seuil rentabilité', reel:reel.seuil, sim:actif.seuil, f:fmt0, higher:false },
-    { lbl:'Point mort', reel:reel.pmJour, sim:actif.pmJour, f:v=>v!=null?'J+'+v:'—', higher:false },
+    { lbl:'CA HT', tip:'Chiffre d\'affaires hors taxes simulé avec vos paramètres de scénario.', reel:reel.caHT,     sim:actif.caHT,     f:fmt,  higher:true  },
+    { lbl:'Résultat brut', tip:'CA HT − Coûts achat − Charges fixes HT − Charges variables HT.', reel:reel.resultat, sim:actif.resultat, f:v=>(v<0?'−':'')+fmt(v), higher:true },
+    { lbl:'Taux de marge', tip:'Marge brute (CA − Coûts achat) divisée par le CA HT. Plus il est élevé, meilleure est votre rentabilité commerciale.', reel:reel.txMarge,  sim:actif.txMarge,  f:v=>v.toFixed(1)+' %', higher:true },
+    { lbl:'Seuil rentabilité', tip:'CA HT minimum à réaliser pour couvrir toutes vos charges fixes. En dessous : perte. Au-dessus : bénéfice.', reel:reel.seuil, sim:actif.seuil, f:fmt0, higher:false },
+    { lbl:'Point mort', tip:'Jour moyen du mois à partir duquel votre activité est rentable. J+15 signifie que la première moitié du mois couvre vos charges.', reel:reel.pmJour, sim:actif.pmJour, f:v=>v!=null?'J+'+v:'—', higher:false },
   ];
 
   const kpisEl = $('sc-kpis');
@@ -3787,11 +3926,12 @@ function renderScenarios() {
         ? dsign + (Math.abs(delta) < 10 && k.lbl.includes('%') ? delta.toFixed(1) : Math.round(delta).toLocaleString('fr-FR'))
         + (k.lbl.includes('marge') ? ' %' : k.lbl.includes('mort') ? '' : ' €')
         : '—';
-      return `<div class="sc-kpi">
+      return `<div class="sc-kpi" style="position:relative">
         <div class="sc-kpi-lbl">${k.lbl}</div>
         <div class="sc-kpi-reel">${k.f(k.reel)}</div>
         <div class="sc-kpi-val" style="color:${_scActif==='reel'?'var(--t1)':better?'var(--gr)':worse?'var(--rd)':'var(--t1)'}">${k.f(k.sim)}</div>
         ${_scActif !== 'reel' ? `<div class="sc-kpi-delta ${dcls}">${dshow}</div>` : ''}
+        <div class="kpi-help" style="position:absolute;bottom:8px;right:8px">?<div class="kpi-tooltip" style="width:200px">${k.tip}</div></div>
       </div>`;
     }).join('');
   }
@@ -4089,15 +4229,15 @@ function renderPrevisionnel() {
           return `
             <div style="padding:8px 12px;font-size:12.5px;font-weight:500;${cell}">${a.nom}</div>
             <div style="padding:6px 8px;text-align:center;${cell}">
-              <input class="pv-hyp-inp" type="number" style="width:70px" placeholder="global"
+              <input class="pv-hyp-inp" type="number" style="width:80px" placeholder="global"
                 value="${vCons}" onchange="pvUpdateArt('cons','${a.code}',this.value)">
             </div>
             <div style="padding:6px 8px;text-align:center;${cell}">
-              <input class="pv-hyp-inp" type="number" style="width:70px" placeholder="global"
+              <input class="pv-hyp-inp" type="number" style="width:80px" placeholder="global"
                 value="${vBase}" onchange="pvUpdateArt('base','${a.code}',this.value)">
             </div>
             <div style="padding:6px 8px;text-align:center;${cell}">
-              <input class="pv-hyp-inp" type="number" style="width:70px" placeholder="global"
+              <input class="pv-hyp-inp" type="number" style="width:80px" placeholder="global"
                 value="${vOpti}" onchange="pvUpdateArt('opti','${a.code}',this.value)">
             </div>`;
         }).join('')}
@@ -4597,7 +4737,8 @@ function renderTresorerie() {
     });
 
     // TVA nette à reverser (seulement si assujetti)
-    const tvaNette = assujetti ? Math.max(moisData[m].net, 0) : 0;
+    // TVA nette à reverser — seulement si assujetti ET flux en TTC
+    const tvaNette = (assujetti && inclTVA) ? Math.max(moisData[m].net, 0) : 0;
 
     return { enc: Math.round(enc*100)/100, achats: Math.round(achats*100)/100, charges: Math.round(chTTC*100)/100, tva: Math.round(tvaNette*100)/100 };
   });
@@ -4795,10 +4936,11 @@ async function changeAnnee(n) {
   qty = {};
   mts = {};
   // Détruire les instances Chart.js liées à l'ancienne année
-  [chartCALine, chartCAPie, chartCHLine, chartCHPie, chartDBMain].forEach(c => { if(c) c.destroy(); });
+  [chartCALine, chartCAPie, chartCHLine, chartCHPie, chartDBMain, chartMRWaterfall, chartSCSens, chartPVMain, chartTR].forEach(c => { if(c) c.destroy(); });
   chartCALine = null; chartCAPie = null;
   chartCHLine = null; chartCHPie = null;
-  chartDBMain = null;
+  chartDBMain = null; chartMRWaterfall = null;
+  chartSCSens = null; chartPVMain = null; chartTR = null;
 
   // Skeleton sur le panneau actif
   const panneauActif = ['pnl-dashboard','pnl-ca','pnl-charges','pnl-params']
@@ -4906,7 +5048,15 @@ function showOk(msg)  { $('auth-ok').textContent=msg;  $('auth-ok').style.displa
 
 async function doLogout() {
   clearTimeout(_saveTimer);
+  // Reset complet de l'état — évite que le prochain user voie les données du précédent
   UID = null;
+  articles = []; charges = []; qty = {}; mts = {};
+  paramsLoaded = false; paramsModifie = false;
+  _anneeCA = null; _anneeMts = null;
+  _sc = null; _scActif = 'reel';
+  P = { nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
+    regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
+    cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
   $('auth').style.display='flex'; $('app').style.display='none';
   await DB.auth.signOut();
 }
@@ -4923,6 +5073,7 @@ async function startApp(user) {
   const av=$('sb-av'); if(av) av.textContent=user.email[0].toUpperCase();
   const em=$('sb-email'); if(em) em.textContent=user.email;
   renderAnneesNav();
+  applyFreemium();
 
   // Ping Supabase — attend le réveil du projet (plan gratuit = jusqu'à 20s)
   const stxt = $('stxt');
@@ -4964,6 +5115,18 @@ async function startApp(user) {
 // ════════════════════════════════════════════════════════
 // NAVIGATION PANELS
 // ════════════════════════════════════════════════════════
+const PANEL_URLS = {
+  'pnl-dashboard':    '/dashboard',
+  'pnl-ca':           '/chiffre-affaires',
+  'pnl-charges':      '/charges',
+  'pnl-marge':        '/marge-rentabilite',
+  'pnl-scenarios':    '/scenarios',
+  'pnl-previsionnel': '/previsionnel',
+  'pnl-tva':          '/tva',
+  'pnl-tresorerie':   '/tresorerie',
+  'pnl-params':       '/parametres',
+};
+
 function showPanel(panelId, navId) {
   ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge','pnl-scenarios','pnl-previsionnel','pnl-tva','pnl-tresorerie'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
   ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge','nav-scenarios','nav-previsionnel','nav-tva','nav-tresorerie'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
@@ -4971,30 +5134,41 @@ function showPanel(panelId, navId) {
   if(p) {
     p.style.display='block';
     p.classList.remove('pnl-enter');
-    void p.offsetWidth; // force reflow pour relancer l'animation
+    void p.offsetWidth;
     p.classList.add('pnl-enter');
   }
   const n=$(navId); if(n) n.classList.add('active');
+  // Mettre à jour l'URL sans rechargement
+  try {
+    const slug = PANEL_URLS[panelId] || '/dashboard';
+    history.pushState({ panelId, navId }, '', slug);
+  } catch(e) {}
 }
 
 // ════════════════════════════════════════════════════════
 // THEME & SIDEBAR
 // ════════════════════════════════════════════════════════
 function applyTheme() {
-  const t = localStorage.getItem('lp-theme')||'light';
-  document.documentElement.setAttribute('data-theme',t);
-  const lbl=$('theme-lbl'); if(lbl) lbl.textContent=t==='light'?'🌙 Thème sombre':'☀️ Thème clair';
+  try {
+    const t = localStorage.getItem('lp-theme')||'light';
+    document.documentElement.setAttribute('data-theme',t);
+    const lbl=$('theme-lbl'); if(lbl) lbl.textContent=t==='light'?'🌙 Thème sombre':'☀️ Thème clair';
+  } catch(e) { document.documentElement.setAttribute('data-theme','light'); }
 }
 function toggleTheme() {
-  const cur=document.documentElement.getAttribute('data-theme');
-  const next=cur==='light'?'dark':'light';
-  document.documentElement.setAttribute('data-theme',next);
-  localStorage.setItem('lp-theme',next);
-  const lbl=$('theme-lbl'); if(lbl) lbl.textContent=next==='light'?'🌙 Thème sombre':'☀️ Thème clair';
+  try {
+    const cur=document.documentElement.getAttribute('data-theme');
+    const next=cur==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme',next);
+    localStorage.setItem('lp-theme',next);
+    const lbl=$('theme-lbl'); if(lbl) lbl.textContent=next==='light'?'🌙 Thème sombre':'☀️ Thème clair';
+  } catch(e) {}
 }
 function toggleSidebar() {
-  document.querySelector('.sb').classList.toggle('col');
-  localStorage.setItem('lp-sb-col', document.querySelector('.sb').classList.contains('col'));
+  try {
+    document.querySelector('.sb').classList.toggle('col');
+    localStorage.setItem('lp-sb-col', document.querySelector('.sb').classList.contains('col'));
+  } catch(e) {}
 }
 
 // ════════════════════════════════════════════════════════
@@ -5002,7 +5176,7 @@ function toggleSidebar() {
 // ════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
-  if(localStorage.getItem('lp-sb-col')==='true') document.querySelector('.sb').classList.add('col');
+  try { if(localStorage.getItem('lp-sb-col')==='true') document.querySelector('.sb').classList.add('col'); } catch(e) {}
 
   // Auth
   $('tab-login').addEventListener('click',  () => setAuthMode('login'));
@@ -5102,22 +5276,27 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   $('nav-marge').addEventListener('click', () => {
     showPanel('pnl-marge','nav-marge');
+    if(!checkProGate('pnl-marge')) return;
     renderMarge();
   });
   $('nav-scenarios').addEventListener('click', () => {
     showPanel('pnl-scenarios','nav-scenarios');
+    if(!checkProGate('pnl-scenarios')) return;
     renderScenarios();
   });
   $('nav-previsionnel').addEventListener('click', () => {
     showPanel('pnl-previsionnel','nav-previsionnel');
+    if(!checkProGate('pnl-previsionnel')) return;
     renderPrevisionnel();
   });
   $('nav-tva').addEventListener('click', () => {
     showPanel('pnl-tva','nav-tva');
+    if(!checkProGate('pnl-tva')) return;
     renderTVA();
   });
   $('nav-tresorerie').addEventListener('click', () => {
     showPanel('pnl-tresorerie','nav-tresorerie');
+    if(!checkProGate('pnl-tresorerie')) return;
     renderTresorerie();
   });
   // Inputs trésorerie — recalcul en temps réel
