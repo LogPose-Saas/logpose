@@ -461,6 +461,45 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .sk-block{background:var(--bgs);border-radius:var(--rs);animation:shimmer 1.4s ease-in-out infinite}
 @keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
+/* ═══ SCÉNARIOS ═══ */
+.sc-tabs{display:flex;gap:4px;background:var(--bgs);border:1px solid var(--bd);border-radius:10px;padding:3px;margin-bottom:20px;width:fit-content}
+.sc-tab{padding:7px 18px;border-radius:7px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all var(--tr);white-space:nowrap}
+.sc-tab:hover{color:var(--t1)}
+.sc-tab.active{background:var(--bgc);color:var(--t1);font-weight:700;box-shadow:0 1px 5px rgba(0,0,0,.12)}
+.sc-tab.reel{color:var(--t3);cursor:default}
+.sc-tab.reel.active{color:var(--t2)}
+.sc-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.sc-section{background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);padding:18px}
+.sc-section-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);font-family:var(--fm);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.sc-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bd)}
+.sc-row:last-child{border-bottom:none}
+.sc-label{flex:1;font-size:12.5px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-val{font-family:var(--fm);font-size:12px;color:var(--t2);min-width:70px;text-align:right}
+.sc-inp{width:80px;background:var(--in);border:1px solid var(--bd);border-radius:6px;padding:4px 8px;color:var(--t1);font-family:var(--fm);font-size:12px;text-align:right;outline:none;transition:border-color var(--tr)}
+.sc-inp:focus{border-color:var(--bdf);box-shadow:0 0 0 2px var(--ag)}
+.sc-pct{font-family:var(--fm);font-size:11px;font-weight:700;min-width:44px;text-align:center;padding:2px 6px;border-radius:5px}
+.sc-pct.pos{background:var(--grb);color:var(--gr)}
+.sc-pct.neg{background:var(--rdb);color:var(--rd)}
+.sc-pct.neu{background:var(--bgs);color:var(--t3)}
+.sc-kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.sc-kpi{background:var(--bgc);border:1px solid var(--bd);border-radius:var(--r);padding:14px;text-align:center}
+.sc-kpi-lbl{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);font-family:var(--fm);margin-bottom:5px}
+.sc-kpi-reel{font-size:11px;color:var(--t3);margin-bottom:3px;font-family:var(--fm)}
+.sc-kpi-val{font-size:17px;font-weight:800;letter-spacing:-.5px;line-height:1}
+.sc-kpi-delta{font-size:11px;font-weight:700;margin-top:5px;padding:2px 8px;border-radius:99px;display:inline-block}
+.sc-kpi-delta.pos{background:var(--grb);color:var(--gr)}
+.sc-kpi-delta.neg{background:var(--rdb);color:var(--rd)}
+.sc-kpi-delta.neu{color:var(--t3);font-weight:400}
+.sc-cmp-tbl{width:100%;border-collapse:collapse}
+.sc-cmp-tbl th{font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:8px 12px;text-align:right;border-bottom:2px solid var(--bd)}
+.sc-cmp-tbl th:first-child{text-align:left}
+.sc-cmp-tbl td{padding:9px 12px;border-bottom:1px solid var(--bd);font-size:13px;text-align:right;font-family:var(--fm)}
+.sc-cmp-tbl td:first-child{text-align:left;font-family:var(--f);font-weight:600;font-size:12.5px}
+.sc-cmp-tbl tr:last-child td{border-bottom:none}
+.sc-cmp-tbl tr:hover td{background:var(--bgh)}
+.sc-reset{font-size:11px;color:var(--t3);cursor:pointer;background:none;border:1px solid var(--bd);border-radius:6px;padding:4px 10px;font-family:var(--f);transition:all var(--tr)}
+.sc-reset:hover{border-color:var(--rd);color:var(--rd)}
+
 .savebar{position:fixed;bottom:0;left:var(--sw);right:0;background:var(--bgs);border-top:1px solid var(--bd);padding:11px 26px;display:flex;align-items:center;justify-content:space-between;z-index:50;transition:left var(--tr)}
 .save-st{font-size:12px;font-weight:500;color:var(--t2);display:flex;align-items:center;gap:8px}
 .sdot{width:7px;height:7px;border-radius:50%;background:var(--am);animation:blink 1.8s infinite;flex-shrink:0}
@@ -755,6 +794,10 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="sb-item" id="nav-marge">
           <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
           <span>Marge & Rentabilité</span>
+        </div>
+        <div class="sb-item" id="nav-scenarios">
+          <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/><path d="M2 12h4"/><path d="M8 6h4"/><path d="M14 14h4"/></svg></span>
+          <span>Scénarios</span>
         </div>
       </div>
       <div class="sb-sect">
@@ -1273,6 +1316,78 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
 
     </div><!-- fin pnl-marge -->
+
+    <!-- SCÉNARIOS -->
+    <div id="pnl-scenarios" style="display:none">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Scénarios</div>
+          <div class="page-sub">Simulation sans impact sur vos données réelles · Année <span id="sc-annee-lbl">2026</span></div>
+        </div>
+      </div>
+
+      <!-- Onglets scénarios -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div class="sc-tabs">
+          <div class="sc-tab reel active" id="sc-tab-reel">📊 Réel</div>
+          <div class="sc-tab" id="sc-tab-a">🔵 Scénario A</div>
+          <div class="sc-tab" id="sc-tab-b">🟣 Scénario B</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="sc-reset" id="sc-btn-reset">↺ Réinitialiser</button>
+          <button class="btn btn-g btn-sm" id="sc-btn-rename" style="font-size:11px">✏️ Renommer</button>
+        </div>
+      </div>
+
+      <!-- KPIs simulés -->
+      <div class="sc-kpi-grid" id="sc-kpis"></div>
+
+      <!-- Zone simulation — masquée en mode Réel -->
+      <div id="sc-sim-zone">
+        <div class="sc-grid">
+          <!-- Articles -->
+          <div class="sc-section">
+            <div class="sc-section-title">📦 Articles — Prix HT & Quantités</div>
+            <div id="sc-articles-rows"></div>
+          </div>
+          <!-- Charges -->
+          <div class="sc-section">
+            <div class="sc-section-title">💸 Charges — Montant mensuel moyen</div>
+            <div id="sc-charges-rows"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Graphique sensibilité -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div class="ct">Sensibilité du résultat au CA</div>
+            <div class="cs">Impact d'une variation de CA de −40 % à +40 % sur le résultat brut</div>
+          </div>
+        </div>
+        <div style="height:220px"><canvas id="sc-chart-sens"></canvas></div>
+      </div>
+
+      <!-- Tableau comparatif -->
+      <div class="card">
+        <div class="ct" style="margin-bottom:14px">Comparaison des scénarios</div>
+        <div style="overflow-x:auto">
+          <table class="sc-cmp-tbl">
+            <thead>
+              <tr>
+                <th style="text-align:left">Indicateur</th>
+                <th id="sc-cmp-th-reel">📊 Réel</th>
+                <th id="sc-cmp-th-a">🔵 Scénario A</th>
+                <th id="sc-cmp-th-b">🟣 Scénario B</th>
+              </tr>
+            </thead>
+            <tbody id="sc-cmp-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- fin pnl-scenarios -->
 
 </div><!-- fin app -->
 
@@ -3158,6 +3273,298 @@ function renderMarge() {
 }
 
 // ════════════════════════════════════════════════════════
+// SCÉNARIOS
+// ════════════════════════════════════════════════════════
+let chartSCSens = null;
+let _scActif = 'reel'; // 'reel' | 'a' | 'b'
+
+// Structure d'un scénario : { nom, articles: {code: {pv, qtyCoeff}}, charges: {code: montantMensuel} }
+function _scVide(nom) {
+  return { nom, articles: {}, charges: {} };
+}
+
+// Charger depuis localStorage
+function _scLoad() {
+  try {
+    const raw = localStorage.getItem('lp_scenarios_' + UID);
+    if(raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { a: _scVide('Scénario A'), b: _scVide('Scénario B') };
+}
+function _scSave(sc) {
+  try { localStorage.setItem('lp_scenarios_' + UID, JSON.stringify(sc)); } catch(e) {}
+}
+
+let _sc = null; // chargé dans renderScenarios
+
+// Calcul des KPIs pour un scénario donné
+function _scCalc(sc) {
+  let caHT = 0, coutAchat = 0, margeB = 0;
+  articles.forEach(a => {
+    const sim = sc?.articles?.[a.code] || {};
+    const pv   = sim.pv   !== undefined ? sim.pv   : a.pv;
+    const coeff = sim.qtyCoeff !== undefined ? sim.qtyCoeff : 1;
+    const totQty = (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0) * coeff;
+    caHT      += totQty * pv;
+    coutAchat += totQty * a.cout;
+    margeB    += totQty * (pv - a.cout);
+  });
+
+  let chFixHT = 0, chVarHT = 0;
+  charges.forEach(c => {
+    const k = String(c.code);
+    const sim = sc?.charges?.[k];
+    let annuelHT;
+    if(sim !== undefined) {
+      annuelHT = sim * 12 / (1 + (c.tva||0));
+    } else {
+      const annuelTTC = (mts[k]||[]).reduce((s,v)=>s+(v||0),0);
+      annuelHT = annuelTTC / (1 + (c.tva||0));
+    }
+    if(c.type === 'Fixe') chFixHT += annuelHT;
+    else                  chVarHT += annuelHT;
+  });
+
+  caHT      = Math.round(caHT      * 100) / 100;
+  coutAchat = Math.round(coutAchat * 100) / 100;
+  margeB    = Math.round(margeB    * 100) / 100;
+  chFixHT   = Math.round(chFixHT   * 100) / 100;
+  chVarHT   = Math.round(chVarHT   * 100) / 100;
+  const resultat = Math.round((caHT - coutAchat - chFixHT - chVarHT) * 100) / 100;
+  const txMarge  = caHT > 0 ? Math.round(margeB / caHT * 1000) / 10 : 0;
+  const mcv      = Math.round((margeB - chVarHT) * 100) / 100;
+  const txMCV    = caHT > 0 ? mcv / caHT : 0;
+  const seuil    = txMCV > 0 ? Math.round(chFixHT / txMCV * 100) / 100 : 0;
+  const caMensuelMoy = caHT / 12;
+  const seuilMensuel = seuil / 12;
+  const pmJour = caMensuelMoy > 0 && seuil > 0
+    ? Math.min(Math.ceil(seuilMensuel / caMensuelMoy * 30), 31)
+    : null;
+  return { caHT, coutAchat, margeB, chFixHT, chVarHT, resultat, txMarge, seuil, pmJour };
+}
+
+function renderScenarios() {
+  const lbl = $('sc-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+  _sc = _scLoad();
+
+  const reel = _scCalc(null);
+  const kA   = _scCalc(_sc.a);
+  const kB   = _scCalc(_sc.b);
+
+  // Mettre à jour les noms des onglets
+  $('sc-tab-a').textContent = '🔵 ' + (_sc.a.nom || 'Scénario A');
+  $('sc-tab-b').textContent = '🟣 ' + (_sc.b.nom || 'Scénario B');
+  $('sc-cmp-th-a').textContent = '🔵 ' + (_sc.a.nom || 'Scénario A');
+  $('sc-cmp-th-b').textContent = '🟣 ' + (_sc.b.nom || 'Scénario B');
+
+  const actif = _scActif === 'a' ? kA : _scActif === 'b' ? kB : reel;
+  const simZone = $('sc-sim-zone');
+  if(simZone) simZone.style.display = _scActif === 'reel' ? 'none' : 'block';
+
+  // ── KPIs simulés ──
+  const fmt  = v => Math.abs(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+  const fmt0 = v => Math.round(Math.abs(v)).toLocaleString('fr-FR') + ' €';
+  const kpiDef = [
+    { lbl:'CA HT', reel:reel.caHT,     sim:actif.caHT,     f:fmt,  higher:true  },
+    { lbl:'Résultat brut', reel:reel.resultat, sim:actif.resultat, f:v=>( v<0?'−':'')+fmt(v), higher:true },
+    { lbl:'Taux de marge', reel:reel.txMarge,  sim:actif.txMarge,  f:v=>v.toFixed(1)+' %', higher:true },
+    { lbl:'Seuil rentabilité', reel:reel.seuil, sim:actif.seuil, f:fmt0, higher:false },
+    { lbl:'Point mort', reel:reel.pmJour, sim:actif.pmJour, f:v=>v!=null?'J+'+v:'—', higher:false },
+  ];
+
+  const kpisEl = $('sc-kpis');
+  if(kpisEl) {
+    kpisEl.innerHTML = kpiDef.map(k => {
+      const delta = (typeof k.sim === 'number' && typeof k.reel === 'number') ? k.sim - k.reel : 0;
+      const better = k.higher ? delta > 0 : delta < 0;
+      const worse  = k.higher ? delta < 0 : delta > 0;
+      const dcls   = better ? 'pos' : worse ? 'neg' : 'neu';
+      const dsign  = delta > 0 ? '+' : '';
+      const dshow  = delta !== 0 && typeof delta === 'number'
+        ? dsign + (Math.abs(delta) < 10 && k.lbl.includes('%') ? delta.toFixed(1) : Math.round(delta).toLocaleString('fr-FR'))
+        + (k.lbl.includes('marge') ? ' %' : k.lbl.includes('mort') ? '' : ' €')
+        : '—';
+      return `<div class="sc-kpi">
+        <div class="sc-kpi-lbl">${k.lbl}</div>
+        <div class="sc-kpi-reel">${k.f(k.reel)}</div>
+        <div class="sc-kpi-val" style="color:${_scActif==='reel'?'var(--t1)':better?'var(--gr)':worse?'var(--rd)':'var(--t1)'}">${k.f(k.sim)}</div>
+        ${_scActif !== 'reel' ? `<div class="sc-kpi-delta ${dcls}">${dshow}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // ── Rows articles ──
+  const scArtsEl = $('sc-articles-rows');
+  if(scArtsEl && _scActif !== 'reel') {
+    const sc = _scActif === 'a' ? _sc.a : _sc.b;
+    scArtsEl.innerHTML = articles.map(a => {
+      const sim   = sc.articles?.[a.code] || {};
+      const pvSim = sim.pv !== undefined ? sim.pv : a.pv;
+      const qSim  = sim.qtyCoeff !== undefined ? Math.round(sim.qtyCoeff * 100) : 100;
+      const pvPct = a.pv > 0 ? Math.round((pvSim - a.pv) / a.pv * 100) : 0;
+      const pvCls = pvPct > 0 ? 'pos' : pvPct < 0 ? 'neg' : 'neu';
+      const qCls  = qSim > 100 ? 'pos' : qSim < 100 ? 'neg' : 'neu';
+      return `<div class="sc-row">
+        <div class="sc-label" title="${a.nom}">${a.nom}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:10px;color:var(--t3)">PV</span>
+          <input class="sc-inp" type="number" step="0.01" min="0"
+            value="${pvSim.toFixed(2)}"
+            data-code="${a.code}" data-field="pv"
+            onchange="scUpdateArt('${a.code}','pv',this.value)">
+          <span class="sc-pct ${pvCls}">${pvPct > 0 ? '+' : ''}${pvPct}%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-left:8px">
+          <span style="font-size:10px;color:var(--t3)">Qté</span>
+          <input class="sc-inp" type="number" step="1" min="0" style="width:60px"
+            value="${qSim}"
+            data-code="${a.code}" data-field="qty"
+            onchange="scUpdateArt('${a.code}','qty',this.value)">
+          <span class="sc-pct ${qCls}">${qSim > 100 ? '+' : ''}${qSim - 100}%</span>
+        </div>
+      </div>`;
+    }).join('') || '<div style="color:var(--t3);font-size:12px;padding:12px 0">Aucun article configuré</div>';
+  }
+
+  // ── Rows charges ──
+  const scChsEl = $('sc-charges-rows');
+  if(scChsEl && _scActif !== 'reel') {
+    const sc = _scActif === 'a' ? _sc.a : _sc.b;
+    scChsEl.innerHTML = charges.map(c => {
+      const k = String(c.code);
+      const annuelTTC = (mts[k]||[]).reduce((s,v)=>s+(v||0),0);
+      const moyReel   = Math.round(annuelTTC / 12 * 100) / 100;
+      const moySim    = sc.charges?.[k] !== undefined ? sc.charges[k] : moyReel;
+      const pct       = moyReel > 0 ? Math.round((moySim - moyReel) / moyReel * 100) : 0;
+      const pcls      = pct < 0 ? 'pos' : pct > 0 ? 'neg' : 'neu'; // baisse = bien
+      return `<div class="sc-row">
+        <div class="sc-label" title="${c.nom}">${c.nom}</div>
+        <span class="bdg ${c.type==='Fixe'?'bpu':'bam'}" style="font-size:9px;flex-shrink:0">${c.type}</span>
+        <input class="sc-inp" type="number" step="0.01" min="0"
+          value="${moySim.toFixed(2)}"
+          onchange="scUpdateCh('${k}',this.value)">
+        <span class="sc-pct ${pcls}">${pct > 0 ? '+' : ''}${pct}%</span>
+      </div>`;
+    }).join('') || '<div style="color:var(--t3);font-size:12px;padding:12px 0">Aucune charge configurée</div>';
+  }
+
+  // ── Graphique sensibilité ──
+  const steps = [-40,-30,-20,-10,0,10,20,30,40];
+  const makeKpis = (sc, coeff) => {
+    let ca=0,cout=0,chF=0,chV=0;
+    articles.forEach(a => {
+      const sim = sc?.articles?.[a.code] || {};
+      const pv  = sim.pv !== undefined ? sim.pv : a.pv;
+      const qc  = (sim.qtyCoeff !== undefined ? sim.qtyCoeff : 1) * coeff;
+      const q   = (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0) * qc;
+      ca   += q * pv;
+      cout += q * a.cout;
+    });
+    charges.forEach(c => {
+      const k = String(c.code);
+      const sim = sc?.charges?.[k];
+      const ht  = sim !== undefined ? sim*12/(1+(c.tva||0))
+                : (mts[k]||[]).reduce((s,v)=>s+(v||0),0)/(1+(c.tva||0));
+      if(c.type==='Fixe') chF+=ht; else chV+=ht;
+    });
+    return Math.round((ca - cout - chF - chV) * 100) / 100;
+  };
+
+  const sensLabels = steps.map(s => (s>=0?'+':'')+s+'%');
+  const sensReel   = steps.map(s => makeKpis(null, 1 + s/100));
+  const sensA      = steps.map(s => makeKpis(_sc.a, 1 + s/100));
+  const sensB      = steps.map(s => makeKpis(_sc.b, 1 + s/100));
+
+  const ctxSens = $('sc-chart-sens');
+  if(ctxSens) {
+    if(chartSCSens) chartSCSens.destroy();
+    chartSCSens = new Chart(ctxSens, {
+      type: 'line',
+      data: {
+        labels: sensLabels,
+        datasets: [
+          { label:'Réel', data:sensReel, borderColor:'#6b85a8', backgroundColor:'transparent',
+            borderWidth:2, pointRadius:3, tension:0.3, borderDash:[4,3] },
+          { label:_sc.a.nom||'Scénario A', data:sensA, borderColor:'#2563eb',
+            backgroundColor:'rgba(37,99,235,0.07)', borderWidth:2.5, pointRadius:4,
+            pointBackgroundColor:'#2563eb', tension:0.3, fill:true },
+          { label:_sc.b.nom||'Scénario B', data:sensB, borderColor:'#7c3aed',
+            backgroundColor:'rgba(124,58,237,0.07)', borderWidth:2.5, pointRadius:4,
+            pointBackgroundColor:'#7c3aed', tension:0.3, fill:true },
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins: {
+          legend: { position:'top', labels:{ font:{family:'Plus Jakarta Sans',size:12}, boxWidth:12, padding:16 } },
+          tooltip: { callbacks: { label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €' } }
+        },
+        scales: {
+          y: { ticks:{ callback: v => Math.round(v).toLocaleString('fr-FR')+' €' } },
+          x: { grid:{ display:false } }
+        }
+      }
+    });
+  }
+
+  // ── Tableau comparatif ──
+  const rows = [
+    { lbl:'CA HT', fn: k=>k.caHT, fmt:fmt, higher:true },
+    { lbl:'Coûts achat', fn: k=>k.coutAchat, fmt:fmt, higher:false },
+    { lbl:'Marge brute', fn: k=>k.margeB, fmt:fmt, higher:true },
+    { lbl:'Charges fixes HT', fn: k=>k.chFixHT, fmt:fmt, higher:false },
+    { lbl:'Charges variables HT', fn: k=>k.chVarHT, fmt:fmt, higher:false },
+    { lbl:'Résultat brut', fn: k=>k.resultat, fmt:v=>(v<0?'−':'')+fmt(v), higher:true },
+    { lbl:'Taux de marge', fn: k=>k.txMarge, fmt:v=>v.toFixed(1)+' %', higher:true },
+    { lbl:'Seuil rentabilité', fn: k=>k.seuil, fmt:fmt0, higher:false },
+    { lbl:'Point mort', fn: k=>k.pmJour, fmt:v=>v!=null?'J+'+v:'—', higher:false },
+  ];
+
+  const cmpBody = $('sc-cmp-tbody');
+  if(cmpBody) {
+    cmpBody.innerHTML = rows.map(r => {
+      const vR = r.fn(reel), vA = r.fn(kA), vB = r.fn(kB);
+      const cell = (sim, ref) => {
+        if(typeof sim !== 'number' || typeof ref !== 'number') return `<td>${r.fmt(sim)}</td>`;
+        const d = sim - ref;
+        const better = r.higher ? d > 0 : d < 0;
+        const worse  = r.higher ? d < 0 : d > 0;
+        const col = better ? 'var(--gr)' : worse ? 'var(--rd)' : 'var(--t1)';
+        const arrow = d > 0 ? ' ↑' : d < 0 ? ' ↓' : '';
+        return `<td style="color:${col};font-weight:${d!==0?700:400}">${r.fmt(sim)}${arrow}</td>`;
+      };
+      return `<tr>
+        <td>${r.lbl}</td>
+        <td>${r.fmt(vR)}</td>
+        ${cell(vA, vR)}
+        ${cell(vB, vR)}
+      </tr>`;
+    }).join('');
+  }
+}
+
+// Mise à jour article dans le scénario actif
+function scUpdateArt(code, field, val) {
+  if(_scActif === 'reel') return;
+  const sc = _scActif === 'a' ? _sc.a : _sc.b;
+  if(!sc.articles[code]) sc.articles[code] = {};
+  if(field === 'pv') sc.articles[code].pv = parseFloat(val) || 0;
+  if(field === 'qty') sc.articles[code].qtyCoeff = (parseFloat(val) || 100) / 100;
+  _scSave(_sc);
+  renderScenarios();
+}
+
+// Mise à jour charge dans le scénario actif
+function scUpdateCh(code, val) {
+  if(_scActif === 'reel') return;
+  const sc = _scActif === 'a' ? _sc.a : _sc.b;
+  if(!sc.charges) sc.charges = {};
+  sc.charges[code] = parseFloat(val) || 0;
+  _scSave(_sc);
+  renderScenarios();
+}
+
+// ════════════════════════════════════════════════════════
 // NAVIGATION ANNÉES
 // ════════════════════════════════════════════════════════
 async function changeAnnee(n) {
@@ -3205,6 +3612,10 @@ async function changeAnnee(n) {
   }
   if($('pnl-marge') && $('pnl-marge').style.display !== 'none') {
     renderMarge();
+  }
+  if($('pnl-scenarios') && $('pnl-scenarios').style.display !== 'none') {
+    _sc = null; // reset pour recharger localStorage avec nouveau UID/ANNEE
+    renderScenarios();
   }
 }
 
@@ -3336,8 +3747,8 @@ async function startApp(user) {
 // NAVIGATION PANELS
 // ════════════════════════════════════════════════════════
 function showPanel(panelId, navId) {
-  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
-  ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
+  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge','pnl-scenarios'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
+  ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge','nav-scenarios'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
   const p=$(panelId);
   if(p) {
     p.style.display='block';
@@ -3474,6 +3885,44 @@ document.addEventListener('DOMContentLoaded', () => {
   $('nav-marge').addEventListener('click', () => {
     showPanel('pnl-marge','nav-marge');
     renderMarge();
+  });
+  $('nav-scenarios').addEventListener('click', () => {
+    showPanel('pnl-scenarios','nav-scenarios');
+    renderScenarios();
+  });
+
+  // Onglets scénarios
+  ['reel','a','b'].forEach(id => {
+    $('sc-tab-'+id).addEventListener('click', () => {
+      if(id === 'reel') { _scActif = 'reel'; }
+      else { _scActif = id; }
+      document.querySelectorAll('.sc-tab').forEach(t => t.classList.remove('active'));
+      $('sc-tab-'+id).classList.add('active');
+      renderScenarios();
+    });
+  });
+
+  // Reset scénario actif
+  $('sc-btn-reset').addEventListener('click', () => {
+    if(_scActif === 'reel') return;
+    if(!confirm('Réinitialiser ce scénario ?')) return;
+    const nom = _scActif === 'a' ? (_sc.a.nom||'Scénario A') : (_sc.b.nom||'Scénario B');
+    if(_scActif === 'a') _sc.a = _scVide(nom);
+    else                 _sc.b = _scVide(nom);
+    _scSave(_sc);
+    renderScenarios();
+  });
+
+  // Renommer scénario
+  $('sc-btn-rename').addEventListener('click', () => {
+    if(_scActif === 'reel') return;
+    const actuel = _scActif === 'a' ? (_sc.a.nom||'Scénario A') : (_sc.b.nom||'Scénario B');
+    const nouveau = prompt('Nouveau nom :', actuel);
+    if(!nouveau || !nouveau.trim()) return;
+    if(_scActif === 'a') _sc.a.nom = nouveau.trim();
+    else                 _sc.b.nom = nouveau.trim();
+    _scSave(_sc);
+    renderScenarios();
   });
   [['tab-articles','p-articles'],['tab-charges','p-charges'],['tab-entreprise','p-entreprise']].forEach(([tid,pid]) => {
     $(tid).addEventListener('click', () => {
