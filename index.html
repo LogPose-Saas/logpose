@@ -408,7 +408,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .kpi-tooltip {
   display:none;
   position:absolute;
-  bottom:calc(100% + 8px);
+  top:calc(100% + 8px);
   right:0;
   background:var(--bgc);
   border:1px solid var(--bds);
@@ -427,9 +427,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .kpi-tooltip::after {
   content:'';
   position:absolute;
-  top:100%; right:5px;
+  bottom:100%; right:5px;
   border:5px solid transparent;
-  border-top-color:var(--bds);
+  border-bottom-color:var(--bds);
 }
 .kpi-help:hover .kpi-tooltip { display:block; animation:fadeInDown .15s ease; }
 /* Suppression des règles nth-child qui causaient le débordement gauche */
@@ -1230,10 +1230,10 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         </div>
         <div class="kcard" style="text-align:center">
           <div class="kacc" style="background:var(--pu)"></div>
-          <div class="klbl">Taux de marque moyen</div>
-          <div class="kval" id="mr-kpi-marque">0 %</div>
-          <div style="font-size:11px;color:var(--t2);margin-top:6px">Marge / Coût achat</div>
-          <div class="kpi-help">?<div class="kpi-tooltip">Différent du taux de marge : Marge brute ÷ Coût d'achat × 100. Indique combien vous gagnez par rapport à ce que vous avez payé.</div></div>
+          <div class="klbl">Point mort</div>
+          <div class="kval" id="mr-kpi-pm-jour">—</div>
+          <div id="mr-kpi-pm-sub" style="font-size:11px;color:var(--t2);margin-top:6px">du mois en moyenne</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Jour moyen du mois à partir duquel votre activité couvre toutes ses charges. Ex : "J+18" signifie que vous êtes rentable à partir du 18 du mois. La date annuelle indique quand le seuil global est atteint sur l'année.</div></div>
         </div>
       </div>
 
@@ -2874,8 +2874,42 @@ function renderMarge() {
   const seuil = txMCVdec > 0 ? Math.round(chFixHT / txMCVdec * 100) / 100 : 0;
   const atteinte = seuil > 0 ? Math.round(caHT / seuil * 100) : (caHT > 0 ? 100 : 0);
 
-  // ── Taux de marque ──
+  // ── Taux de marque (conservé pour info interne) ──
   const txMarque = coutAchat > 0 ? Math.round(margeB / coutAchat * 1000) / 10 : 0;
+
+  // ── Point mort journalier et date annuelle ──
+  // Jour du mois moyen = (Seuil mensuel / CA mensuel moyen) × 30
+  const caMensuelMoy = caHT / 12;
+  const seuilMensuel = seuil / 12;
+  let pmJour = null, pmDateLabel = '—';
+  if(seuil > 0 && caMensuelMoy > 0) {
+    pmJour = Math.ceil(seuilMensuel / caMensuelMoy * 30);
+    pmJour = Math.min(pmJour, 31);
+    // Date annuelle : on cherche le mois où le CA cumulé dépasse le seuil
+    const MOIS_COURTS = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+    const MOIS_LONGS  = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    let caCumul = 0;
+    let moisAtteinte = -1;
+    const caParMoisArr = articles.reduce((acc, a) => {
+      (qty[a.code]||[]).forEach((v,m) => { acc[m] = (acc[m]||0) + (v||0) * a.pv; });
+      return acc;
+    }, Array(12).fill(0));
+    for(let m = 0; m < 12; m++) {
+      caCumul += caParMoisArr[m];
+      if(caCumul >= seuil && moisAtteinte < 0) moisAtteinte = m;
+    }
+    if(moisAtteinte >= 0) {
+      // Interpoler le jour dans le mois
+      const caAvantMois = caParMoisArr.slice(0, moisAtteinte).reduce((s,v)=>s+v,0);
+      const manqueAuDebutMois = seuil - caAvantMois;
+      const jourDansMois = caParMoisArr[moisAtteinte] > 0
+        ? Math.ceil(manqueAuDebutMois / caParMoisArr[moisAtteinte] * 30)
+        : 30;
+      pmDateLabel = `${Math.min(jourDansMois,30)} ${MOIS_LONGS[moisAtteinte]} ${ANNEE}`;
+    } else if(caCumul < seuil) {
+      pmDateLabel = 'Seuil non atteint sur l\'année';
+    }
+  }
 
   // ── KPIs ──
   const eSeuil = $('mr-kpi-seuil');
@@ -2906,21 +2940,44 @@ function renderMarge() {
   const eMCVsub = $('mr-kpi-mcv-sub');
   if(eMCVsub) eMCVsub.textContent = `Taux : ${txMCV.toFixed(1)} %`;
 
-  const eMarque = $('mr-kpi-marque');
-  if(eMarque) eMarque.textContent = txMarque.toFixed(1) + ' %';
+  const ePMJour = $('mr-kpi-pm-jour');
+  const ePMSub  = $('mr-kpi-pm-sub');
+  if(ePMJour) {
+    if(seuil <= 0) {
+      ePMJour.textContent = '—';
+      ePMJour.style.color = 'var(--t2)';
+    } else if(pmJour !== null) {
+      ePMJour.textContent = `J+${pmJour}`;
+      ePMJour.style.color = pmJour <= 15 ? 'var(--gr)' : pmJour <= 25 ? 'var(--am)' : 'var(--rd)';
+    }
+  }
+  if(ePMSub) {
+    ePMSub.innerHTML = seuil > 0
+      ? `du mois · <span style="color:var(--ac);font-weight:600">${pmDateLabel}</span>`
+      : 'Définir des charges fixes';
+  }
 
   // ── Graphique Waterfall ──
-  // On simule un waterfall avec des barres flottantes Chart.js
+  // Waterfall correct : base[i] = niveau de départ de chaque barre
+  // CA HT part de 0, chaque étape déduit ou ajoute
   const wfLabels = ['CA HT', 'Coûts achat', 'Marge brute', 'Ch. variables', 'Ch. fixes', 'Résultat'];
-  const wfBase   = [0, caHT - coutAchat, caHT - coutAchat, margeB - chVarHT, resultat < 0 ? resultat : 0, 0];
-  const wfVals   = [caHT, coutAchat, margeB, chVarHT, chFixHT, Math.abs(resultat)];
+  //            CA HT          Coûts achat   Marge brute    Ch. variables      Ch. fixes    Résultat
+  const wfBase = [
+    0,                          // CA HT : part de 0
+    margeB,                     // Coûts achat : part du bas de la marge brute
+    0,                          // Marge brute : repart de 0 (barre positive)
+    resultat + chFixHT,         // Ch. variables : part du résultat + fixes
+    resultat,                   // Ch. fixes : part du résultat
+    0,                          // Résultat : part de 0
+  ];
+  const wfVals = [caHT, coutAchat, margeB, chVarHT, chFixHT, Math.abs(resultat)];
   const wfColors = [
-    '#2563eb',
-    'rgba(225,29,72,0.75)',
-    '#0d9488',
-    'rgba(217,119,6,0.75)',
-    'rgba(124,58,237,0.75)',
-    resultat >= 0 ? '#059669' : '#e11d48',
+    '#2563eb',                               // CA HT — bleu
+    'rgba(225,29,72,0.8)',                   // Coûts achat — rouge
+    '#0d9488',                               // Marge brute — teal
+    'rgba(217,119,6,0.8)',                   // Ch. variables — orange
+    'rgba(124,58,237,0.8)',                  // Ch. fixes — violet
+    resultat >= 0 ? '#059669' : '#e11d48',  // Résultat — vert ou rouge
   ];
 
   const ctxWF = $('mr-chart-waterfall');
@@ -3263,28 +3320,33 @@ document.addEventListener('DOMContentLoaded', () => {
   $('auth-pwd').addEventListener('keydown',   e => { if(e.key==='Enter') doAuth(); });
 
   // Sidebar
-  // Repositionnement dynamique des tooltips KPI pour éviter débordement viewport
+  // Repositionnement dynamique des tooltips KPI
   document.addEventListener('mouseenter', e => {
     const help = e.target.closest('.kpi-help');
     if(!help) return;
     const tip = help.querySelector('.kpi-tooltip');
     if(!tip) return;
-    // Reset
-    tip.style.right = '0';
-    tip.style.left  = 'auto';
-    tip.style.removeProperty('--arrow-right');
-    // Calculer si le tooltip déborde à droite
+    // Reset position par défaut : en bas, aligné à droite
+    tip.style.top    = 'calc(100% + 8px)';
+    tip.style.bottom = 'auto';
+    tip.style.right  = '0';
+    tip.style.left   = 'auto';
     requestAnimationFrame(() => {
       const rect = tip.getBoundingClientRect();
-      if(rect.left < 8) {
-        // Déborde à gauche → aligner à gauche du bouton
-        tip.style.right = 'auto';
-        tip.style.left  = '0';
+      // Débordement bas → passer au-dessus
+      if(rect.bottom > window.innerHeight - 8) {
+        tip.style.top    = 'auto';
+        tip.style.bottom = 'calc(100% + 8px)';
       }
+      // Débordement droit → aligner à gauche
       if(rect.right > window.innerWidth - 8) {
-        // Déborde à droite → aligner à droite du bouton (défaut)
         tip.style.right = '0';
         tip.style.left  = 'auto';
+      }
+      // Débordement gauche → aligner à droite du bouton
+      if(rect.left < 8) {
+        tip.style.right = 'auto';
+        tip.style.left  = '0';
       }
     });
   }, true);
