@@ -461,7 +461,30 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .sk-block{background:var(--bgs);border-radius:var(--rs);animation:shimmer 1.4s ease-in-out infinite}
 @keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
-/* ═══ PRÉVISIONNEL ═══ */
+/* ═══ TVA ═══ */
+.tva-regime{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:var(--rs);font-size:13px;font-weight:600;margin-bottom:16px}
+.tva-regime.franchise{background:var(--amb);color:var(--am);border:1px solid rgba(217,119,6,.25)}
+.tva-regime.assujetti{background:var(--grb);color:var(--gr);border:1px solid rgba(5,150,105,.25)}
+.tva-alert{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--rs);font-size:12.5px;margin-bottom:14px;border:1px solid transparent}
+.tva-alert.danger{background:var(--rdb);color:var(--rd);border-color:rgba(225,29,72,.2)}
+.tva-alert.warn{background:var(--amb);color:var(--am);border-color:rgba(217,119,6,.2)}
+.tva-alert.info{background:var(--ag);color:var(--ac);border-color:var(--bdf)}
+.tva-alert.ok{background:var(--grb);color:var(--gr);border-color:rgba(5,150,105,.2)}
+.tva-sim{background:var(--bgc);border:2px dashed var(--bd);border-radius:var(--r);padding:20px;margin-bottom:14px;transition:all var(--tr)}
+.tva-sim:hover{border-color:var(--bds)}
+.tva-sim-title{font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.tva-tbl{width:100%;border-collapse:collapse}
+.tva-tbl th{font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:8px 12px;border-bottom:2px solid var(--bd);text-align:right;white-space:nowrap}
+.tva-tbl th:first-child{text-align:left}
+.tva-tbl td{padding:8px 12px;border-bottom:1px solid var(--bd);font-size:12px;text-align:right;font-family:var(--fm)}
+.tva-tbl td:first-child{text-align:left;font-family:var(--f);font-weight:500;font-size:12.5px}
+.tva-tbl tr:last-child td{border-bottom:none}
+.tva-tbl .tva-tr-total td{background:var(--bgs);font-weight:700;border-top:2px solid var(--bd)}
+.tva-tbl .tva-tr-trim td{background:var(--bgs);font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);padding:6px 12px}
+.tva-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;font-family:var(--fm)}
+.tva-badge.payer{background:var(--rdb);color:var(--rd)}
+.tva-badge.credit{background:var(--grb);color:var(--gr)}
+.tva-badge.zero{background:var(--bgs);color:var(--t3)}
 .pv-hyp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
 .pv-hyp{background:var(--bgc);border:2px solid var(--bd);border-radius:var(--r);padding:16px;transition:all var(--tr);cursor:pointer}
 .pv-hyp.active-cons{border-color:#0d9488;background:rgba(13,148,136,.05)}
@@ -827,6 +850,13 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="sb-item" id="nav-previsionnel">
           <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
           <span>Prévisionnel</span>
+        </div>
+      </div>
+      <div class="sb-sect">
+        <div class="sb-lbl">Fiscalité</div>
+        <div class="sb-item" id="nav-tva">
+          <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+          <span>TVA</span>
         </div>
       </div>
       <div class="sb-sect">
@@ -1543,6 +1573,74 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
 
     </div><!-- fin pnl-previsionnel -->
+
+    <!-- TVA -->
+    <div id="pnl-tva" style="display:none">
+      <div class="topbar">
+        <div>
+          <div class="page-title">TVA</div>
+          <div class="page-sub">Déclarations &amp; simulation · Année <span id="tva-annee-lbl">2026</span></div>
+        </div>
+      </div>
+
+      <!-- Régime actuel + alerte seuil -->
+      <div id="tva-regime-bar"></div>
+      <div id="tva-alerts"></div>
+
+      <!-- Simulation franchise → réel (affiché seulement si franchise) -->
+      <div id="tva-sim-zone" style="display:none">
+        <div class="tva-sim">
+          <div class="tva-sim-title">🔄 Simulation : que se passerait-il si vous optiez pour le régime réel ?</div>
+          <div id="tva-sim-content"></div>
+        </div>
+      </div>
+
+      <!-- KPIs TVA -->
+      <div class="kgrid g4" style="margin-bottom:14px" id="tva-kpis-zone">
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--rd)"></div>
+          <div class="klbl">TVA collectée</div>
+          <div class="kval" id="tva-kpi-collectee">0 €</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:6px">Sur ventes HT × taux</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">TVA que vous avez facturée à vos clients sur vos ventes. Elle ne vous appartient pas — vous la reversez à l'État.</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--gr)"></div>
+          <div class="klbl">TVA déductible</div>
+          <div class="kval" id="tva-kpi-deductible">0 €</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:6px">Sur achats &amp; charges TTC</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">TVA que vous avez payée sur vos achats et charges. Vous pouvez la récupérer (déduire de la TVA collectée) si vous êtes assujetti.</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" id="tva-kpi-net-acc" style="background:var(--am)"></div>
+          <div class="klbl">TVA nette</div>
+          <div class="kval" id="tva-kpi-net">0 €</div>
+          <div id="tva-kpi-net-sub" style="font-size:11px;color:var(--t2);margin-top:6px">À payer ou crédit</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">TVA collectée − TVA déductible. Si positif : vous devez reverser ce montant à l'État. Si négatif : vous avez un crédit de TVA récupérable.</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--pu)"></div>
+          <div class="klbl">Impact trésorerie moy.</div>
+          <div class="kval" id="tva-kpi-impact">0 €</div>
+          <div id="tva-kpi-impact-sub" style="font-size:11px;color:var(--t2);margin-top:6px">Par déclaration</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Montant moyen décaissé par déclaration TVA (mensuelle ou trimestrielle). À provisionner dans votre trésorerie.</div></div>
+        </div>
+      </div>
+
+      <!-- Tableau déclarations -->
+      <div class="card">
+        <div class="tbl-hdr">
+          <div><div class="ct" id="tva-tbl-title">Déclarations TVA</div><div class="cs" id="tva-tbl-sub"></div></div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tva-tbl">
+            <thead id="tva-thead"></thead>
+            <tbody id="tva-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- fin pnl-tva -->
 
 </div><!-- fin app -->
 
@@ -4071,7 +4169,238 @@ function pvUpdateArt(scenario, code, val) {
   _pvSaveHyp(hyp);
   renderPrevisionnel();
 }
+
 // ════════════════════════════════════════════════════════
+// TVA
+// ════════════════════════════════════════════════════════
+
+// ⚠️ MAINTENANCE ANNUELLE — Mettre à jour chaque janvier
+// Source : Journal Officiel / BOFiP / Direction Générale des Finances Publiques
+// Seuils de franchise en base de TVA (en euros HT annuels)
+const SEUILS_FRANCHISE = {
+  2024: { services: 36800,  commerce: 91900  },
+  2025: { services: 36800,  commerce: 91900  },
+  2026: { services: 37500,  commerce: 94300  },
+  // 2027 : à ajouter en janvier 2027 dès publication au JO
+};
+
+function _tvaGetSeuils(annee) {
+  if(SEUILS_FRANCHISE[annee]) return { ...SEUILS_FRANCHISE[annee], estime: false };
+  const ans = Object.keys(SEUILS_FRANCHISE).map(Number).sort((a,b)=>b-a);
+  const dernier = ans[0];
+  const delta   = annee - dernier;
+  const base    = SEUILS_FRANCHISE[dernier];
+  return {
+    services: Math.round(base.services * Math.pow(1.02, delta)),
+    commerce : Math.round(base.commerce * Math.pow(1.02, delta)),
+    estime   : true,
+  };
+}
+
+function _tvaSeuilAnnee(annee) {
+  const s = _tvaGetSeuils(annee);
+  const secteur = (P.secteur || '').toLowerCase();
+  const isCommerce = secteur.includes('commerce') || secteur.includes('e-commerce')
+                  || secteur.includes('restauration') || secteur.includes('artisan');
+  return { seuil: isCommerce ? s.commerce : s.services, estime: s.estime, isCommerce };
+}
+
+function _tvaIsAssujetti() {
+  const r = (P.regimeTVA || '').toLowerCase();
+  return !r.includes('franchise');
+}
+
+function _tvaCalcMois() {
+  const mois = [];
+  for(let m = 0; m < 12; m++) {
+    let collectee = 0;
+    articles.forEach(a => {
+      const q = (qty[a.code]||[])[m] || 0;
+      collectee += q * a.pv * (a.tva || 0.2);
+    });
+    let deductible = 0;
+    charges.forEach(c => {
+      const k = String(c.code);
+      const ttc = (mts[k]||[])[m] || 0;
+      const taux = c.tva || 0;
+      deductible += ttc - (ttc / (1 + taux));
+    });
+    articles.forEach(a => {
+      const q = (qty[a.code]||[])[m] || 0;
+      deductible += q * a.cout * (a.tva || 0.2);
+    });
+    const net = Math.round((collectee - deductible) * 100) / 100;
+    mois.push({
+      m,
+      collectee:  Math.round(collectee  * 100) / 100,
+      deductible: Math.round(deductible * 100) / 100,
+      net,
+    });
+  }
+  return mois;
+}
+
+function renderTVA() {
+  const lbl = $('tva-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+  const MOIS_LONGS  = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const MOIS_COURTS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const fmt  = v => Math.abs(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+  const fmt0 = v => Math.round(Math.abs(v)).toLocaleString('fr-FR') + ' €';
+
+  const assujetti = _tvaIsAssujetti();
+  const { seuil, estime, isCommerce } = _tvaSeuilAnnee(ANNEE);
+  const caAnnuel = articles.reduce((s,a) =>
+    s + (qty[a.code]||[]).reduce((x,v)=>x+(v||0),0) * a.pv, 0);
+
+  // Régime
+  const regimeBar = $('tva-regime-bar');
+  if(regimeBar) {
+    const cls = assujetti ? 'assujetti' : 'franchise';
+    const ico = assujetti ? '✅' : '⚠️';
+    const txt = assujetti
+      ? `Régime : ${P.regimeTVA || 'TVA réelle'}`
+      : `Franchise en base de TVA — Seuil ${ANNEE} : ${fmt0(seuil)}${estime ? ' (estimé)' : ''}`;
+    regimeBar.innerHTML = `<div class="tva-regime ${cls}">${ico} ${txt}</div>`;
+  }
+
+  // Alertes seuil
+  const alertsEl = $('tva-alerts');
+  if(alertsEl) {
+    let alerts = '';
+    if(!assujetti) {
+      const pct = Math.round(caAnnuel / seuil * 100);
+      if(caAnnuel >= seuil) {
+        alerts += `<div class="tva-alert danger">🚨 <div><strong>Seuil de franchise dépassé !</strong> Votre CA (${fmt0(caAnnuel)}) dépasse le seuil de ${fmt0(seuil)}. Régularisation TVA obligatoire — contactez votre comptable.</div></div>`;
+      } else if(pct >= 85) {
+        alerts += `<div class="tva-alert warn">⚠️ <div><strong>Attention :</strong> Votre CA (${fmt0(caAnnuel)}) représente ${pct}% du seuil (${fmt0(seuil)}). Vous pourriez le dépasser cette année.</div></div>`;
+      } else {
+        alerts += `<div class="tva-alert ok">✅ CA annuel (${fmt0(caAnnuel)}) sous le seuil de franchise (${fmt0(seuil)}) — ${pct}% atteint.</div>`;
+      }
+      if(estime) {
+        alerts += `<div class="tva-alert info">ℹ️ Seuil ${ANNEE} non encore publié — valeur extrapolée à +2%/an. <strong>Mise à jour prévue dès publication au Journal Officiel.</strong></div>`;
+      }
+    }
+    alertsEl.innerHTML = alerts;
+  }
+
+  // Calcul mois
+  const moisData = _tvaCalcMois();
+  const totalCollectee  = Math.round(moisData.reduce((s,m)=>s+m.collectee,0)*100)/100;
+  const totalDeductible = Math.round(moisData.reduce((s,m)=>s+m.deductible,0)*100)/100;
+  const totalNet        = Math.round((totalCollectee - totalDeductible)*100)/100;
+
+  // KPIs
+  const kpiZone = $('tva-kpis-zone');
+  if(kpiZone) kpiZone.style.display = assujetti ? 'grid' : 'none';
+  if(assujetti) {
+    const eC = $('tva-kpi-collectee');  if(eC) { eC.textContent = fmt(totalCollectee);  eC.style.color='var(--rd)'; }
+    const eD = $('tva-kpi-deductible'); if(eD) { eD.textContent = fmt(totalDeductible); eD.style.color='var(--gr)'; }
+    const eN = $('tva-kpi-net'), eNs=$('tva-kpi-net-sub'), eNa=$('tva-kpi-net-acc');
+    if(eN) { eN.textContent=(totalNet<0?'−':'')+fmt(totalNet); eN.style.color=totalNet>0?'var(--rd)':totalNet<0?'var(--gr)':'var(--t2)'; }
+    if(eNs) eNs.textContent = totalNet>0?'À reverser à l\'État':totalNet<0?'Crédit de TVA':'Neutre';
+    if(eNa) eNa.style.background = totalNet>0?'var(--rd)':totalNet<0?'var(--gr)':'var(--am)';
+    const isTrimestriel = (P.regimeTVA||'').includes('trimestrielle');
+    const nbDecl = isTrimestriel ? 4 : 12;
+    const eI=$('tva-kpi-impact'), eIs=$('tva-kpi-impact-sub');
+    if(eI) { eI.textContent=fmt(Math.abs(totalNet)/nbDecl); eI.style.color=totalNet>0?'var(--rd)':'var(--gr)'; }
+    if(eIs) eIs.textContent=`Par déclaration ${isTrimestriel?'trimestrielle':'mensuelle'}`;
+  }
+
+  // Simulation franchise → réel
+  const simZone = $('tva-sim-zone'), simContent = $('tva-sim-content');
+  if(simZone && simContent) {
+    simZone.style.display = assujetti ? 'none' : 'block';
+    if(!assujetti) {
+      const bilan = Math.round((totalDeductible - totalCollectee)*100)/100;
+      const fav   = bilan >= 0;
+      simContent.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+          <div style="text-align:center;padding:14px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)">
+            <div style="font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:6px">TVA récupérable sur achats</div>
+            <div style="font-size:20px;font-weight:800;color:var(--gr)">+${fmt(totalDeductible)}</div>
+            <div style="font-size:11px;color:var(--t2);margin-top:4px">Que vous ne récupérez pas actuellement</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)">
+            <div style="font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:6px">TVA à reverser sur ventes</div>
+            <div style="font-size:20px;font-weight:800;color:var(--rd)">−${fmt(totalCollectee)}</div>
+            <div style="font-size:11px;color:var(--t2);margin-top:4px">Nouvelle obligation si assujetti</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:${fav?'var(--grb)':'var(--rdb)'};border-radius:var(--rs);border:1px solid ${fav?'rgba(5,150,105,.2)':'rgba(225,29,72,.2)'}">
+            <div style="font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:${fav?'var(--gr)':'var(--rd)'};margin-bottom:6px">Bilan net annuel</div>
+            <div style="font-size:20px;font-weight:800;color:${fav?'var(--gr)':'var(--rd)'}">${bilan>=0?'+':'−'}${fmt(bilan)}</div>
+            <div style="font-size:11px;color:${fav?'var(--gr)':'var(--rd)'};margin-top:4px">${fav?'✅ Option favorable':'❌ Option défavorable'}</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.6;padding:10px 14px;background:var(--bgs);border-radius:var(--rs);border-left:3px solid var(--bds)">
+          ${fav
+            ? `💡 Opter pour le régime réel vous ferait <strong>gagner ${fmt(bilan)}/an</strong> grâce à la récupération de TVA sur vos achats.`
+            : `ℹ️ Avec votre structure de coûts actuelle, la franchise vous est plus favorable.`}
+          <br><span style="font-size:11px;color:var(--t3)">⚠️ Simulation indicative — consultez un expert-comptable avant toute décision.</span>
+        </div>`;
+    }
+  }
+
+  // Tableau
+  const isTrimestriel = (P.regimeTVA||'').includes('trimestrielle');
+  const thead=$('tva-thead'), tbody=$('tva-tbody');
+  const tblTitle=$('tva-tbl-title'), tblSub=$('tva-tbl-sub');
+  if(tblTitle) tblTitle.textContent = assujetti
+    ? `Déclarations TVA ${isTrimestriel?'trimestrielles':'mensuelles'}`
+    : 'Simulation TVA — régime réel fictif';
+  if(tblSub) tblSub.textContent = assujetti
+    ? 'TVA collectée − TVA déductible = TVA nette à reverser'
+    : 'Vous êtes en franchise — ce tableau simule vos obligations si vous étiez assujetti';
+
+  if(thead) thead.innerHTML = `<tr>
+    <th style="text-align:left">Période</th>
+    <th>TVA collectée</th><th>TVA déductible</th><th>TVA nette</th>
+    <th>Statut</th><th>Échéance</th>
+  </tr>`;
+
+  if(tbody) {
+    let rows = '';
+    if(isTrimestriel && assujetti) {
+      const trims = [
+        {lbl:'T1 — Jan/Fév/Mar', mois:[0,1,2], ech:'30 avril'},
+        {lbl:'T2 — Avr/Mai/Jun', mois:[3,4,5], ech:'31 juillet'},
+        {lbl:'T3 — Jul/Aoû/Sep', mois:[6,7,8], ech:'31 octobre'},
+        {lbl:'T4 — Oct/Nov/Déc', mois:[9,10,11],ech:'31 janvier N+1'},
+      ];
+      trims.forEach(t => {
+        const c=Math.round(t.mois.reduce((s,m)=>s+moisData[m].collectee,0)*100)/100;
+        const d=Math.round(t.mois.reduce((s,m)=>s+moisData[m].deductible,0)*100)/100;
+        const n=Math.round((c-d)*100)/100;
+        const bcls=n>0?'payer':n<0?'credit':'zero';
+        rows += `<tr class="tva-tr-trim"><td colspan="6">${t.lbl}</td></tr>
+        <tr><td style="padding-left:20px">Déclaration trimestrielle</td>
+          <td style="color:var(--rd)">${fmt(c)}</td><td style="color:var(--gr)">${fmt(d)}</td>
+          <td style="color:${n>0?'var(--rd)':n<0?'var(--gr)':'var(--t2)'};font-weight:700">${n<0?'−':''}${fmt(n)}</td>
+          <td><span class="tva-badge ${bcls}">${n>0?'À payer':n<0?'Crédit':'Neutre'}</span></td>
+          <td style="color:var(--t2);font-size:11px">${t.ech}</td></tr>`;
+      });
+    } else {
+      moisData.forEach((md,i) => {
+        const bcls=md.net>0?'payer':md.net<0?'credit':'zero';
+        const ech=`${MOIS_COURTS[(i+1)%12]} ${i===11?ANNEE+1:ANNEE}`;
+        rows += `<tr><td>${MOIS_LONGS[i]} ${ANNEE}</td>
+          <td style="color:var(--rd)">${fmt(md.collectee)}</td>
+          <td style="color:var(--gr)">${fmt(md.deductible)}</td>
+          <td style="color:${md.net>0?'var(--rd)':md.net<0?'var(--gr)':'var(--t2)'};font-weight:700">${md.net<0?'−':''}${fmt(md.net)}</td>
+          <td><span class="tva-badge ${bcls}">${md.net>0?'À payer':md.net<0?'Crédit':'Neutre'}</span></td>
+          <td style="color:var(--t2);font-size:11px">${ech}</td></tr>`;
+      });
+    }
+    const btot=totalNet>0?'payer':totalNet<0?'credit':'zero';
+    rows += `<tr class="tva-tr-total"><td>TOTAL ${ANNEE}</td>
+      <td style="color:var(--rd)">${fmt(totalCollectee)}</td>
+      <td style="color:var(--gr)">${fmt(totalDeductible)}</td>
+      <td style="color:${totalNet>0?'var(--rd)':totalNet<0?'var(--gr)':'var(--t2)'}">${totalNet<0?'−':''}${fmt(totalNet)}</td>
+      <td><span class="tva-badge ${btot}">${totalNet>0?'À payer':totalNet<0?'Crédit':'Neutre'}</span></td>
+      <td></td></tr>`;
+    tbody.innerHTML = rows;
+  }
+}
+
 async function changeAnnee(n) {
   n = parseInt(n);
   if(isNaN(n) || n===ANNEE) return;
@@ -4124,6 +4453,9 @@ async function changeAnnee(n) {
   }
   if($('pnl-previsionnel') && $('pnl-previsionnel').style.display !== 'none') {
     renderPrevisionnel();
+  }
+  if($('pnl-tva') && $('pnl-tva').style.display !== 'none') {
+    renderTVA();
   }
 }
 
@@ -4255,8 +4587,8 @@ async function startApp(user) {
 // NAVIGATION PANELS
 // ════════════════════════════════════════════════════════
 function showPanel(panelId, navId) {
-  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge','pnl-scenarios','pnl-previsionnel'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
-  ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge','nav-scenarios','nav-previsionnel'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
+  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge','pnl-scenarios','pnl-previsionnel','pnl-tva'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
+  ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge','nav-scenarios','nav-previsionnel','nav-tva'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
   const p=$(panelId);
   if(p) {
     p.style.display='block';
@@ -4401,6 +4733,10 @@ document.addEventListener('DOMContentLoaded', () => {
   $('nav-previsionnel').addEventListener('click', () => {
     showPanel('pnl-previsionnel','nav-previsionnel');
     renderPrevisionnel();
+  });
+  $('nav-tva').addEventListener('click', () => {
+    showPanel('pnl-tva','nav-tva');
+    renderTVA();
   });
 
   // Inputs hypothèses prévisionnel — recalcul en temps réel
