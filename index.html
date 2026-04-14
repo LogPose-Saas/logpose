@@ -1279,7 +1279,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
 
       <!-- KPIs -->
-      <div class="kgrid g4" style="margin-bottom:14px">
+      <div class="kgrid g4" style="margin-bottom:14px;grid-template-columns:repeat(5,1fr)">
         <div class="kcard" style="text-align:center">
           <div class="kacc" style="background:var(--ac)"></div>
           <div class="klbl">Seuil de rentabilité</div>
@@ -1306,7 +1306,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="klbl">Point mort</div>
           <div class="kval" id="mr-kpi-pm-jour">—</div>
           <div id="mr-kpi-pm-sub" style="font-size:11px;color:var(--t2);margin-top:6px">du mois en moyenne</div>
-          <div class="kpi-help">?<div class="kpi-tooltip">Jour moyen du mois à partir duquel votre activité couvre toutes ses charges. Ex : "J+18" signifie que vous êtes rentable à partir du 18 du mois. La date annuelle indique quand le seuil global est atteint sur l'année.</div></div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Jour moyen du mois à partir duquel votre activité couvre toutes ses charges. Ex : "J+18" signifie que vous êtes rentable à partir du 18 du mois.</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" id="mr-bfr-acc" style="background:var(--am)"></div>
+          <div class="klbl">BFR indicatif</div>
+          <div class="kval" id="mr-kpi-bfr">—</div>
+          <div id="mr-kpi-bfr-sub" style="font-size:11px;color:var(--t2);margin-top:6px">Besoin de financement</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Besoin en Fonds de Roulement estimé = Coûts achat + Charges variables − CA HT. Positif = vous devez financer cet écart. Négatif = votre activité se finance d'elle-même (excellent signe).</div></div>
         </div>
       </div>
 
@@ -3221,6 +3228,27 @@ function renderMarge() {
       : 'Définir des charges fixes';
   }
 
+  // ── BFR indicatif ──
+  // Formule : Coûts achat annuels + Charges variables HT − CA HT
+  // Positif = besoin de financement, Négatif = activité auto-financée
+  const bfr = Math.round((coutAchat + chVarHT - caHT) * 100) / 100;
+  const eBFR    = $('mr-kpi-bfr');
+  const eBFRsub = $('mr-kpi-bfr-sub');
+  const eBFRacc = $('mr-bfr-acc');
+  if(eBFR) {
+    const bfrAbs = Math.abs(bfr);
+    eBFR.textContent = (bfr < 0 ? '−' : '+') + bfrAbs.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+    eBFR.style.color = bfr <= 0 ? 'var(--gr)' : bfr < caHT * 0.1 ? 'var(--am)' : 'var(--rd)';
+  }
+  if(eBFRsub) {
+    eBFRsub.textContent = bfr <= 0
+      ? '✅ Activité auto-financée'
+      : `À financer : ${Math.round(bfr/12).toLocaleString('fr-FR')} €/mois`;
+  }
+  if(eBFRacc) {
+    eBFRacc.style.background = bfr <= 0 ? 'var(--gr)' : bfr < caHT * 0.1 ? 'var(--am)' : 'var(--rd)';
+  }
+
   // ── Graphique Waterfall ──
   // Simulation waterfall avec barres flottantes [min, max]
   // Dataset 1 (invisible) = socle, Dataset 2 = barre visible
@@ -3818,21 +3846,36 @@ function renderPrevisionnel() {
   // Coefficients par article
   const artGrid = $('pv-art-grid');
   if(artGrid) {
-    artGrid.innerHTML = articles.map(a => {
-      const vCons = hyp.cons.arts?.[a.code] !== undefined ? hyp.cons.arts[a.code] : '';
-      const vBase = hyp.base.arts?.[a.code] !== undefined ? hyp.base.arts[a.code] : '';
-      const vOpti = hyp.opti.arts?.[a.code] !== undefined ? hyp.opti.arts[a.code] : '';
-      return `<div class="pv-art-row">
-        <div class="pv-art-nom" title="${a.nom}">${a.nom}</div>
-        <input class="pv-hyp-inp" type="number" style="width:52px" placeholder="🔵" title="Conservateur %"
-          value="${vCons}" onchange="pvUpdateArt('cons','${a.code}',this.value)">
-        <input class="pv-hyp-inp" type="number" style="width:52px" placeholder="🟢" title="Base %"
-          value="${vBase}" onchange="pvUpdateArt('base','${a.code}',this.value)">
-        <input class="pv-hyp-inp" type="number" style="width:52px" placeholder="🚀" title="Optimiste %"
-          value="${vOpti}" onchange="pvUpdateArt('opti','${a.code}',this.value)">
-        <span class="pv-hyp-unit">%</span>
-      </div>`;
-    }).join('');
+    artGrid.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 100px 100px 100px;gap:0;border:1px solid var(--bd);border-radius:var(--rs);overflow:hidden">
+        <div style="padding:7px 12px;font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);background:var(--bgs);border-bottom:1px solid var(--bd)">Article</div>
+        <div style="padding:7px 12px;text-align:center;font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:#0d9488;background:var(--bgs);border-bottom:1px solid var(--bd)">🔵 Cons.</div>
+        <div style="padding:7px 12px;text-align:center;font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:#2563eb;background:var(--bgs);border-bottom:1px solid var(--bd)">🟢 Base</div>
+        <div style="padding:7px 12px;text-align:center;font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:#059669;background:var(--bgs);border-bottom:1px solid var(--bd)">🚀 Opti.</div>
+        ${articles.map((a, idx) => {
+          const vCons = hyp.cons.arts?.[a.code] !== undefined ? hyp.cons.arts[a.code] : '';
+          const vBase = hyp.base.arts?.[a.code] !== undefined ? hyp.base.arts[a.code] : '';
+          const vOpti = hyp.opti.arts?.[a.code] !== undefined ? hyp.opti.arts[a.code] : '';
+          const bg = idx % 2 === 0 ? '' : 'background:var(--bgs);';
+          const bdr = idx < articles.length - 1 ? 'border-bottom:1px solid var(--bd);' : '';
+          const cell = `${bg}${bdr}`;
+          return `
+            <div style="padding:8px 12px;font-size:12.5px;font-weight:500;${cell}">${a.nom}</div>
+            <div style="padding:6px 8px;text-align:center;${cell}">
+              <input class="pv-hyp-inp" type="number" style="width:70px" placeholder="global"
+                value="${vCons}" onchange="pvUpdateArt('cons','${a.code}',this.value)">
+            </div>
+            <div style="padding:6px 8px;text-align:center;${cell}">
+              <input class="pv-hyp-inp" type="number" style="width:70px" placeholder="global"
+                value="${vBase}" onchange="pvUpdateArt('base','${a.code}',this.value)">
+            </div>
+            <div style="padding:6px 8px;text-align:center;${cell}">
+              <input class="pv-hyp-inp" type="number" style="width:70px" placeholder="global"
+                value="${vOpti}" onchange="pvUpdateArt('opti','${a.code}',this.value)">
+            </div>`;
+        }).join('')}
+      </div>
+      <div style="font-size:11px;color:var(--t3);margin-top:6px">📌 Valeur en % · Laisser vide = coefficient global de l'hypothèse</div>`;
   }
 
   // Projections 3 ans
