@@ -369,12 +369,12 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .rdopt-sub{font-size:11px;color:var(--t2)}
 
 /* ── KPI TOOLTIP ── */
-.kcard{position:relative;cursor:default}
+.kcard{position:relative;cursor:default;overflow:visible}
 .kcard .ktooltip{
   display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
   background:var(--bgc);border:1px solid var(--bds);border-radius:var(--rs);
   padding:10px 13px;font-size:11.5px;color:var(--t1);line-height:1.5;
-  width:220px;z-index:200;box-shadow:var(--sh);pointer-events:none;
+  width:220px;z-index:500;box-shadow:var(--sh);pointer-events:none;
   text-align:left;font-family:var(--f);font-weight:400;
 }
 .kcard .ktooltip::after{
@@ -408,7 +408,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .kpi-tooltip {
   display:none;
   position:absolute;
-  top:calc(100% + 8px);
+  bottom:calc(100% + 8px);
   right:0;
   background:var(--bgc);
   border:1px solid var(--bds);
@@ -427,10 +427,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .kpi-tooltip::after {
   content:'';
   position:absolute;
-  bottom:100%; right:5px;
+  top:100%; right:5px;
   border:5px solid transparent;
-  border-bottom-color:var(--bds);
+  border-top-color:var(--bds);
 }
+.kpi-help { overflow:visible; }
 .kpi-help:hover .kpi-tooltip { display:block; animation:fadeInDown .15s ease; }
 /* Suppression des règles nth-child qui causaient le débordement gauche */
 @keyframes fadeInDown{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
@@ -2958,70 +2959,74 @@ function renderMarge() {
   }
 
   // ── Graphique Waterfall ──
-  // Waterfall correct : base[i] = niveau de départ de chaque barre
-  // CA HT part de 0, chaque étape déduit ou ajoute
-  const wfLabels = ['CA HT', 'Coûts achat', 'Marge brute', 'Ch. variables', 'Ch. fixes', 'Résultat'];
-  //            CA HT          Coûts achat   Marge brute    Ch. variables      Ch. fixes    Résultat
-  const wfBase = [
-    0,                          // CA HT : part de 0
-    margeB,                     // Coûts achat : part du bas de la marge brute
-    0,                          // Marge brute : repart de 0 (barre positive)
-    resultat + chFixHT,         // Ch. variables : part du résultat + fixes
-    resultat,                   // Ch. fixes : part du résultat
-    0,                          // Résultat : part de 0
-  ];
-  const wfVals = [caHT, coutAchat, margeB, chVarHT, chFixHT, Math.abs(resultat)];
+  // Approche robuste : bar chart non-stacké avec données absolues
+  // Chaque barre représente le niveau à cette étape de la cascade
+  const wfLabels = ['CA HT', '− Coûts achat', '= Marge brute', '− Ch. variables', '− Ch. fixes', '= Résultat'];
+  const wfVals   = [caHT, margeB, margeB, margeB - chVarHT, resultat, resultat];
   const wfColors = [
-    '#2563eb',                               // CA HT — bleu
-    'rgba(225,29,72,0.8)',                   // Coûts achat — rouge
-    '#0d9488',                               // Marge brute — teal
-    'rgba(217,119,6,0.8)',                   // Ch. variables — orange
-    'rgba(124,58,237,0.8)',                  // Ch. fixes — violet
-    resultat >= 0 ? '#059669' : '#e11d48',  // Résultat — vert ou rouge
+    'rgba(37,99,235,0.85)',
+    'rgba(14,165,114,0.5)',
+    'rgba(14,165,114,0.85)',
+    'rgba(14,165,114,0.5)',
+    'rgba(14,165,114,0.5)',
+    resultat >= 0 ? 'rgba(5,150,105,0.9)' : 'rgba(225,29,72,0.9)',
   ];
+  const wfBorders = ['#2563eb','#059669','#059669','#059669','#059669', resultat >= 0 ? '#059669':'#e11d48'];
+
+  // Plugin étiquettes sur barres
+  const wfLabelsPlugin = {
+    id: 'wfLabels',
+    afterDatasetsDraw(chart) {
+      const {ctx, data, scales:{x,y}} = chart;
+      ctx.save();
+      ctx.font = '700 11px Plus Jakarta Sans, sans-serif';
+      ctx.textAlign = 'center';
+      data.datasets[0].data.forEach((val, i) => {
+        if(!val) return;
+        const px = x.getPixelForValue(i);
+        const py = y.getPixelForValue(val) - 8;
+        const labels = ['CA HT','Marge','Marge brute','MCV','MCV','Résultat'];
+        const vals   = [caHT, coutAchat, margeB, chVarHT, chFixHT, resultat];
+        ctx.fillStyle = wfBorders[i];
+        ctx.fillText(Math.round(vals[i]).toLocaleString('fr-FR') + ' €', px, py);
+      });
+      ctx.restore();
+    }
+  };
 
   const ctxWF = $('mr-chart-waterfall');
   if(ctxWF) {
     if(chartMRWaterfall) chartMRWaterfall.destroy();
     chartMRWaterfall = new Chart(ctxWF, {
       type: 'bar',
+      plugins: [wfLabelsPlugin],
       data: {
         labels: wfLabels,
-        datasets: [
-          {
-            label: 'Base',
-            data: wfBase,
-            backgroundColor: 'transparent',
-            borderColor: 'transparent',
-            borderSkipped: false,
-          },
-          {
-            label: 'Valeur',
-            data: wfVals,
-            backgroundColor: wfColors,
-            borderRadius: 4,
-            borderSkipped: false,
-          }
-        ]
+        datasets: [{
+          data: wfVals,
+          backgroundColor: wfColors,
+          borderColor: wfBorders,
+          borderWidth: 2,
+          borderRadius: 5,
+        }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 28 } },
         plugins: {
           legend: { display: false },
           tooltip: {
             callbacks: {
               label: ctx => {
-                if(ctx.datasetIndex === 0) return null;
-                return ctx.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
-              },
-              filter: item => item.datasetIndex === 1,
+                const reels = [caHT, coutAchat, margeB, chVarHT, chFixHT, resultat];
+                return reels[ctx.dataIndex].toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+              }
             }
           }
         },
         scales: {
-          x: { stacked: true, grid: { display: false } },
+          x: { grid: { display: false } },
           y: {
-            stacked: true,
             beginAtZero: true,
             ticks: { callback: v => Math.round(v).toLocaleString('fr-FR') + ' €' }
           }
@@ -3326,24 +3331,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!help) return;
     const tip = help.querySelector('.kpi-tooltip');
     if(!tip) return;
-    // Reset position par défaut : en bas, aligné à droite
-    tip.style.top    = 'calc(100% + 8px)';
-    tip.style.bottom = 'auto';
+    // Reset position par défaut : au-dessus, aligné à droite
+    tip.style.bottom = 'calc(100% + 8px)';
+    tip.style.top    = 'auto';
     tip.style.right  = '0';
     tip.style.left   = 'auto';
     requestAnimationFrame(() => {
       const rect = tip.getBoundingClientRect();
-      // Débordement bas → passer au-dessus
-      if(rect.bottom > window.innerHeight - 8) {
-        tip.style.top    = 'auto';
-        tip.style.bottom = 'calc(100% + 8px)';
+      // Débordement en haut → passer en dessous
+      if(rect.top < 8) {
+        tip.style.bottom = 'auto';
+        tip.style.top    = 'calc(100% + 8px)';
       }
-      // Débordement droit → aligner à gauche
-      if(rect.right > window.innerWidth - 8) {
-        tip.style.right = '0';
-        tip.style.left  = 'auto';
-      }
-      // Débordement gauche → aligner à droite du bouton
+      // Débordement gauche → aligner à gauche du bouton
       if(rect.left < 8) {
         tip.style.right = 'auto';
         tip.style.left  = '0';
