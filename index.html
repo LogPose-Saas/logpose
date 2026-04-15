@@ -5330,29 +5330,34 @@ document.addEventListener('DOMContentLoaded', () => {
       renderChargesData(); // instantané
     }
   });
-  $('nav-marge').addEventListener('click', () => {
+  $('nav-marge').addEventListener('click', async () => {
     showPanel('pnl-marge','nav-marge');
     if(!checkProGate('pnl-marge')) return;
+    if(_anneeMts !== ANNEE) await _loadMtsOnly();
     renderMarge();
   });
-  $('nav-scenarios').addEventListener('click', () => {
+  $('nav-scenarios').addEventListener('click', async () => {
     showPanel('pnl-scenarios','nav-scenarios');
     if(!checkProGate('pnl-scenarios')) return;
+    if(_anneeMts !== ANNEE) await _loadMtsOnly();
     renderScenarios();
   });
-  $('nav-previsionnel').addEventListener('click', () => {
+  $('nav-previsionnel').addEventListener('click', async () => {
     showPanel('pnl-previsionnel','nav-previsionnel');
     if(!checkProGate('pnl-previsionnel')) return;
+    if(_anneeMts !== ANNEE) await _loadMtsOnly();
     renderPrevisionnel();
   });
-  $('nav-tva').addEventListener('click', () => {
+  $('nav-tva').addEventListener('click', async () => {
     showPanel('pnl-tva','nav-tva');
     if(!checkProGate('pnl-tva')) return;
+    if(_anneeMts !== ANNEE) await _loadMtsOnly();
     renderTVA();
   });
-  $('nav-tresorerie').addEventListener('click', () => {
+  $('nav-tresorerie').addEventListener('click', async () => {
     showPanel('pnl-tresorerie','nav-tresorerie');
     if(!checkProGate('pnl-tresorerie')) return;
+    if(_anneeMts !== ANNEE) await _loadMtsOnly();
     renderTresorerie();
   });
   // Inputs trésorerie — recalcul en temps réel
