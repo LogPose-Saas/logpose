@@ -3235,34 +3235,41 @@ function applyFreemium() {
 }
 
 function checkProGate(panelId) {
-  // Supprimer un éventuel overlay Pro existant sur ce panneau
-  const existing = document.getElementById('pro-overlay-' + panelId);
-  if(existing) existing.remove();
+  // Supprimer tout overlay Pro existant
+  document.querySelectorAll('[id^="pro-overlay-"]').forEach(e => e.remove());
 
   if(isPro()) return true;
   if(FREE_MODULES.includes(panelId)) return true;
 
-  // Afficher un overlay par-dessus le panneau sans écraser son HTML
-  const p = $(panelId); if(!p) return false;
+  // Overlay ajouté directement dans body — pas dans le panneau
+  // Évite tout problème de contexte de stacking ou de scroll
   const overlay = document.createElement('div');
   overlay.id = 'pro-overlay-' + panelId;
-  overlay.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;';
+  overlay.style.cssText = [
+    'position:fixed',
+    'top:0','left:0','right:0','bottom:0',
+    'background:var(--bg)',
+    'z-index:9999',
+    'display:flex',
+    'flex-direction:column',
+    'align-items:center',
+    'justify-content:center',
+    'text-align:center',
+    'padding:40px',
+  ].join(';');
   overlay.innerHTML = `
     <div style="font-size:44px;margin-bottom:16px">🔒</div>
     <div style="font-size:20px;font-weight:800;color:var(--t1);margin-bottom:10px;letter-spacing:-.4px">Fonctionnalité Pro</div>
     <div style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:28px;max-width:420px">
       Ce module est réservé aux abonnés LogPose Pro.<br>
-      Accédez à l'analyse de marge, scénarios, prévisionnel,<br>TVA et trésorerie pour piloter votre activité comme un expert.
+      Accédez à l'analyse de marge, scénarios, prévisionnel,<br>
+      TVA et trésorerie pour piloter votre activité comme un expert.
     </div>
-    <a href="${LEMON_URL}" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:13px 30px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:14px;font-weight:700;text-decoration:none;">⚡ Passer au Pro — 25€/mois</a>
-  `;
-  overlay.innerHTML = `
-    <div class="pro-wall-ico">🔒</div>
-    <div class="pro-wall-title">Fonctionnalité Pro</div>
-    <div class="pro-wall-sub">Ce module est réservé aux abonnés LogPose Pro.<br>Accédez à l'analyse de marge, scénarios, prévisionnel, TVA et trésorerie<br>pour piloter votre activité comme un expert.</div>
-    <a href="${LEMON_URL}" target="_blank" class="pro-wall-btn">⚡ Passer au Pro — 25€/mois</a>`;
-  p.style.position = 'relative';
-  p.appendChild(overlay);
+    <a href="${LEMON_URL}" target="_blank"
+      style="display:inline-flex;align-items:center;gap:8px;padding:13px 30px;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:14px;font-weight:700;text-decoration:none;">
+      ⚡ Passer au Pro — 25€/mois
+    </a>`;
+  document.body.appendChild(overlay);
   return false;
 }
 
@@ -5181,6 +5188,8 @@ const PANEL_URLS = {
 };
 
 function showPanel(panelId, navId) {
+  // Supprimer tout overlay Pro en cours
+  document.querySelectorAll('[id^="pro-overlay-"]').forEach(e => e.remove());
   ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge','pnl-scenarios','pnl-previsionnel','pnl-tva','pnl-tresorerie'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
   ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge','nav-scenarios','nav-previsionnel','nav-tva','nav-tresorerie'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
   const p=$(panelId);
