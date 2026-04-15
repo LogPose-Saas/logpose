@@ -3247,7 +3247,9 @@ function checkProGate(panelId) {
   const overlay = document.createElement('div');
   overlay.id = 'pro-overlay-' + panelId;
   overlay.className = 'pro-wall';
-  overlay.style.cssText = 'position:absolute;inset:0;background:var(--bg);z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px';
+  const sbCollapsed = document.querySelector('.sb')?.classList.contains('col');
+  const leftOffset = sbCollapsed ? 'var(--swc)' : 'var(--sw)';
+  overlay.style.cssText = `position:fixed;top:0;left:${leftOffset};right:0;bottom:0;background:var(--bg);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;`;
   overlay.innerHTML = `
     <div class="pro-wall-ico">🔒</div>
     <div class="pro-wall-title">Fonctionnalité Pro</div>
