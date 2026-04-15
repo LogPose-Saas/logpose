@@ -3206,12 +3206,13 @@ let _isPro = false;
 async function loadProStatus() {
   if(!UID) return;
   try {
+    // Cherche is_pro=true sur n'importe quelle année — pas seulement l'année active
     const { data } = await DB.from('parametres')
       .select('is_pro')
       .eq('user_id', UID)
       .eq('is_pro', true)
       .limit(1)
-      .single();
+      .maybeSingle();
     _isPro = !!(data?.is_pro);
   } catch(e) {
     _isPro = false;
