@@ -3235,16 +3235,26 @@ function applyFreemium() {
 }
 
 function checkProGate(panelId) {
+  // Supprimer un éventuel overlay Pro existant sur ce panneau
+  const existing = document.getElementById('pro-overlay-' + panelId);
+  if(existing) existing.remove();
+
   if(isPro()) return true;
   if(FREE_MODULES.includes(panelId)) return true;
+
+  // Afficher un overlay par-dessus le panneau sans écraser son HTML
   const p = $(panelId); if(!p) return false;
-  p.style.display = 'block';
-  p.innerHTML = `<div class="pro-wall">
+  const overlay = document.createElement('div');
+  overlay.id = 'pro-overlay-' + panelId;
+  overlay.className = 'pro-wall';
+  overlay.style.cssText = 'position:absolute;inset:0;background:var(--bg);z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px';
+  overlay.innerHTML = `
     <div class="pro-wall-ico">🔒</div>
     <div class="pro-wall-title">Fonctionnalité Pro</div>
     <div class="pro-wall-sub">Ce module est réservé aux abonnés LogPose Pro.<br>Accédez à l'analyse de marge, scénarios, prévisionnel, TVA et trésorerie<br>pour piloter votre activité comme un expert.</div>
-    <a href="${LEMON_URL}" target="_blank" class="pro-wall-btn">⚡ Passer au Pro — 25€/mois</a>
-  </div>`;
+    <a href="${LEMON_URL}" target="_blank" class="pro-wall-btn">⚡ Passer au Pro — 25€/mois</a>`;
+  p.style.position = 'relative';
+  p.appendChild(overlay);
   return false;
 }
 
