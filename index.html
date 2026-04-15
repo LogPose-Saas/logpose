@@ -3235,28 +3235,17 @@ function applyFreemium() {
 }
 
 function checkProGate(panelId) {
-  // Supprimer tout overlay Pro existant
   document.querySelectorAll('[id^="pro-overlay-"]').forEach(e => e.remove());
 
   if(isPro()) return true;
   if(FREE_MODULES.includes(panelId)) return true;
 
-  // Overlay ajouté directement dans body — pas dans le panneau
-  // Évite tout problème de contexte de stacking ou de scroll
+  // Overlay dans .main — couvre la zone contenu, sidebar reste cliquable
+  const main = document.querySelector('.main');
+  if(!main) return false;
   const overlay = document.createElement('div');
   overlay.id = 'pro-overlay-' + panelId;
-  overlay.style.cssText = [
-    'position:fixed',
-    'top:0','left:0','right:0','bottom:0',
-    'background:var(--bg)',
-    'z-index:9999',
-    'display:flex',
-    'flex-direction:column',
-    'align-items:center',
-    'justify-content:center',
-    'text-align:center',
-    'padding:40px',
-  ].join(';');
+  overlay.style.cssText = 'position:fixed;top:0;bottom:0;left:' + (document.querySelector('.sb.col') ? 'var(--swc)' : 'var(--sw)') + ';right:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;';
   overlay.innerHTML = `
     <div style="font-size:44px;margin-bottom:16px">🔒</div>
     <div style="font-size:20px;font-weight:800;color:var(--t1);margin-bottom:10px;letter-spacing:-.4px">Fonctionnalité Pro</div>
