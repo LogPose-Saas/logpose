@@ -5107,7 +5107,6 @@ async function startApp(user) {
   const av=$('sb-av'); if(av) av.textContent=user.email[0].toUpperCase();
   const em=$('sb-email'); if(em) em.textContent=user.email;
   renderAnneesNav();
-  applyFreemium();
 
   // Ping Supabase — attend le réveil du projet (plan gratuit = jusqu'à 20s)
   const stxt = $('stxt');
@@ -5136,6 +5135,7 @@ async function startApp(user) {
   await loadCA();
   await _loadMtsOnly();
   await loadProStatus();
+  applyFreemium(); // Appelé après loadProStatus — _isPro est maintenant correct
   // Routing : Wizard si premier accès, Dashboard si configuré, Paramètres sinon
   if(!P.nomEnt || P.nomEnt.trim() === '') {
     showPanel('pnl-params','nav-params');
