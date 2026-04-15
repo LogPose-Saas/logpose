@@ -3,7 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LogPose</title>
+<title>LogPose — Financial OS pour TPE & indépendants</title>
+<meta name="description" content="LogPose est le tableau de bord financier tout-en-un pour les TPE et indépendants français. Pilotez votre CA, vos charges, votre marge, votre TVA et votre trésorerie en temps réel.">
+<meta name="keywords" content="logiciel comptabilité TPE, tableau de bord financier, gestion CA, marge bénéficiaire, trésorerie PME, TVA indépendant, prévisionnel financier">
+<meta name="author" content="LogPose">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://logposefr.com">
+<!-- Open Graph -->
+<meta property="og:title" content="LogPose — Financial OS pour TPE & indépendants">
+<meta property="og:description" content="Pilotez votre activité comme un expert. CA, charges, marge, TVA, trésorerie et prévisionnel — tout en un seul outil.">
+<meta property="og:url" content="https://logposefr.com">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LogPose — Financial OS pour TPE & indépendants">
+<meta name="twitter:description" content="Pilotez votre activité comme un expert. CA, charges, marge, TVA, trésorerie et prévisionnel — tout en un seul outil.">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -3185,8 +3200,26 @@ const FREE_MAX_CHARGES  = 3;
 const FREE_MODULES = ['pnl-dashboard','pnl-ca','pnl-charges','pnl-params'];
 const PRO_NAVS     = ['nav-marge','nav-scenarios','nav-previsionnel','nav-tva','nav-tresorerie'];
 
+// Cache Pro en mémoire — chargé au login, mis à jour si nécessaire
+let _isPro = false;
+
+async function loadProStatus() {
+  if(!UID) return;
+  try {
+    const { data } = await DB.from('parametres')
+      .select('is_pro')
+      .eq('user_id', UID)
+      .eq('is_pro', true)
+      .limit(1)
+      .single();
+    _isPro = !!(data?.is_pro);
+  } catch(e) {
+    _isPro = false;
+  }
+}
+
 function isPro() {
-  try { return localStorage.getItem('lp_pro_' + UID) === 'true'; } catch(e) { return false; }
+  return _isPro;
 }
 
 function applyFreemium() {
@@ -5101,6 +5134,7 @@ async function startApp(user) {
   await loadParams();
   await loadCA();
   await _loadMtsOnly();
+  await loadProStatus();
   // Routing : Wizard si premier accès, Dashboard si configuré, Paramètres sinon
   if(!P.nomEnt || P.nomEnt.trim() === '') {
     showPanel('pnl-params','nav-params');
