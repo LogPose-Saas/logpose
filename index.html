@@ -3581,7 +3581,8 @@ function renderMarge() {
 
   const eSeuilSub = $('mr-kpi-seuil-sub');
   if(eSeuilSub) {
-    if(seuil <= 0) eSeuilSub.textContent = 'Pas de charges fixes saisies';
+    if(chFixHT === 0) eSeuilSub.textContent = 'Pas de charges fixes saisies';
+    else if(seuil <= 0) eSeuilSub.textContent = 'MCV négative — non calculable';
     else if(caHT >= seuil) eSeuilSub.textContent = '✅ Seuil dépassé !';
     else eSeuilSub.textContent = `Manque ${fmt0(seuil - caHT)} de CA`;
   }
@@ -3597,7 +3598,7 @@ function renderMarge() {
   const eAttSub = $('mr-kpi-atteinte-sub');
   if(eAttSub) eAttSub.textContent = seuil > 0
     ? `Seuil : ${fmt0(seuil)}`
-    : 'Définir des charges fixes';
+    : chFixHT === 0 ? 'Définir des charges fixes' : 'MCV négative — non calculable';
 
   const eMCV = $('mr-kpi-mcv');
   if(eMCV) { eMCV.textContent = fmt(mcv); eMCV.style.color = mcv >= 0 ? 'var(--gr)' : 'var(--rd)'; }
