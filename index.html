@@ -3246,18 +3246,22 @@ function applyFreemium() {
   });
 }
 
+function _sbWidth() {
+  // Lit la vraie largeur de la sidebar en px — fiable même avec les variables CSS
+  const sb = document.querySelector('.sb');
+  return sb ? sb.getBoundingClientRect().width : 238;
+}
+
 function checkProGate(panelId) {
   document.querySelectorAll('[id^="pro-overlay-"]').forEach(e => e.remove());
 
   if(isPro()) return true;
   if(FREE_MODULES.includes(panelId)) return true;
 
-  // Overlay dans .main — couvre la zone contenu, sidebar reste cliquable
-  const main = document.querySelector('.main');
-  if(!main) return false;
   const overlay = document.createElement('div');
   overlay.id = 'pro-overlay-' + panelId;
-  overlay.style.cssText = 'position:fixed;top:0;bottom:0;left:' + (document.querySelector('.sb.col') ? 'var(--swc)' : 'var(--sw)') + ';right:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;';
+  const left = _sbWidth();
+  overlay.style.cssText = `position:fixed;top:0;bottom:0;left:${left}px;right:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;transition:left .2s cubic-bezier(.4,0,.2,1);`;
   overlay.innerHTML = `
     <div style="font-size:44px;margin-bottom:16px">🔒</div>
     <div style="font-size:20px;font-weight:800;color:var(--t1);margin-bottom:10px;letter-spacing:-.4px">Fonctionnalité Pro</div>
@@ -5086,8 +5090,8 @@ async function doAuth() {
     } else {
       const {error} = await DB.auth.signUp({email, password:pwd});
       if(error) throw error;
-      showOk('Compte créé ! Vérifiez votre email puis connectez-vous.');
-      setAuthMode('login');
+      showOk('✅ Compte créé ! Un email de confirmation vous a été envoyé. Vérifiez votre boîte mail puis connectez-vous.');
+      setTimeout(() => setAuthMode('login'), 3000);
     }
   } catch(e) {
     const m = {'Invalid login credentials':'Email ou mot de passe incorrect.','User already registered':'Compte déjà existant.'};
@@ -5232,12 +5236,11 @@ function toggleSidebar() {
   try {
     document.querySelector('.sb').classList.toggle('col');
     localStorage.setItem('lp-sb-col', document.querySelector('.sb').classList.contains('col'));
-    // Recalculer la position de l'overlay Pro si présent
-    const overlay = document.querySelector('[id^="pro-overlay-"]');
-    if(overlay) {
-      const collapsed = document.querySelector('.sb')?.classList.contains('col');
-      overlay.style.left = collapsed ? 'var(--swc)' : 'var(--sw)';
-    }
+    // Recalculer la position de l'overlay Pro après l'animation
+    setTimeout(() => {
+      const overlay = document.querySelector('[id^="pro-overlay-"]');
+      if(overlay) overlay.style.left = _sbWidth() + 'px';
+    }, 220); // légèrement après la transition CSS (0.2s)
   } catch(e) {}
 }
 
