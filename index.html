@@ -2586,11 +2586,18 @@ let chartCHPie  = null;
 async function _loadMtsOnly() {
   if(!UID || !charges.length) return;
 
-  // Lazy load : données déjà en mémoire pour cette année
+  // Lazy load : données déjà en mémoire pour cette année — ne jamais réinitialiser
   if(_anneeMts === ANNEE && Object.keys(mts).length > 0) return;
 
-  mts = {};
-  charges.forEach(c => { mts[String(c.code)] = Array(12).fill(0); });
+  // Initialiser seulement les codes manquants, pas tout écraser
+  charges.forEach(c => {
+    const k = String(c.code);
+    if(!mts[k]) mts[k] = Array(12).fill(0);
+  });
+
+  // Si déjà partiellement chargé pour cette année, ne pas refaire la requête
+  if(_anneeMts === ANNEE) return;
+
   try {
     const {data, error} = await sbq(
       DB.from('saisies_charges').select('charge_code,mois,montant')
@@ -5225,6 +5232,12 @@ function toggleSidebar() {
   try {
     document.querySelector('.sb').classList.toggle('col');
     localStorage.setItem('lp-sb-col', document.querySelector('.sb').classList.contains('col'));
+    // Recalculer la position de l'overlay Pro si présent
+    const overlay = document.querySelector('[id^="pro-overlay-"]');
+    if(overlay) {
+      const collapsed = document.querySelector('.sb')?.classList.contains('col');
+      overlay.style.left = collapsed ? 'var(--swc)' : 'var(--sw)';
+    }
   } catch(e) {}
 }
 
@@ -5446,7 +5459,16 @@ document.addEventListener('DOMContentLoaded', () => {
       started = true;
       await startApp(session.user);
     } else if(event==='SIGNED_OUT') {
-      started = false; UID = null;
+      started = false;
+      // Reset complet de l'état — garantit qu'aucune donnée du compte précédent ne persiste
+      UID = null;
+      articles = []; charges = []; qty = {}; mts = {};
+      paramsLoaded = false; paramsModifie = false;
+      _anneeCA = null; _anneeMts = null;
+      _sc = null; _scActif = 'reel'; _isPro = false;
+      P = { nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
+        regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
+        cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
       $('auth').style.display='flex'; $('app').style.display='none';
     }
   });
