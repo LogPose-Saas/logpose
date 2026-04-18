@@ -3266,6 +3266,18 @@ async function loadProStatus() {
           })
           .eq('user_id', UID);
         _trialEndsAt = trialEnd;
+        // Email bienvenue trial J+0 — fire & forget, ne bloque pas le chargement
+        try {
+          const userRes = await DB.auth.getUser();
+          const userEmail = userRes?.data?.user?.email;
+          if(userEmail) {
+            fetch(SUPA_URL + '/functions/v1/send-trial-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPA_KEY },
+              body: JSON.stringify({ email: userEmail, type: 'j0' })
+            }).catch(() => {});
+          }
+        } catch(e) { /* silencieux */ }
       } else if(data?.trial_ends_at) {
         // Trial existant — on charge la date
         _trialEndsAt = new Date(data.trial_ends_at);
