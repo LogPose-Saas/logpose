@@ -3237,31 +3237,95 @@ const PRO_NAVS     = ['nav-marge','nav-scenarios','nav-previsionnel','nav-tva','
 
 // Cache Pro en mémoire — chargé au login, mis à jour si nécessaire
 let _isPro = false;
+let _trialEndsAt = null; // Date de fin du trial — null si pas de trial actif
 
 async function loadProStatus() {
   if(!UID) return;
   try {
-    // Cherche is_pro=true sur n'importe quelle année — pas seulement l'année active
+    // Cherche is_pro, trial_ends_at et first_login_at sur n'importe quelle année
     const { data } = await DB.from('parametres')
-      .select('is_pro')
+      .select('is_pro, trial_ends_at, first_login_at')
       .eq('user_id', UID)
-      .eq('is_pro', true)
+      .order('annee', { ascending: true })
       .limit(1)
       .maybeSingle();
+
     _isPro = !!(data?.is_pro);
+
+    // Gestion du trial
+    if(!_isPro) {
+      const now = new Date();
+
+      if(data && !data.first_login_at) {
+        // Premier login : on enregistre first_login_at et on calcule trial_ends_at
+        const trialEnd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+        await DB.from('parametres')
+          .update({
+            first_login_at: now.toISOString(),
+            trial_ends_at:  trialEnd.toISOString()
+          })
+          .eq('user_id', UID);
+        _trialEndsAt = trialEnd;
+      } else if(data?.trial_ends_at) {
+        // Trial existant — on charge la date
+        _trialEndsAt = new Date(data.trial_ends_at);
+      } else {
+        _trialEndsAt = null;
+      }
+    } else {
+      _trialEndsAt = null; // Pro payant — pas besoin du trial
+    }
   } catch(e) {
     _isPro = false;
+    _trialEndsAt = null;
   }
 }
 
 function isPro() {
-  return _isPro;
+  if(_isPro) return true;
+  if(_trialEndsAt && new Date() < _trialEndsAt) return true;
+  return false;
+}
+
+function isTrial() {
+  if(_isPro) return false; // Pro payant — pas un trial
+  return !!(_trialEndsAt && new Date() < _trialEndsAt);
+}
+
+function trialDaysLeft() {
+  if(!_trialEndsAt) return 0;
+  const diff = _trialEndsAt - new Date();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
 function applyFreemium() {
   const pro = isPro();
+  const trial = isTrial();
   const btnPro = $('btn-pro');
+
+  // Bouton "Passer au Pro" — masqué si Pro ou en trial
   if(btnPro) btnPro.style.display = pro ? 'none' : 'flex';
+
+  // Badge trial — affiché uniquement pendant le trial
+  const existingBadge = $('trial-badge');
+  if(trial) {
+    const days = trialDaysLeft();
+    if(!existingBadge) {
+      const badge = document.createElement('div');
+      badge.id = 'trial-badge';
+      badge.style.cssText = 'display:block;padding:7px 10px;background:var(--grb);border:1px solid rgba(14,165,114,.25);color:var(--gr);border-radius:var(--rs);font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;cursor:default;';
+      badge.innerHTML = `🎁 Essai Pro · <span id="trial-days">${days}</span> jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}`;
+      // Insérer avant btn-pro
+      if(btnPro && btnPro.parentNode) btnPro.parentNode.insertBefore(badge, btnPro);
+    } else {
+      const daysEl = $('trial-days');
+      if(daysEl) daysEl.textContent = days;
+    }
+  } else if(existingBadge) {
+    existingBadge.remove();
+  }
+
+  // Modules Pro — verrouillés ou déverrouillés
   PRO_NAVS.forEach(id => {
     const el = $(id); if(!el) return;
     if(pro) el.classList.remove('locked');
@@ -5542,7 +5606,7 @@ document.addEventListener('DOMContentLoaded', () => {
       articles = []; charges = []; qty = {}; mts = {};
       paramsLoaded = false; paramsModifie = false;
       _anneeCA = null; _anneeMts = null;
-      _sc = null; _scActif = 'reel'; _isPro = false;
+      _sc = null; _scActif = 'reel'; _isPro = false; _trialEndsAt = null;
       P = { nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
         regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
         cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
