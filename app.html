@@ -3255,10 +3255,38 @@ async function loadProStatus() {
     // Gestion du trial
     if(!_isPro) {
       const now = new Date();
+      const trialEnd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
 
-      if(data && !data.first_login_at) {
-        // Premier login : on enregistre first_login_at et on calcule trial_ends_at
-        const trialEnd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+      const _sendTrialJ0 = async () => {
+        try {
+          const userRes = await DB.auth.getUser();
+          const userEmail = userRes?.data?.user?.email;
+          const sessionRes = await DB.auth.getSession();
+          const accessToken = sessionRes?.data?.session?.access_token;
+          if(userEmail && accessToken) {
+            fetch(SUPA_URL + '/functions/v1/send-trial-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+              body: JSON.stringify({ email: userEmail, type: 'j0' })
+            }).catch(() => {});
+          }
+        } catch(e) { /* silencieux */ }
+      };
+
+      if(!data) {
+        // Aucune ligne dans parametres — nouvel user sans config
+        // On crée une ligne minimale pour stocker le trial
+        await DB.from('parametres').upsert({
+          user_id: UID,
+          annee: new Date().getFullYear(),
+          first_login_at: now.toISOString(),
+          trial_ends_at:  trialEnd.toISOString(),
+          is_pro: false
+        }, { onConflict: 'user_id,annee' });
+        _trialEndsAt = trialEnd;
+        _sendTrialJ0();
+      } else if(!data.first_login_at) {
+        // Ligne existante mais premier login — UPDATE
         await DB.from('parametres')
           .update({
             first_login_at: now.toISOString(),
@@ -3266,19 +3294,8 @@ async function loadProStatus() {
           })
           .eq('user_id', UID);
         _trialEndsAt = trialEnd;
-        // Email bienvenue trial J+0 — fire & forget, ne bloque pas le chargement
-        try {
-          const userRes = await DB.auth.getUser();
-          const userEmail = userRes?.data?.user?.email;
-          if(userEmail) {
-            fetch(SUPA_URL + '/functions/v1/send-trial-email', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPA_KEY },
-              body: JSON.stringify({ email: userEmail, type: 'j0' })
-            }).catch(() => {});
-          }
-        } catch(e) { /* silencieux */ }
-      } else if(data?.trial_ends_at) {
+        _sendTrialJ0();
+      } else if(data.trial_ends_at) {
         // Trial existant — on charge la date
         _trialEndsAt = new Date(data.trial_ends_at);
       } else {
