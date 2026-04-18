@@ -17,372 +17,224 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="LogPose — Financial OS pour TPE & indépendants">
 <meta name="twitter:description" content="Pilotez votre activité comme un expert. CA, charges, marge, TVA, trésorerie et prévisionnel — tout en un seul outil.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233b7eff'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='white' stroke-width='2.2'/%3E%3Cpolygon points='20.24 11.76 18.12 18.12 11.76 20.24 13.88 13.88 20.24 11.76' fill='white'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ══ THÈMES ══ */
-[data-theme="dark"] {
-  --bg:#06080f; --bgs:#0b0f1c; --bgc:#101624; --bgh:#16202e;
-  --bd:#1a2640; --bds:#253555;
-  --t1:#dde6f5; --t2:#6b85a8; --t3:#2e4460;
-  --ac:#3b7eff; --ag:rgba(59,126,255,.12);
-  --gr:#0ea572; --grb:rgba(14,165,114,.11);
-  --rd:#f43f5e; --rdb:rgba(244,63,94,.11);
-  --am:#f59e0b; --pu:#9b87f5;
-  --nav-bg:rgba(6,8,15,.88);
-  --nav-bd:rgba(26,38,64,.9);
+[data-theme="dark"]{
+  --bg:#06080f;--bgs:#0b0f1c;--bgc:#101624;--bgh:#16202e;
+  --bd:#1a2640;--bds:#253555;
+  --t1:#dde6f5;--t2:#6b85a8;--t3:#2e4460;
+  --ac:#3b7eff;--ag:rgba(59,126,255,.12);
+  --gr:#0ea572;--grb:rgba(14,165,114,.11);
+  --rd:#f43f5e;--rdb:rgba(244,63,94,.11);
+  --am:#f59e0b;--pu:#9b87f5;
+  --nav-bg:rgba(6,8,15,.88);--nav-bd:rgba(26,38,64,.9);
   --sh:0 8px 32px rgba(0,0,0,.45);
-  --hero-glow:rgba(59,126,255,.12);
-  --mockup-shadow:0 40px 120px rgba(0,0,0,.6);
+  --hero-glow:rgba(59,126,255,.13);
+  --card-shadow:0 40px 120px rgba(0,0,0,.6);
 }
-[data-theme="light"] {
-  --bg:#f0f5fc; --bgs:#e8eef8; --bgc:#fff; --bgh:#f7faff;
-  --bd:#dce6f5; --bds:#c2d2ea;
-  --t1:#0c1828; --t2:#4e6480; --t3:#9eb3ce;
-  --ac:#2563eb; --ag:rgba(37,99,235,.08);
-  --gr:#059669; --grb:rgba(5,150,105,.09);
-  --rd:#e11d48; --rdb:rgba(225,29,72,.09);
-  --am:#d97706; --pu:#7c3aed;
-  --nav-bg:rgba(240,245,252,.92);
-  --nav-bd:rgba(220,230,245,.95);
+[data-theme="light"]{
+  --bg:#f0f5fc;--bgs:#e8eef8;--bgc:#fff;--bgh:#f7faff;
+  --bd:#dce6f5;--bds:#c2d2ea;
+  --t1:#0c1828;--t2:#4e6480;--t3:#9eb3ce;
+  --ac:#2563eb;--ag:rgba(37,99,235,.08);
+  --gr:#059669;--grb:rgba(5,150,105,.09);
+  --rd:#e11d48;--rdb:rgba(225,29,72,.09);
+  --am:#d97706;--pu:#7c3aed;
+  --nav-bg:rgba(240,245,252,.93);--nav-bd:rgba(220,230,245,.98);
   --sh:0 4px 20px rgba(0,0,0,.07);
-  --hero-glow:rgba(37,99,235,.08);
-  --mockup-shadow:0 24px 80px rgba(0,0,0,.12);
+  --hero-glow:rgba(37,99,235,.09);
+  --card-shadow:0 24px 80px rgba(0,0,0,.10);
 }
-
-/* ══ BASE ══ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background: var(--bg);
-  color: var(--t1);
-  font-size: 15px;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  transition: background .25s, color .25s;
-}
-a { text-decoration: none; color: inherit; }
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--bds); border-radius: 99px; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bds);border-radius:99px}
 
 /* ══ NAV ══ */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  padding: 0 32px;
-  height: 64px;
-  background: var(--nav-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--nav-bd);
-  transition: background .25s, border-color .25s;
-}
-.nav-logo {
-  display: flex; align-items: center; gap: 10px;
-  justify-self: start;
-}
-.nav-icon {
-  width: 36px; height: 36px;
-  background: var(--ac);
-  border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.nav-brand-wrap { display: flex; flex-direction: column; }
-.nav-brand { font-weight: 800; font-size: 16px; letter-spacing: -.4px; line-height: 1; }
-.nav-sub { font-size: 9px; color: var(--t3); font-family: 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; margin-top: 2px; }
-.nav-links {
-  display: flex; align-items: center; gap: 28px;
-  justify-self: center;
-}
-.nav-link {
-  font-size: 13.5px; font-weight: 500; color: var(--t2);
-  transition: color .2s; cursor: pointer; white-space: nowrap;
-}
-.nav-link:hover { color: var(--t1); }
-.nav-actions {
-  display: flex; align-items: center; gap: 10px;
-  justify-self: end;
-}
-.theme-toggle {
-  width: 34px; height: 34px;
-  border-radius: 8px;
-  background: transparent;
-  border: 1px solid var(--bd);
-  color: var(--t2);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all .2s;
-  font-size: 15px;
-  flex-shrink: 0;
-}
-.theme-toggle:hover { border-color: var(--bds); color: var(--t1); background: var(--bgc); }
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 36px;height:64px;background:var(--nav-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--nav-bd);transition:background .25s,border-color .25s}
+.nav-logo{display:flex;align-items:center;gap:10px;justify-self:start}
+.nav-icon{width:36px;height:36px;background:var(--ac);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .25s}
+.nav-brand-wrap{display:flex;flex-direction:column}
+.nav-brand{font-weight:800;font-size:16px;letter-spacing:-.4px;line-height:1}
+.nav-sub{font-size:9px;color:var(--t3);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.nav-links{display:flex;align-items:center;gap:28px;justify-self:center}
+.nav-link{font-size:13.5px;font-weight:500;color:var(--t2);transition:color .2s;cursor:pointer;white-space:nowrap}
+.nav-link:hover{color:var(--t1)}
+.nav-actions{display:flex;align-items:center;gap:10px;justify-self:end}
+.theme-toggle{width:34px;height:34px;border-radius:8px;background:transparent;border:1px solid var(--bd);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:15px;flex-shrink:0}
+.theme-toggle:hover{border-color:var(--bds);color:var(--t1);background:var(--bgc)}
 
 /* ══ BOUTONS ══ */
-.btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 18px;
-  border-radius: 9px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 13.5px; font-weight: 600;
-  cursor: pointer; transition: all .2s;
-  border: none; white-space: nowrap; letter-spacing: -.1px;
-  text-decoration: none;
-}
-.btn-ghost {
-  background: transparent; color: var(--t2); border: 1px solid var(--bd);
-}
-.btn-ghost:hover { border-color: var(--bds); color: var(--t1); background: var(--bgc); }
-.btn-primary { background: var(--ac); color: #fff; }
-.btn-primary:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(59,126,255,.4); }
-.btn-pro { background: linear-gradient(135deg, var(--ac), var(--pu)); color: #fff; }
-.btn-pro:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(59,126,255,.35); }
-.btn-lg { padding: 13px 28px; font-size: 15px; border-radius: 11px; }
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s;border:none;white-space:nowrap;letter-spacing:-.1px;text-decoration:none}
+.btn-ghost{background:transparent;color:var(--t2);border:1px solid var(--bd)}
+.btn-ghost:hover{border-color:var(--bds);color:var(--t1);background:var(--bgc)}
+.btn-primary{background:var(--ac);color:#fff}
+.btn-primary:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 4px 20px rgba(59,126,255,.4)}
+.btn-pro{background:linear-gradient(135deg,var(--ac),var(--pu));color:#fff}
+.btn-pro:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 4px 20px rgba(59,126,255,.35)}
+.btn-lg{padding:13px 28px;font-size:15px;border-radius:11px}
 
 /* ══ HERO ══ */
-.hero {
-  min-height: 100vh;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center;
-  padding: 120px 24px 80px;
-  position: relative; overflow: hidden;
-}
-.hero::before {
-  content: '';
-  position: absolute; top: -40%; left: 50%; transform: translateX(-50%);
-  width: 900px; height: 700px;
-  background: radial-gradient(ellipse at center, var(--hero-glow) 0%, transparent 70%);
-  pointer-events: none; transition: background .25s;
-}
-.hero-badge {
-  display: inline-flex; align-items: center; gap: 7px;
-  background: var(--ag); border: 1px solid rgba(59,126,255,.25);
-  border-radius: 99px; padding: 5px 14px;
-  font-size: 12px; font-weight: 600; color: var(--ac);
-  margin-bottom: 28px;
-  font-family: 'JetBrains Mono', monospace; letter-spacing: .03em;
-}
-.hero-badge-dot {
-  width: 6px; height: 6px; background: var(--ac); border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-@keyframes pulse {
-  0%,100% { opacity:1; transform:scale(1); }
-  50% { opacity:.4; transform:scale(.75); }
-}
-.hero h1 {
-  font-size: clamp(34px, 6vw, 68px);
-  font-weight: 800; letter-spacing: -2px; line-height: 1.08;
-  margin-bottom: 22px; max-width: 800px;
-}
-.hero h1 span {
-  background: linear-gradient(135deg, var(--ac), var(--pu));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.hero-sub {
-  font-size: clamp(15px, 2vw, 19px); color: var(--t2);
-  max-width: 540px; margin-bottom: 40px; line-height: 1.65; font-weight: 400;
-}
-.hero-ctas {
-  display: flex; align-items: center; gap: 12px;
-  flex-wrap: wrap; justify-content: center; margin-bottom: 14px;
-}
-.hero-note { font-size: 12px; color: var(--t3); font-family: 'JetBrains Mono', monospace; margin-bottom: 52px; }
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-30%;left:50%;transform:translateX(-50%);width:1000px;height:700px;background:radial-gradient(ellipse at center,var(--hero-glow) 0%,transparent 70%);pointer-events:none;transition:background .25s}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:var(--ag);border:1px solid rgba(59,126,255,.25);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--ac);margin-bottom:24px;font-family:'JetBrains Mono',monospace;letter-spacing:.03em}
+.hero-badge-dot{width:6px;height:6px;background:var(--ac);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+.hero h1{font-size:clamp(32px,5.5vw,66px);font-weight:800;letter-spacing:-2px;line-height:1.08;margin-bottom:20px;max-width:780px}
+.hero h1 span{background:linear-gradient(135deg,var(--ac),var(--pu));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(15px,1.8vw,18px);color:var(--t2);max-width:520px;margin-bottom:36px;line-height:1.65;font-weight:400}
+.hero-ctas{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+.hero-note{font-size:11.5px;color:var(--t3);font-family:'JetBrains Mono',monospace;margin-bottom:20px}
 
-/* ══ MOCKUP ══ */
-.hero-mockup {
-  width: 100%; max-width: 880px; margin: 0 auto;
-  background: var(--bgc); border: 1px solid var(--bd); border-radius: 18px;
-  overflow: hidden; box-shadow: var(--mockup-shadow), 0 0 0 1px rgba(59,126,255,.07);
-  transition: box-shadow .25s;
-}
-.mockup-bar {
-  display: flex; align-items: center; gap: 7px;
-  padding: 12px 16px; background: var(--bgs); border-bottom: 1px solid var(--bd);
-}
-.mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
-.mockup-url {
-  flex: 1; background: var(--bg); border: 1px solid var(--bd); border-radius: 6px;
-  padding: 4px 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace;
-  color: var(--t3); margin: 0 10px; text-align: center;
-}
-.mockup-body { display: flex; height: 400px; }
-.mockup-sidebar {
-  width: 172px; background: var(--bgs); border-right: 1px solid var(--bd);
-  padding: 14px 10px; flex-shrink: 0;
-}
-.mockup-logo-row {
-  display: flex; align-items: center; gap: 8px;
-  padding: 4px 6px 12px; border-bottom: 1px solid var(--bd); margin-bottom: 10px;
-}
-.mockup-icon {
-  width: 24px; height: 24px; background: var(--ac); border-radius: 6px; flex-shrink: 0;
-}
-.mockup-brand { font-weight: 800; font-size: 12px; letter-spacing: -.3px; }
-.mockup-nav-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 8px; border-radius: 6px; margin-bottom: 2px;
-  font-size: 11px; color: var(--t2);
-}
-.mockup-nav-item.active { background: var(--ag); color: var(--ac); font-weight: 600; }
-.mockup-nav-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
-.mockup-content { flex: 1; padding: 18px; overflow: hidden; }
-.mockup-title { font-size: 15px; font-weight: 700; letter-spacing: -.3px; margin-bottom: 14px; }
-.mockup-kpis { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
-.mockup-kpi { background: var(--bgs); border: 1px solid var(--bd); border-radius: 9px; padding: 10px; }
-.mockup-kpi-label { font-size: 9px; color: var(--t2); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px; }
-.mockup-kpi-val { font-size: 16px; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: -.5px; }
-.mockup-chart-area { background: var(--bgs); border: 1px solid var(--bd); border-radius: 9px; padding: 12px; height: 148px; }
-.mockup-chart-label { font-size: 10px; color: var(--t2); font-weight: 600; margin-bottom: 10px; }
-.mockup-bars { display: flex; align-items: flex-end; gap: 5px; height: 95px; }
-.mockup-bar-item { flex: 1; border-radius: 3px 3px 0 0; }
+/* ── Preuve sociale ── */
+.social-proof{display:flex;align-items:center;gap:14px;margin-bottom:52px;justify-content:center;flex-wrap:wrap}
+.avatars{display:flex}
+.avatar{width:30px;height:30px;border-radius:50%;border:2px solid var(--bg);margin-left:-8px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .25s}
+.avatar:first-child{margin-left:0}
+.social-text{font-size:12.5px;color:var(--t2)}
+.social-text strong{color:var(--t1);font-weight:700}
+.social-stars{color:var(--am);font-size:13px;letter-spacing:1px}
+
+/* ── Dashboard SVG ── */
+.hero-screen{width:100%;max-width:920px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:var(--card-shadow),0 0 0 1px rgba(59,126,255,.08);transition:box-shadow .25s}
+
+/* ══ FADE IN SCROLL ══ */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .55s cubic-bezier(.4,0,.2,1),transform .55s cubic-bezier(.4,0,.2,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
 
 /* ══ SECTIONS ══ */
-section { padding: 96px 24px; }
-.container { max-width: 1040px; margin: 0 auto; }
-.section-badge {
-  display: inline-block; font-size: 11px; font-weight: 700;
-  font-family: 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--ac); margin-bottom: 14px;
-}
-.section-title { font-size: clamp(26px, 4vw, 42px); font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 14px; }
-.section-sub { font-size: 17px; color: var(--t2); line-height: 1.65; }
+section{padding:96px 24px}
+.container{max-width:1040px;margin:0 auto}
+.section-badge{display:inline-block;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);margin-bottom:12px}
+.section-title{font-size:clamp(26px,3.8vw,42px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:14px}
+.section-sub{font-size:16px;color:var(--t2);line-height:1.65}
 
 /* ══ PROBLÈME / SOLUTION ══ */
-.problems { background: var(--bgs); border-top: 1px solid var(--bd); border-bottom: 1px solid var(--bd); transition: background .25s; }
-.problems-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; margin-top: 56px; }
-.problem-item {
-  display: flex; align-items: flex-start; gap: 14px;
-  padding: 16px; background: var(--bgc); border: 1px solid var(--bd);
-  border-radius: 12px; transition: border-color .2s; margin-bottom: 12px;
-}
-.problem-item:last-child { margin-bottom: 0; }
-.problem-item:hover { border-color: var(--bds); }
-.problem-emoji { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
-.problem-text strong { display: block; font-size: 13.5px; font-weight: 700; margin-bottom: 3px; }
-.problem-text span { font-size: 12.5px; color: var(--t2); line-height: 1.5; }
-.solution-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
-.solution-item:last-child { margin-bottom: 0; }
-.solution-check {
-  width: 26px; height: 26px; border-radius: 50%;
-  background: var(--grb); border: 1px solid rgba(14,165,114,.25);
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
-}
-.solution-text strong { display: block; font-size: 13.5px; font-weight: 700; margin-bottom: 3px; }
-.solution-text span { font-size: 12.5px; color: var(--t2); }
+.problems{background:var(--bgs);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);transition:background .25s}
+.problems-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;margin-top:52px}
+.problem-item{display:flex;align-items:flex-start;gap:13px;padding:15px;background:var(--bgc);border:1px solid var(--bd);border-radius:12px;transition:border-color .2s;margin-bottom:10px}
+.problem-item:last-child{margin-bottom:0}
+.problem-item:hover{border-color:var(--bds)}
+.problem-emoji{font-size:19px;flex-shrink:0;margin-top:2px}
+.problem-text strong{display:block;font-size:13px;font-weight:700;margin-bottom:3px}
+.problem-text span{font-size:12.5px;color:var(--t2);line-height:1.5}
+.solution-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.solution-item:last-child{margin-bottom:0}
+.solution-check{width:24px;height:24px;border-radius:50%;background:var(--grb);border:1px solid rgba(14,165,114,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.solution-text strong{display:block;font-size:13px;font-weight:700;margin-bottom:2px}
+.solution-text span{font-size:12.5px;color:var(--t2)}
 
 /* ══ FEATURES ══ */
-.features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-top: 52px; }
-.feature-card {
-  background: var(--bgc); border: 1px solid var(--bd); border-radius: 16px; padding: 22px;
-  transition: all .2s; position: relative; overflow: hidden;
-}
-.feature-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: var(--color, var(--ac)); opacity: 0; transition: opacity .2s;
-}
-.feature-card:hover { border-color: var(--bds); transform: translateY(-2px); box-shadow: var(--sh); }
-.feature-card:hover::before { opacity: 1; }
-.feature-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--icon-bg, var(--ag)); display: flex; align-items: center; justify-content: center; font-size: 19px; margin-bottom: 14px; }
-.feature-label { font-size: 9.5px; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--color, var(--ac)); margin-bottom: 5px; }
-.feature-title { font-size: 15px; font-weight: 700; letter-spacing: -.3px; margin-bottom: 7px; }
-.feature-desc { font-size: 12.5px; color: var(--t2); line-height: 1.6; }
-.feature-tag { display: inline-block; margin-top: 12px; font-size: 10px; font-weight: 700; font-family: 'JetBrains Mono', monospace; padding: 3px 9px; border-radius: 99px; background: var(--ag); color: var(--ac); border: 1px solid rgba(59,126,255,.2); }
-.feature-tag.pro { background: rgba(155,135,245,.1); color: var(--pu); border-color: rgba(155,135,245,.2); }
+.features-sep{display:flex;align-items:center;gap:14px;margin:36px 0 20px}
+.features-sep-line{flex:1;height:1px;background:var(--bd)}
+.features-sep-label{font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);white-space:nowrap;padding:4px 12px;background:var(--bgs);border:1px solid var(--bd);border-radius:99px}
+.features-sep-label.pro-label{color:var(--pu);background:rgba(155,135,245,.08);border-color:rgba(155,135,245,.2)}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.feature-card{background:var(--bgc);border:1px solid var(--bd);border-radius:14px;padding:20px;transition:all .2s;position:relative;overflow:hidden}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--color,var(--ac));opacity:0;transition:opacity .2s}
+.feature-card:hover{border-color:var(--bds);transform:translateY(-2px);box-shadow:var(--sh)}
+.feature-card:hover::before{opacity:1}
+.feature-icon{width:38px;height:38px;border-radius:9px;background:var(--icon-bg,var(--ag));display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.feature-label{font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--color,var(--ac));margin-bottom:4px}
+.feature-title{font-size:14px;font-weight:700;letter-spacing:-.2px;margin-bottom:6px}
+.feature-desc{font-size:12px;color:var(--t2);line-height:1.6}
 
 /* ══ PRICING ══ */
-.pricing-section { background: var(--bgs); border-top: 1px solid var(--bd); border-bottom: 1px solid var(--bd); transition: background .25s; }
-.pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 800px; margin: 52px auto 0; }
-.pricing-card { background: var(--bgc); border: 1px solid var(--bd); border-radius: 20px; padding: 30px; position: relative; transition: background .25s; }
-.pricing-card.popular { border-color: var(--ac); box-shadow: 0 0 0 1px rgba(59,126,255,.3), 0 20px 60px rgba(59,126,255,.1); }
-.pricing-popular-badge {
-  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-  background: linear-gradient(135deg, var(--ac), var(--pu)); color: #fff;
-  font-size: 10.5px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
-  letter-spacing: .05em; padding: 4px 14px; border-radius: 99px; white-space: nowrap;
-}
-.pricing-plan { font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--t2); margin-bottom: 10px; }
-.pricing-price { font-size: 42px; font-weight: 800; letter-spacing: -2px; line-height: 1; margin-bottom: 3px; }
-.pricing-price sup { font-size: 20px; font-weight: 700; vertical-align: super; letter-spacing: 0; }
-.pricing-period { font-size: 13px; color: var(--t2); margin-bottom: 22px; }
-.pricing-divider { height: 1px; background: var(--bd); margin-bottom: 22px; }
-.pricing-features { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 26px; }
-.pricing-feat { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-.pricing-feat-ico { width: 17px; height: 17px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
-.feat-ok { background: var(--grb); color: var(--gr); border: 1px solid rgba(14,165,114,.2); }
-.feat-off { background: var(--bgs); color: var(--t3); border: 1px solid var(--bd); }
-.pricing-feat.off { color: var(--t3); }
-.pricing-note { text-align: center; font-size: 11.5px; color: var(--t3); margin-top: 22px; font-family: 'JetBrains Mono', monospace; }
+.pricing-section{background:var(--bgs);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);transition:background .25s}
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:780px;margin:48px auto 0}
+.pricing-card{background:var(--bgc);border:1px solid var(--bd);border-radius:18px;padding:28px;position:relative;transition:background .25s}
+.pricing-card.popular{border-color:var(--ac);box-shadow:0 0 0 1px rgba(59,126,255,.3),0 20px 60px rgba(59,126,255,.1)}
+.pricing-popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--ac),var(--pu));color:#fff;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.05em;padding:4px 14px;border-radius:99px;white-space:nowrap}
+.pricing-plan{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--t2);margin-bottom:10px}
+.pricing-price{font-size:40px;font-weight:800;letter-spacing:-2px;line-height:1;margin-bottom:3px}
+.pricing-price sup{font-size:19px;font-weight:700;vertical-align:super;letter-spacing:0}
+.pricing-period{font-size:12.5px;color:var(--t2);margin-bottom:20px}
+.pricing-divider{height:1px;background:var(--bd);margin-bottom:20px}
+.pricing-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.pricing-feat{display:flex;align-items:center;gap:9px;font-size:13px}
+.pricing-feat-ico{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.feat-ok{background:var(--grb);color:var(--gr);border:1px solid rgba(14,165,114,.2)}
+.feat-off{background:var(--bgs);color:var(--t3);border:1px solid var(--bd)}
+.pricing-feat.off{color:var(--t3)}
+.pricing-note{text-align:center;font-size:11px;color:var(--t3);margin-top:20px;font-family:'JetBrains Mono',monospace}
 
 /* ══ FAQ ══ */
-.faq-list { max-width: 660px; margin: 52px auto 0; display: flex; flex-direction: column; gap: 8px; }
-.faq-item { background: var(--bgc); border: 1px solid var(--bd); border-radius: 12px; overflow: hidden; transition: border-color .2s; }
-.faq-item:hover { border-color: var(--bds); }
-.faq-q { padding: 17px 20px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 14px; user-select: none; }
-.faq-arrow { font-size: 11px; color: var(--t3); transition: transform .2s; flex-shrink: 0; }
-.faq-item.open .faq-arrow { transform: rotate(180deg); }
-.faq-a { display: none; padding: 16px 20px 18px; font-size: 13.5px; color: var(--t2); line-height: 1.7; border-top: 1px solid var(--bd); }
-.faq-item.open .faq-a { display: block; }
+.faq-list{max-width:660px;margin:48px auto 0;display:flex;flex-direction:column;gap:8px}
+.faq-item{background:var(--bgc);border:1px solid var(--bd);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.faq-item:hover{border-color:var(--bds)}
+.faq-q{padding:16px 18px;font-size:13.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:14px;user-select:none}
+.faq-arrow{font-size:10px;color:var(--t3);transition:transform .2s;flex-shrink:0}
+.faq-item.open .faq-arrow{transform:rotate(180deg)}
+.faq-a{display:none;padding:16px 18px 18px;font-size:13px;color:var(--t2);line-height:1.7;border-top:1px solid var(--bd)}
+.faq-item.open .faq-a{display:block}
 
 /* ══ CTA FINAL ══ */
-.cta-section { text-align: center; padding: 120px 24px; }
-.cta-section h2 { font-size: clamp(30px, 5vw, 52px); font-weight: 800; letter-spacing: -2px; line-height: 1.1; margin-bottom: 18px; }
-.cta-section p { font-size: 17px; color: var(--t2); margin-bottom: 38px; }
-.cta-glow { position: relative; display: inline-block; width: 100%; }
-.cta-glow::before { content: ''; position: absolute; inset: -60px; background: radial-gradient(ellipse at center, var(--hero-glow) 0%, transparent 70%); pointer-events: none; transition: background .25s; }
+.cta-section{text-align:center;padding:120px 24px;position:relative;overflow:hidden}
+.cta-section::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:500px;background:radial-gradient(ellipse at center,var(--hero-glow) 0%,transparent 70%);pointer-events:none;transition:background .25s}
+.cta-section h2{font-size:clamp(28px,4.5vw,50px);font-weight:800;letter-spacing:-2px;line-height:1.1;margin-bottom:16px;position:relative}
+.cta-section>div>p{font-size:17px;color:var(--t2);margin-bottom:36px;position:relative}
+
+/* ══ STICKY MOBILE CTA ══ */
+.sticky-cta{display:none;position:fixed;bottom:0;left:0;right:0;z-index:90;padding:12px 16px;background:var(--bgc);border-top:1px solid var(--bd);box-shadow:0 -8px 32px rgba(0,0,0,.25);transition:background .25s,transform .3s}
+.sticky-cta.hidden{transform:translateY(100%)}
 
 /* ══ FOOTER ══ */
-footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 24px 32px; transition: background .25s; }
-.footer-inner { max-width: 1040px; margin: 0 auto; }
-.footer-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 40px; margin-bottom: 40px; flex-wrap: wrap; }
-.footer-brand { max-width: 260px; }
-.footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-.footer-logo-icon { width: 28px; height: 28px; background: var(--ac); border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.footer-logo-name { font-weight: 800; font-size: 15px; letter-spacing: -.3px; }
-.footer-tagline { font-size: 12.5px; color: var(--t2); line-height: 1.6; }
-.footer-links-title { font-size: 10px; font-weight: 700; font-family: 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); margin-bottom: 12px; }
-.footer-links-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
-.footer-links-list a { font-size: 13px; color: var(--t2); transition: color .2s; cursor: pointer; }
-.footer-links-list a:hover { color: var(--t1); }
-.footer-bottom { border-top: 1px solid var(--bd); padding-top: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-.footer-copy { font-size: 12px; color: var(--t3); font-family: 'JetBrains Mono', monospace; }
+footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32px;transition:background .25s}
+.footer-inner{max-width:1040px;margin:0 auto}
+.footer-top{display:flex;align-items:flex-start;justify-content:space-between;gap:40px;margin-bottom:36px;flex-wrap:wrap}
+.footer-brand{max-width:240px}
+.footer-logo{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.footer-logo-icon{width:28px;height:28px;background:var(--ac);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .25s}
+.footer-logo-name{font-weight:800;font-size:15px;letter-spacing:-.3px}
+.footer-tagline{font-size:12px;color:var(--t2);line-height:1.6}
+.footer-links-title{font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:12px}
+.footer-links-list{list-style:none;display:flex;flex-direction:column;gap:9px}
+.footer-links-list a{font-size:13px;color:var(--t2);transition:color .2s;cursor:pointer}
+.footer-links-list a:hover{color:var(--t1)}
+.footer-bottom{border-top:1px solid var(--bd);padding-top:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.footer-copy{font-size:11.5px;color:var(--t3);font-family:'JetBrains Mono',monospace}
+.footer-status{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--gr);font-family:'JetBrains Mono',monospace}
+.status-dot{width:7px;height:7px;background:var(--gr);border-radius:50%;animation:pulse 3s infinite}
 
 /* ══ MODALES ══ */
-.modal-ov { display: none; position: fixed; inset: 0; background: rgba(6,8,15,.8); backdrop-filter: blur(6px); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
-.modal-ov.open { display: flex; }
-.modal { background: var(--bgc); border: 1px solid var(--bd); border-radius: 18px; max-width: 600px; width: 100%; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 24px 80px rgba(0,0,0,.5); }
-.modal-hdr { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--bd); flex-shrink: 0; }
-.modal-title { font-size: 15px; font-weight: 700; }
-.modal-close { width: 28px; height: 28px; border-radius: 7px; background: transparent; border: 1px solid var(--bd); color: var(--t2); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all .2s; }
-.modal-close:hover { background: var(--rdb); border-color: var(--rd); color: var(--rd); }
-.modal-body { padding: 22px; overflow-y: auto; font-size: 13.5px; line-height: 1.75; color: var(--t2); }
-.modal-body h3 { font-size: 13px; font-weight: 700; color: var(--t1); margin: 16px 0 7px; }
-.modal-body h3:first-child { margin-top: 0; }
-.modal-body p { margin-bottom: 9px; }
-.modal-body a { color: var(--ac); }
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(6,8,15,.8);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;padding:20px}
+.modal-ov.open{display:flex}
+.modal{background:var(--bgc);border:1px solid var(--bd);border-radius:18px;max-width:580px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.modal-title{font-size:15px;font-weight:700}
+.modal-close{width:28px;height:28px;border-radius:7px;background:transparent;border:1px solid var(--bd);color:var(--t2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{background:var(--rdb);border-color:var(--rd);color:var(--rd)}
+.modal-body{padding:22px;overflow-y:auto;font-size:13px;line-height:1.75;color:var(--t2)}
+.modal-body h3{font-size:13px;font-weight:700;color:var(--t1);margin:16px 0 6px}
+.modal-body h3:first-child{margin-top:0}
+.modal-body p{margin-bottom:8px}
+.modal-body a{color:var(--ac)}
 
 /* ══ RESPONSIVE ══ */
-@media (max-width: 860px) {
-  nav { grid-template-columns: 1fr auto; padding: 0 20px; }
-  .nav-links { display: none; }
-  nav { grid-template-columns: 1fr auto; }
+@media(max-width:860px){
+  nav{grid-template-columns:1fr auto;padding:0 20px}
+  .nav-links{display:none}
+  .sticky-cta{display:block}
 }
-@media (max-width: 700px) {
-  .problems-grid { grid-template-columns: 1fr; gap: 36px; }
-  .features-grid { grid-template-columns: 1fr 1fr; }
-  .pricing-grid { grid-template-columns: 1fr; }
-  .footer-top { flex-direction: column; }
-  .footer-bottom { flex-direction: column; text-align: center; }
+@media(max-width:700px){
+  .problems-grid{grid-template-columns:1fr;gap:32px}
+  .features-grid{grid-template-columns:1fr 1fr}
+  .pricing-grid{grid-template-columns:1fr}
+  .footer-top{flex-direction:column}
+  .footer-bottom{flex-direction:column;text-align:center}
 }
-@media (max-width: 480px) {
-  .features-grid { grid-template-columns: 1fr; }
-  .mockup-sidebar { display: none; }
-  .mockup-kpis { grid-template-columns: 1fr 1fr; }
-  .hero-ctas { flex-direction: column; align-items: stretch; }
-  .hero-ctas .btn { justify-content: center; }
+@media(max-width:480px){
+  .features-grid{grid-template-columns:1fr}
+  .hero-ctas{flex-direction:column;align-items:stretch}
+  .hero-ctas .btn{justify-content:center}
+  .social-proof{flex-direction:column;gap:8px}
 }
 </style>
 </head>
@@ -393,8 +245,7 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
   <a class="nav-logo" href="/">
     <div class="nav-icon">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+        <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
       </svg>
     </div>
     <div class="nav-brand-wrap">
@@ -402,16 +253,14 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
       <span class="nav-sub">Financial OS</span>
     </div>
   </a>
-
   <div class="nav-links">
     <a class="nav-link" href="#features">Fonctionnalités</a>
     <a class="nav-link" href="#pricing">Tarifs</a>
     <a class="nav-link" href="#faq">FAQ</a>
     <a class="nav-link" href="mailto:contact@logposefr.com">Contact</a>
   </div>
-
   <div class="nav-actions">
-    <button class="theme-toggle" id="theme-btn" title="Changer de thème" onclick="toggleTheme()">🌙</button>
+    <button class="theme-toggle" id="theme-btn" title="Changer de thème" onclick="toggleTheme()">☀️</button>
     <a class="btn btn-ghost" href="/app">Se connecter</a>
     <a class="btn btn-primary" href="/app">Commencer gratuitement</a>
   </div>
@@ -419,130 +268,259 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
 
 <!-- ════ HERO ════ -->
 <section class="hero">
-  <div class="hero-badge">
-    <span class="hero-badge-dot"></span>
-    Financial OS · Gratuit pour commencer
-  </div>
+  <div class="hero-badge"><span class="hero-badge-dot"></span>Opérationnel en 5 minutes · Gratuit pour commencer</div>
 
-  <h1>Pilotez votre activité<br><span>comme un expert-comptable</span></h1>
+  <h1>Arrêtez de gérer votre<br>activité <span>dans Excel</span></h1>
 
-  <p class="hero-sub">CA, charges, marge, TVA, trésorerie et prévisionnel — tout en un seul tableau de bord. Conçu pour les TPE et indépendants français.</p>
+  <p class="hero-sub">CA, charges, marge, TVA, trésorerie et prévisionnel — tout en un seul tableau de bord. Pensé pour les TPE et indépendants français.</p>
 
   <div class="hero-ctas">
     <a class="btn btn-primary btn-lg" href="/app">
       Commencer gratuitement
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
-    <a class="btn btn-ghost btn-lg" href="#features">Découvrir les modules</a>
+    <a class="btn btn-ghost btn-lg" href="#features">Voir les modules</a>
   </div>
 
-  <p class="hero-note">Aucune carte bancaire requise · Données sécurisées</p>
+  <p class="hero-note">Aucune carte bancaire requise · Données sécurisées en Europe</p>
 
-  <div class="hero-mockup">
-    <div class="mockup-bar">
-      <div class="mockup-dot" style="background:#f43f5e"></div>
-      <div class="mockup-dot" style="background:#f59e0b"></div>
-      <div class="mockup-dot" style="background:#0ea572"></div>
-      <div class="mockup-url">logposefr.com/app</div>
+  <!-- Preuve sociale -->
+  <div class="social-proof">
+    <div class="avatars">
+      <div class="avatar" style="background:#3b7eff">S</div>
+      <div class="avatar" style="background:#0ea572">M</div>
+      <div class="avatar" style="background:#9b87f5">A</div>
+      <div class="avatar" style="background:#f59e0b">L</div>
+      <div class="avatar" style="background:#f43f5e">R</div>
     </div>
-    <div class="mockup-body">
-      <div class="mockup-sidebar">
-        <div class="mockup-logo-row">
-          <div class="mockup-icon"></div>
-          <span class="mockup-brand">LogPose</span>
-        </div>
-        <div class="mockup-nav-item active"><div class="mockup-nav-dot" style="background:var(--ac)"></div>Dashboard</div>
-        <div class="mockup-nav-item"><div class="mockup-nav-dot" style="background:var(--bds)"></div>Chiffre d'affaires</div>
-        <div class="mockup-nav-item"><div class="mockup-nav-dot" style="background:var(--bds)"></div>Charges</div>
-        <div class="mockup-nav-item"><div class="mockup-nav-dot" style="background:var(--bds)"></div>Marge &amp; Rentabilité</div>
-        <div class="mockup-nav-item"><div class="mockup-nav-dot" style="background:var(--bds)"></div>Scénarios</div>
-        <div class="mockup-nav-item"><div class="mockup-nav-dot" style="background:var(--bds)"></div>Prévisionnel</div>
-        <div class="mockup-nav-item"><div class="mockup-nav-dot" style="background:var(--bds)"></div>TVA</div>
-        <div class="mockup-nav-item"><div class="mockup-nav-dot" style="background:var(--bds)"></div>Trésorerie</div>
-      </div>
-      <div class="mockup-content">
-        <div class="mockup-title">Dashboard 2026</div>
-        <div class="mockup-kpis">
-          <div class="mockup-kpi">
-            <div class="mockup-kpi-label">CA cumulé</div>
-            <div class="mockup-kpi-val" style="color:var(--ac)">84 200 €</div>
-          </div>
-          <div class="mockup-kpi">
-            <div class="mockup-kpi-label">Marge brute</div>
-            <div class="mockup-kpi-val" style="color:var(--gr)">61,4 %</div>
-          </div>
-          <div class="mockup-kpi">
-            <div class="mockup-kpi-label">Trésorerie</div>
-            <div class="mockup-kpi-val" style="color:var(--am)">12 450 €</div>
-          </div>
-        </div>
-        <div class="mockup-chart-area">
-          <div class="mockup-chart-label">Chiffre d'affaires mensuel (€)</div>
-          <div class="mockup-bars" id="mockup-bars"></div>
-        </div>
-      </div>
+    <div>
+      <div class="social-stars">★★★★★</div>
+      <div class="social-text">Déjà <strong>une dizaine d'indépendants</strong> pilotent leur activité avec LogPose</div>
     </div>
+  </div>
+
+  <!-- Dashboard SVG -->
+  <div class="hero-screen reveal">
+    <svg id="dashboard-svg" viewBox="0 0 920 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+      <!-- fond -->
+      <rect width="920" height="520" fill="var(--bgc)"/>
+      <!-- topbar -->
+      <rect width="920" height="46" fill="var(--bgs)"/>
+      <rect width="920" height="1" y="46" fill="var(--bd)"/>
+      <!-- dots fenêtre -->
+      <circle cx="16" cy="23" r="5" fill="#f43f5e" opacity=".7"/>
+      <circle cx="30" cy="23" r="5" fill="#f59e0b" opacity=".7"/>
+      <circle cx="44" cy="23" r="5" fill="#0ea572" opacity=".7"/>
+      <!-- url bar -->
+      <rect x="60" y="13" width="200" height="20" rx="5" fill="var(--bg)" stroke="var(--bd)" stroke-width="1"/>
+      <text x="160" y="27" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="var(--t3)">logposefr.com/app</text>
+
+      <!-- sidebar -->
+      <rect x="0" y="47" width="170" height="473" fill="var(--bgs)"/>
+      <rect x="170" y="47" width="1" height="473" fill="var(--bd)"/>
+      <!-- logo sidebar -->
+      <rect x="12" y="60" width="24" height="24" rx="6" fill="var(--ac)"/>
+      <text x="42" y="74" font-family="Plus Jakarta Sans,sans-serif" font-size="12" font-weight="800" fill="var(--t1)">LogPose</text>
+      <text x="42" y="84" font-family="JetBrains Mono,monospace" font-size="7" fill="var(--t3)" letter-spacing="1">FINANCIAL OS</text>
+      <line x1="12" y1="94" x2="158" y2="94" stroke="var(--bd)" stroke-width="1"/>
+      <!-- année selector -->
+      <rect x="12" y="100" width="146" height="24" rx="6" fill="var(--bgc)" stroke="var(--bd)" stroke-width="1"/>
+      <text x="85" y="116" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="var(--t1)">2026</text>
+      <!-- nav items -->
+      <rect x="8" y="132" width="154" height="26" rx="6" fill="var(--ag)"/>
+      <text x="28" y="149" font-family="Plus Jakarta Sans,sans-serif" font-size="11" font-weight="600" fill="var(--ac)">📊  Dashboard</text>
+      <text x="28" y="174" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="var(--t2)">📈  Chiffre d'affaires</text>
+      <text x="28" y="196" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="var(--t2)">💸  Charges</text>
+      <text x="28" y="218" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="var(--t2)">⚖️  Marge &amp; Rentabilité</text>
+      <text x="28" y="240" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="var(--t2)">🎭  Scénarios</text>
+      <text x="28" y="262" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="var(--t2)">🔭  Prévisionnel</text>
+      <text x="28" y="284" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="var(--t2)">🧾  TVA</text>
+      <text x="28" y="306" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="var(--t2)">💰  Trésorerie</text>
+      <text x="28" y="328" font-family="Plus Jakarta Sans,sans-serif" font-size="11" fill="var(--t2)">⚙️  Paramètres</text>
+
+      <!-- main content -->
+      <!-- page title -->
+      <text x="188" y="76" font-family="Plus Jakarta Sans,sans-serif" font-size="16" font-weight="800" fill="var(--t1)">Dashboard</text>
+      <text x="188" y="91" font-family="Plus Jakarta Sans,sans-serif" font-size="10" fill="var(--t2)">Vue d'ensemble · LogPose · Année 2026</text>
+
+      <!-- KPI cards -->
+      <!-- KPI 1 CA -->
+      <rect x="188" y="102" width="170" height="72" rx="8" fill="var(--bgc)" stroke="var(--bd)" stroke-width="1"/>
+      <rect x="188" y="102" width="170" height="3" rx="2" fill="var(--ac)"/>
+      <text x="200" y="120" font-family="JetBrains Mono,monospace" font-size="8" fill="var(--t2)" letter-spacing="1">CA HT ANNUEL</text>
+      <text x="200" y="143" font-family="Plus Jakarta Sans,sans-serif" font-size="20" font-weight="800" fill="var(--t1)">84 200 €</text>
+      <text x="200" y="158" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="var(--gr)">↑ +18% vs objectif</text>
+      <rect x="200" y="162" width="148" height="5" rx="3" fill="var(--ag)"/>
+      <rect x="200" y="162" width="118" height="5" rx="3" fill="var(--ac)"/>
+
+      <!-- KPI 2 Charges -->
+      <rect x="368" y="102" width="170" height="72" rx="8" fill="var(--bgc)" stroke="var(--bd)" stroke-width="1"/>
+      <rect x="368" y="102" width="170" height="3" rx="2" fill="var(--rd)"/>
+      <text x="380" y="120" font-family="JetBrains Mono,monospace" font-size="8" fill="var(--t2)" letter-spacing="1">CHARGES ANNUELLES</text>
+      <text x="380" y="143" font-family="Plus Jakarta Sans,sans-serif" font-size="20" font-weight="800" fill="var(--t1)">23 450 €</text>
+      <text x="380" y="158" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="var(--am)">Ratio 27.8% du CA</text>
+      <rect x="380" y="162" width="148" height="5" rx="3" fill="var(--rdb)"/>
+      <rect x="380" y="162" width="42" height="5" rx="3" fill="var(--rd)"/>
+
+      <!-- KPI 3 Résultat -->
+      <rect x="548" y="102" width="170" height="72" rx="8" fill="var(--bgc)" stroke="var(--bd)" stroke-width="1"/>
+      <rect x="548" y="102" width="170" height="3" rx="2" fill="var(--gr)"/>
+      <text x="560" y="120" font-family="JetBrains Mono,monospace" font-size="8" fill="var(--t2)" letter-spacing="1">RÉSULTAT BRUT</text>
+      <text x="560" y="143" font-family="Plus Jakarta Sans,sans-serif" font-size="20" font-weight="800" fill="var(--gr)">60 750 €</text>
+      <text x="560" y="158" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="var(--t2)">CA HT – Charges HT</text>
+      <rect x="560" y="162" width="148" height="5" rx="3" fill="var(--grb)"/>
+      <rect x="560" y="162" width="110" height="5" rx="3" fill="var(--gr)"/>
+
+      <!-- KPI 4 Marge -->
+      <rect x="728" y="102" width="176" height="72" rx="8" fill="var(--bgc)" stroke="var(--bd)" stroke-width="1"/>
+      <rect x="728" y="102" width="176" height="3" rx="2" fill="var(--pu)"/>
+      <text x="740" y="120" font-family="JetBrains Mono,monospace" font-size="8" fill="var(--t2)" letter-spacing="1">TAUX DE MARGE</text>
+      <text x="740" y="143" font-family="Plus Jakarta Sans,sans-serif" font-size="20" font-weight="800" fill="var(--pu)">72,1 %</text>
+      <text x="740" y="158" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="var(--t2)">(CA – Coûts achat) / CA HT</text>
+      <rect x="740" y="162" width="152" height="5" rx="3" fill="rgba(155,135,245,.15)"/>
+      <rect x="740" y="162" width="110" height="5" rx="3" fill="var(--pu)"/>
+
+      <!-- Graphique CA vs Charges -->
+      <rect x="188" y="184" width="524" height="200" rx="8" fill="var(--bgc)" stroke="var(--bd)" stroke-width="1"/>
+      <text x="202" y="202" font-family="Plus Jakarta Sans,sans-serif" font-size="11" font-weight="700" fill="var(--t1)">CA vs Charges</text>
+      <text x="202" y="215" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="var(--t2)">Comparaison mensuelle HT · CA, Charges et Résultat</text>
+      <!-- légende -->
+      <rect x="490" y="196" width="8" height="8" rx="2" fill="var(--ac)" opacity=".6"/>
+      <text x="502" y="204" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="var(--t2)">CA HT</text>
+      <rect x="530" y="196" width="8" height="8" rx="2" fill="var(--rd)" opacity=".6"/>
+      <text x="542" y="204" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="var(--t2)">Charges</text>
+      <circle cx="572" cy="200" r="4" fill="var(--gr)"/>
+      <text x="580" y="204" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="var(--t2)">Résultat</text>
+      <!-- axes -->
+      <line x1="220" y1="225" x2="220" y2="368" stroke="var(--bd)" stroke-width="1"/>
+      <line x1="220" y1="368" x2="700" y2="368" stroke="var(--bd)" stroke-width="1"/>
+      <!-- barres CA + charges (12 mois) -->
+      <!-- Jan -->
+      <rect x="228" y="310" width="18" height="58" rx="2" fill="var(--ac)" opacity=".55"/>
+      <rect x="228" y="352" width="18" height="16" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="237" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--t3)">J</text>
+      <!-- Fev -->
+      <rect x="266" y="295" width="18" height="73" rx="2" fill="var(--ac)" opacity=".55"/>
+      <rect x="266" y="345" width="18" height="23" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="275" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--t3)">F</text>
+      <!-- Mar -->
+      <rect x="304" y="280" width="18" height="88" rx="2" fill="var(--ac)" opacity=".55"/>
+      <rect x="304" y="348" width="18" height="20" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="313" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--t3)">M</text>
+      <!-- Avr -->
+      <rect x="342" y="265" width="18" height="103" rx="2" fill="var(--ac)" opacity=".55"/>
+      <rect x="342" y="345" width="18" height="23" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="351" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--t3)">A</text>
+      <!-- Mai -->
+      <rect x="380" y="248" width="18" height="120" rx="2" fill="var(--ac)" opacity=".55"/>
+      <rect x="380" y="342" width="18" height="26" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="389" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--t3)">M</text>
+      <!-- Jun -->
+      <rect x="418" y="238" width="18" height="130" rx="2" fill="var(--ac)" opacity=".8"/>
+      <rect x="418" y="340" width="18" height="28" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="427" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--ac)">J</text>
+      <!-- Jul -->
+      <rect x="456" y="225" width="18" height="143" rx="2" fill="var(--ac)" opacity=".55"/>
+      <rect x="456" y="338" width="18" height="30" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="465" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--t3)">J</text>
+      <!-- Aou -->
+      <rect x="494" y="258" width="18" height="110" rx="2" fill="var(--ac)" opacity=".55"/>
+      <rect x="494" y="340" width="18" height="28" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="503" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--t3)">A</text>
+      <!-- Sep -->
+      <rect x="532" y="242" width="18" height="126" rx="2" fill="var(--ac)" opacity=".55"/>
+      <rect x="532" y="336" width="18" height="32" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="541" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--t3)">S</text>
+      <!-- Oct -->
+      <rect x="570" y="252" width="18" height="116" rx="2" fill="var(--ac)" opacity=".55"/>
+      <rect x="570" y="336" width="18" height="32" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="579" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--t3)">O</text>
+      <!-- Nov -->
+      <rect x="608" y="244" width="18" height="124" rx="2" fill="var(--ac)" opacity=".55"/>
+      <rect x="608" y="334" width="18" height="34" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="617" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--t3)">N</text>
+      <!-- Dec -->
+      <rect x="646" y="260" width="18" height="108" rx="2" fill="var(--ac)" opacity=".55"/>
+      <rect x="646" y="332" width="18" height="36" rx="2" fill="var(--rd)" opacity=".7"/>
+      <text x="655" y="380" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="7" fill="var(--t3)">D</text>
+      <!-- courbe résultat -->
+      <polyline points="237,300 275,286 313,270 351,254 389,236 427,224 465,212 503,244 541,228 579,238 617,230 655,246" fill="none" stroke="var(--gr)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="427" cy="224" r="4" fill="var(--gr)"/>
+
+      <!-- Panel droit - Top articles + alertes -->
+      <rect x="722" y="184" width="182" height="200" rx="8" fill="var(--bgc)" stroke="var(--bd)" stroke-width="1"/>
+      <text x="736" y="202" font-family="Plus Jakarta Sans,sans-serif" font-size="11" font-weight="700" fill="var(--t1)">Top articles</text>
+      <text x="736" y="215" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="var(--t2)">Par CA HT généré</text>
+      <!-- article 1 -->
+      <text x="736" y="235" font-family="Plus Jakarta Sans,sans-serif" font-size="10" font-weight="600" fill="var(--t1)">Consulting</text>
+      <text x="878" y="235" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="9" fill="var(--ac)">42 100 €</text>
+      <rect x="736" y="238" width="146" height="4" rx="2" fill="var(--ag)"/>
+      <rect x="736" y="238" width="146" height="4" rx="2" fill="var(--ac)"/>
+      <!-- article 2 -->
+      <text x="736" y="258" font-family="Plus Jakarta Sans,sans-serif" font-size="10" font-weight="600" fill="var(--t1)">Formation</text>
+      <text x="878" y="258" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="9" fill="var(--ac)">24 600 €</text>
+      <rect x="736" y="261" width="146" height="4" rx="2" fill="var(--ag)"/>
+      <rect x="736" y="261" width="86" height="4" rx="2" fill="var(--ac)"/>
+      <!-- article 3 -->
+      <text x="736" y="281" font-family="Plus Jakarta Sans,sans-serif" font-size="10" font-weight="600" fill="var(--t1)">Maintenance</text>
+      <text x="878" y="281" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="9" fill="var(--ac)">17 500 €</text>
+      <rect x="736" y="284" width="146" height="4" rx="2" fill="var(--ag)"/>
+      <rect x="736" y="284" width="61" height="4" rx="2" fill="var(--ac)"/>
+      <line x1="736" y1="298" x2="878" y2="298" stroke="var(--bd)" stroke-width="1"/>
+      <!-- alerte -->
+      <rect x="736" y="305" width="146" height="36" rx="6" fill="var(--grb)" stroke="rgba(14,165,114,.2)" stroke-width="1"/>
+      <text x="744" y="319" font-family="Plus Jakarta Sans,sans-serif" font-size="9" font-weight="700" fill="var(--gr)">✓ Objectif atteint !</text>
+      <text x="744" y="332" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="var(--gr)">+18% au-dessus du plan</text>
+      <!-- alerte tréso -->
+      <rect x="736" y="348" width="146" height="28" rx="6" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.2)" stroke-width="1"/>
+      <text x="744" y="360" font-family="Plus Jakarta Sans,sans-serif" font-size="9" font-weight="700" fill="var(--am)">⚠ Tréso : surveiller</text>
+      <text x="744" y="370" font-family="Plus Jakarta Sans,sans-serif" font-size="8" fill="var(--am)">Tension prévue en août</text>
+
+      <!-- Bottom row : Point mort + Prévisionnel -->
+      <rect x="188" y="394" width="340" height="110" rx="8" fill="var(--bgc)" stroke="var(--bd)" stroke-width="1"/>
+      <text x="202" y="412" font-family="Plus Jakarta Sans,sans-serif" font-size="11" font-weight="700" fill="var(--t1)">Point mort mensuel</text>
+      <text x="202" y="425" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="var(--t2)">Seuil de rentabilité atteint le</text>
+      <text x="202" y="450" font-family="Plus Jakarta Sans,sans-serif" font-size="28" font-weight="800" fill="var(--gr)">8e jour</text>
+      <text x="202" y="464" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="var(--t2)">du mois en moyenne · Marge de sécu. 73%</text>
+      <!-- mini barre jours -->
+      <rect x="202" y="472" width="312" height="8" rx="4" fill="var(--bd)"/>
+      <rect x="202" y="472" width="84" height="8" rx="4" fill="var(--gr)"/>
+      <text x="290" y="481" font-family="JetBrains Mono,monospace" font-size="7" fill="var(--t2)">J8</text>
+      <line x1="286" y1="472" x2="286" y2="480" stroke="var(--gr)" stroke-width="1.5"/>
+
+      <rect x="538" y="394" width="366" height="110" rx="8" fill="var(--bgc)" stroke="var(--bd)" stroke-width="1"/>
+      <text x="552" y="412" font-family="Plus Jakarta Sans,sans-serif" font-size="11" font-weight="700" fill="var(--t1)">Prévisionnel 2027</text>
+      <text x="552" y="425" font-family="Plus Jakarta Sans,sans-serif" font-size="9" fill="var(--t2)">Hypothèse réaliste · Taux de marge constant</text>
+      <!-- mini graph prévisionnel -->
+      <polyline points="560,488 600,478 640,470 680,462 720,455 760,449 800,444 840,440 880,437" fill="none" stroke="var(--pu)" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 2"/>
+      <polyline points="560,488 600,480 640,473 680,466 720,459 760,452" fill="none" stroke="var(--ac)" stroke-width="2" stroke-linecap="round"/>
+      <text x="560" y="500" font-family="JetBrains Mono,monospace" font-size="8" fill="var(--t2)">CA projeté 2027 :</text>
+      <text x="650" y="500" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="var(--pu)">+22%  →  102 700 €</text>
+    </svg>
   </div>
 </section>
 
 <!-- ════ PROBLÈME → SOLUTION ════ -->
 <section class="problems" id="features">
   <div class="container">
-    <span class="section-badge">Pourquoi LogPose ?</span>
-    <h2 class="section-title">Fini la gestion financière à l'aveugle</h2>
-    <p class="section-sub">Les TPE et indépendants perdent des heures chaque mois sur des tableaux Excel bricolés. LogPose change ça.</p>
+    <div class="reveal">
+      <span class="section-badge">Pourquoi LogPose ?</span>
+      <h2 class="section-title">Fini la gestion financière<br>à l'aveugle</h2>
+      <p class="section-sub">Les TPE et indépendants perdent des heures chaque mois sur des tableaux Excel bricolés. LogPose change ça.</p>
+    </div>
     <div class="problems-grid">
-      <div>
-        <div class="problem-item">
-          <span class="problem-emoji">😰</span>
-          <div class="problem-text">
-            <strong>Votre Excel est un monstre ingérable</strong>
-            <span>Des formules qui se cassent, des données incohérentes, personne ne sait quelle version est la bonne.</span>
-          </div>
-        </div>
-        <div class="problem-item">
-          <span class="problem-emoji">🤷</span>
-          <div class="problem-text">
-            <strong>Vous ne savez pas si vous êtes rentable</strong>
-            <span>CA en hausse mais trésorerie à sec — vous manquez les signaux d'alerte avant qu'il soit trop tard.</span>
-          </div>
-        </div>
-        <div class="problem-item">
-          <span class="problem-emoji">📅</span>
-          <div class="problem-text">
-            <strong>La TVA est une source de stress permanente</strong>
-            <span>Seuils de franchise, fréquences de déclaration, montants à verser — tout ça géré manuellement.</span>
-          </div>
-        </div>
-        <div class="problem-item">
-          <span class="problem-emoji">🎯</span>
-          <div class="problem-text">
-            <strong>Impossible de simuler des scénarios</strong>
-            <span>Et si vous augmentiez vos prix de 10 % ? Vous n'avez aucun outil pour répondre avant de décider.</span>
-          </div>
-        </div>
+      <div class="reveal reveal-delay-1">
+        <div class="problem-item"><span class="problem-emoji">😰</span><div class="problem-text"><strong>Votre Excel est un monstre ingérable</strong><span>Des formules qui se cassent, des données incohérentes, personne ne sait quelle version est la bonne.</span></div></div>
+        <div class="problem-item"><span class="problem-emoji">🤷</span><div class="problem-text"><strong>Vous ne savez pas si vous êtes rentable</strong><span>CA en hausse mais trésorerie à sec — vous manquez les signaux d'alerte avant qu'il soit trop tard.</span></div></div>
+        <div class="problem-item"><span class="problem-emoji">📅</span><div class="problem-text"><strong>La TVA est une source de stress permanente</strong><span>Seuils de franchise, fréquences de déclaration, montants à verser — tout géré manuellement.</span></div></div>
+        <div class="problem-item"><span class="problem-emoji">🎯</span><div class="problem-text"><strong>Impossible de simuler des scénarios</strong><span>Et si vous augmentiez vos prix de 10 % ? Embauchiez ? Vous n'avez aucun outil pour répondre.</span></div></div>
       </div>
-      <div>
-        <div style="margin-bottom:24px">
-          <span class="section-badge">La solution</span>
-          <h3 style="font-size:21px;font-weight:800;letter-spacing:-.5px;line-height:1.25;margin-top:6px">LogPose centralise tout,<br>automatise le reste</h3>
-        </div>
-        <div class="solution-item">
-          <div class="solution-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
-          <div class="solution-text"><strong>Saisie en 2 minutes par mois</strong><span>Vos articles, quantités et charges — tout est structuré et persisté dans le cloud.</span></div>
-        </div>
-        <div class="solution-item">
-          <div class="solution-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
-          <div class="solution-text"><strong>KPIs calculés en temps réel</strong><span>Marge brute, point mort, ratio charges/CA — avec alertes intelligentes si quelque chose déraille.</span></div>
-        </div>
-        <div class="solution-item">
-          <div class="solution-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
-          <div class="solution-text"><strong>TVA gérée automatiquement</strong><span>Suivi des seuils de franchise, calcul mensuel/trimestriel, alertes de dépassement incluses.</span></div>
-        </div>
-        <div class="solution-item">
-          <div class="solution-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
-          <div class="solution-text"><strong>Simulations A/B en un clic</strong><span>Testez 2 scénarios différents et visualisez l'impact sur votre rentabilité avant de décider.</span></div>
-        </div>
+      <div class="reveal reveal-delay-2">
+        <div style="margin-bottom:22px"><span class="section-badge">La solution</span><h3 style="font-size:20px;font-weight:800;letter-spacing:-.5px;line-height:1.25;margin-top:6px">LogPose centralise tout,<br>automatise le reste</h3></div>
+        <div class="solution-item"><div class="solution-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="solution-text"><strong>Saisie en 2 minutes par mois</strong><span>Vos articles, quantités et charges — structurés et persistés dans le cloud.</span></div></div>
+        <div class="solution-item"><div class="solution-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="solution-text"><strong>KPIs calculés en temps réel</strong><span>Marge brute, point mort, ratio charges/CA — alertes intelligentes si quelque chose déraille.</span></div></div>
+        <div class="solution-item"><div class="solution-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="solution-text"><strong>TVA gérée automatiquement</strong><span>Suivi des seuils 2026, calcul mensuel/trimestriel, alertes de dépassement incluses.</span></div></div>
+        <div class="solution-item"><div class="solution-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gr)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="solution-text"><strong>Simulations A/B en un clic</strong><span>Testez 2 scénarios et visualisez l'impact sur votre rentabilité avant de décider.</span></div></div>
       </div>
     </div>
   </div>
@@ -551,75 +529,35 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
 <!-- ════ FEATURES ════ -->
 <section>
   <div class="container">
-    <div style="text-align:center;max-width:580px;margin:0 auto">
+    <div class="reveal" style="text-align:center;max-width:580px;margin:0 auto">
       <span class="section-badge">9 modules intégrés</span>
       <h2 class="section-title">Tout ce dont vous avez besoin,<br>rien de plus</h2>
       <p class="section-sub">Un outil complet, sans la complexité d'un ERP. Pensé pour les non-comptables.</p>
     </div>
-    <div class="features-grid">
-      <div class="feature-card" style="--color:var(--ac);--icon-bg:var(--ag)">
-        <div class="feature-icon">📊</div>
-        <div class="feature-label">Dashboard</div>
-        <div class="feature-title">Vue d'ensemble instantanée</div>
-        <div class="feature-desc">KPIs clés, alertes intelligentes, checklist onboarding et top articles/charges en un coup d'œil.</div>
-        <span class="feature-tag">Gratuit</span>
-      </div>
-      <div class="feature-card" style="--color:var(--gr);--icon-bg:var(--grb)">
-        <div class="feature-icon">📈</div>
-        <div class="feature-label">Chiffre d'affaires</div>
-        <div class="feature-title">Suivi CA article par article</div>
-        <div class="feature-desc">Saisie des quantités mois par mois, graphiques d'évolution, alertes saisonnalité et objectif.</div>
-        <span class="feature-tag">Gratuit</span>
-      </div>
-      <div class="feature-card" style="--color:var(--rd);--icon-bg:var(--rdb)">
-        <div class="feature-icon">💸</div>
-        <div class="feature-label">Charges</div>
-        <div class="feature-title">Contrôle total des dépenses</div>
-        <div class="feature-desc">Charges fixes et variables, suivi mensuel TTC, alertes ratio de rigidité et dérive budgétaire.</div>
-        <span class="feature-tag">Gratuit</span>
-      </div>
-      <div class="feature-card" style="--color:var(--pu);--icon-bg:rgba(155,135,245,.1)">
-        <div class="feature-icon">⚖️</div>
-        <div class="feature-label">Marge & Rentabilité</div>
-        <div class="feature-title">Waterfall et point mort</div>
-        <div class="feature-desc">Waterfall CA→marge nette, BFR, point mort mensuel, tableau de rentabilité par article.</div>
-        <span class="feature-tag pro">Pro</span>
-      </div>
-      <div class="feature-card" style="--color:var(--am);--icon-bg:rgba(245,158,11,.1)">
-        <div class="feature-icon">🎭</div>
-        <div class="feature-label">Scénarios</div>
-        <div class="feature-title">Simulations A/B en temps réel</div>
-        <div class="feature-desc">3 onglets Réel/A/B, simulation prix + quantités + charges avec comparaison graphique instantanée.</div>
-        <span class="feature-tag pro">Pro</span>
-      </div>
-      <div class="feature-card" style="--color:#22d3c8;--icon-bg:rgba(34,211,200,.1)">
-        <div class="feature-icon">🔭</div>
-        <div class="feature-label">Prévisionnel</div>
-        <div class="feature-title">Projection sur 36 mois</div>
-        <div class="feature-desc">3 hypothèses (pessimiste/réaliste/optimiste), saisonnalité préservée, taux de marge constant.</div>
-        <span class="feature-tag pro">Pro</span>
-      </div>
-      <div class="feature-card" style="--color:var(--gr);--icon-bg:var(--grb)">
-        <div class="feature-icon">🧾</div>
-        <div class="feature-label">TVA</div>
-        <div class="feature-title">Franchise et assujettissement</div>
-        <div class="feature-desc">Seuils 2026 (37 500 € / 94 300 €), déclaration mensuelle ou trimestrielle, alertes de dépassement.</div>
-        <span class="feature-tag pro">Pro</span>
-      </div>
-      <div class="feature-card" style="--color:var(--ac);--icon-bg:var(--ag)">
-        <div class="feature-icon">💰</div>
-        <div class="feature-label">Trésorerie</div>
-        <div class="feature-title">Flux avec décalages réels</div>
-        <div class="feature-desc">Encaissements et décaissements avec délais configurables, graphique de solde, alertes tension.</div>
-        <span class="feature-tag pro">Pro</span>
-      </div>
-      <div class="feature-card" style="--color:var(--t2);--icon-bg:rgba(107,133,168,.1)">
-        <div class="feature-icon">⚙️</div>
-        <div class="feature-label">Paramètres</div>
-        <div class="feature-title">Configuration multi-années</div>
-        <div class="feature-desc">Articles, charges, entreprise — tout configuré par année avec réplication intelligente sur N+.</div>
-        <span class="feature-tag">Gratuit</span>
-      </div>
+
+    <div class="features-sep reveal">
+      <div class="features-sep-line"></div>
+      <span class="features-sep-label">Inclus gratuitement</span>
+      <div class="features-sep-line"></div>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card" style="--color:var(--ac);--icon-bg:var(--ag)"><div class="feature-icon">📊</div><div class="feature-label">Dashboard</div><div class="feature-title">Vue d'ensemble instantanée</div><div class="feature-desc">KPIs clés, alertes intelligentes, checklist onboarding et top articles/charges en un coup d'œil.</div></div>
+      <div class="feature-card" style="--color:var(--gr);--icon-bg:var(--grb)"><div class="feature-icon">📈</div><div class="feature-label">Chiffre d'affaires</div><div class="feature-title">Suivi CA article par article</div><div class="feature-desc">Saisie des quantités mois par mois, graphiques d'évolution, alertes saisonnalité et objectif annuel.</div></div>
+      <div class="feature-card" style="--color:var(--rd);--icon-bg:var(--rdb)"><div class="feature-icon">💸</div><div class="feature-label">Charges</div><div class="feature-title">Contrôle total des dépenses</div><div class="feature-desc">Charges fixes et variables, suivi mensuel TTC, alertes ratio de rigidité et dérive budgétaire.</div></div>
+    </div>
+
+    <div class="features-sep reveal" style="margin-top:28px">
+      <div class="features-sep-line"></div>
+      <span class="features-sep-label pro-label">✦ Modules Pro — 25 €/mois</span>
+      <div class="features-sep-line"></div>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card" style="--color:var(--pu);--icon-bg:rgba(155,135,245,.1)"><div class="feature-icon">⚖️</div><div class="feature-label">Marge & Rentabilité</div><div class="feature-title">Waterfall et point mort</div><div class="feature-desc">Waterfall CA→marge nette, BFR, point mort mensuel, tableau de rentabilité article par article.</div></div>
+      <div class="feature-card" style="--color:var(--am);--icon-bg:rgba(245,158,11,.1)"><div class="feature-icon">🎭</div><div class="feature-label">Scénarios</div><div class="feature-title">Simulations A/B en temps réel</div><div class="feature-desc">3 onglets Réel/A/B, simulation prix + quantités + charges avec comparaison graphique instantanée.</div></div>
+      <div class="feature-card" style="--color:#22d3c8;--icon-bg:rgba(34,211,200,.1)"><div class="feature-icon">🔭</div><div class="feature-label">Prévisionnel</div><div class="feature-title">Projection sur 36 mois</div><div class="feature-desc">3 hypothèses (pessimiste/réaliste/optimiste), saisonnalité préservée, taux de marge constant.</div></div>
+      <div class="feature-card" style="--color:var(--gr);--icon-bg:var(--grb)"><div class="feature-icon">🧾</div><div class="feature-label">TVA</div><div class="feature-title">Franchise et assujettissement</div><div class="feature-desc">Seuils 2026 (37 500 € services / 94 300 € commerce), déclaration mensuelle ou trimestrielle.</div></div>
+      <div class="feature-card" style="--color:var(--ac);--icon-bg:var(--ag)"><div class="feature-icon">💰</div><div class="feature-label">Trésorerie</div><div class="feature-title">Flux avec décalages réels</div><div class="feature-desc">Encaissements et décaissements avec délais configurables, graphique de solde, alertes tension.</div></div>
+      <div class="feature-card" style="--color:var(--t2);--icon-bg:rgba(107,133,168,.1)"><div class="feature-icon">⚙️</div><div class="feature-label">Paramètres</div><div class="feature-title">Configuration multi-années</div><div class="feature-desc">Articles, charges, entreprise — configurés par année avec réplication intelligente sur N+.</div></div>
     </div>
   </div>
 </section>
@@ -627,12 +565,12 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
 <!-- ════ PRICING ════ -->
 <section class="pricing-section" id="pricing">
   <div class="container">
-    <div style="text-align:center;max-width:540px;margin:0 auto">
+    <div class="reveal" style="text-align:center;max-width:520px;margin:0 auto">
       <span class="section-badge">Tarifs</span>
       <h2 class="section-title">Simple et transparent</h2>
       <p class="section-sub">Commencez gratuitement, passez Pro quand vous en avez besoin.</p>
     </div>
-    <div class="pricing-grid">
+    <div class="pricing-grid reveal">
       <div class="pricing-card">
         <div class="pricing-plan">Gratuit</div>
         <div class="pricing-price">0 <sup>€</sup></div>
@@ -641,9 +579,9 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
         <ul class="pricing-features">
           <li class="pricing-feat"><div class="pricing-feat-ico feat-ok">✓</div>Dashboard complet</li>
           <li class="pricing-feat"><div class="pricing-feat-ico feat-ok">✓</div>Chiffre d'affaires (3 articles)</li>
-          <li class="pricing-feat"><div class="pricing-feat-ico feat-ok">✓</div>Charges (3 charges)</li>
+          <li class="pricing-feat"><div class="pricing-feat-ico feat-ok">✓</div>Charges (3 charges max)</li>
           <li class="pricing-feat"><div class="pricing-feat-ico feat-ok">✓</div>Paramètres entreprise</li>
-          <li class="pricing-feat"><div class="pricing-feat-ico feat-ok">✓</div>Multi-années</li>
+          <li class="pricing-feat"><div class="pricing-feat-ico feat-ok">✓</div>Multi-années illimité</li>
           <li class="pricing-feat off"><div class="pricing-feat-ico feat-off">–</div>Marge &amp; Rentabilité</li>
           <li class="pricing-feat off"><div class="pricing-feat-ico feat-off">–</div>Scénarios A/B</li>
           <li class="pricing-feat off"><div class="pricing-feat-ico feat-off">–</div>Prévisionnel 36 mois</li>
@@ -674,21 +612,29 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
         </a>
       </div>
     </div>
-    <p class="pricing-note">Paiement sécurisé via Lemon Squeezy · Sans engagement · Annulable à tout moment</p>
+    <p class="pricing-note reveal">Paiement sécurisé via Lemon Squeezy · Sans engagement · Annulable à tout moment</p>
   </div>
 </section>
 
 <!-- ════ FAQ ════ -->
 <section id="faq">
   <div class="container">
-    <div style="text-align:center;max-width:540px;margin:0 auto">
+    <div class="reveal" style="text-align:center;max-width:520px;margin:0 auto">
       <span class="section-badge">FAQ</span>
       <h2 class="section-title">Questions fréquentes</h2>
     </div>
-    <div class="faq-list">
+    <div class="faq-list reveal">
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">LogPose remplace-t-il mon expert-comptable ?<span class="faq-arrow">▼</span></div>
         <div class="faq-a">Non, et c'est voulu. LogPose est un outil de <strong>pilotage au quotidien</strong> — il vous aide à comprendre votre activité, anticiper les problèmes et prendre de meilleures décisions. Votre expert-comptable reste indispensable pour la comptabilité légale et fiscale.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Ça marche pour une micro-entreprise ?<span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Oui, c'est même le cas d'usage idéal. LogPose gère le régime franchise en base de TVA, vous alerte quand vous approchez des seuils, et s'adapte à tous les secteurs : services, commerce, artisanat, conseil, freelance.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">En quoi c'est mieux qu'un simple Excel ?<span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Excel ne fait pas d'alertes intelligentes, ne calcule pas votre point mort, ne simule pas de scénarios en temps réel, ne gère pas votre TVA et n'est pas accessible partout sans risque de corruption de fichier. LogPose est opérationnel en 5 minutes, sans formules à maintenir.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">Mes données sont-elles sécurisées ?<span class="faq-arrow">▼</span></div>
@@ -699,12 +645,8 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
         <div class="faq-a">Oui, sans engagement ni pénalité. Votre abonnement est géré via Lemon Squeezy. À l'annulation, vous repassez automatiquement sur le plan gratuit à la fin de la période en cours.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">LogPose fonctionne-t-il pour mon activité ?<span class="faq-arrow">▼</span></div>
-        <div class="faq-a">LogPose est conçu pour les <strong>TPE, auto-entrepreneurs et indépendants français</strong> — commerce, services, artisans, consultants, freelances. Il gère les régimes de TVA français et les spécificités fiscales françaises.</div>
-      </div>
-      <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">Faut-il des connaissances comptables ?<span class="faq-arrow">▼</span></div>
-        <div class="faq-a">Non. Vous renseignez vos articles, vos prix, vos quantités vendues et vos charges — LogPose calcule tout automatiquement et vous alerte si quelque chose mérite votre attention.</div>
+        <div class="faq-a">Non. Vous renseignez vos articles, vos prix, vos quantités vendues et vos charges — LogPose calcule tout automatiquement et vous alerte si quelque chose mérite votre attention. Aucun jargon comptable requis.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">La gestion multi-années est-elle incluse dans le gratuit ?<span class="faq-arrow">▼</span></div>
@@ -716,19 +658,17 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
 
 <!-- ════ CTA FINAL ════ -->
 <section class="cta-section">
-  <div class="container">
-    <div class="cta-glow">
-      <h2>Prêt à piloter votre activité<br>avec clarté ?</h2>
-      <p>Rejoignez les indépendants qui prennent enfin le contrôle de leurs finances.</p>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <a class="btn btn-primary btn-lg" href="/app">
-          Commencer gratuitement
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-        <a class="btn btn-ghost btn-lg" href="mailto:contact@logposefr.com">Nous contacter</a>
-      </div>
-      <p style="margin-top:18px;font-size:12px;color:var(--t3);font-family:'JetBrains Mono',monospace">Gratuit · Aucune carte bancaire · Données sécurisées</p>
+  <div class="container reveal">
+    <h2>Prêt à piloter votre activité<br>avec clarté ?</h2>
+    <p>Rejoignez les indépendants qui prennent enfin le contrôle de leurs finances.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative">
+      <a class="btn btn-primary btn-lg" href="/app">
+        Commencer gratuitement
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a class="btn btn-ghost btn-lg" href="mailto:contact@logposefr.com">Nous contacter</a>
     </div>
+    <p style="margin-top:16px;font-size:11.5px;color:var(--t3);font-family:'JetBrains Mono',monospace;position:relative">Gratuit · Aucune carte bancaire · Données sécurisées en Europe</p>
   </div>
 </section>
 
@@ -739,10 +679,7 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
       <div class="footer-brand">
         <div class="footer-logo">
           <div class="footer-logo-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
           </div>
           <span class="footer-logo-name">LogPose</span>
         </div>
@@ -773,11 +710,19 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
       </div>
     </div>
     <div class="footer-bottom">
-      <span class="footer-copy">© 2026 LogPose · Hébergé par Vercel Inc.</span>
-      <span class="footer-copy">Made in France 🇫🇷</span>
+      <span class="footer-copy">© 2026 LogPose · Hébergé par Vercel Inc. · Made in France 🇫🇷</span>
+      <span class="footer-status"><span class="status-dot"></span>Tous les systèmes opérationnels</span>
     </div>
   </div>
 </footer>
+
+<!-- ════ STICKY MOBILE CTA ════ -->
+<div class="sticky-cta" id="sticky-cta">
+  <a class="btn btn-primary" style="width:100%;justify-content:center;padding:13px" href="/app">
+    Commencer gratuitement — c'est gratuit
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </a>
+</div>
 
 <!-- ════ MODALES LÉGALES ════ -->
 <div class="modal-ov" id="modal-cgu" onclick="closeModalOv(event,'cgu')">
@@ -794,91 +739,84 @@ footer { background: var(--bgs); border-top: 1px solid var(--bd); padding: 48px 
     </div>
   </div>
 </div>
-
 <div class="modal-ov" id="modal-confidentialite" onclick="closeModalOv(event,'confidentialite')">
   <div class="modal">
     <div class="modal-hdr"><span class="modal-title">Politique de confidentialité</span><button class="modal-close" onclick="closeModal('confidentialite')">×</button></div>
     <div class="modal-body">
-      <h3>1. Données collectées</h3><p>LogPose collecte uniquement les données nécessaires : adresse email (authentification) et données financières saisies par l'utilisateur.</p>
-      <h3>2. Utilisation</h3><p>Vos données sont utilisées exclusivement pour fournir le service. Elles ne sont ni vendues, ni partagées avec des tiers à des fins commerciales.</p>
+      <h3>1. Données collectées</h3><p>LogPose collecte uniquement les données nécessaires : adresse email et données financières saisies par l'utilisateur.</p>
+      <h3>2. Utilisation</h3><p>Vos données sont utilisées exclusivement pour fournir le service. Elles ne sont ni vendues, ni partagées avec des tiers.</p>
       <h3>3. Hébergement</h3><p>Données hébergées sur Supabase (infrastructure AWS Europe) avec chiffrement en transit (HTTPS) et au repos.</p>
       <h3>4. Paiement</h3><p>Les paiements sont traités par Lemon Squeezy (Merchant of Record). LogPose ne stocke aucune donnée bancaire.</p>
       <h3>5. Vos droits</h3><p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression. Contact : <a href="mailto:contact@logposefr.com">contact@logposefr.com</a></p>
-      <h3>6. Cookies</h3><p>LogPose n'utilise pas de cookies de tracking. Seuls des tokens d'authentification sont stockés localement pour maintenir votre session.</p>
+      <h3>6. Cookies</h3><p>LogPose n'utilise pas de cookies de tracking. Seuls des tokens d'authentification sont stockés localement.</p>
     </div>
   </div>
 </div>
-
 <div class="modal-ov" id="modal-mentions" onclick="closeModalOv(event,'mentions')">
   <div class="modal">
     <div class="modal-hdr"><span class="modal-title">Mentions légales</span><button class="modal-close" onclick="closeModal('mentions')">×</button></div>
     <div class="modal-body">
       <h3>Éditeur</h3><p>LogPose · <a href="mailto:contact@logposefr.com">contact@logposefr.com</a></p>
-      <h3>Hébergement</h3><p>Vercel Inc. · 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis · <a href="https://vercel.com" target="_blank" rel="noopener">vercel.com</a></p>
+      <h3>Hébergement</h3><p>Vercel Inc. · 440 N Barranca Ave #4133, Covina, CA 91723 · <a href="https://vercel.com" target="_blank" rel="noopener">vercel.com</a></p>
       <h3>Base de données</h3><p>Supabase Inc. — Infrastructure hébergée en Europe.</p>
-      <h3>Propriété intellectuelle</h3><p>L'ensemble du contenu de LogPose (code, design, textes) est la propriété exclusive de LogPose. Toute reproduction est interdite sans autorisation préalable.</p>
+      <h3>Propriété intellectuelle</h3><p>L'ensemble du contenu de LogPose est la propriété exclusive de LogPose. Toute reproduction est interdite sans autorisation.</p>
       <h3>Droit applicable</h3><p>Les présentes mentions légales sont soumises au droit français.</p>
     </div>
   </div>
 </div>
 
 <script>
-// ── Thème
-(function() {
+// ── Thème (persisté, dark par défaut)
+(function(){
   const saved = localStorage.getItem('lp-landing-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
   const btn = document.getElementById('theme-btn');
-  if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+  if(btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
 })();
-
-function toggleTheme() {
+function toggleTheme(){
   const html = document.documentElement;
-  const current = html.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   html.setAttribute('data-theme', next);
-  try { localStorage.setItem('lp-landing-theme', next); } catch(e) {}
+  try{ localStorage.setItem('lp-landing-theme', next); }catch(e){}
   document.getElementById('theme-btn').textContent = next === 'dark' ? '☀️' : '🌙';
 }
 
-// ── Mockup bars
-(function() {
-  const values = [62,74,55,88,71,95,83,67,90,78,85,72];
-  const container = document.getElementById('mockup-bars');
-  if (!container) return;
-  values.forEach((v, i) => {
-    const bar = document.createElement('div');
-    bar.className = 'mockup-bar-item';
-    const isHighlight = i === 5;
-    bar.style.cssText = `height:${v}%;background:${i < 6 ? 'var(--ac)' : 'var(--gr)'};opacity:${isHighlight ? '1' : '.5'}`;
-    container.appendChild(bar);
-  });
+// ── Reveal au scroll
+(function(){
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+})();
+
+// ── Sticky CTA mobile : masquer quand hero CTA visible
+(function(){
+  const sticky = document.getElementById('sticky-cta');
+  if(!sticky) return;
+  const heroCtas = document.querySelector('.hero-ctas');
+  const ctaSection = document.querySelector('.cta-section');
+  const obs = new IntersectionObserver((entries) => {
+    const anyVisible = entries.some(e => e.isIntersecting);
+    sticky.classList.toggle('hidden', anyVisible);
+  }, { threshold: 0.1 });
+  if(heroCtas) obs.observe(heroCtas);
+  if(ctaSection) obs.observe(ctaSection);
 })();
 
 // ── FAQ
-function toggleFaq(el) {
+function toggleFaq(el){
   const item = el.closest('.faq-item');
   const wasOpen = item.classList.contains('open');
   document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-  if (!wasOpen) item.classList.add('open');
+  if(!wasOpen) item.classList.add('open');
 }
 
 // ── Modales
-function openModal(id) {
-  document.getElementById('modal-' + id).classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeModal(id) {
-  document.getElementById('modal-' + id).classList.remove('open');
-  document.body.style.overflow = '';
-}
-function closeModalOv(e, id) {
-  if (e.target === e.currentTarget) closeModal(id);
-}
+function openModal(id){ document.getElementById('modal-'+id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById('modal-'+id).classList.remove('open'); document.body.style.overflow=''; }
+function closeModalOv(e,id){ if(e.target===e.currentTarget) closeModal(id); }
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-ov.open').forEach(m => m.classList.remove('open'));
-    document.body.style.overflow = '';
-  }
+  if(e.key==='Escape'){ document.querySelectorAll('.modal-ov.open').forEach(m=>m.classList.remove('open')); document.body.style.overflow=''; }
 });
 
 // ── Smooth scroll
@@ -886,7 +824,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     const id = a.getAttribute('href').slice(1);
     const el = document.getElementById(id);
-    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth',block:'start'}); }
   });
 });
 </script>
