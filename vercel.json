@@ -1,5 +1,16 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/app", "destination": "/index.html" },
+    { "source": "/app/(.*)", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/index.html" },
+    { "source": "/chiffre-affaires", "destination": "/index.html" },
+    { "source": "/charges", "destination": "/index.html" },
+    { "source": "/marge-rentabilite", "destination": "/index.html" },
+    { "source": "/scenarios", "destination": "/index.html" },
+    { "source": "/previsionnel", "destination": "/index.html" },
+    { "source": "/tva", "destination": "/index.html" },
+    { "source": "/tresorerie", "destination": "/index.html" },
+    { "source": "/parametres", "destination": "/index.html" },
+    { "source": "/", "destination": "/landing.html" }
   ]
 }
