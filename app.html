@@ -3257,20 +3257,22 @@ async function loadProStatus() {
       const now = new Date();
       const trialEnd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
 
-      const _sendTrialJ0 = async () => {
-        try {
-          const userRes = await DB.auth.getUser();
-          const userEmail = userRes?.data?.user?.email;
-          const sessionRes = await DB.auth.getSession();
-          const accessToken = sessionRes?.data?.session?.access_token;
-          if(userEmail && accessToken) {
-            fetch(SUPA_URL + '/functions/v1/send-trial-email', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
-              body: JSON.stringify({ email: userEmail, type: 'j0' })
-            }).catch(() => {});
-          }
-        } catch(e) { /* silencieux */ }
+      const _sendTrialJ0 = () => {
+        // Délai court pour s'assurer que la session est bien établie
+        setTimeout(async () => {
+          try {
+            const sessionRes = await DB.auth.getSession();
+            const accessToken = sessionRes?.data?.session?.access_token;
+            const userEmail = sessionRes?.data?.session?.user?.email;
+            if(userEmail && accessToken) {
+              fetch(SUPA_URL + '/functions/v1/send-trial-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+                body: JSON.stringify({ email: userEmail, type: 'j0' })
+              }).catch(() => {});
+            }
+          } catch(e) { /* silencieux */ }
+        }, 2000);
       };
 
       if(!data) {
