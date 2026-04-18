@@ -5231,6 +5231,7 @@ function showOk(msg)  { $('auth-ok').textContent=msg;  $('auth-ok').style.displa
 
 async function doLogout() {
   clearTimeout(_saveTimer);
+  if(window._trialCheckInterval) { clearInterval(window._trialCheckInterval); window._trialCheckInterval = null; }
   // Reset complet de l'état — évite que le prochain user voie les données du précédent
   UID = null;
   articles = []; charges = []; qty = {}; mts = {};
@@ -5285,6 +5286,19 @@ async function startApp(user) {
   await _loadMtsOnly();
   await loadProStatus();
   applyFreemium(); // Appelé après loadProStatus — _isPro est maintenant correct
+
+  // Vérification périodique expiration trial — toutes les 5 minutes
+  // Utile si l'user laisse l'app ouverte au moment où le trial expire
+  if(window._trialCheckInterval) clearInterval(window._trialCheckInterval);
+  window._trialCheckInterval = setInterval(() => {
+    if(!_isPro && _trialEndsAt && new Date() >= _trialEndsAt) {
+      _trialEndsAt = null;
+      applyFreemium();
+      // Supprimer l'overlay courant si un module Pro est affiché
+      document.querySelectorAll('[id^="pro-overlay-"]').forEach(e => e.remove());
+    }
+  }, 5 * 60 * 1000);
+
   // Routing : Wizard si premier accès, Dashboard si configuré, Paramètres sinon
   if(!P.nomEnt || P.nomEnt.trim() === '') {
     showPanel('pnl-params','nav-params');
