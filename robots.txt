@@ -1,0 +1,17 @@
+# LogPose — robots.txt
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /app/
+Disallow: /dashboard
+Disallow: /chiffre-affaires
+Disallow: /charges
+Disallow: /marge-rentabilite
+Disallow: /scenarios
+Disallow: /previsionnel
+Disallow: /tva
+Disallow: /tresorerie
+Disallow: /parametres
+
+# Sitemap
+Sitemap: https://logposefr.com/sitemap.xml
