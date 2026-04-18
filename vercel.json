@@ -1,16 +1,17 @@
 {
   "rewrites": [
-    { "source": "/app", "destination": "/index.html" },
-    { "source": "/app/(.*)", "destination": "/index.html" },
-    { "source": "/dashboard", "destination": "/index.html" },
-    { "source": "/chiffre-affaires", "destination": "/index.html" },
-    { "source": "/charges", "destination": "/index.html" },
-    { "source": "/marge-rentabilite", "destination": "/index.html" },
-    { "source": "/scenarios", "destination": "/index.html" },
-    { "source": "/previsionnel", "destination": "/index.html" },
-    { "source": "/tva", "destination": "/index.html" },
-    { "source": "/tresorerie", "destination": "/index.html" },
-    { "source": "/parametres", "destination": "/index.html" },
+    { "source": "/app", "destination": "/app.html" },
+    { "source": "/app/", "destination": "/app.html" },
+    { "source": "/app/(.*)", "destination": "/app.html" },
+    { "source": "/dashboard", "destination": "/app.html" },
+    { "source": "/chiffre-affaires", "destination": "/app.html" },
+    { "source": "/charges", "destination": "/app.html" },
+    { "source": "/marge-rentabilite", "destination": "/app.html" },
+    { "source": "/scenarios", "destination": "/app.html" },
+    { "source": "/previsionnel", "destination": "/app.html" },
+    { "source": "/tva", "destination": "/app.html" },
+    { "source": "/tresorerie", "destination": "/app.html" },
+    { "source": "/parametres", "destination": "/app.html" },
     { "source": "/", "destination": "/landing.html" }
   ]
 }
