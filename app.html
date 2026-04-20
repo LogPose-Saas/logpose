@@ -3287,14 +3287,15 @@ async function _loadN1() {
 
   try {
     // ── Charger articles N-1 ──
+    // On charge tous les articles et on filtre en JS (lte non supporté sur PK composite)
     const { data: artsN1 } = await DB.from('articles')
-      .select('code,pv,cout')
+      .select('code,pv,cout,annee')
       .eq('user_id', UID)
-      .lte('annee', anneeN1);
+      .order('annee', { ascending: true });
 
-    // Map code → dernière version connue pour N-1
+    // Map code → dernière version connue pour annee <= N-1
     const artMapN1 = {};
-    (artsN1 || []).forEach(a => { artMapN1[a.code] = a; });
+    (artsN1 || []).filter(a => a.annee <= anneeN1).forEach(a => { artMapN1[a.code] = a; });
 
     // ── Charger saisies CA N-1 ──
     const { data: saisiesCA_N1 } = await DB.from('saisies_ca')
@@ -3310,13 +3311,14 @@ async function _loadN1() {
     });
 
     // ── Charger charges N-1 ──
+    // Même logique — filtre JS pour éviter lte sur PK composite
     const { data: chsN1 } = await DB.from('charges')
-      .select('code,tva')
+      .select('code,tva,annee')
       .eq('user_id', UID)
-      .lte('annee', anneeN1);
+      .order('annee', { ascending: true });
 
     const chMapN1 = {};
-    (chsN1 || []).forEach(c => { chMapN1[String(c.code)] = c; });
+    (chsN1 || []).filter(c => c.annee <= anneeN1).forEach(c => { chMapN1[String(c.code)] = c; });
 
     const { data: saisiesCH_N1 } = await DB.from('saisies_charges')
       .select('charge_code,mois,montant')
