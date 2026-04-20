@@ -3289,7 +3289,7 @@ async function _loadN1() {
     // ── Charger articles N-1 ──
     // On charge tous les articles et on filtre en JS (lte non supporté sur PK composite)
     const { data: artsN1 } = await DB.from('articles')
-      .select('code,pv,cout,annee')
+      .select('code,prix_ht,cout_achat,annee')
       .eq('user_id', UID)
       .order('annee', { ascending: true });
 
@@ -3350,7 +3350,7 @@ async function _loadN1() {
     // N-1
     Object.entries(qtyN1).forEach(([code, vals]) => {
       const a = artMapN1[code]; if(!a) return;
-      vals.forEach((v, m) => { caParMoisN1[m] += (v||0) * a.pv; });
+      vals.forEach((v, m) => { caParMoisN1[m] += (v||0) * a.prix_ht; });
     });
     Object.entries(mtsN1).forEach(([code, vals]) => {
       const c = chMapN1[code]; if(!c) return;
@@ -3388,7 +3388,7 @@ async function _loadN1() {
     });
     Object.entries(qtyN1).forEach(([code, vals]) => {
       const a = artMapN1[code]; if(!a) return;
-      moisCommuns.forEach(m => { margeN1 += (vals[m]||0) * (a.pv - a.cout); });
+      moisCommuns.forEach(m => { margeN1 += (vals[m]||0) * (a.prix_ht - a.cout_achat); });
     });
 
     const resN  = caN  - chN;
