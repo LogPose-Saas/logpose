@@ -269,6 +269,15 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .du{background:var(--grb);color:var(--gr)}.dd{background:var(--rdb);color:var(--rd)}.dn{background:var(--amb);color:var(--am)}
 .ksub{font-size:10.5px;color:var(--t3);margin-top:4px}
 
+/* ── DELTA N-1 YTD ── */
+.kytd{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;margin-top:6px;cursor:default;position:relative}
+.kytd.up{background:var(--grb);color:var(--gr)}
+.kytd.dn{background:var(--rdb);color:var(--rd)}
+.kytd.neu{background:var(--amb);color:var(--am)}
+.kytd-tip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--bgc);border:1px solid var(--bd);border-radius:var(--rs);padding:6px 10px;font-size:11px;font-weight:400;color:var(--t2);white-space:nowrap;box-shadow:var(--sh);z-index:50;pointer-events:none}
+.kytd-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--bd)}
+.kytd:hover .kytd-tip{display:block;animation:fadeInDown .15s ease}
+
 /* ── ALERTS BAR ── */
 .alerts{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
 .alrt{display:flex;align-items:center;gap:7px;padding:6px 13px;border-radius:99px;font-size:12px;font-weight:600}
@@ -1028,6 +1037,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div id="db-kpi-ca-obj" style="font-size:11px;color:var(--t2);margin-top:6px">Objectif : —</div>
           <div class="pw" style="margin-top:8px"><div class="pb" id="db-bar-obj" style="width:0%;background:var(--ac)"></div></div>
           <div class="kpi-help">?<div class="kpi-tooltip">CA HT calculé depuis les quantités saisies × prix unitaires HT. La barre indique la progression vers l'objectif annuel défini dans Paramètres.</div></div>
+          <div id="db-ytd-ca"></div>
         </div>
         <div class="kcard" style="text-align:center">
           <div class="kacc" style="background:var(--rd)"></div>
@@ -1035,6 +1045,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="kval" id="db-kpi-ch">0 €</div>
           <div id="db-kpi-ch-sub" style="font-size:11px;color:var(--t2);margin-top:6px">HT : 0 €</div>
           <div class="kpi-help">?<div class="kpi-tooltip">Montant TTC total des charges saisi sur l'année. Le montant HT est recalculé en appliquant le taux de TVA de chaque charge.</div></div>
+          <div id="db-ytd-ch"></div>
         </div>
         <div class="kcard" style="text-align:center">
           <div class="kacc" id="db-res-acc" style="background:var(--gr)"></div>
@@ -1042,6 +1053,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="kval" id="db-kpi-res">0 €</div>
           <div style="font-size:11px;color:var(--t2);margin-top:6px">CA HT − Charges HT</div>
           <div class="kpi-help">?<div class="kpi-tooltip">Résultat brut = CA HT − Charges HT. Positif = l'activité couvre ses charges. Négatif = déficit sur la période saisie.</div></div>
+          <div id="db-ytd-res"></div>
         </div>
         <div class="kcard" style="text-align:center">
           <div class="kacc" style="background:var(--pu)"></div>
@@ -1049,6 +1061,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="kval" id="db-kpi-marge">0 %</div>
           <div style="font-size:11px;color:var(--t2);margin-top:6px">(CA − Coûts achat) / CA HT</div>
           <div class="kpi-help">?<div class="kpi-tooltip">Marge commerciale = CA HT − coûts d'achat directs des articles. Indépendant des charges fixes. Un taux élevé indique une bonne valorisation produit.</div></div>
+          <div id="db-ytd-marge"></div>
         </div>
       </div>
 
@@ -3224,6 +3237,190 @@ function renderDashboard() {
       <div class="abox-ico">${a.ico}</div>
       <div><div class="abox-title">${a.titre}</div><div class="abox-desc">${a.desc}</div></div>
     </div>`).join('');
+
+  // Comparaison N-1 — asynchrone, ne bloque pas le rendu
+  _loadN1();
+}
+
+// ════════════════════════════════════════════════════════
+// COMPARAISON N-1 (YTD)
+// ════════════════════════════════════════════════════════
+
+// Noms des mois courts pour le tooltip
+const MOIS_COURTS = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+
+// Affiche ou masque un badge YTD sur un élément
+function _ytdBadge(id, valN, valN1, moisCommuns, isPercent) {
+  const el = $(id);
+  if(!el) return;
+
+  // Pas de données communes ou N-1 = 0 → on efface et on sort
+  if(!moisCommuns || moisCommuns.length === 0 || valN1 === 0) {
+    el.innerHTML = '';
+    return;
+  }
+
+  const delta  = valN - valN1;
+  const pct    = Math.round(delta / Math.abs(valN1) * 1000) / 10;
+  const sign   = pct > 0 ? '+' : '';
+  const cls    = pct > 0.05 ? 'up' : pct < -0.05 ? 'dn' : 'neu';
+  const arrow  = pct > 0.05 ? '↑' : pct < -0.05 ? '↓' : '=';
+
+  // Libellé de la période pour le tooltip
+  const debut  = MOIS_COURTS[Math.min(...moisCommuns)];
+  const fin    = MOIS_COURTS[Math.max(...moisCommuns)];
+  const tipTxt = debut === fin
+    ? `vs ${debut} ${ANNEE-1}`
+    : `vs ${debut}–${fin} ${ANNEE-1}`;
+
+  el.innerHTML = `
+    <div class="kytd ${cls}">
+      ${arrow} ${sign}${pct.toFixed(1)} % <span style="font-size:10px;opacity:.8">YTD</span>
+      <div class="kytd-tip">${tipTxt}</div>
+    </div>`;
+}
+
+// Charge les données N-1 et injecte les badges YTD sur les 4 KPIs du dashboard
+async function _loadN1() {
+  if(!UID) return;
+  const anneeN1 = ANNEE - 1;
+
+  try {
+    // ── Charger articles N-1 ──
+    const { data: artsN1 } = await DB.from('articles')
+      .select('code,pv,cout')
+      .eq('user_id', UID)
+      .lte('annee', anneeN1);
+
+    // Map code → dernière version connue pour N-1
+    const artMapN1 = {};
+    (artsN1 || []).forEach(a => { artMapN1[a.code] = a; });
+
+    // ── Charger saisies CA N-1 ──
+    const { data: saisiesCA_N1 } = await DB.from('saisies_ca')
+      .select('article_code,mois,quantite')
+      .eq('user_id', UID)
+      .eq('annee', anneeN1);
+
+    // Construire qtyN1 : { code: [12 valeurs] }
+    const qtyN1 = {};
+    Object.keys(artMapN1).forEach(c => { qtyN1[c] = Array(12).fill(0); });
+    (saisiesCA_N1 || []).forEach(r => {
+      if(qtyN1[r.article_code] !== undefined) qtyN1[r.article_code][r.mois-1] = r.quantite || 0;
+    });
+
+    // ── Charger charges N-1 ──
+    const { data: chsN1 } = await DB.from('charges')
+      .select('code,tva')
+      .eq('user_id', UID)
+      .lte('annee', anneeN1);
+
+    const chMapN1 = {};
+    (chsN1 || []).forEach(c => { chMapN1[String(c.code)] = c; });
+
+    const { data: saisiesCH_N1 } = await DB.from('saisies_charges')
+      .select('charge_code,mois,montant')
+      .eq('user_id', UID)
+      .eq('annee', anneeN1);
+
+    const mtsN1 = {};
+    Object.keys(chMapN1).forEach(k => { mtsN1[k] = Array(12).fill(0); });
+    (saisiesCH_N1 || []).forEach(r => {
+      const k = String(r.charge_code);
+      if(mtsN1[k] !== undefined) mtsN1[k][r.mois-1] = r.montant || 0;
+    });
+
+    // ── Calculer CA et Charges par mois pour N et N-1 ──
+    const caParMoisN  = Array(12).fill(0);
+    const chParMoisN  = Array(12).fill(0);
+    const caParMoisN1 = Array(12).fill(0);
+    const chParMoisN1 = Array(12).fill(0);
+
+    // N — depuis les variables globales déjà en mémoire
+    articles.forEach(a => {
+      (qty[a.code] || []).forEach((v, m) => { caParMoisN[m] += (v||0) * a.pv; });
+    });
+    charges.forEach(c => {
+      const k = String(c.code);
+      (mts[k] || []).forEach((v, m) => { chParMoisN[m] += (v||0) / (1 + (c.tva||0)); });
+    });
+
+    // N-1
+    Object.entries(qtyN1).forEach(([code, vals]) => {
+      const a = artMapN1[code]; if(!a) return;
+      vals.forEach((v, m) => { caParMoisN1[m] += (v||0) * a.pv; });
+    });
+    Object.entries(mtsN1).forEach(([code, vals]) => {
+      const c = chMapN1[code]; if(!c) return;
+      vals.forEach((v, m) => { chParMoisN1[m] += (v||0) / (1 + (c.tva||0)); });
+    });
+
+    // ── Détecter les mois actifs en N (CA > 0) ──
+    const moisActifsN  = caParMoisN.map((v,i) => v > 0 ? i : -1).filter(i => i >= 0);
+    const moisActifsN1 = caParMoisN1.map((v,i) => v > 0 ? i : -1).filter(i => i >= 0);
+
+    // Intersection des mois actifs
+    const moisCommuns = moisActifsN.filter(m => moisActifsN1.includes(m));
+
+    if(moisCommuns.length === 0) {
+      // Aucun mois commun — on efface tous les badges
+      ['db-ytd-ca','db-ytd-ch','db-ytd-res','db-ytd-marge'].forEach(id => {
+        const el = $(id); if(el) el.innerHTML = '';
+      });
+      return;
+    }
+
+    // ── Totaux sur les mois communs uniquement ──
+    let caN = 0, caN1 = 0, chN = 0, chN1 = 0, margeN = 0, margeN1 = 0;
+
+    moisCommuns.forEach(m => {
+      caN  += caParMoisN[m];
+      caN1 += caParMoisN1[m];
+      chN  += chParMoisN[m];
+      chN1 += chParMoisN1[m];
+    });
+
+    // Marge brute sur mois communs
+    articles.forEach(a => {
+      moisCommuns.forEach(m => { margeN += (qty[a.code]?.[m]||0) * (a.pv - a.cout); });
+    });
+    Object.entries(qtyN1).forEach(([code, vals]) => {
+      const a = artMapN1[code]; if(!a) return;
+      moisCommuns.forEach(m => { margeN1 += (vals[m]||0) * (a.pv - a.cout); });
+    });
+
+    const resN  = caN  - chN;
+    const resN1 = caN1 - chN1;
+    const txN   = caN  > 0 ? margeN  / caN  * 100 : 0;
+    const txN1  = caN1 > 0 ? margeN1 / caN1 * 100 : 0;
+
+    // ── Injecter les badges ──
+    _ytdBadge('db-ytd-ca',    caN,  caN1,  moisCommuns, false);
+    _ytdBadge('db-ytd-ch',    chN,  chN1,  moisCommuns, false);
+    _ytdBadge('db-ytd-res',   resN, resN1, moisCommuns, false);
+
+    // Pour la marge (%) on passe les taux directement
+    const elMarge = $('db-ytd-marge');
+    if(elMarge) {
+      if(moisCommuns.length === 0 || caN1 === 0) { elMarge.innerHTML = ''; return; }
+      const deltaTx = txN - txN1;
+      const sign    = deltaTx > 0 ? '+' : '';
+      const cls     = deltaTx > 0.05 ? 'up' : deltaTx < -0.05 ? 'dn' : 'neu';
+      const arrow   = deltaTx > 0.05 ? '↑' : deltaTx < -0.05 ? '↓' : '=';
+      const debut   = MOIS_COURTS[Math.min(...moisCommuns)];
+      const fin     = MOIS_COURTS[Math.max(...moisCommuns)];
+      const tipTxt  = debut === fin ? `vs ${debut} ${ANNEE-1}` : `vs ${debut}–${fin} ${ANNEE-1}`;
+      elMarge.innerHTML = `
+        <div class="kytd ${cls}">
+          ${arrow} ${sign}${deltaTx.toFixed(1)} pts <span style="font-size:10px;opacity:.8">YTD</span>
+          <div class="kytd-tip">${tipTxt}</div>
+        </div>`;
+    }
+
+  } catch(e) {
+    // Silencieux — la comparaison N-1 n'est jamais bloquante
+    console.warn('[N-1]', e.message);
+  }
 }
 
 // ════════════════════════════════════════════════════════
