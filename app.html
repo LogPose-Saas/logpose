@@ -1272,6 +1272,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
           <div class="klbl">Marge brute</div>
           <div class="kval" id="ca-kpi-marge">0 €</div>
+          <div id="ca-ytd-marge"></div>
           <div class="kpi-help">?<div class="kpi-tooltip">Ce qu'il vous reste après déduction des coûts d'achat. Calculé en soustrayant le coût d'achat unitaire du prix HT, multiplié par les quantités vendues.</div></div>
         </div>
         <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
@@ -1343,6 +1344,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="card" style="margin:0;padding:16px;position:relative;text-align:center">
           <div class="klbl">Ratio charges / CA</div>
           <div class="kval" id="ch-kpi-ratio">— %</div>
+          <div id="ch-ytd-ratio"></div>
           <div id="ch-kpi-ratio-sub" style="font-size:12px;color:var(--t2);margin-top:4px;font-family:var(--fm)">CA HT : 0 €</div>
           <div class="kpi-help">?<div class="kpi-tooltip">Part des charges HT dans le CA HT. Un ratio élevé réduit votre marge. Calculé sur les données saisies dans le module Chiffre d'affaires.</div></div>
         </div>
@@ -3257,7 +3259,7 @@ function renderDashboard() {
 const MOIS_COURTS = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
 
 // Affiche ou masque un badge YTD sur un élément
-function _ytdBadge(id, valN, valN1, moisCommuns, isPercent) {
+function _ytdBadge(id, valN, valN1, moisCommuns, isPercent, invert) {
   const el = $(id);
   if(!el) return;
 
@@ -3270,7 +3272,10 @@ function _ytdBadge(id, valN, valN1, moisCommuns, isPercent) {
   const delta  = valN - valN1;
   const pct    = Math.round(delta / Math.abs(valN1) * 1000) / 10;
   const sign   = pct > 0 ? '+' : '';
-  const cls    = pct > 0.05 ? 'up' : pct < -0.05 ? 'dn' : 'neu';
+  // invert=true : hausse = mauvais (rouge), baisse = bon (vert) — ex: charges, ratio
+  const cls    = invert
+    ? (pct > 0.05 ? 'dn' : pct < -0.05 ? 'up' : 'neu')
+    : (pct > 0.05 ? 'up' : pct < -0.05 ? 'dn' : 'neu');
   const arrow  = pct > 0.05 ? '↑' : pct < -0.05 ? '↓' : '=';
 
   // Libellé de la période pour le tooltip
@@ -3445,7 +3450,8 @@ async function _loadN1CA() {
       const a=artMapN1[code]; if(!a) return;
       moisComm.forEach(m => { margeN1+=(vals[m]||0)*(a.prix_ht-a.cout_achat); });
     });
-    _ytdBadge('ca-ytd-caht', caN, caN1, moisComm, false);
+    _ytdBadge('ca-ytd-caht',  caN,    caN1,   moisComm, false);
+    _ytdBadge('ca-ytd-marge', margeN, margeN1, moisComm, false);
     _ytdBadgePts('ca-ytd-txmarge', caN>0?margeN/caN*100:0, caN1>0?margeN1/caN1*100:0, moisComm);
   } catch(e) { console.warn('[N-1 CA]', e.message); }
 }
@@ -3462,14 +3468,34 @@ async function _loadN1CH() {
       const el=$('ch-ytd-ttc'); if(el) el.innerHTML=''; return;
     }
     let chN=0, chN1=0;
-    // Pour les charges on compare les charges TTC sur les mois communs
+    // Charges TTC sur mois communs
     moisComm.forEach(m => {
       charges.forEach(c => { chN+=(mts[String(c.code)]?.[m]||0); });
     });
     Object.entries(mtsN1).forEach(([code,vals]) => {
       moisComm.forEach(m => { chN1+=(vals[m]||0); });
     });
-    _ytdBadge('ch-ytd-ttc', chN, chN1, moisComm, false);
+    // invert=true : hausse des charges = rouge
+    _ytdBadge('ch-ytd-ttc', chN, chN1, moisComm, false, true);
+
+    // Ratio charges HT / CA HT sur mois communs
+    let chHT_N=0, chHT_N1=0, caN=0, caN1=0;
+    moisComm.forEach(m => { caN+=caParMoisN[m]; caN1+=caParMoisN1[m]; chHT_N+=chParMoisN[m]; chHT_N1+=chParMoisN1[m]; });
+    const ratioN  = caN  > 0 ? chHT_N  / caN  * 100 : 0;
+    const ratioN1 = caN1 > 0 ? chHT_N1 / caN1 * 100 : 0;
+    // Pour le ratio on utilise _ytdBadgePts avec invert
+    const elRatio = $('ch-ytd-ratio');
+    if(elRatio && moisComm.length && caN1 > 0) {
+      const delta = ratioN - ratioN1;
+      const sign  = delta > 0 ? '+' : '';
+      // Ratio qui monte = mauvais → dn (rouge), qui baisse = bon → up (vert)
+      const cls   = delta > 0.05 ? 'dn' : delta < -0.05 ? 'up' : 'neu';
+      const arrow = delta > 0.05 ? '↑' : delta < -0.05 ? '↓' : '=';
+      const debut = MOIS_COURTS[Math.min(...moisComm)];
+      const fin   = MOIS_COURTS[Math.max(...moisComm)];
+      const tip   = debut === fin ? `vs ${debut} ${ANNEE-1}` : `vs ${debut}–${fin} ${ANNEE-1}`;
+      elRatio.innerHTML = `<div class="kytd ${cls}">${arrow} ${sign}${delta.toFixed(1)} pts <span style="font-size:10px;opacity:.8">YTD</span><div class="kytd-tip">${tip}</div></div>`;
+    } else if(elRatio) { elRatio.innerHTML = ''; }
   } catch(e) { console.warn('[N-1 charges]', e.message); }
 }
 
