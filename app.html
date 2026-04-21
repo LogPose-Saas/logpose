@@ -708,20 +708,50 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   .dtbl td, .stbl td { padding: 4px 6px !important; }
   .sinp { border: none !important; background: transparent !important; font-size: 9px !important; width: auto !important; }
 
-  /* Graphiques */
-  canvas { max-height: 200px !important; }
-  .cw, .cwlg { height: 200px !important; }
+  /* Graphiques — forcer dimensions pour impression */
+  canvas { max-height: 220px !important; display: block !important; }
+  .cw { height: 220px !important; position: relative !important; }
+  .cwlg { height: 220px !important; position: relative !important; }
+
+  /* Overflow-x → visible pour tableaux CA/Charges */
+  [style*="overflow-x:auto"], [style*="overflow-x: auto"] {
+    overflow: visible !important;
+  }
+  #ca-tbl-wrap, #ch-tbl-wrap { overflow: visible !important; }
+
+  /* Tableaux CA/Charges — réduire taille pour tenir en largeur */
+  #ca-tbl th, #ca-tbl td,
+  #ch-tbl th, #ch-tbl td { font-size: 7px !important; padding: 2px 3px !important; }
+  .sinp { width: 28px !important; font-size: 7px !important; padding: 1px !important; }
+
+  /* Masquer inputs dans Prévisionnel */
+  #pnl-previsionnel input[type="number"],
+  #pnl-previsionnel .pv-hyp-input { display: none !important; }
+  #pnl-previsionnel .pv-hyp-val { display: inline !important; }
+
+  /* Masquer éléments interactifs inutiles */
+  .tabs, .tab { display: none !important; }
+  select { display: none !important; }
+
+  /* Top 5 — forcer largeur complète */
+  .cg3 { display: block !important; }
+  .cg3 > * { width: 100% !important; margin-bottom: 8px !important; break-inside: avoid; }
+
+  /* Grid Dashboard KPIs */
+  .g4 { grid-template-columns: repeat(2,1fr) !important; }
 
   /* Variables couleurs pour impression */
   :root {
-    --t1: #0c1828 !important; --t2: #4e6480 !important; --t3: #9eb3ce !important;
-    --ac: #2563eb !important; --gr: #059669 !important; --rd: #e11d48 !important;
-    --am: #d97706 !important; --pu: #7c3aed !important;
-    --bg: #fff !important; --bgc: #fff !important; --bgs: #f7faff !important;
-    --bd: #dce6f5 !important; --bds: #c2d2ea !important;
+    --t1: #0c1828; --t2: #4e6480; --t3: #9eb3ce;
+    --ac: #2563eb; --gr: #059669; --rd: #e11d48;
+    --am: #d97706; --pu: #7c3aed;
+    --bg: #fff; --bgc: #fff; --bgs: #f7faff;
+    --bd: #dce6f5; --bds: #c2d2ea;
+    --grb: rgba(5,150,105,.09); --rdb: rgba(225,29,72,.09);
+    --ag: rgba(37,99,235,.08); --amb: rgba(217,119,6,.09);
   }
 
-  @page { margin: 15mm 12mm; }
+  @page { margin: 12mm 10mm; size: A4; }
 }
 
 /* En-tête de rapport — masqué en mode normal */
@@ -3953,7 +3983,7 @@ function exportChargesExcel() {
 // ════════════════════════════════════════════════════════
 
 async function printReport() {
-  // 1. Remplir les métadonnées de l'en-tête
+  // 1. Métadonnées en-tête
   const eAnnee = $('print-annee');
   const eEnt   = $('print-entreprise');
   const eDate  = $('print-date');
@@ -3961,11 +3991,16 @@ async function printReport() {
   if(eEnt)   eEnt.textContent   = P.nomEnt || 'Mon Entreprise';
   if(eDate)  eDate.textContent  = 'Généré le ' + new Date().toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'});
 
-  // 2. S'assurer que toutes les données sont chargées
+  // 2. Charger toutes les données avec la bonne année
   if(_anneeCA !== ANNEE) await loadCA();
   if(_anneeMts !== ANNEE) await _loadMtsOnly();
 
-  // 3. Rendre tous les modules Pro si l'user est Pro/trial
+  // 3. Rendre tous les modules — CA et Charges en priorité
+  updateCAKpis();
+  updateCACharts();
+  renderChargesData();
+  updateCHCharts();
+
   if(isPro()) {
     renderMarge();
     renderTVA();
@@ -3973,10 +4008,16 @@ async function printReport() {
     renderPrevisionnel();
   }
 
-  // 4. Petit délai pour laisser les graphiques se redessiner
-  await new Promise(r => setTimeout(r, 400));
+  // 4. Délai pour que les canvas Chart.js se redessinent
+  // On force une mise à jour de tous les graphiques existants
+  [chartCALine, chartCAPie, chartCHLine, chartCHPie, chartDBMain,
+   chartMRWaterfall, chartPVMain, chartTR].forEach(c => {
+    if(c) { try { c.resize(); c.update(); } catch(e){} }
+  });
 
-  // 5. Lancer l'impression
+  await new Promise(r => setTimeout(r, 800));
+
+  // 5. Impression
   window.print();
 }
 
