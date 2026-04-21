@@ -647,6 +647,89 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 @media(max-width:520px){
   .g4,.g3,.g2{grid-template-columns:1fr}
 }
+
+/* ════════════════════════════════════════════════════════
+   IMPRESSION / EXPORT PDF
+   ════════════════════════════════════════════════════════ */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { background: #fff !important; color: #0c1828 !important; font-size: 11px !important; }
+
+  /* Masquer les éléments non pertinents */
+  .sb, .mob-hdr, .sb-ov, .savebar,
+  #pnl-aide, #aide-ov, #onb-wizard,
+  .page-actions, .addrow, .kpi-help,
+  #ca-filtre-art, #ch-filtre-type, #db-periode,
+  .db-checklist, #db-alertes, #ca-alertes, #ch-alertes,
+  [id^="pro-overlay-"], #trial-badge,
+  .theme-btn, .sb-col-btn, .sb-aide-btn,
+  #pnl-params, #pnl-scenarios { display: none !important; }
+
+  /* Main sans sidebar */
+  .main { margin-left: 0 !important; padding: 0 !important; }
+
+  /* Afficher tous les panels */
+  #pnl-dashboard, #pnl-ca, #pnl-charges,
+  #pnl-marge, #pnl-previsionnel, #pnl-tva, #pnl-tresorerie {
+    display: block !important;
+  }
+
+  /* En-tête de rapport */
+  #print-header { display: block !important; }
+
+  /* Sauts de page entre modules */
+  #pnl-ca, #pnl-charges, #pnl-marge,
+  #pnl-previsionnel, #pnl-tva, #pnl-tresorerie {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  /* Cards */
+  .card, .kcard {
+    background: #fff !important;
+    border: 1px solid #dce6f5 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  /* Topbar */
+  .topbar { margin-bottom: 12px !important; }
+  .page-title { font-size: 16px !important; font-weight: 800 !important; }
+  .page-sub { font-size: 10px !important; color: #4e6480 !important; }
+
+  /* KPIs */
+  .kgrid { gap: 8px !important; margin-bottom: 10px !important; }
+  .kval { font-size: 18px !important; }
+  .klbl { font-size: 9px !important; }
+
+  /* Tableaux */
+  .dtbl, .stbl { font-size: 9px !important; width: 100% !important; }
+  .dtbl th, .stbl th { font-size: 8px !important; padding: 4px 6px !important; }
+  .dtbl td, .stbl td { padding: 4px 6px !important; }
+  .sinp { border: none !important; background: transparent !important; font-size: 9px !important; width: auto !important; }
+
+  /* Graphiques */
+  canvas { max-height: 200px !important; }
+  .cw, .cwlg { height: 200px !important; }
+
+  /* Variables couleurs pour impression */
+  :root {
+    --t1: #0c1828 !important; --t2: #4e6480 !important; --t3: #9eb3ce !important;
+    --ac: #2563eb !important; --gr: #059669 !important; --rd: #e11d48 !important;
+    --am: #d97706 !important; --pu: #7c3aed !important;
+    --bg: #fff !important; --bgc: #fff !important; --bgs: #f7faff !important;
+    --bd: #dce6f5 !important; --bds: #c2d2ea !important;
+  }
+
+  @page { margin: 15mm 12mm; }
+}
+
+/* En-tête de rapport — masqué en mode normal */
+#print-header { display: none; padding: 16px 0 20px; border-bottom: 2px solid #2563eb; margin-bottom: 20px; }
+.print-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.print-logo-icon { width: 32px; height: 32px; background: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.print-brand { font-size: 20px; font-weight: 800; color: #0c1828; letter-spacing: -.4px; }
+.print-meta { font-size: 11px; color: #4e6480; font-family: monospace; }
 </style>
 </head>
 <body>
@@ -985,10 +1068,26 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
     <!-- DASHBOARD -->
     <div id="pnl-dashboard" style="display:none">
+      <!-- En-tête de rapport — visible uniquement à l'impression -->
+      <div id="print-header">
+        <div class="print-logo">
+          <div class="print-logo-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+            </svg>
+          </div>
+          <span class="print-brand">LogPose</span>
+        </div>
+        <div class="print-meta" id="print-meta">Rapport annuel · Année <span id="print-annee"></span> · <span id="print-entreprise"></span></div>
+        <div class="print-meta" style="margin-top:2px" id="print-date"></div>
+      </div>
       <div class="topbar">
         <div>
           <div class="page-title" id="db-title">Dashboard</div>
           <div class="page-sub">Vue d'ensemble · <span id="db-name"></span> · Année <span id="db-annee-lbl">2026</span></div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-g btn-sm" onclick="printReport()" title="Imprimer ou exporter en PDF">🖨 Imprimer / PDF</button>
         </div>
       </div>
 
@@ -3847,6 +3946,40 @@ function exportChargesExcel() {
 
   _downloadFile(csv, `Charges_LogPose_${ANNEE}.csv`, 'text/csv;charset=utf-8');
   toast('ok', 'Export réussi', `Fichier Charges_LogPose_${ANNEE}.csv téléchargé.`, 3000);
+}
+
+// ════════════════════════════════════════════════════════
+// IMPRESSION / EXPORT PDF
+// ════════════════════════════════════════════════════════
+
+async function printReport() {
+  // 1. Remplir les métadonnées de l'en-tête
+  const eAnnee = $('print-annee');
+  const eEnt   = $('print-entreprise');
+  const eDate  = $('print-date');
+  if(eAnnee) eAnnee.textContent = ANNEE;
+  if(eEnt)   eEnt.textContent   = P.nomEnt || 'Mon Entreprise';
+  if(eDate)  eDate.textContent  = 'Généré le ' + new Date().toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'});
+
+  // 2. S'assurer que toutes les données sont chargées
+  if(_anneeCA !== ANNEE) await loadCA();
+  if(_anneeMts !== ANNEE) await _loadMtsOnly();
+
+  // 3. Rendre tous les modules Pro si l'user est Pro/trial
+  if(isPro()) {
+    renderMarge();
+    renderTVA();
+    renderTresorerie();
+    // Prévisionnel nécessite ses propres données
+    const pvData = _pvLoad();
+    _pvSynth && typeof _pvSynth === 'function' && renderPrevisionnel();
+  }
+
+  // 4. Petit délai pour laisser les graphiques se redessiner
+  await new Promise(r => setTimeout(r, 400));
+
+  // 5. Lancer l'impression
+  window.print();
 }
 
 const LEMON_URL = 'https://logpose.lemonsqueezy.com/checkout/buy/246ce9d6-683a-4db6-912f-a95437b7d1da';
