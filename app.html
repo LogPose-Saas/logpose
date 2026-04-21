@@ -1996,13 +1996,25 @@ async function saveParams() {
     } else {
       paramsModifie = false;
       setSaved();
-      // Répliquer nomEnt sur N+1 et N+2 si le champ est vide sur ces années
-      if(P.nomEnt && P.nomEnt.trim()) {
+      // Répliquer nomEnt, secteur et regimeFisc sur N+1 et N+2 si les champs sont vides
+      const hasNomEnt    = !!(P.nomEnt     && P.nomEnt.trim());
+      const hasSecteur   = !!(P.secteur    && P.secteur.trim());
+      const hasRegimeFisc= !!(P.regimeFisc && P.regimeFisc.trim());
+
+      if(hasNomEnt || hasSecteur || hasRegimeFisc) {
         for(const an of [ANNEE+1, ANNEE+2]) {
-          const {data} = await DB.from('parametres').select('nom_entreprise').eq('user_id',UID).eq('annee',an).single();
-          if(!data || !data.nom_entreprise) {
+          const {data} = await DB.from('parametres')
+            .select('nom_entreprise,secteur,regime_fiscal')
+            .eq('user_id', UID).eq('annee', an).single();
+
+          const toUpdate = {};
+          if(hasNomEnt     && (!data || !data.nom_entreprise)) toUpdate.nom_entreprise = P.nomEnt;
+          if(hasSecteur    && (!data || !data.secteur))        toUpdate.secteur        = P.secteur;
+          if(hasRegimeFisc && (!data || !data.regime_fiscal))  toUpdate.regime_fiscal  = P.regimeFisc;
+
+          if(Object.keys(toUpdate).length > 0) {
             await DB.from('parametres').upsert({
-              user_id:UID, annee:an, nom_entreprise:P.nomEnt,
+              user_id: UID, annee: an, ...toUpdate
             }, {onConflict:'user_id,annee'});
           }
         }
