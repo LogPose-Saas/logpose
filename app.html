@@ -4004,16 +4004,23 @@ async function printReport() {
   if(eEnt)   eEnt.textContent   = P.nomEnt || 'Mon Entreprise';
   if(eDate)  eDate.textContent  = 'Généré le ' + new Date().toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'});
 
-  // 2. Charger toutes les données avec la bonne année
+  // 2. Charger toutes les données
   if(_anneeCA !== ANNEE) await loadCA();
   if(_anneeMts !== ANNEE) await _loadMtsOnly();
 
-  // 3. Rendre tous les modules — CA et Charges en priorité
+  // 3. Afficher TEMPORAIREMENT tous les panels pour que les canvas soient visibles
+  const allPanels = ['pnl-dashboard','pnl-ca','pnl-charges','pnl-marge','pnl-previsionnel','pnl-tva','pnl-tresorerie'];
+  const panelPrevDisplay = {};
+  allPanels.forEach(id => {
+    const el = $(id);
+    if(el) { panelPrevDisplay[id] = el.style.display; el.style.display = 'block'; }
+  });
+
+  // 4. Rendre tous les modules avec les panels visibles
   updateCAKpis();
   updateCACharts();
   renderChargesData();
   updateCHCharts();
-
   if(isPro()) {
     renderMarge();
     renderTVA();
@@ -4021,9 +4028,11 @@ async function printReport() {
     renderPrevisionnel();
   }
 
-  // 4. Injecter les valeurs des inputs Prévisionnel comme texte visible
+  // 5. Laisser le DOM se mettre à jour + canvas se dessiner
+  await new Promise(r => setTimeout(r, 600));
+
+  // 6. Injecter les valeurs des inputs Prévisionnel
   document.querySelectorAll('#pnl-previsionnel input[type="number"]').forEach(inp => {
-    // Chercher ou créer le span de valeur print
     let s = inp.parentNode.querySelector('.pv-print-val');
     if(!s) {
       s = document.createElement('span');
@@ -4031,12 +4040,11 @@ async function printReport() {
       s.style.cssText = 'font-size:12px;font-weight:700;color:#0c1828;margin-left:4px';
       inp.parentNode.appendChild(s);
     }
-    // Valeur sans doublon de % — le label % est masqué en CSS print
     s.textContent = inp.value !== '' ? inp.value + ' %' : '—';
   });
 
-  // 5. Convertir chaque graphique en image PNG pour l'impression
-  const _chartImgMap = []; // [{canvas, img, parent}] pour restaurer après
+  // 7. Capturer chaque graphique en image PNG
+  const _chartImgMap = [];
   const chartList = [
     { chart: chartDBMain,      canvasId: 'db-chart-main' },
     { chart: chartCALine,      canvasId: 'ca-chart-line' },
@@ -4056,9 +4064,10 @@ async function printReport() {
       const canvas = $(canvasId);
       if(!canvas) return;
       const imgData = chart.toBase64Image('image/png', 1.0);
+      if(!imgData || imgData === 'data:,') return; // canvas vide — on skip
       const img = document.createElement('img');
       img.src = imgData;
-      img.style.cssText = `width:${canvas.offsetWidth}px;height:${canvas.offsetHeight}px;max-width:100%;display:block`;
+      img.style.cssText = 'width:100%;max-width:100%;display:block;height:auto';
       img.className = 'print-chart-img';
       canvas.parentNode.insertBefore(img, canvas);
       canvas.style.display = 'none';
@@ -4066,18 +4075,22 @@ async function printReport() {
     } catch(e) { console.warn('[print chart]', canvasId, e.message); }
   });
 
-  await new Promise(r => setTimeout(r, 300));
+  // 8. Remettre les panels dans leur état initial SAUF dashboard (toujours visible)
+  allPanels.forEach(id => {
+    const el = $(id);
+    if(el && id !== 'pnl-dashboard') el.style.display = panelPrevDisplay[id] || 'none';
+  });
 
-  // 6. Impression
+  // 9. Petit délai puis impression
+  await new Promise(r => setTimeout(r, 200));
   window.print();
 
-  // 7. Restaurer les canvas après impression
+  // 10. Restaurer canvas + nettoyer après impression
   setTimeout(() => {
     _chartImgMap.forEach(({ canvas, img }) => {
       canvas.style.display = '';
       try { img.parentNode.removeChild(img); } catch(e) {}
     });
-    // Nettoyer les spans prévisionnel injectés
     document.querySelectorAll('.pv-print-val').forEach(s => s.remove());
   }, 500);
 }
