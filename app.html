@@ -3533,14 +3533,29 @@ async function _loadN1MR() {
     const resN1 = caN1 - chN1;
     // MCV en € — badge normal
     _ytdBadge('mr-ytd-mcv', mcvN, mcvN1, moisComm, false);
-    // Atteinte du seuil en % — on compare les ratios en points
-    const attN  = caN  > 0 && (caN - chN) !== 0 ? Math.round(caN  / Math.max(caN  - chN,  0.01) * 10) / 10 : 0;
-    const attN1 = caN1 > 0 && (caN1 - chN1) !== 0 ? Math.round(caN1 / Math.max(caN1 - chN1, 0.01) * 10) / 10 : 0;
-    // Calcul correct : atteinte = caHT / seuil * 100 — on utilise resN/resN1 comme proxy de progression
-    // Plus simple : on compare directement resN/caN vs resN1/caN1 en pts (taux de résultat)
-    const txResN  = caN  > 0 ? resN  / caN  * 100 : 0;
-    const txResN1 = caN1 > 0 ? resN1 / caN1 * 100 : 0;
-    _ytdBadgePts('mr-ytd-resultat', txResN, txResN1, moisComm);
+
+    // Atteinte du seuil en pts — calcul exact : caHT / seuil * 100
+    // seuil = chFixHT / txMCV  où txMCV = mcv / caHT
+    let chFixN=0, chFixN1=0, chVarN2=0, chVarN12=0;
+    charges.forEach(c => {
+      const k = String(c.code);
+      const htN = moisComm.reduce((s,m) => s + (mts[k]?.[m]||0)/(1+(c.tva||0)), 0);
+      if(c.type==='Fixe') chFixN  += htN; else chVarN2 += htN;
+    });
+    Object.entries(mtsN1).forEach(([code,vals]) => {
+      const c = chMapN1[code]; if(!c) return;
+      const htN1 = moisComm.reduce((s,m) => s + (vals[m]||0)/(1+(c.tva||0)), 0);
+      if(c.type==='Fixe') chFixN1 += htN1; else chVarN12 += htN1;
+    });
+    const mcvN2  = margeN  - chVarN2;
+    const mcvN12 = margeN1 - chVarN12;
+    const txMCVN  = caN  > 0 ? mcvN2  / caN  : 0;
+    const txMCVN1 = caN1 > 0 ? mcvN12 / caN1 : 0;
+    const seuilN  = txMCVN  > 0 ? chFixN  / txMCVN  : 0;
+    const seuilN1 = txMCVN1 > 0 ? chFixN1 / txMCVN1 : 0;
+    const attN  = seuilN  > 0 ? caN  / seuilN  * 100 : 0;
+    const attN1 = seuilN1 > 0 ? caN1 / seuilN1 * 100 : 0;
+    _ytdBadgePts('mr-ytd-resultat', attN, attN1, moisComm);
   } catch(e) { console.warn('[N-1 marge]', e.message); }
 }
 
