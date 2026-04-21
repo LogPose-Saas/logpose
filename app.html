@@ -1141,8 +1141,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="tbl-hdr">
             <div><div class="ct">Table articles</div><div class="cs">Répliqué automatiquement sur les années suivantes</div></div>
             <div style="display:flex;gap:8px">
+              <button class="btn btn-g btn-sm" id="btn-import-art" title="Importer depuis CSV">⬆ Importer CSV</button>
+              <button class="btn btn-g btn-sm" id="btn-template-art" title="Télécharger le modèle CSV">⬇ Modèle CSV</button>
               <button class="btn btn-g btn-sm" id="btn-add-art">+ Ajouter</button>
             </div>
+            <input type="file" id="input-csv-art" accept=".csv" style="display:none">
           </div>
           <div class="addrow" id="p-art-add">
             <input type="text" id="pa-code" placeholder="Code (REF01)" style="max-width:100px">
@@ -1172,8 +1175,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="tbl-hdr">
             <div><div class="ct">Table charges</div><div class="cs">Répliqué automatiquement sur les années suivantes</div></div>
             <div style="display:flex;gap:8px">
+              <button class="btn btn-g btn-sm" id="btn-import-ch" title="Importer depuis CSV">⬆ Importer CSV</button>
+              <button class="btn btn-g btn-sm" id="btn-template-ch" title="Télécharger le modèle CSV">⬇ Modèle CSV</button>
               <button class="btn btn-g btn-sm" id="btn-add-ch">+ Ajouter</button>
             </div>
+            <input type="file" id="input-csv-ch" accept=".csv" style="display:none">
           </div>
           <div class="addrow" id="p-ch-add">
             <input type="text" id="pc-nom" placeholder="Nom de la charge" style="flex:2">
@@ -1287,6 +1293,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="card">
         <div class="tbl-hdr">
           <div><div class="ct">Saisie des quantités</div><div class="cs">Quantités vendues par article et par mois</div></div>
+          <button class="btn btn-g btn-sm" id="btn-export-ca" title="Exporter en Excel CSV">⬇ Exporter Excel</button>
         </div>
         <div id="ca-empty" style="display:none" class="empty">
           <div class="empty-ico">📦</div>
@@ -1363,6 +1370,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="card">
         <div class="tbl-hdr">
           <div><div class="ct">Saisie des montants TTC</div><div class="cs">Montants en euros TTC par charge et par mois</div></div>
+          <button class="btn btn-g btn-sm" id="btn-export-ch" title="Exporter en Excel CSV">⬇ Exporter Excel</button>
         </div>
         <div id="ch-empty" style="display:none" class="empty">
           <div class="empty-ico">💸</div>
@@ -3562,6 +3570,271 @@ async function _loadN1MR() {
 // ════════════════════════════════════════════════════════
 // FREEMIUM
 // ════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// IMPORT / EXPORT CSV
+// ════════════════════════════════════════════════════════
+
+// ── Helpers CSV ──────────────────────────────────────────
+
+// Parse un CSV en tableau d'objets — gère les guillemets et virgules
+function _parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if(lines.length < 2) return [];
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
+  return lines.slice(1).map(line => {
+    // Parse basique — gère les champs entre guillemets
+    const vals = [];
+    let cur = '', inQ = false;
+    for(let i=0; i<line.length; i++) {
+      const c = line[i];
+      if(c==='"') { inQ=!inQ; }
+      else if(c===',' && !inQ) { vals.push(cur.trim()); cur=''; }
+      else { cur+=c; }
+    }
+    vals.push(cur.trim());
+    const obj = {};
+    headers.forEach((h,i) => { obj[h] = (vals[i]||'').replace(/^"|"$/g,'').trim(); });
+    return obj;
+  }).filter(r => Object.values(r).some(v => v !== ''));
+}
+
+// Déclenche le téléchargement d'un fichier texte
+function _downloadFile(content, filename, mime) {
+  const blob = new Blob(['﻿'+content], { type: mime }); // BOM pour Excel
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── Templates CSV téléchargeables ────────────────────────
+
+function downloadTemplateArticles() {
+  const header = 'code,nom,categorie,prix_ht,cout_achat,tva';
+  const exemple = 'ART1,Consulting,Services,500.00,0.00,0.20\nART2,Formation,Services,800.00,0.00,0.20\nART3,Produit A,Commerce,29.90,12.00,0.20';
+  _downloadFile(header+'\n'+exemple, 'modele_articles_logpose.csv', 'text/csv;charset=utf-8');
+  toast('ok', 'Modèle téléchargé', 'Ouvrez le fichier dans Excel, remplissez vos articles puis importez-le.', 4000);
+}
+
+function downloadTemplateCharges() {
+  const header = 'nom,categorie,type,tva';
+  const exemple = 'Loyer,Immobilier,Fixe,0.20\nSalaires,Personnel,Fixe,0\nPublicité,Marketing,Variable,0.20\nFournitures,Divers,Variable,0.20';
+  _downloadFile(header+'\n'+exemple, 'modele_charges_logpose.csv', 'text/csv;charset=utf-8');
+  toast('ok', 'Modèle téléchargé', 'Ouvrez le fichier dans Excel, remplissez vos charges puis importez-le.', 4000);
+}
+
+// ── Import articles depuis CSV ────────────────────────────
+
+async function importArticlesCSV(file) {
+  if(!file || !UID) return;
+  const text = await file.text();
+  const rows = _parseCSV(text);
+
+  if(!rows.length) {
+    toast('warn', 'Fichier vide', 'Le fichier CSV ne contient aucune donnée valide.', 4000);
+    return;
+  }
+
+  // Validation des colonnes requises
+  const required = ['code','nom','prix_ht'];
+  const headers = Object.keys(rows[0]);
+  const missing = required.filter(r => !headers.includes(r));
+  if(missing.length) {
+    toast('warn', 'Colonnes manquantes', `Colonnes requises manquantes : ${missing.join(', ')}. Utilisez le modèle CSV.`, 0);
+    return;
+  }
+
+  // Vérification limite freemium
+  const existingCodes = new Set(articles.map(a => a.code));
+  const newCodes = rows.filter(r => !existingCodes.has(r.code.toUpperCase()));
+  if(!isPro() && articles.length + newCodes.length > FREE_MAX_ARTICLES) {
+    toast('warn', 'Limite plan gratuit', `Le plan gratuit est limité à ${FREE_MAX_ARTICLES} articles. Passez au Pro pour en importer davantage.`, 0);
+    return;
+  }
+
+  let created=0, updated=0, errors=0;
+
+  for(const row of rows) {
+    const code = (row.code||'').toUpperCase().trim();
+    const nom  = (row.nom||'').trim();
+    if(!code || !nom) { errors++; continue; }
+
+    const pv   = parseFloat(row.prix_ht)   || 0;
+    const cout = parseFloat(row.cout_achat) || 0;
+    const tva  = parseFloat(row.tva)        || 0.20;
+    const cat  = (row.categorie||'').trim();
+
+    const exists = articles.find(a => a.code === code);
+    const isNew  = !exists;
+
+    if(!isNew && !isPro() && articles.length >= FREE_MAX_ARTICLES) continue;
+
+    try {
+      await DB.from('articles').upsert({
+        user_id: UID, code, annee: ANNEE,
+        nom, categorie: cat, prix_ht: pv, cout_achat: cout, tva, actif: true
+      }, { onConflict: 'user_id,code,annee' });
+      isNew ? created++ : updated++;
+    } catch(e) { errors++; }
+  }
+
+  // Recharger les articles
+  await loadArticles();
+  renderParams();
+  toast('ok', 'Import terminé', `${created} article(s) créé(s), ${updated} mis à jour${errors ? ', '+errors+' erreur(s)' : ''}.`, 5000);
+}
+
+// ── Import charges depuis CSV ─────────────────────────────
+
+async function importChargesCSV(file) {
+  if(!file || !UID) return;
+  const text = await file.text();
+  const rows = _parseCSV(text);
+
+  if(!rows.length) {
+    toast('warn', 'Fichier vide', 'Le fichier CSV ne contient aucune donnée valide.', 4000);
+    return;
+  }
+
+  const required = ['nom'];
+  const headers = Object.keys(rows[0]);
+  const missing = required.filter(r => !headers.includes(r));
+  if(missing.length) {
+    toast('warn', 'Colonnes manquantes', `Colonnes requises manquantes : ${missing.join(', ')}. Utilisez le modèle CSV.`, 0);
+    return;
+  }
+
+  // Vérification limite freemium
+  const existingNoms = new Set(charges.map(c => c.nom.toLowerCase()));
+  const newCharges = rows.filter(r => !existingNoms.has((r.nom||'').toLowerCase().trim()));
+  if(!isPro() && charges.length + newCharges.length > FREE_MAX_CHARGES) {
+    toast('warn', 'Limite plan gratuit', `Le plan gratuit est limité à ${FREE_MAX_CHARGES} charges. Passez au Pro pour en importer davantage.`, 0);
+    return;
+  }
+
+  let created=0, updated=0, errors=0;
+
+  for(const row of rows) {
+    const nom  = (row.nom||'').trim();
+    if(!nom) { errors++; continue; }
+
+    const type = ['Fixe','Variable'].includes(row.type) ? row.type : 'Variable';
+    const tva  = parseFloat(row.tva) || 0.20;
+    const cat  = (row.categorie||'').trim();
+
+    // Générer un code auto si pas fourni
+    const code = String(Date.now() + Math.random()).replace('.','').slice(-6);
+
+    const exists = charges.find(c => c.nom.toLowerCase() === nom.toLowerCase());
+
+    if(exists) {
+      // Mise à jour
+      try {
+        await DB.from('charges').upsert({
+          user_id: UID, code: String(exists.code), annee: ANNEE,
+          nom, categorie: cat, type, tva, actif: true
+        }, { onConflict: 'user_id,code,annee' });
+        updated++;
+      } catch(e) { errors++; }
+    } else {
+      if(!isPro() && charges.length + created >= FREE_MAX_CHARGES) continue;
+      try {
+        await DB.from('charges').upsert({
+          user_id: UID, code, annee: ANNEE,
+          nom, categorie: cat, type, tva, actif: true
+        }, { onConflict: 'user_id,code,annee' });
+        created++;
+      } catch(e) { errors++; }
+    }
+  }
+
+  await loadCharges();
+  renderParams();
+  toast('ok', 'Import terminé', `${created} charge(s) créée(s), ${updated} mise(s) à jour${errors ? ', '+errors+' erreur(s)' : ''}.`, 5000);
+}
+
+// ── Export CA (Excel CSV) ─────────────────────────────────
+
+function exportCAExcel() {
+  if(!articles.length) {
+    toast('warn', 'Aucune donnée', "Ajoutez des articles et saisissez des quantités avant d'exporter.", 4000);
+    return;
+  }
+  const MOIS_FULL = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const sep = ';'; // Séparateur Excel FR
+
+  // En-tête
+  let csv = ['Code','Article','Prix HT', ...MOIS_FULL, 'Total qté','CA HT'].join(sep) + '\n';
+
+  // Lignes articles
+  articles.forEach(a => {
+    const q = qty[a.code] || Array(12).fill(0);
+    const totQty = q.reduce((s,v)=>s+(v||0),0);
+    const caHT   = Math.round(totQty * a.pv * 100) / 100;
+    const vals   = [
+      a.code, `"${a.nom}"`, a.pv.toFixed(2),
+      ...q.map(v => (v||0).toString()),
+      totQty, caHT.toFixed(2)
+    ];
+    csv += vals.join(sep) + '\n';
+  });
+
+  // Ligne totaux
+  const totParMois = Array(12).fill(0);
+  articles.forEach(a => {
+    (qty[a.code]||[]).forEach((v,m) => { totParMois[m]+=(v||0); });
+  });
+  const totGlobal = totParMois.reduce((s,v)=>s+v,0);
+  const caGlobal  = articles.reduce((s,a) => {
+    const t = (qty[a.code]||[]).reduce((x,v)=>x+(v||0),0);
+    return s + t * a.pv;
+  }, 0);
+  csv += ['TOTAL', '', '', ...totParMois.map(v=>v.toString()), totGlobal, caGlobal.toFixed(2)].join(sep) + '\n';
+
+  _downloadFile(csv, `CA_LogPose_${ANNEE}.csv`, 'text/csv;charset=utf-8');
+  toast('ok', 'Export réussi', `Fichier CA_LogPose_${ANNEE}.csv téléchargé.`, 3000);
+}
+
+// ── Export Charges (Excel CSV) ────────────────────────────
+
+function exportChargesExcel() {
+  if(!charges.length) {
+    toast('warn', 'Aucune donnée', "Ajoutez des charges et saisissez des montants avant d'exporter.", 4000);
+    return;
+  }
+  const MOIS_FULL = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const sep = ';';
+
+  let csv = ['Code','Charge','Type','TVA', ...MOIS_FULL, 'Total TTC','Total HT'].join(sep) + '\n';
+
+  charges.forEach(c => {
+    const k   = String(c.code);
+    const m12 = mts[k] || Array(12).fill(0);
+    const totTTC = Math.round(m12.reduce((s,v)=>s+(v||0),0) * 100) / 100;
+    const totHT  = Math.round(totTTC / (1+(c.tva||0)) * 100) / 100;
+    const tvaLbl = c.tva === 0 ? 'Exonéré' : Math.round(c.tva*100)+'%';
+    const vals   = [
+      k, `"${c.nom}"`, c.type, tvaLbl,
+      ...m12.map(v => (v||0).toFixed(2)),
+      totTTC.toFixed(2), totHT.toFixed(2)
+    ];
+    csv += vals.join(sep) + '\n';
+  });
+
+  // Ligne totaux
+  const totParMois = Array(12).fill(0);
+  charges.forEach(c => {
+    (mts[String(c.code)]||[]).forEach((v,m) => { totParMois[m]+=(v||0); });
+  });
+  const totTTC = totParMois.reduce((s,v)=>s+v,0);
+  csv += ['TOTAL','','','', ...totParMois.map(v=>v.toFixed(2)), totTTC.toFixed(2), ''].join(sep) + '\n';
+
+  _downloadFile(csv, `Charges_LogPose_${ANNEE}.csv`, 'text/csv;charset=utf-8');
+  toast('ok', 'Export réussi', `Fichier Charges_LogPose_${ANNEE}.csv téléchargé.`, 3000);
+}
+
 const LEMON_URL = 'https://logpose.lemonsqueezy.com/checkout/buy/246ce9d6-683a-4db6-912f-a95437b7d1da';
 const FREE_MAX_ARTICLES = 3;
 const FREE_MAX_CHARGES  = 3;
@@ -5957,6 +6230,23 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Articles
+  // Import/Export CSV
+  $('btn-template-art').addEventListener('click', downloadTemplateArticles);
+  $('btn-template-ch').addEventListener('click',  downloadTemplateCharges);
+
+  $('btn-import-art').addEventListener('click', () => $('input-csv-art').click());
+  $('input-csv-art').addEventListener('change', e => {
+    if(e.target.files[0]) { importArticlesCSV(e.target.files[0]); e.target.value=''; }
+  });
+
+  $('btn-import-ch').addEventListener('click', () => $('input-csv-ch').click());
+  $('input-csv-ch').addEventListener('change', e => {
+    if(e.target.files[0]) { importChargesCSV(e.target.files[0]); e.target.value=''; }
+  });
+
+  $('btn-export-ca').addEventListener('click', exportCAExcel);
+  $('btn-export-ch').addEventListener('click', exportChargesExcel);
+
   $('btn-add-art').addEventListener('click',    () => $('p-art-add').classList.toggle('open'));
   $('btn-add-art-ok').addEventListener('click',  addArt);
   $('btn-add-art-cancel').addEventListener('click', () => $('p-art-add').classList.remove('open'));
