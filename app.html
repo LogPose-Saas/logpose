@@ -652,10 +652,18 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
    IMPRESSION / EXPORT PDF
    ════════════════════════════════════════════════════════ */
 @media print {
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  body { background: #fff !important; color: #0c1828 !important; font-size: 11px !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box !important; }
 
-  /* Masquer les éléments non pertinents */
+  /* ── Zoom global pour tout faire rentrer ── */
+  body {
+    background: #fff !important;
+    color: #0c1828 !important;
+    zoom: 0.72;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ── Masquer éléments non imprimables ── */
   .sb, .mob-hdr, .sb-ov, .savebar,
   #pnl-aide, #aide-ov, #onb-wizard,
   .page-actions, .addrow, .kpi-help,
@@ -663,95 +671,85 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   .db-checklist, #db-alertes, #ca-alertes, #ch-alertes,
   [id^="pro-overlay-"], #trial-badge,
   .theme-btn, .sb-col-btn, .sb-aide-btn,
-  #pnl-params, #pnl-scenarios { display: none !important; }
+  #pnl-params, #pnl-scenarios,
+  .kytd { display: none !important; }
 
-  /* Main sans sidebar */
-  .main { margin-left: 0 !important; padding: 0 !important; }
+  /* ── Main sans sidebar ── */
+  .main { margin-left: 0 !important; padding: 16px !important; width: 100% !important; max-width: 100% !important; }
 
-  /* Afficher tous les panels */
+  /* ── Afficher tous les panels ── */
   #pnl-dashboard, #pnl-ca, #pnl-charges,
   #pnl-marge, #pnl-previsionnel, #pnl-tva, #pnl-tresorerie {
     display: block !important;
+    width: 100% !important;
   }
 
-  /* En-tête de rapport */
+  /* ── En-tête rapport ── */
   #print-header { display: block !important; }
 
-  /* Sauts de page entre modules */
+  /* ── Saut de page entre chaque module ── */
   #pnl-ca, #pnl-charges, #pnl-marge,
   #pnl-previsionnel, #pnl-tva, #pnl-tresorerie {
-    page-break-before: always;
-    break-before: page;
+    page-break-before: always !important;
+    break-before: page !important;
+    padding-top: 8px !important;
   }
 
-  /* Cards */
+  /* ── Cards ── */
   .card, .kcard {
     background: #fff !important;
     border: 1px solid #dce6f5 !important;
     box-shadow: none !important;
-    break-inside: avoid;
+    break-inside: avoid !important;
+    margin-bottom: 12px !important;
   }
 
-  /* Topbar */
-  .topbar { margin-bottom: 12px !important; }
-  .page-title { font-size: 16px !important; font-weight: 800 !important; }
-  .page-sub { font-size: 10px !important; color: #4e6480 !important; }
+  /* ── Overflow visible partout pour tableaux ── */
+  * { overflow: visible !important; }
 
-  /* KPIs */
+  /* ── Tableaux — 100% largeur, police réduite ── */
+  .stbl, .dtbl { width: 100% !important; font-size: 10px !important; border-collapse: collapse !important; table-layout: auto !important; }
+  .stbl th, .dtbl th { font-size: 9px !important; padding: 3px 4px !important; white-space: nowrap !important; }
+  .stbl td, .dtbl td { font-size: 10px !important; padding: 3px 4px !important; }
+  .sinp { width: auto !important; min-width: 0 !important; border: none !important; background: transparent !important; font-size: 10px !important; padding: 0 2px !important; }
+
+  /* ── Graphiques — laisser Chart.js gérer la taille ── */
+  canvas { display: block !important; max-width: 100% !important; }
+  .cw { height: 180px !important; position: relative !important; }
+  .cwlg { height: 180px !important; position: relative !important; }
+  .cwsm { height: 120px !important; position: relative !important; }
+
+  /* ── KPIs ── */
   .kgrid { gap: 8px !important; margin-bottom: 10px !important; }
-  .kval { font-size: 18px !important; }
+  .g4 { grid-template-columns: repeat(4,1fr) !important; }
+  .g3 { grid-template-columns: repeat(3,1fr) !important; }
+  .kval { font-size: 20px !important; }
   .klbl { font-size: 9px !important; }
 
-  /* Tableaux */
-  .dtbl, .stbl { font-size: 9px !important; width: 100% !important; }
-  .dtbl th, .stbl th { font-size: 8px !important; padding: 4px 6px !important; }
-  .dtbl td, .stbl td { padding: 4px 6px !important; }
-  .sinp { border: none !important; background: transparent !important; font-size: 9px !important; width: auto !important; }
-
-  /* Graphiques — forcer dimensions pour impression */
-  canvas { max-height: 220px !important; display: block !important; }
-  .cw { height: 220px !important; position: relative !important; }
-  .cwlg { height: 220px !important; position: relative !important; }
-
-  /* Overflow-x → visible pour tableaux CA/Charges */
-  [style*="overflow-x:auto"], [style*="overflow-x: auto"] {
-    overflow: visible !important;
-  }
-  #ca-tbl-wrap, #ch-tbl-wrap { overflow: visible !important; }
-
-  /* Tableaux CA/Charges — réduire taille pour tenir en largeur */
-  #ca-tbl th, #ca-tbl td,
-  #ch-tbl th, #ch-tbl td { font-size: 7px !important; padding: 2px 3px !important; }
-  .sinp { width: 28px !important; font-size: 7px !important; padding: 1px !important; }
-
-  /* Masquer inputs dans Prévisionnel */
-  #pnl-previsionnel input[type="number"],
-  #pnl-previsionnel .pv-hyp-input { display: none !important; }
-  #pnl-previsionnel .pv-hyp-val { display: inline !important; }
-
-  /* Masquer éléments interactifs inutiles */
-  .tabs, .tab { display: none !important; }
+  /* ── Masquer inputs interactifs ── */
   select { display: none !important; }
+  .tabs, .tab { display: none !important; }
+  #pnl-previsionnel input[type="number"] { visibility: hidden !important; width: 0 !important; }
+  #pnl-tresorerie input[type="number"],
+  #pnl-tresorerie select { display: none !important; }
 
-  /* Top 5 — forcer largeur complète */
-  .cg3 { display: block !important; }
-  .cg3 > * { width: 100% !important; margin-bottom: 8px !important; break-inside: avoid; }
+  /* ── Grilles côte à côte ── */
+  .cg2, .cgeq { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .cg3 { display: grid !important; grid-template-columns: repeat(3,1fr) !important; gap: 10px !important; }
 
-  /* Grid Dashboard KPIs */
-  .g4 { grid-template-columns: repeat(2,1fr) !important; }
-
-  /* Variables couleurs pour impression */
+  /* ── Variables couleurs ── */
   :root {
     --t1: #0c1828; --t2: #4e6480; --t3: #9eb3ce;
     --ac: #2563eb; --gr: #059669; --rd: #e11d48;
-    --am: #d97706; --pu: #7c3aed;
+    --am: #d97706; --pu: #7c3aed; --tl: #0d9488;
     --bg: #fff; --bgc: #fff; --bgs: #f7faff;
     --bd: #dce6f5; --bds: #c2d2ea;
     --grb: rgba(5,150,105,.09); --rdb: rgba(225,29,72,.09);
     --ag: rgba(37,99,235,.08); --amb: rgba(217,119,6,.09);
+    --r: 8px; --rs: 6px; --f: 'Plus Jakarta Sans',sans-serif; --fm: 'DM Mono',monospace;
   }
 
-  @page { margin: 10mm 8mm; size: A4 landscape; }
+  @page { margin: 8mm 6mm; size: A4 landscape; }
 }
 
 /* En-tête de rapport — masqué en mode normal */
@@ -4008,16 +4006,27 @@ async function printReport() {
     renderPrevisionnel();
   }
 
-  // 4. Délai pour que les canvas Chart.js se redessinent
-  // On force une mise à jour de tous les graphiques existants
-  [chartCALine, chartCAPie, chartCHLine, chartCHPie, chartDBMain,
-   chartMRWaterfall, chartPVMain, chartTR].forEach(c => {
-    if(c) { try { c.resize(); c.update(); } catch(e){} }
+  // 4. Injecter les valeurs des inputs Prévisionnel comme texte visible
+  document.querySelectorAll('#pnl-previsionnel input[type="number"]').forEach(inp => {
+    const span = inp.nextElementSibling;
+    if(!span || !span.classList.contains('pv-print-val')) {
+      const s = document.createElement('span');
+      s.className = 'pv-print-val';
+      s.style.cssText = 'font-size:12px;font-weight:600;color:#0c1828';
+      inp.parentNode.insertBefore(s, inp.nextSibling);
+    }
+    inp.nextElementSibling.textContent = inp.value ? inp.value + ' %' : '—';
   });
 
-  await new Promise(r => setTimeout(r, 800));
+  // 5. Forcer resize + update de tous les graphiques
+  [chartCALine, chartCAPie, chartCHLine, chartCHPie, chartDBMain,
+   chartMRWaterfall, chartPVMain, chartTR].forEach(c => {
+    if(c) { try { c.resize(); c.update('none'); } catch(e){} }
+  });
 
-  // 5. Impression
+  await new Promise(r => setTimeout(r, 1000));
+
+  // 6. Impression
   window.print();
 }
 
