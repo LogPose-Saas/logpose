@@ -722,11 +722,12 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   .stbl td, .dtbl td { font-size: 10px !important; padding: 3px 4px !important; }
   .sinp { width: auto !important; min-width: 0 !important; border: none !important; background: transparent !important; font-size: 10px !important; padding: 0 2px !important; }
 
-  /* ── Graphiques — laisser Chart.js gérer la taille ── */
-  canvas { display: block !important; max-width: 100% !important; }
-  .cw { height: 180px !important; position: relative !important; }
-  .cwlg { height: 180px !important; position: relative !important; }
-  .cwsm { height: 120px !important; position: relative !important; }
+  /* ── Graphiques — canvas remplacés par img, canvas masqué ── */
+  canvas { display: none !important; }
+  .print-chart-img { display: block !important; max-width: 100% !important; }
+  .cw { height: auto !important; min-height: 0 !important; }
+  .cwlg { height: auto !important; min-height: 0 !important; }
+  .cwsm { height: auto !important; min-height: 0 !important; }
 
   /* ── KPIs ── */
   .kgrid { gap: 8px !important; margin-bottom: 10px !important; }
@@ -4034,16 +4035,51 @@ async function printReport() {
     s.textContent = inp.value !== '' ? inp.value + ' %' : '—';
   });
 
-  // 5. Forcer resize + update de tous les graphiques
-  [chartCALine, chartCAPie, chartCHLine, chartCHPie, chartDBMain,
-   chartMRWaterfall, chartPVMain, chartTR].forEach(c => {
-    if(c) { try { c.resize(); c.update('none'); } catch(e){} }
+  // 5. Convertir chaque graphique en image PNG pour l'impression
+  const _chartImgMap = []; // [{canvas, img, parent}] pour restaurer après
+  const chartList = [
+    { chart: chartDBMain,      canvasId: 'db-chart-main' },
+    { chart: chartCALine,      canvasId: 'ca-chart-line' },
+    { chart: chartCAPie,       canvasId: 'ca-chart-pie'  },
+    { chart: chartCHLine,      canvasId: 'ch-chart-line' },
+    { chart: chartCHPie,       canvasId: 'ch-chart-pie'  },
+    { chart: chartMRWaterfall, canvasId: 'mr-chart-wf'   },
+    { chart: chartPVMain,      canvasId: 'pv-chart-main' },
+    { chart: chartTR,          canvasId: 'tr-chart'      },
+  ];
+
+  chartList.forEach(({ chart, canvasId }) => {
+    if(!chart) return;
+    try {
+      chart.resize();
+      chart.update('none');
+      const canvas = $(canvasId);
+      if(!canvas) return;
+      const imgData = chart.toBase64Image('image/png', 1.0);
+      const img = document.createElement('img');
+      img.src = imgData;
+      img.style.cssText = `width:${canvas.offsetWidth}px;height:${canvas.offsetHeight}px;max-width:100%;display:block`;
+      img.className = 'print-chart-img';
+      canvas.parentNode.insertBefore(img, canvas);
+      canvas.style.display = 'none';
+      _chartImgMap.push({ canvas, img });
+    } catch(e) { console.warn('[print chart]', canvasId, e.message); }
   });
 
-  await new Promise(r => setTimeout(r, 1000));
+  await new Promise(r => setTimeout(r, 300));
 
   // 6. Impression
   window.print();
+
+  // 7. Restaurer les canvas après impression
+  setTimeout(() => {
+    _chartImgMap.forEach(({ canvas, img }) => {
+      canvas.style.display = '';
+      try { img.parentNode.removeChild(img); } catch(e) {}
+    });
+    // Nettoyer les spans prévisionnel injectés
+    document.querySelectorAll('.pv-print-val').forEach(s => s.remove());
+  }, 500);
 }
 
 const LEMON_URL = 'https://logpose.lemonsqueezy.com/checkout/buy/246ce9d6-683a-4db6-912f-a95437b7d1da';
