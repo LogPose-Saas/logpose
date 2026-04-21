@@ -3418,7 +3418,7 @@ async function _loadN1() {
       moisComm.forEach(m => { margeN1+=(vals[m]||0)*(a.prix_ht-a.cout_achat); });
     });
     _ytdBadge('db-ytd-ca',  caN,       caN1,       moisComm, false);
-    _ytdBadge('db-ytd-ch',  chN,       chN1,       moisComm, false);
+    _ytdBadge('db-ytd-ch',  chN,       chN1,       moisComm, false, true); // invert: hausse charges = rouge
     _ytdBadge('db-ytd-res', caN-chN,   caN1-chN1,  moisComm, false);
     _ytdBadgePts('db-ytd-marge', caN>0?margeN/caN*100:0, caN1>0?margeN1/caN1*100:0, moisComm);
   } catch(e) { console.warn('[N-1 dashboard]', e.message); }
