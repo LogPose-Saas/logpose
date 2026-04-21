@@ -1999,18 +1999,21 @@ async function saveParams() {
     } else {
       paramsModifie = false;
       setSaved();
-      // Répliquer nomEnt, secteur, regimeTVA et regimeFisc sur N+1 et N+2
-      // Règle : valeur renseignée en N ET vide sur l'année cible → on réplique
+      // Répliquer sur N+1 et N+2 :
+      // - nomEnt : seulement si vide sur l'année cible
+      // - secteur, regimeTVA, regimeFisc : toujours écraser (comme les articles/charges)
       for(const an of [ANNEE+1, ANNEE+2]) {
-        const {data} = await DB.from('parametres')
-          .select('nom_entreprise,secteur,regime_tva,regime_fiscal')
-          .eq('user_id', UID).eq('annee', an).single();
-
         const toUpdate = {};
-        if(P.nomEnt     && P.nomEnt.trim()     && (!data || !data.nom_entreprise)) toUpdate.nom_entreprise = P.nomEnt;
-        if(P.secteur    && P.secteur.trim()    && (!data || !data.secteur))        toUpdate.secteur        = P.secteur;
-        if(P.regimeTVA  && P.regimeTVA.trim()  && (!data || !data.regime_tva))     toUpdate.regime_tva     = P.regimeTVA;
-        if(P.regimeFisc && P.regimeFisc.trim() && (!data || !data.regime_fiscal))  toUpdate.regime_fiscal  = P.regimeFisc;
+        // nomEnt — seulement si vide
+        if(P.nomEnt && P.nomEnt.trim()) {
+          const {data: d} = await DB.from('parametres')
+            .select('nom_entreprise').eq('user_id',UID).eq('annee',an).single();
+          if(!d || !d.nom_entreprise) toUpdate.nom_entreprise = P.nomEnt;
+        }
+        // secteur, regimeTVA, regimeFisc — toujours si renseigné en N
+        if(P.secteur    && P.secteur.trim())    toUpdate.secteur       = P.secteur;
+        if(P.regimeTVA  && P.regimeTVA.trim())  toUpdate.regime_tva    = P.regimeTVA;
+        if(P.regimeFisc && P.regimeFisc.trim()) toUpdate.regime_fiscal = P.regimeFisc;
 
         if(Object.keys(toUpdate).length > 0) {
           await DB.from('parametres').upsert({
