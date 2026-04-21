@@ -672,7 +672,16 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   [id^="pro-overlay-"], #trial-badge,
   .theme-btn, .sb-col-btn, .sb-aide-btn,
   #pnl-params, #pnl-scenarios,
-  .kytd { display: none !important; }
+  .kytd,
+  #btn-export-ca, #btn-export-ch,
+  #btn-import-art, #btn-import-ch,
+  #btn-template-art, #btn-template-ch,
+  #input-csv-art, #input-csv-ch,
+  .tbl-hdr button { display: none !important; }
+
+  /* ── Masquer labels trésorerie sans valeur ── */
+  #pnl-tresorerie label,
+  #pnl-tresorerie .flbl { display: none !important; }
 
   /* ── Main sans sidebar ── */
   .main { margin-left: 0 !important; padding: 16px !important; width: 100% !important; max-width: 100% !important; }
@@ -729,9 +738,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   /* ── Masquer inputs interactifs ── */
   select { display: none !important; }
   .tabs, .tab { display: none !important; }
-  #pnl-previsionnel input[type="number"] { visibility: hidden !important; width: 0 !important; }
+  #pnl-previsionnel input[type="number"] { visibility: hidden !important; width: 0 !important; height: 0 !important; position: absolute !important; }
+  /* Masquer le "%" après input dans prévisionnel (évite le doublon) */
+  #pnl-previsionnel .pv-hyp-unit { display: none !important; } /* masqué car % déjà dans la valeur injectée */
   #pnl-tresorerie input[type="number"],
-  #pnl-tresorerie select { display: none !important; }
+  #pnl-tresorerie input[type="text"],
+  #pnl-tresorerie select,
+  #pnl-tresorerie .flbl,
+  #pnl-tresorerie label { display: none !important; }
 
   /* ── Grilles côte à côte ── */
   .cg2, .cgeq { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
@@ -4008,14 +4022,16 @@ async function printReport() {
 
   // 4. Injecter les valeurs des inputs Prévisionnel comme texte visible
   document.querySelectorAll('#pnl-previsionnel input[type="number"]').forEach(inp => {
-    const span = inp.nextElementSibling;
-    if(!span || !span.classList.contains('pv-print-val')) {
-      const s = document.createElement('span');
+    // Chercher ou créer le span de valeur print
+    let s = inp.parentNode.querySelector('.pv-print-val');
+    if(!s) {
+      s = document.createElement('span');
       s.className = 'pv-print-val';
-      s.style.cssText = 'font-size:12px;font-weight:600;color:#0c1828';
-      inp.parentNode.insertBefore(s, inp.nextSibling);
+      s.style.cssText = 'font-size:12px;font-weight:700;color:#0c1828;margin-left:4px';
+      inp.parentNode.appendChild(s);
     }
-    inp.nextElementSibling.textContent = inp.value ? inp.value + ' %' : '—';
+    // Valeur sans doublon de % — le label % est masqué en CSS print
+    s.textContent = inp.value !== '' ? inp.value + ' %' : '—';
   });
 
   // 5. Forcer resize + update de tous les graphiques
