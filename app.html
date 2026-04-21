@@ -3970,9 +3970,7 @@ async function printReport() {
     renderMarge();
     renderTVA();
     renderTresorerie();
-    // Prévisionnel nécessite ses propres données
-    const pvData = _pvLoad();
-    _pvSynth && typeof _pvSynth === 'function' && renderPrevisionnel();
+    renderPrevisionnel();
   }
 
   // 4. Petit délai pour laisser les graphiques se redessiner
