@@ -1217,6 +1217,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
               <input class="finp" id="ent-nom" type="text" placeholder="Mon Entreprise"></div>
             <div><label class="flbl">Secteur</label>
               <select class="fsel" id="ent-sect">
+                <option value="">— Choisir un secteur —</option>
                 <option>Commerce de détail</option><option>E-commerce</option>
                 <option>Prestation de service</option><option>Restauration / Food</option>
                 <option>BTP / Artisanat</option><option>Autre</option>
@@ -1227,12 +1228,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
             <div><label class="flbl">Régime TVA</label>
               <select class="fsel" id="ent-tva">
+                <option value="">— Choisir un régime TVA —</option>
                 <option>TVA réelle mensuelle</option>
                 <option>TVA réelle trimestrielle</option>
                 <option>Franchise en base</option>
               </select></div>
             <div><label class="flbl">Régime fiscal</label>
               <select class="fsel" id="ent-fisc">
+                <option value="">— Choisir un régime fiscal —</option>
                 <option>IS — Impôt sur les sociétés</option>
                 <option>IR — Impôt sur le revenu</option>
                 <option>Micro-entreprise</option>
@@ -1886,8 +1889,8 @@ const DB = supabase.createClient(SUPA_URL, SUPA_KEY);
 let UID   = null;
 let ANNEE = 2026;
 let P = {  // paramètres entreprise de l'année active
-  nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
-  regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
+  nomEnt:'', secteur:'', regimeTVA:'',
+  regimeFisc:'', devise:'€ Euro',
   cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12,
 };
 let articles = [];
@@ -1964,8 +1967,8 @@ async function loadParams() {
     if(data) {
       P.nomEnt    = data.nom_entreprise || '';
       P.secteur   = data.secteur        || '';
-      P.regimeTVA = data.regime_tva     || 'TVA réelle mensuelle';
-      P.regimeFisc= data.regime_fiscal  || 'IS — Impôt sur les sociétés';
+      P.regimeTVA = data.regime_tva     || '';
+      P.regimeFisc= data.regime_fiscal  || '';
       P.devise    = data.devise         || '€ Euro';
       P.cle       = data.cle_repartition|| 'qte';
       P.moisDeb   = data.mois_debut     || 1;
@@ -1996,27 +1999,23 @@ async function saveParams() {
     } else {
       paramsModifie = false;
       setSaved();
-      // Répliquer nomEnt, secteur et regimeFisc sur N+1 et N+2 si les champs sont vides
-      const hasNomEnt    = !!(P.nomEnt     && P.nomEnt.trim());
-      const hasSecteur   = !!(P.secteur    && P.secteur.trim());
-      const hasRegimeFisc= !!(P.regimeFisc && P.regimeFisc.trim());
+      // Répliquer nomEnt, secteur, regimeTVA et regimeFisc sur N+1 et N+2
+      // Règle : valeur renseignée en N ET vide sur l'année cible → on réplique
+      for(const an of [ANNEE+1, ANNEE+2]) {
+        const {data} = await DB.from('parametres')
+          .select('nom_entreprise,secteur,regime_tva,regime_fiscal')
+          .eq('user_id', UID).eq('annee', an).single();
 
-      if(hasNomEnt || hasSecteur || hasRegimeFisc) {
-        for(const an of [ANNEE+1, ANNEE+2]) {
-          const {data} = await DB.from('parametres')
-            .select('nom_entreprise,secteur,regime_fiscal')
-            .eq('user_id', UID).eq('annee', an).single();
+        const toUpdate = {};
+        if(P.nomEnt     && P.nomEnt.trim()     && (!data || !data.nom_entreprise)) toUpdate.nom_entreprise = P.nomEnt;
+        if(P.secteur    && P.secteur.trim()    && (!data || !data.secteur))        toUpdate.secteur        = P.secteur;
+        if(P.regimeTVA  && P.regimeTVA.trim()  && (!data || !data.regime_tva))     toUpdate.regime_tva     = P.regimeTVA;
+        if(P.regimeFisc && P.regimeFisc.trim() && (!data || !data.regime_fiscal))  toUpdate.regime_fiscal  = P.regimeFisc;
 
-          const toUpdate = {};
-          if(hasNomEnt     && (!data || !data.nom_entreprise)) toUpdate.nom_entreprise = P.nomEnt;
-          if(hasSecteur    && (!data || !data.secteur))        toUpdate.secteur        = P.secteur;
-          if(hasRegimeFisc && (!data || !data.regime_fiscal))  toUpdate.regime_fiscal  = P.regimeFisc;
-
-          if(Object.keys(toUpdate).length > 0) {
-            await DB.from('parametres').upsert({
-              user_id: UID, annee: an, ...toUpdate
-            }, {onConflict:'user_id,annee'});
-          }
+        if(Object.keys(toUpdate).length > 0) {
+          await DB.from('parametres').upsert({
+            user_id: UID, annee: an, ...toUpdate
+          }, {onConflict:'user_id,annee'});
         }
       }
     }
@@ -5730,8 +5729,8 @@ async function changeAnnee(n) {
   paramsLoaded  = false;
   paramsModifie = false;
   localStorage.setItem('lp_annee_'+UID, ANNEE);
-  P = { nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
-         regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
+  P = { nomEnt:'', secteur:'', regimeTVA:'',
+         regimeFisc:'', devise:'€ Euro',
          cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
 
   // Invalider les caches lazy load + instances graphiques
@@ -5859,8 +5858,8 @@ async function doLogout() {
   paramsLoaded = false; paramsModifie = false;
   _anneeCA = null; _anneeMts = null;
   _sc = null; _scActif = 'reel';
-  P = { nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
-    regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
+  P = { nomEnt:'', secteur:'', regimeTVA:'',
+    regimeFisc:'', devise:'€ Euro',
     cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
   $('auth').style.display='flex'; $('app').style.display='none';
   await DB.auth.signOut();
@@ -6290,8 +6289,8 @@ document.addEventListener('DOMContentLoaded', () => {
       paramsLoaded = false; paramsModifie = false;
       _anneeCA = null; _anneeMts = null;
       _sc = null; _scActif = 'reel'; _isPro = false; _trialEndsAt = null;
-      P = { nomEnt:'', secteur:'', regimeTVA:'TVA réelle mensuelle',
-        regimeFisc:'IS — Impôt sur les sociétés', devise:'€ Euro',
+      P = { nomEnt:'', secteur:'', regimeTVA:'',
+        regimeFisc:'', devise:'€ Euro',
         cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
       $('auth').style.display='flex'; $('app').style.display='none';
     }
