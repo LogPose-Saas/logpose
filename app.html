@@ -2068,8 +2068,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
             <thead><tr>
               <th style="text-align:left">Mois</th>
               <th>Encaissements</th>
-              <th>Achats TTC</th>
-              <th>Charges TTC</th>
+              <th id="tr-th-achats">Achats TTC</th>
+              <th id="tr-th-charges">Charges TTC</th>
               <th>TVA nette</th>
               <th>Flux net</th>
               <th>Solde cumulé</th>
@@ -3719,7 +3719,18 @@ async function _loadN1Data() {
       if(mtsN1[k] !== undefined) mtsN1[k][r.mois-1] = r.montant || 0;
     });
 
-    return { artMapN1, qtyN1, chMapN1, mtsN1 };
+    // Charger les coûts d'achat N-1 pour calculer la vraie marge brute N-1
+    const { data: achatsN1 } = await DB.from('saisies_achats')
+      .select('article_code,mois,cout_unitaire')
+      .eq('user_id', UID).eq('annee', anneeN1);
+
+    const coutsN1 = {};
+    Object.keys(artMapN1).forEach(c => { coutsN1[c] = Array(12).fill(0); });
+    (achatsN1 || []).forEach(r => {
+      if(coutsN1[r.article_code] !== undefined) coutsN1[r.article_code][r.mois-1] = r.cout_unitaire || 0;
+    });
+
+    return { artMapN1, qtyN1, chMapN1, mtsN1, coutsN1 };
   } catch(e) {
     console.warn('[N-1 data]', e.message);
     return null;
@@ -3735,6 +3746,16 @@ async function _getN1Data() {
   _n1Cache = await _loadN1Data();
   _n1CacheAnnee = ANNEE;
   return _n1Cache;
+}
+
+// Retourne le dernier coût connu N-1 <= moisIdx (forward propagation)
+function _coutMoisN1(code, moisIdx, coutsN1) {
+  const vals = coutsN1?.[code];
+  if(!vals) return 0;
+  for(let m = moisIdx; m >= 0; m--) {
+    if(vals[m] > 0) return vals[m];
+  }
+  return 0;
 }
 
 // Calcule les mois communs entre N et N-1 à partir des CA par mois
@@ -3788,7 +3809,7 @@ async function _loadN1() {
   if(!UID) return;
   try {
     const d = await _getN1Data(); if(!d) return;
-    const { artMapN1, qtyN1, chMapN1, mtsN1 } = d;
+    const { artMapN1, qtyN1, chMapN1, mtsN1, coutsN1 } = d;
     const { caParMoisN, chParMoisN, caParMoisN1, chParMoisN1 } = _calcVecteursN1(artMapN1, qtyN1, chMapN1, mtsN1);
     const moisComm = _moisCommuns(caParMoisN, caParMoisN1);
     if(!moisComm.length) {
@@ -3800,7 +3821,7 @@ async function _loadN1() {
     articles.forEach(a => { moisComm.forEach(m => { margeN+=(qty[a.code]?.[m]||0)*(a.pv-_coutMois(a.code,m)); }); });
     Object.entries(qtyN1).forEach(([code,vals]) => {
       const a=artMapN1[code]; if(!a) return;
-      moisComm.forEach(m => { margeN1+=(vals[m]||0)*a.prix_ht; }); // cout N-1 non disponible → marge conservatrice
+      moisComm.forEach(m => { margeN1+=(vals[m]||0)*(a.prix_ht-_coutMoisN1(code,m,coutsN1)); });
     });
     _ytdBadge('db-ytd-ca',  caN,       caN1,       moisComm, false);
     _ytdBadge('db-ytd-ch',  chN,       chN1,       moisComm, false, true); // invert: hausse charges = rouge
@@ -3814,7 +3835,7 @@ async function _loadN1CA() {
   if(!UID) return;
   try {
     const d = await _getN1Data(); if(!d) return;
-    const { artMapN1, qtyN1 } = d;
+    const { artMapN1, qtyN1, coutsN1 } = d;
     const caParMoisN  = Array(12).fill(0);
     const caParMoisN1 = Array(12).fill(0);
     let margeN=0, margeN1=0;
@@ -3833,7 +3854,7 @@ async function _loadN1CA() {
     articles.forEach(a => { moisComm.forEach(m => { margeN+=(qty[a.code]?.[m]||0)*(a.pv-_coutMois(a.code,m)); }); });
     Object.entries(qtyN1).forEach(([code,vals]) => {
       const a=artMapN1[code]; if(!a) return;
-      moisComm.forEach(m => { margeN1+=(vals[m]||0)*a.prix_ht; }); // cout N-1 non disponible → marge conservatrice
+      moisComm.forEach(m => { margeN1+=(vals[m]||0)*(a.prix_ht-_coutMoisN1(code,m,coutsN1)); });
     });
     _ytdBadge('ca-ytd-caht',  caN,    caN1,   moisComm, false);
     _ytdBadge('ca-ytd-marge', margeN, margeN1, moisComm, false);
@@ -3889,7 +3910,7 @@ async function _loadN1MR() {
   if(!UID) return;
   try {
     const d = await _getN1Data(); if(!d) return;
-    const { artMapN1, qtyN1, chMapN1, mtsN1 } = d;
+    const { artMapN1, qtyN1, chMapN1, mtsN1, coutsN1 } = d;
     const { caParMoisN, chParMoisN, caParMoisN1, chParMoisN1 } = _calcVecteursN1(artMapN1, qtyN1, chMapN1, mtsN1);
     const moisComm = _moisCommuns(caParMoisN, caParMoisN1);
     if(!moisComm.length) {
@@ -3902,7 +3923,7 @@ async function _loadN1MR() {
     articles.forEach(a => { moisComm.forEach(m => { margeN+=(qty[a.code]?.[m]||0)*(a.pv-_coutMois(a.code,m)); }); });
     Object.entries(qtyN1).forEach(([code,vals]) => {
       const a=artMapN1[code]; if(!a) return;
-      moisComm.forEach(m => { margeN1+=(vals[m]||0)*a.prix_ht; }); // cout N-1 non disponible → marge conservatrice
+      moisComm.forEach(m => { margeN1+=(vals[m]||0)*(a.prix_ht-_coutMoisN1(code,m,coutsN1)); });
     });
     // Charges variables sur mois communs
     charges.filter(c=>c.type!=='Fixe').forEach(c => {
@@ -5320,9 +5341,13 @@ function renderScenarios() {
       const sim = sc?.articles?.[a.code] || {};
       const pv  = sim.pv !== undefined ? sim.pv : a.pv;
       const qc  = (sim.qtyCoeff !== undefined ? sim.qtyCoeff : 1) * coeff;
-      const q   = (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0) * qc;
+      // Coût moyen pondéré annuel (évite la référence à m indéfini)
+      const coutAnnuel = Array.from({length:12},(_,mi)=>(qty[a.code]?.[mi]||0)*_coutMois(a.code,mi)).reduce((s,v)=>s+v,0);
+      const qteAnn     = (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0);
+      const coutMoyen  = qteAnn > 0 ? coutAnnuel / qteAnn : 0;
+      const q   = qteAnn * qc;
       ca   += q * pv;
-      cout += q * _coutMois(a.code,m);
+      cout += q * coutMoyen;
     });
     charges.forEach(c => {
       const k = String(c.code);
@@ -6026,6 +6051,9 @@ function renderTresorerie() {
   const delaiForun  = parseInt(trP.delaiForun)   || 0;
   const inclTVA     = parseInt(trP.inclTVA !== undefined ? trP.inclTVA : 1);
   const assujetti   = _tvaIsAssujetti();
+  // Adapter les headers du tableau selon le mode TTC/HT
+  const thAch = $('tr-th-achats'); if(thAch) thAch.textContent = inclTVA ? 'Achats TTC' : 'Achats HT';
+  const thCh  = $('tr-th-charges'); if(thCh)  thCh.textContent  = inclTVA ? 'Charges TTC' : 'Charges HT';
 
   // ── Calcul flux mensuels bruts (avant décalage) ──
   const moisData = _tvaCalcMois(); // TVA par mois
@@ -6046,14 +6074,16 @@ function renderTresorerie() {
       achats += inclTVA ? coutHT * (1 + (a.tva||0.2)) : coutHT;
     });
 
-    // Décaissement charges : déjà en TTC dans mts
+    // Décaissement charges : sommer charge par charge en HT ou TTC selon le mode
     let chTTC = 0;
     charges.forEach(c => {
       const k = String(c.code);
-      chTTC += (mts[k]||[])[m] || 0;
-      if(!inclTVA) {
+      const montantTTC = (mts[k]||[])[m] || 0;
+      if(inclTVA) {
+        chTTC += montantTTC;
+      } else {
         const taux = c.tva || 0;
-        chTTC = chTTC / (1 + taux); // repasser en HT si pas inclTVA
+        chTTC += taux > 0 ? montantTTC / (1 + taux) : montantTTC;
       }
     });
 
