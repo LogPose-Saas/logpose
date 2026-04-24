@@ -631,21 +631,87 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 @keyframes toastOut{to{opacity:0;transform:translateX(20px) scale(.95)}}
 
 /* ── RESPONSIVE ── */
+/* ════════════════════════════════════════════════════════
+   MOBILE HEADER
+   ════════════════════════════════════════════════════════ */
+.mob-menu-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--bd);background:var(--in);color:var(--t1);cursor:pointer;flex-shrink:0;transition:background var(--tr)}
+.mob-menu-btn:hover{background:var(--bgc)}
+.mob-hdr-logo{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.mob-hdr-title{font-size:15px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mob-hdr-annee{display:flex;align-items:center;gap:4px;flex-shrink:0}
+
 @media(max-width:860px){
-  .sb{transform:translateX(-100%);width:var(--sw)!important}
-  .sb.mob-open{transform:translateX(0)}
+  /* Sidebar masquée par défaut, slide-in au tap */
+  .sb{transform:translateX(-100%);width:var(--sw)!important;z-index:200}
+  .sb.mob-open{transform:translateX(0);box-shadow:4px 0 32px rgba(0,0,0,.25)}
+  .sb-ov{z-index:199}
   .sb-ov.open{display:block}
+  /* Fermer la sidebar au clic sur un nav item */
   .main,.savebar{margin-left:0!important;left:0!important}
   .mob-hdr{display:flex}
-  .main{padding:16px 16px 90px}
+  .main{padding:72px 12px 80px}
+
+  /* Grilles KPI */
   .g4{grid-template-columns:repeat(2,1fr)}
   .g3{grid-template-columns:repeat(2,1fr)}
   .cg2,.cgeq,.cg3{grid-template-columns:1fr}
   .ctrlgrid{grid-template-columns:repeat(2,1fr)}
   .tabs{overflow-x:auto;max-width:100%}
+
+  /* Tableaux — scroll horizontal natif */
+  .stbl,.dtbl,.pv-tbl,.tva-tbl,.tr-tbl,.sc-cmp-tbl{min-width:700px}
+  [id$="-tbl-wrap"],[style*="overflow-x:auto"]{-webkit-overflow-scrolling:touch}
+
+  /* Inputs tableau tactiles */
+  .sinp{min-height:36px;font-size:12px}
+
+  /* Cards KPI : éviter débordement texte */
+  .kval{font-size:20px!important}
+  .kpi-sub{font-size:10px!important}
+
+  /* Topbar module */
+  .topbar{flex-direction:column;align-items:flex-start;gap:8px}
+  .page-actions{width:100%;display:flex;flex-wrap:wrap;gap:6px}
+  .page-actions .btn{flex:1;min-width:0;font-size:11px;padding:6px 8px;text-align:center}
+
+  /* Calculateur achats */
+  .ach-calc-header{flex-direction:column;align-items:flex-start!important;gap:8px!important}
+  #ach-calc-art,#ach-calc-mois{max-width:100%!important;width:100%}
+
+  /* Savebar */
+  .savebar{padding:8px 12px;flex-wrap:wrap;gap:6px}
+
+  /* Scénarios rows */
+  .sc-row{flex-wrap:wrap;gap:6px}
+
+  /* Dashboard checklist */
+  .db-checklist-items{grid-template-columns:1fr!important}
+
+  /* Waterfall chart — scroll */
+  #mr-tbl-wrap,#mr-chart-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* Prévisionnel synthèse */
+  #pv-tbl-annuel{min-width:900px}
+
+  /* Trésorerie config grid */
+  .tr-config,.tr-params{grid-template-columns:1fr 1fr!important}
 }
+
 @media(max-width:520px){
   .g4,.g3,.g2{grid-template-columns:1fr}
+  .kval{font-size:18px!important}
+  .g4 .card,.g3 .card{padding:14px}
+  .topbar{gap:6px}
+  .page-title{font-size:18px}
+  .tr-config{grid-template-columns:1fr!important}
+  .ctrlgrid{grid-template-columns:1fr}
+
+  /* Calculateur coût de revient — full width */
+  #ach-calc-art,#ach-calc-mois{font-size:13px}
+  .ach-calc-row{flex-direction:column;gap:4px}
+
+  /* KPI cards 1 col */
+  .g4,.g3{grid-template-columns:1fr}
 }
 
 /* ════════════════════════════════════════════════════════
@@ -1007,6 +1073,27 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
 <!-- APP -->
 <div id="app" style="display:none;min-height:100vh">
+
+  <!-- HEADER MOBILE -->
+  <header class="mob-hdr" id="mob-hdr">
+    <button class="mob-menu-btn" id="mob-menu-btn" onclick="mobOpenSb()" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="mob-hdr-logo">
+      <div class="sb-icon" style="width:26px;height:26px;min-width:26px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+      <span class="mob-hdr-title" id="mob-hdr-title">LogPose</span>
+    </div>
+    <div class="mob-hdr-annee">
+      <button class="sb-year-btn" onclick="changeAnnee(-1)" style="width:24px;height:24px;font-size:14px">‹</button>
+      <span id="mob-annee-lbl" style="font-size:13px;font-weight:700;font-family:var(--fm);color:var(--t1);min-width:32px;text-align:center">2026</span>
+      <button class="sb-year-btn" onclick="changeAnnee(1)" style="width:24px;height:24px;font-size:14px">›</button>
+    </div>
+  </header>
+
+  <!-- OVERLAY SIDEBAR MOBILE -->
+  <div class="sb-ov" id="sb-ov" onclick="mobCloseSb()"></div>
 
   <!-- SIDEBAR -->
   <aside class="sb" id="sb">
@@ -1508,9 +1595,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="card" style="margin-bottom:20px">
         <div class="tbl-hdr">
           <div><div class="ct">Calculateur de coût de revient</div><div class="cs">Décomposez vos coûts pour obtenir le prix de revient réel</div></div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <select class="fsel btn-sm" id="ach-calc-art" style="max-width:180px"><option value="">— Choisir un article —</option></select>
-            <select class="fsel btn-sm" id="ach-calc-mois" style="max-width:140px">
+          <div class="ach-calc-header" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select class="fsel btn-sm" id="ach-calc-art" style="max-width:180px;min-width:140px"><option value="">— Choisir un article —</option></select>
+            <select class="fsel btn-sm" id="ach-calc-mois" style="max-width:140px;min-width:110px">
               <option value="0">Janvier</option><option value="1">Février</option><option value="2">Mars</option>
               <option value="3">Avril</option><option value="4">Mai</option><option value="5">Juin</option>
               <option value="6">Juillet</option><option value="7">Août</option><option value="8">Septembre</option>
@@ -1521,9 +1608,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div style="padding:12px 0">
           <div id="ach-calc-lignes" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
           <button class="btn btn-g btn-sm" onclick="achCalcAddLigne()" style="margin-bottom:16px">+ Ajouter un composant</button>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--ag);border-radius:var(--rs);border:1px solid var(--bd)">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 16px;background:var(--ag);border-radius:var(--rs);border:1px solid var(--bd)">
             <div style="font-size:13px;font-weight:700;color:var(--t1)">Coût de revient total</div>
-            <div style="display:flex;align-items:center;gap:16px">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
               <div style="font-size:22px;font-weight:800;color:var(--rd);font-family:var(--fm)" id="ach-calc-total">0,00 €</div>
               <button class="btn btn-p btn-sm" onclick="achCalcInjecter()">↗ Injecter dans la saisie</button>
             </div>
@@ -6337,6 +6424,8 @@ async function changeAnnee(n) {
 }
 
 function renderAnneesNav() {
+  // Sync header mobile
+  const mobAn = $('mob-annee-lbl'); if(mobAn) mobAn.textContent = ANNEE;
   const a = $('sb-annee'); if(a) a.textContent = ANNEE;
   const lbl = $('params-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
   const btns = $('sb-annees');
@@ -6513,11 +6602,52 @@ function showPanel(panelId, navId) {
     p.classList.add('pnl-enter');
   }
   const n=$(navId); if(n) n.classList.add('active');
+  // Mobile : fermer sidebar + mettre à jour le titre
+  mobCloseSb();
+  mobSetTitle(navId);
   // Mettre à jour l'URL sans rechargement
   try {
     const slug = PANEL_URLS[panelId] || '/dashboard';
     history.pushState({ panelId, navId }, '', slug);
   } catch(e) {}
+}
+
+// ════════════════════════════════════════════════════════
+// MOBILE NAVIGATION
+// ════════════════════════════════════════════════════════
+const MOB_TITLES = {
+  'nav-dashboard':   'Dashboard',
+  'nav-ca':          "Chiffre d'affaires",
+  'nav-achats':      'Achats',
+  'nav-charges':     'Charges',
+  'nav-marge':       'Marge & Rentabilité',
+  'nav-scenarios':   'Scénarios',
+  'nav-previsionnel':'Prévisionnel',
+  'nav-tva':         'TVA',
+  'nav-tresorerie':  'Trésorerie',
+  'nav-params':      'Paramètres',
+};
+
+function mobOpenSb() {
+  const sb = $('sb'), ov = $('sb-ov');
+  if(sb) sb.classList.add('mob-open');
+  if(ov) ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function mobCloseSb() {
+  const sb = $('sb'), ov = $('sb-ov');
+  if(sb) sb.classList.remove('mob-open');
+  if(ov) ov.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function mobSetTitle(navId) {
+  const el = $('mob-hdr-title');
+  if(el) el.textContent = MOB_TITLES[navId] || 'LogPose';
+  // Sync année dans header mobile
+  const anneeEl = $('mob-annee-lbl');
+  if(anneeEl) anneeEl.textContent = ANNEE;
 }
 
 // ════════════════════════════════════════════════════════
