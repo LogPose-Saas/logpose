@@ -1305,6 +1305,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           </div>
           <div style="overflow-x:auto">
             <table class="dtbl">
+              <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>Prix HT</th><th>TVA</th><th></th></tr></thead>
               <tbody id="art-tbody"></tbody>
             </table>
           </div>
@@ -2351,7 +2352,7 @@ async function delArt(i) {
 function renderArticles() {
   const tb = $('art-tbody'); if(!tb) return;
   if(!articles.length) {
-    tb.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--t2)">Aucun article — cliquez sur + Ajouter</td></tr>';
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--t2)">Aucun article — cliquez sur + Ajouter</td></tr>';
     return;
   }
   const tvaOpts = sel => [[0.2,'20%'],[0.1,'10%'],[0.055,'5,5%'],[0,'0%']]
@@ -2365,7 +2366,7 @@ function renderArticles() {
       <td><input class="tdinp" value="${a.cat}" style="max-width:100px"
         onblur="articles[${i}].cat=this.value;upsertArticle(articles[${i}])"></td>
       <td><input class="tdinp" type="number" value="${a.pv}" style="max-width:80px"
-        onblur="const v=parseFloat(this.value)||0;if(v<0){this.value=0;toast('err','Prix invalide','Le prix HT ne peut pas être négatif.');return;}if(v>0&&v<articles[${i}].cout)toast('warn','Marge négative','Le prix HT est inférieur au coût d\\'achat. Votre marge sera négative.',6000);articles[${i}].pv=v;upsertArticle(articles[${i}]);renderArticles()"></td>
+        onblur="const v=parseFloat(this.value)||0;if(v<0){this.value=0;toast('err','Prix invalide','Le prix HT ne peut pas être négatif.');return;}articles[${i}].pv=v;upsertArticle(articles[${i}]);renderArticles()">
       <td><select class="tdsel" style="max-width:78px"
         onchange="articles[${i}].tva=parseFloat(this.value);upsertArticle(articles[${i}])">${tvaOpts(a.tva)}</select></td>
       <td><button class="delbtn" onclick="delArt(${i})">×</button></td>
