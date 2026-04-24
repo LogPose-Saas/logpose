@@ -646,16 +646,26 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   .sb .sb-texts,.sb .sb-lbl,
   .sb .sb-item span:not(.sb-ico),
   .sb .sb-year-label,.sb .sb-year-btns,
-  .sb .sb-logout,.sb #sb-upgrade,
-  .sb .sb-uemail,.sb .col-txt{display:none!important}
+  .sb #sb-upgrade,
+  .sb .sb-uinfo,.sb .col-txt{display:none!important}
   .sb .sb-logo{padding:14px 6px;justify-content:center}
   .sb .sb-item{padding:11px 6px;justify-content:center;gap:0}
   .sb .sb-ico{opacity:.7;width:20px;height:20px}
   .sb .sb-item.active .sb-ico{opacity:1}
   .sb .sb-bottom{padding:6px}
-  .sb .sb-user{justify-content:center;padding:8px;border:none;background:transparent}
+  /* sb-user : avatar + logout empilés, centrés */
+  .sb .sb-user{flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border:none;background:transparent}
+  .sb .sb-logout{display:flex!important;width:32px;height:32px;border-radius:8px;border:1px solid var(--bd);background:var(--in);align-items:center;justify-content:center;color:var(--t2)}
+  .sb .sb-logout:hover{color:var(--rd);border-color:var(--rd);background:rgba(225,29,72,.08)}
   .sb .sb-col-btn,.sb .sb-aide-btn,.sb .sb-pro-btn span,
   .sb .theme-txt,.sb .tog{display:none!important}
+  /* Trial badge : version courte sur mobile */
+  #trial-badge{font-size:11px;padding:5px 4px;text-align:center;overflow:hidden}
+  #trial-badge .trial-full{display:none}
+  #trial-badge .trial-short{display:flex;flex-direction:column;align-items:center;line-height:1.2}
+  /* Btn pro : icône seule */
+  #btn-pro{padding:8px 4px;justify-content:center;min-width:0;font-size:16px}
+  #btn-pro span{display:none!important}
   .sb .sb-year-block{padding:8px 4px}
   .sb .sb-year-row{flex-direction:column;gap:2px;align-items:center}
   .sb .sb-year-val{font-size:10px;font-weight:700}
@@ -686,10 +696,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   .kval{font-size:20px!important}
   .kpi-sub{font-size:10px!important}
 
-  /* ── Topbar ── */
-  .topbar{flex-direction:column;align-items:flex-start;gap:8px}
-  .page-actions{width:100%;display:flex;flex-wrap:wrap;gap:6px}
-  .page-actions .btn{flex:1;min-width:0;font-size:11px;padding:6px 8px;text-align:center}
+  /* ── Topbar masquée sur mobile (remplacée par mob-hdr) ── */
+  .topbar{display:none!important}
 
   /* ── Calculateur achats ── */
   .ach-calc-header{flex-wrap:wrap;gap:8px!important}
@@ -4593,7 +4601,7 @@ function applyFreemium() {
       const badge = document.createElement('div');
       badge.id = 'trial-badge';
       badge.style.cssText = 'display:block;padding:7px 10px;background:var(--grb);border:1px solid rgba(14,165,114,.25);color:var(--gr);border-radius:var(--rs);font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;cursor:default;';
-      badge.innerHTML = `🎁 Essai Pro · <span id="trial-days">${days}</span> jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}`;
+      badge.innerHTML = `<span class="trial-full">🎁 Essai Pro · <span id="trial-days">${days}</span> jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}</span><span class="trial-short" title="Essai Pro · ${days} jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}">🎁<br><span style="font-size:9px">${days}j</span></span>`;
       // Insérer avant btn-pro
       if(btnPro && btnPro.parentNode) btnPro.parentNode.insertBefore(badge, btnPro);
     } else {
