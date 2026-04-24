@@ -640,17 +640,19 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
 @media(max-width:860px){
   /* ── Sidebar : toujours visible, mode icônes ── */
-  .sb{width:var(--swc)!important;transform:none!important;box-shadow:none}
+  .sb{width:var(--swc)!important;transform:none!important;box-shadow:none;overflow:hidden}
   .sb-ov{display:none!important}
-  /* Forcer mode col sans la classe .col */
-  .sb .sb-texts,.sb .sb-lbl,
+  /* Masquer tout le texte, garder uniquement les icônes */
+  .sb .sb-texts,.sb .sb-lbl,.sb .sb-sect .sb-lbl,
   .sb .sb-item span:not(.sb-ico),
   .sb .sb-year-label,.sb .sb-year-btns,
   .sb #sb-upgrade,
   .sb .sb-uinfo,.sb .col-txt{display:none!important}
+  .sb .sb-sect{padding:0 4px}
+  .sb .sb-scroll{padding:2px 0}
   .sb .sb-logo{padding:14px 6px;justify-content:center}
-  .sb .sb-item{padding:11px 6px;justify-content:center;gap:0}
-  .sb .sb-ico{opacity:.7;width:20px;height:20px}
+  .sb .sb-item{padding:11px 6px;justify-content:center;gap:0;white-space:nowrap;overflow:hidden}
+  .sb .sb-ico{opacity:.7;width:20px;height:20px;flex-shrink:0}
   .sb .sb-item.active .sb-ico{opacity:1}
   .sb .sb-bottom{padding:6px}
   /* sb-user : avatar + logout empilés, centrés */
@@ -659,7 +661,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   .sb .sb-logout:hover{color:var(--rd);border-color:var(--rd);background:rgba(225,29,72,.08)}
   .sb .sb-col-btn,.sb .sb-aide-btn,.sb .sb-pro-btn span,
   .sb .theme-txt,.sb .tog{display:none!important}
-  /* Trial badge : version courte sur mobile */
+  /* Trial badge : icône + jours en mini */
   #trial-badge{font-size:11px;padding:5px 4px;text-align:center;overflow:hidden}
   #trial-badge .trial-full{display:none}
   #trial-badge .trial-short{display:flex;flex-direction:column;align-items:center;line-height:1.2}
