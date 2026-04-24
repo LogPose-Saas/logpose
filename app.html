@@ -2924,6 +2924,9 @@ async function renderAchats() {
   if(!UID) return;
   await loadAchats();
 
+  // Formatter local
+  const fmt = v => v.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+
   // ── KPIs ──
   const MOIS_FULL = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   const moisCourant = new Date().getMonth(); // 0-based
