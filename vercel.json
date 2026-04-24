@@ -12,6 +12,7 @@
     { "source": "/app/", "destination": "/app.html" },
     { "source": "/app/(.*)", "destination": "/app.html" },
     { "source": "/dashboard", "destination": "/app.html" },
+    { "source": "/achats", "destination": "/app.html" },
     { "source": "/chiffre-affaires", "destination": "/app.html" },
     { "source": "/charges", "destination": "/app.html" },
     { "source": "/marge-rentabilite", "destination": "/app.html" },
