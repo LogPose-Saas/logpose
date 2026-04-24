@@ -835,8 +835,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
           <div><label class="flbl">Prix HT (€)</label>
             <input class="finp" id="onb-art-pv" type="number" placeholder="29.90" step="0.01"></div>
-          <div><label class="flbl">Coût achat (€)</label>
-            <input class="finp" id="onb-art-cout" type="number" placeholder="12.00" step="0.01"></div>
           <div><label class="flbl">TVA</label>
             <select class="fsel" id="onb-art-tva">
               <option value="0.20">20 %</option><option value="0.10">10 %</option>
@@ -1040,6 +1038,10 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="sb-item" id="nav-ca">
           <span class="sb-ico" style="font-size:14px;font-weight:700;opacity:.65">€</span>
           <span>Chiffre d'affaires</span>
+        </div>
+        <div class="sb-item" id="nav-achats">
+          <span class="sb-ico" style="font-size:15px;opacity:.7">🛒</span>
+          <span>Achats</span>
         </div>
         <div class="sb-item" id="nav-charges">
           <span class="sb-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>
@@ -1294,7 +1296,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
             <input type="text" id="pa-nom" placeholder="Nom de l'article" style="flex:2">
             <input type="text" id="pa-cat" placeholder="Catégorie" style="max-width:110px">
             <input type="number" id="pa-pv" placeholder="Prix HT €" style="max-width:90px" step="0.01">
-            <input type="number" id="pa-cout" placeholder="Coût achat €" style="max-width:90px" step="0.01">
             <select id="pa-tva" style="max-width:90px">
               <option value="0.20">TVA 20%</option><option value="0.10">TVA 10%</option>
               <option value="0.055">TVA 5,5%</option><option value="0">Exonéré</option>
@@ -1304,7 +1305,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           </div>
           <div style="overflow-x:auto">
             <table class="dtbl">
-              <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>Prix HT</th><th>Coût achat</th><th>TVA</th><th></th></tr></thead>
               <tbody id="art-tbody"></tbody>
             </table>
           </div>
@@ -1472,6 +1472,86 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
     </div><!-- fin pnl-ca -->
 
+    <!-- MODULE ACHATS -->
+    <div id="pnl-achats" style="display:none">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Achats</div>
+          <div class="page-sub">Coûts d'achat par article · Année <span id="ach-annee-lbl">2026</span></div>
+        </div>
+      </div>
+      <div class="kgrid g3" style="margin-bottom:20px">
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--rd)"></div>
+          <div class="klbl">TOTAL ACHATS ANNUEL</div>
+          <div class="kval" id="ach-kpi-total">—</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px">Coûts × quantités vendues</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Total des coûts d'achat calculé sur la base des coûts unitaires × quantités vendues par mois.</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--am)"></div>
+          <div class="klbl">MOIS LE PLUS COÛTEUX</div>
+          <div class="kval" id="ach-kpi-mois">—</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px" id="ach-kpi-mois-lbl">—</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Mois où le total des achats (coût × quantités) est le plus élevé.</div></div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="kacc" style="background:var(--pu)"></div>
+          <div class="klbl">MARGE BRUTE ESTIMÉE</div>
+          <div class="kval" id="ach-kpi-marge">—</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:4px" id="ach-kpi-marge-lbl">CA HT − Coûts achat</div>
+          <div class="kpi-help">?<div class="kpi-tooltip">Marge brute = CA HT − total des coûts d'achat. Indépendant des charges fixes et variables.</div></div>
+        </div>
+      </div>
+      <!-- Calculateur -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="tbl-hdr">
+          <div><div class="ct">Calculateur de coût de revient</div><div class="cs">Décomposez vos coûts pour obtenir le prix de revient réel</div></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="fsel btn-sm" id="ach-calc-art" style="max-width:180px"><option value="">— Choisir un article —</option></select>
+            <select class="fsel btn-sm" id="ach-calc-mois" style="max-width:140px">
+              <option value="0">Janvier</option><option value="1">Février</option><option value="2">Mars</option>
+              <option value="3">Avril</option><option value="4">Mai</option><option value="5">Juin</option>
+              <option value="6">Juillet</option><option value="7">Août</option><option value="8">Septembre</option>
+              <option value="9">Octobre</option><option value="10">Novembre</option><option value="11">Décembre</option>
+            </select>
+          </div>
+        </div>
+        <div style="padding:12px 0">
+          <div id="ach-calc-lignes" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
+          <button class="btn btn-g btn-sm" onclick="achCalcAddLigne()" style="margin-bottom:16px">+ Ajouter un composant</button>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--ag);border-radius:var(--rs);border:1px solid var(--bd)">
+            <div style="font-size:13px;font-weight:700;color:var(--t1)">Coût de revient total</div>
+            <div style="display:flex;align-items:center;gap:16px">
+              <div style="font-size:22px;font-weight:800;color:var(--rd);font-family:var(--fm)" id="ach-calc-total">0,00 €</div>
+              <button class="btn btn-p btn-sm" onclick="achCalcInjecter()">↗ Injecter dans la saisie</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Tableau saisie -->
+      <div class="card">
+        <div class="tbl-hdr">
+          <div><div class="ct">Saisie des coûts unitaires</div><div class="cs">Coût d'achat unitaire par article et par mois · La valeur se propage aux mois suivants</div></div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="stbl" id="ach-tbl">
+            <thead><tr>
+              <th>Code</th><th>Article</th><th>Prix HT</th>
+              <th>Jan</th><th>Fév</th><th>Mar</th><th>Avr</th><th>Mai</th><th>Jun</th>
+              <th>Jul</th><th>Aoû</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Déc</th>
+              <th style="text-align:right">Total achats</th>
+            </tr></thead>
+            <tbody id="ach-tbody"></tbody>
+            <tfoot id="ach-tfoot"></tfoot>
+          </table>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--t3)">
+          💡 Saisissez le coût unitaire d'achat pour chaque article. La valeur saisie se propage automatiquement aux mois suivants. Les cases vides utilisent la dernière valeur connue (affichée en gris).
+        </div>
+      </div>
+    </div><!-- fin pnl-achats -->
+
     <!-- SAISIE CHARGES -->
     <div id="pnl-charges" style="display:none">
       <div class="topbar">
@@ -1623,7 +1703,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
             <thead><tr>
               <th>Article</th>
               <th style="text-align:right">CA HT</th>
-              <th style="text-align:right">Coût achat</th>
               <th style="text-align:right">Marge brute</th>
               <th style="text-align:right">Taux marge</th>
               <th style="text-align:right">Charges fixes imputées</th>
@@ -2049,6 +2128,8 @@ let paramsModifie = false; // true uniquement quand l'user a changé un champ
 
 // ── Lazy load flags — année pour laquelle les données sont en mémoire ──
 let _anneeCA  = null; // année des données qty en mémoire
+let achats = {}; // { article_code: [12 valeurs cout_unitaire] } — dernier coût connu par mois
+let _anneeAchats = null;
 let _anneeMts = null; // année des données mts en mémoire
 
 // ── Helpers skeleton ──
@@ -2211,7 +2292,7 @@ async function loadArticles() {
     (data||[]).forEach(r => { if(r.annee <= ANNEE) byCode[r.code] = r; });
     articles = Object.values(byCode).filter(r => r.actif !== false).map(r => ({
       code:r.code, nom:r.nom, cat:r.categorie||'Divers',
-      pv:parseFloat(r.prix_ht)||0, cout:parseFloat(r.cout_achat)||0,
+      pv:parseFloat(r.prix_ht)||0, cout:0,
       tva:parseFloat(r.tva)||0.2, actif:true,
     }));
     renderArticles();
@@ -2225,7 +2306,7 @@ async function upsertArticle(a) {
   if(!UID) return;
   const {error} = await DB.from('articles').upsert({
     user_id:UID, code:a.code, annee:ANNEE,
-    nom:a.nom, categorie:a.cat, prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:a.actif,
+    nom:a.nom, categorie:a.cat, prix_ht:a.pv, tva:a.tva, actif:a.actif,
   }, {onConflict:'user_id,code,annee'});
   if(error) {
     console.warn('[upsert article]', error.message);
@@ -2238,14 +2319,13 @@ function addArt() {
   const nom  = $('pa-nom').value.trim();
   const code = $('pa-code').value.trim() || 'ART'+String(articles.length+1).padStart(2,'0');
   const pv   = parseFloat($('pa-pv').value) || 0;
-  const cout = parseFloat($('pa-cout').value) || 0;
-  if(!validateArticle(nom, $('pa-code').value.trim(), pv, cout)) return;
+  if(!validateArticle(nom, $('pa-code').value.trim(), pv)) return;
   const a = {
     code, nom, cat:$('pa-cat').value||'Divers',
-    pv, cout, tva:parseFloat($('pa-tva').value)||0.2, actif:true,
+    pv, cout:0, tva:parseFloat($('pa-tva').value)||0.2, actif:true,
   };
   articles.push(a);
-  ['pa-code','pa-nom','pa-cat','pa-pv','pa-cout'].forEach(id => $(id).value='');
+  ['pa-code','pa-nom','pa-cat','pa-pv'].forEach(id => $(id).value='');
   $('p-art-add').classList.remove('open');
   upsertArticle(a);
   renderArticles();
@@ -2258,7 +2338,7 @@ async function delArt(i) {
   if(UID) {
     const {error} = await DB.from('articles').upsert({
       user_id:UID, code:a.code, annee:ANNEE,
-      nom:a.nom, categorie:a.cat, prix_ht:a.pv, cout_achat:a.cout, tva:a.tva, actif:false,
+      nom:a.nom, categorie:a.cat, prix_ht:a.pv, tva:a.tva, actif:false,
     }, {onConflict:'user_id,code,annee'});
     if(error) {
       console.warn('[del art]', error.message);
@@ -2286,8 +2366,6 @@ function renderArticles() {
         onblur="articles[${i}].cat=this.value;upsertArticle(articles[${i}])"></td>
       <td><input class="tdinp" type="number" value="${a.pv}" style="max-width:80px"
         onblur="const v=parseFloat(this.value)||0;if(v<0){this.value=0;toast('err','Prix invalide','Le prix HT ne peut pas être négatif.');return;}if(v>0&&v<articles[${i}].cout)toast('warn','Marge négative','Le prix HT est inférieur au coût d\\'achat. Votre marge sera négative.',6000);articles[${i}].pv=v;upsertArticle(articles[${i}]);renderArticles()"></td>
-      <td><input class="tdinp" type="number" value="${a.cout}" style="max-width:80px"
-        onblur="const v=parseFloat(this.value)||0;if(v<0){this.value=0;toast('err','Coût invalide','Le coût d\\'achat ne peut pas être négatif.');return;}if(v>articles[${i}].pv&&articles[${i}].pv>0)toast('warn','Marge négative','Le coût d\\'achat dépasse le prix HT. Votre marge sera négative.',6000);articles[${i}].cout=v;upsertArticle(articles[${i}]);renderArticles()"></td>
       <td><select class="tdsel" style="max-width:78px"
         onchange="articles[${i}].tva=parseFloat(this.value);upsertArticle(articles[${i}])">${tvaOpts(a.tva)}</select></td>
       <td><button class="delbtn" onclick="delArt(${i})">×</button></td>
@@ -2592,7 +2670,7 @@ function updateCAKpis() {
   articles.forEach(a => {
     const totQty = (qty[a.code]||[]).reduce((s,v) => s + (v||0), 0);
     caHT  += totQty * a.pv;
-    marge += totQty * (a.pv - a.cout);
+    for(let m=0;m<12;m++) { marge += (qty[a.code]?.[m]||0) * (a.pv - _coutMois(a.code,m)); }
   });
   const txMarge = caHT > 0 ? marge/caHT*100 : 0;
   const fmt = v => v.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
@@ -2783,6 +2861,134 @@ function updateCACharts() {
       });
     }
   }
+}
+
+// ════════════════════════════════════════════════════════
+// ACHATS — Coûts d'achat par article et par mois
+// ════════════════════════════════════════════════════════
+
+// Charge les saisies_achats depuis Supabase pour l'année courante
+async function loadAchats() {
+  if(!UID || !articles.length) return;
+  if(_anneeAchats === ANNEE && Object.keys(achats).length > 0) return;
+
+  // Initialiser à 0 pour tous les articles
+  articles.forEach(a => { achats[a.code] = Array(12).fill(0); });
+
+  const { data } = await DB.from('saisies_achats')
+    .select('article_code,mois,cout_unitaire')
+    .eq('user_id', UID).eq('annee', ANNEE);
+
+  (data || []).forEach(r => {
+    if(achats[r.article_code]) achats[r.article_code][r.mois-1] = r.cout_unitaire || 0;
+  });
+
+  _anneeAchats = ANNEE;
+}
+
+// Retourne le coût unitaire d'un article pour un mois donné
+// Logique : dernier coût connu ≤ mois (réplication forward)
+function _coutMois(code, moisIdx) {
+  const vals = achats[code];
+  if(!vals) return 0;
+  // Chercher le dernier coût non nul jusqu'au mois demandé
+  for(let m = moisIdx; m >= 0; m--) {
+    if(vals[m] > 0) return vals[m];
+  }
+  return 0;
+}
+
+// Sauvegarde un coût et le réplique sur les mois suivants non saisis
+async function upsertAchat(code, moisIdx, cout) {
+  if(!UID) return;
+  achats[code][moisIdx] = cout;
+
+  // Upsert en base
+  await DB.from('saisies_achats').upsert({
+    user_id: UID, article_code: code, annee: ANNEE,
+    mois: moisIdx + 1, cout_unitaire: cout
+  }, { onConflict: 'user_id,article_code,annee,mois' });
+
+  // Réplication forward : effacer les mois suivants qui auraient l'ancienne valeur
+  // (on laisse la logique _coutMois gérer la propagation — pas besoin d'écrire tous les mois)
+}
+
+// Rendu du module Achats
+let _achatsLoaded = false;
+
+async function renderAchats() {
+  if(!UID) return;
+  await loadAchats();
+
+  // ── KPIs ──
+  const MOIS_FULL = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const moisCourant = new Date().getMonth(); // 0-based
+
+  let totalAchatsAnnee = 0;
+  let moisMax = 0, moisMaxVal = 0;
+  const cmpAnnuel = {};
+
+  articles.forEach(a => {
+    let totalArt = 0;
+    for(let m = 0; m < 12; m++) {
+      const q = qty[a.code]?.[m] || 0;
+      const c = _coutMois(a.code, m);
+      totalArt += q * c;
+    }
+    cmpAnnuel[a.code] = totalArt;
+    totalAchatsAnnee += totalArt;
+  });
+
+  // Mois le plus coûteux
+  for(let m = 0; m < 12; m++) {
+    let s = 0;
+    articles.forEach(a => { s += (qty[a.code]?.[m]||0) * _coutMois(a.code, m); });
+    if(s > moisMaxVal) { moisMaxVal = s; moisMax = m; }
+  }
+
+  const eTotal = $('ach-kpi-total'); if(eTotal) eTotal.textContent = fmt(totalAchatsAnnee);
+  const eMois  = $('ach-kpi-mois');  if(eMois)  eMois.textContent  = moisMaxVal > 0 ? fmt(moisMaxVal) : '—';
+  const eMoisLbl = $('ach-kpi-mois-lbl'); if(eMoisLbl) eMoisLbl.textContent = moisMaxVal > 0 ? MOIS_FULL[moisMax] : '—';
+
+  // ── Tableau ──
+  const tbody = $('ach-tbody');
+  if(!tbody) return;
+
+  tbody.innerHTML = articles.map(a => {
+    const cellules = Array.from({length:12}, (_,m) => {
+      const v = achats[a.code]?.[m] || 0;
+      const inherited = v === 0 && _coutMois(a.code, m) > 0;
+      const display = v > 0 ? v : (inherited ? _coutMois(a.code, m) : 0);
+      return `<td style="padding:2px">
+        <input class="sinp" type="number" min="0" step="0.01"
+          value="${v > 0 ? v : ''}"
+          placeholder="${inherited ? _coutMois(a.code, m) : '0'}"
+          style="width:52px;text-align:right;color:${v>0?'var(--t1)':'var(--t3)'}"
+          onchange="upsertAchat('${a.code}',${m},parseFloat(this.value)||0);renderAchats()"
+        >
+      </td>`;
+    }).join('');
+
+    const totCout = Array.from({length:12},(_,m)=>(qty[a.code]?.[m]||0)*_coutMois(a.code,m)).reduce((s,v)=>s+v,0);
+    const noAchat = articles.find(x=>x.code===a.code)?._noAchat ?? true;
+
+    return `<tr>
+      <td style="font-size:11px;color:var(--t3);font-family:var(--fm)">${a.code}</td>
+      <td style="font-weight:600;font-size:13px">${a.nom}</td>
+      <td style="font-size:12px;color:var(--t2);font-family:var(--fm)">${fmt(a.pv)}</td>
+      ${cellules}
+      <td style="font-family:var(--fm);font-size:12px;font-weight:600;color:var(--rd);text-align:right">${totCout>0?fmt(totCout):'—'}</td>
+    </tr>`;
+  }).join('');
+
+  // ── Ligne TOTAL ──
+  const totParMois = Array.from({length:12},(_,m)=>
+    articles.reduce((s,a)=>(s+(qty[a.code]?.[m]||0)*_coutMois(a.code,m)),0)
+  );
+  const grandTotal = totParMois.reduce((s,v)=>s+v,0);
+  const totCells = totParMois.map(v=>`<td style="font-family:var(--fm);font-size:11px;font-weight:700;color:var(--ac);text-align:right;padding:4px 6px">${v>0?v.toFixed(2):''}</td>`).join('');
+  const totRow = $('ach-tfoot');
+  if(totRow) totRow.innerHTML = `<tr><td colspan="3" style="font-weight:700;font-size:12px;padding:4px 8px">TOTAL</td>${totCells}<td style="font-family:var(--fm);font-size:12px;font-weight:700;color:var(--rd);text-align:right;padding:4px 8px">${grandTotal>0?fmt(grandTotal):'—'}</td></tr>`;
 }
 
 // ════════════════════════════════════════════════════════
@@ -3182,7 +3388,7 @@ function renderDashboard() {
     q.forEach((v,m) => {
       const val = v || 0;
       caHT        += val * a.pv;
-      margeB      += val * (a.pv - a.cout);
+      margeB      += val * (a.pv - _coutMois(a.code, m));
       caParMois[m]+= val * a.pv;
     });
   });
@@ -3462,7 +3668,7 @@ async function _loadN1Data() {
   const anneeN1 = ANNEE - 1;
   try {
     const { data: artsN1 } = await DB.from('articles')
-      .select('code,prix_ht,cout_achat,annee')
+      .select('code,prix_ht,annee')
       .eq('user_id', UID)
       .order('annee', { ascending: true });
 
@@ -3576,10 +3782,10 @@ async function _loadN1() {
     }
     let caN=0,caN1=0,chN=0,chN1=0,margeN=0,margeN1=0;
     moisComm.forEach(m => { caN+=caParMoisN[m]; caN1+=caParMoisN1[m]; chN+=chParMoisN[m]; chN1+=chParMoisN1[m]; });
-    articles.forEach(a => { moisComm.forEach(m => { margeN+=(qty[a.code]?.[m]||0)*(a.pv-a.cout); }); });
+    articles.forEach(a => { moisComm.forEach(m => { margeN+=(qty[a.code]?.[m]||0)*(a.pv-_coutMois(a.code,m)); }); });
     Object.entries(qtyN1).forEach(([code,vals]) => {
       const a=artMapN1[code]; if(!a) return;
-      moisComm.forEach(m => { margeN1+=(vals[m]||0)*(a.prix_ht-a.cout_achat); });
+      moisComm.forEach(m => { margeN1+=(vals[m]||0)*a.prix_ht; }); // cout N-1 non disponible → marge conservatrice
     });
     _ytdBadge('db-ytd-ca',  caN,       caN1,       moisComm, false);
     _ytdBadge('db-ytd-ch',  chN,       chN1,       moisComm, false, true); // invert: hausse charges = rouge
@@ -3609,10 +3815,10 @@ async function _loadN1CA() {
     }
     let caN=0, caN1=0;
     moisComm.forEach(m => { caN+=caParMoisN[m]; caN1+=caParMoisN1[m]; });
-    articles.forEach(a => { moisComm.forEach(m => { margeN+=(qty[a.code]?.[m]||0)*(a.pv-a.cout); }); });
+    articles.forEach(a => { moisComm.forEach(m => { margeN+=(qty[a.code]?.[m]||0)*(a.pv-_coutMois(a.code,m)); }); });
     Object.entries(qtyN1).forEach(([code,vals]) => {
       const a=artMapN1[code]; if(!a) return;
-      moisComm.forEach(m => { margeN1+=(vals[m]||0)*(a.prix_ht-a.cout_achat); });
+      moisComm.forEach(m => { margeN1+=(vals[m]||0)*a.prix_ht; }); // cout N-1 non disponible → marge conservatrice
     });
     _ytdBadge('ca-ytd-caht',  caN,    caN1,   moisComm, false);
     _ytdBadge('ca-ytd-marge', margeN, margeN1, moisComm, false);
@@ -3678,10 +3884,10 @@ async function _loadN1MR() {
     let caN=0,caN1=0,chN=0,chN1=0,margeN=0,margeN1=0;
     let chVarN=0,chVarN1=0;
     moisComm.forEach(m => { caN+=caParMoisN[m]; caN1+=caParMoisN1[m]; chN+=chParMoisN[m]; chN1+=chParMoisN1[m]; });
-    articles.forEach(a => { moisComm.forEach(m => { margeN+=(qty[a.code]?.[m]||0)*(a.pv-a.cout); }); });
+    articles.forEach(a => { moisComm.forEach(m => { margeN+=(qty[a.code]?.[m]||0)*(a.pv-_coutMois(a.code,m)); }); });
     Object.entries(qtyN1).forEach(([code,vals]) => {
       const a=artMapN1[code]; if(!a) return;
-      moisComm.forEach(m => { margeN1+=(vals[m]||0)*(a.prix_ht-a.cout_achat); });
+      moisComm.forEach(m => { margeN1+=(vals[m]||0)*a.prix_ht; }); // cout N-1 non disponible → marge conservatrice
     });
     // Charges variables sur mois communs
     charges.filter(c=>c.type!=='Fixe').forEach(c => {
@@ -3768,7 +3974,7 @@ function _downloadFile(content, filename, mime) {
 // ── Templates CSV téléchargeables ────────────────────────
 
 function downloadTemplateArticles() {
-  const header = 'code,nom,categorie,prix_ht,cout_achat,tva';
+  const header = 'code,nom,categorie,prix_ht,tva';
   const exemple = 'ART1,Consulting,Services,500.00,0.00,0.20\nART2,Formation,Services,800.00,0.00,0.20\nART3,Produit A,Commerce,29.90,12.00,0.20';
   _downloadFile(header+'\n'+exemple, 'modele_articles_logpose.csv', 'text/csv;charset=utf-8');
   toast('ok', 'Modèle téléchargé', 'Ouvrez le fichier dans Excel, remplissez vos articles puis importez-le.', 4000);
@@ -3818,7 +4024,6 @@ async function importArticlesCSV(file) {
     if(!code || !nom) { errors++; continue; }
 
     const pv   = parseFloat(row.prix_ht)   || 0;
-    const cout = parseFloat(row.cout_achat) || 0;
     const tva  = parseFloat(row.tva)        || 0.20;
     const cat  = (row.categorie||'').trim();
 
@@ -3830,7 +4035,7 @@ async function importArticlesCSV(file) {
     try {
       await DB.from('articles').upsert({
         user_id: UID, code, annee: ANNEE,
-        nom, categorie: cat, prix_ht: pv, cout_achat: cout, tva, actif: true
+        nom, categorie: cat, prix_ht: pv, tva, actif: true
       }, { onConflict: 'user_id,code,annee' });
       isNew ? created++ : updated++;
     } catch(e) { errors++; }
@@ -4009,7 +4214,7 @@ async function printReport() {
   if(_anneeMts !== ANNEE) await _loadMtsOnly();
 
   // 3. Afficher TEMPORAIREMENT tous les panels pour que les canvas soient visibles
-  const allPanels = ['pnl-dashboard','pnl-ca','pnl-charges','pnl-marge','pnl-previsionnel','pnl-tva','pnl-tresorerie'];
+  const allPanels = ['pnl-dashboard','pnl-ca','pnl-achats','pnl-charges','pnl-marge','pnl-previsionnel','pnl-tva','pnl-tresorerie'];
   const panelPrevDisplay = {};
   allPanels.forEach(id => {
     const el = $(id);
@@ -4093,6 +4298,53 @@ async function printReport() {
     });
     document.querySelectorAll('.pv-print-val').forEach(s => s.remove());
   }, 500);
+}
+
+// ── Calculateur de coût de revient ──
+let _calcLignes = [{ lib: '', val: 0 }];
+
+function achCalcAddLigne() {
+  _calcLignes.push({ lib: '', val: 0 });
+  achCalcRender();
+}
+
+function achCalcRender() {
+  const cont = $('ach-calc-lignes');
+  if(!cont) return;
+  cont.innerHTML = _calcLignes.map((l, i) => `
+    <div style="display:flex;gap:8px;align-items:center">
+      <input class="finp" style="flex:1" type="text" placeholder="Composant (ex: Prix achat, Transport...)"
+        value="${l.lib}" onchange="_calcLignes[${i}].lib=this.value">
+      <input class="finp" style="max-width:110px" type="number" min="0" step="0.01" placeholder="0.00 €"
+        value="${l.val||''}" onchange="_calcLignes[${i}].val=parseFloat(this.value)||0;achCalcTotal()">
+      <button class="delbtn" onclick="_calcLignes.splice(${i},1);achCalcRender()">×</button>
+    </div>
+  `).join('');
+  achCalcTotal();
+}
+
+function achCalcTotal() {
+  const tot = _calcLignes.reduce((s,l)=>s+(l.val||0),0);
+  const el = $('ach-calc-total');
+  if(el) el.textContent = tot.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+  return tot;
+}
+
+function achCalcInjecter() {
+  const code  = $('ach-calc-art')?.value;
+  const moisI = parseInt($('ach-calc-mois')?.value || '0');
+  const tot   = achCalcTotal();
+  if(!code) { toast('warn','Article requis',"Sélectionnez un article avant d'injecter le coût.",3000); return; }
+  if(tot <= 0) { toast('warn','Coût nul','Saisissez au moins un composant avec un montant.',3000); return; }
+  upsertAchat(code, moisI, Math.round(tot*100)/100);
+  renderAchats();
+  toast('ok','Coût injecté',`Coût de revient de ${tot.toFixed(2)} € injecté pour ${articles.find(a=>a.code===code)?.nom} en ${['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'][moisI]}.`,4000);
+}
+
+// Initialiser le calculateur à l'ouverture
+function achCalcInit() {
+  _calcLignes = [{ lib: "Prix d'achat", val: 0 }, { lib: "Frais annexes", val: 0 }];
+  achCalcRender();
 }
 
 const LEMON_URL = 'https://logpose.lemonsqueezy.com/checkout/buy/246ce9d6-683a-4db6-912f-a95437b7d1da';
@@ -4297,7 +4549,7 @@ function _inputErr(id, msg) {
 }
 
 // Validation article (addArt + onblur inline)
-function validateArticle(nom, code, pv, cout) {
+function validateArticle(nom, code, pv) {
   if(!nom || !nom.trim()) {
     _inputErr('pa-nom', 'Le nom de l\'article est obligatoire.');
     return false;
@@ -4311,10 +4563,7 @@ function validateArticle(nom, code, pv, cout) {
     _inputErr('pa-pv', 'Le prix de vente ne peut pas être négatif.');
     return false;
   }
-  if(cout < 0) {
-    _inputErr('pa-cout', 'Le coût d\'achat ne peut pas être négatif.');
-    return false;
-  }
+
   // Avertissements non bloquants
   if(pv === 0) toast('warn', 'Prix à 0 €', `"${nom}" a un prix HT à 0 €. Cet article ne générera pas de CA.`, 5000);
   if(pv > 0 && cout > pv) toast('warn', 'Marge négative', `Le coût d'achat de "${nom}" dépasse son prix HT. Votre marge sera négative.`, 6000);
@@ -4417,7 +4666,7 @@ async function onbSaveStep2() {
   const a = {
     code, nom, cat: $('onb-art-cat').value || 'Divers',
     pv: parseFloat($('onb-art-pv').value) || 0,
-    cout: parseFloat($('onb-art-cout').value) || 0,
+    cout: 0,
     tva: parseFloat($('onb-art-tva').value) || 0.2,
     actif: true,
   };
@@ -4503,8 +4752,11 @@ function renderMarge() {
   articles.forEach(a => {
     const totQty = (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0);
     caHT     += totQty * a.pv;
-    coutAchat+= totQty * a.cout;
-    margeB   += totQty * (a.pv - a.cout);
+    for(let m=0;m<12;m++) {
+      const q=qty[a.code]?.[m]||0;
+      coutAchat += q * _coutMois(a.code,m);
+      margeB    += q * (a.pv - _coutMois(a.code,m));
+    }
   });
 
   let chFixHT = 0, chVarHT = 0;
@@ -4777,7 +5029,7 @@ function renderMarge() {
   const lignes = artAvecCA.map(a => {
     const totQty  = (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0);
     const artCA   = Math.round(totQty * a.pv * 100) / 100;
-    const artCout = Math.round(totQty * a.cout * 100) / 100;
+    const artCout = Math.round(Array.from({length:12},(_,m)=>(qty[a.code]?.[m]||0)*_coutMois(a.code,m)).reduce((s,v)=>s+v,0)*100)/100;
     const artMB   = Math.round((artCA - artCout) * 100) / 100;
     const txMB    = artCA > 0 ? Math.round(artMB / artCA * 1000) / 10 : 0;
 
@@ -4899,8 +5151,11 @@ function _scCalc(sc) {
     const coeff = sim.qtyCoeff !== undefined ? sim.qtyCoeff : 1;
     const totQty = (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0) * coeff;
     caHT      += totQty * pv;
-    coutAchat += totQty * a.cout;
-    margeB    += totQty * (pv - a.cout);
+    for(let m=0;m<12;m++) {
+      const q=qty[a.code]?.[m]||0;
+      coutAchat += q * _coutMois(a.code,m);
+      margeB    += q * (a.pv - _coutMois(a.code,m));
+    }
   });
 
   let chFixHT = 0, chVarHT = 0;
@@ -5052,7 +5307,7 @@ function renderScenarios() {
       const qc  = (sim.qtyCoeff !== undefined ? sim.qtyCoeff : 1) * coeff;
       const q   = (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0) * qc;
       ca   += q * pv;
-      cout += q * a.cout;
+      cout += q * _coutMois(a.code,m);
     });
     charges.forEach(c => {
       const k = String(c.code);
@@ -5207,7 +5462,7 @@ function _pvProjCA(hyp, nAns) {
         const qReel = (qty[a.code]||[])[m] || 0;
         const qProj = qReel * Math.pow(coeff, an);
         caM   += qProj * a.pv;
-        coutM += qProj * a.cout;
+        coutM += qProj * _coutMois(a.code,m);
       });
       // Charges
       let chFixM = 0, chVarM = 0;
@@ -5306,7 +5561,7 @@ function renderPrevisionnel() {
   const reelCA = articles.reduce((s,a)=>s+(qty[a.code]||[]).reduce((x,v)=>x+(v||0),0)*a.pv,0);
   const reelRes = (() => {
     let ca=0,cout=0,chF=0,chV=0;
-    articles.forEach(a=>{const q=(qty[a.code]||[]).reduce((s,v)=>s+(v||0),0);ca+=q*a.pv;cout+=q*a.cout;});
+    articles.forEach(a=>{for(let m=0;m<12;m++){const q=qty[a.code]?.[m]||0;ca+=q*a.pv;cout+=q*_coutMois(a.code,m);}});
     charges.forEach(c=>{const k=String(c.code);const ht=(mts[k]||[]).reduce((s,v)=>s+(v||0),0)/(1+(c.tva||0));if(c.type==='Fixe')chF+=ht;else chV+=ht;});
     return Math.round((ca-cout-chF-chV)*100)/100;
   })();
@@ -5367,7 +5622,7 @@ function renderPrevisionnel() {
   // Recalcul réel — déclaré avant if(tbody) pour être accessible par besoin financement
   const synthReel = (() => {
     let ca=0,cout=0,chF=0,chV=0;
-    articles.forEach(a=>{const q=(qty[a.code]||[]).reduce((s,v)=>s+(v||0),0);ca+=q*a.pv;cout+=q*a.cout;});
+    articles.forEach(a=>{for(let m=0;m<12;m++){const q=qty[a.code]?.[m]||0;ca+=q*a.pv;cout+=q*_coutMois(a.code,m);}});
     charges.forEach(c=>{const k=String(c.code);const ht=(mts[k]||[]).reduce((s,v)=>s+(v||0),0)/(1+(c.tva||0));if(c.type==='Fixe')chF+=ht;else chV+=ht;});
     const margeB=Math.round((ca-cout)*100)/100, res=Math.round((ca-cout-chF-chV)*100)/100;
     const txM=ca>0?Math.round(margeB/ca*1000)/10:0;
@@ -5547,7 +5802,7 @@ function _tvaCalcMois() {
     });
     articles.forEach(a => {
       const q = (qty[a.code]||[])[m] || 0;
-      deductible += q * a.cout * (a.tva || 0.2);
+      deductible += q * _coutMois(a.code,m) * (a.tva || 0.2);
     });
     const net = Math.round((collectee - deductible) * 100) / 100;
     mois.push({
@@ -5772,7 +6027,7 @@ function renderTresorerie() {
     let achats = 0;
     articles.forEach(a => {
       const q = (qty[a.code]||[])[m] || 0;
-      const coutHT = q * a.cout;
+      const coutHT = q * _coutMois(a.code,m);
       achats += inclTVA ? coutHT * (1 + (a.tva||0.2)) : coutHT;
     });
 
@@ -5984,6 +6239,7 @@ async function changeAnnee(n) {
 
   // Invalider les caches lazy load + instances graphiques
   _anneeCA  = null;
+  _anneeAchats = null; achats = {};
   _anneeMts = null;
   qty = {};
   mts = {};
@@ -6185,6 +6441,7 @@ async function startApp(user) {
 const PANEL_URLS = {
   'pnl-dashboard':    '/dashboard',
   'pnl-ca':           '/chiffre-affaires',
+  'pnl-achats':       '/achats',
   'pnl-charges':      '/charges',
   'pnl-marge':        '/marge-rentabilite',
   'pnl-scenarios':    '/scenarios',
@@ -6197,8 +6454,8 @@ const PANEL_URLS = {
 function showPanel(panelId, navId) {
   // Supprimer tout overlay Pro en cours
   document.querySelectorAll('[id^="pro-overlay-"]').forEach(e => e.remove());
-  ['pnl-dashboard','pnl-params','pnl-ca','pnl-charges','pnl-marge','pnl-scenarios','pnl-previsionnel','pnl-tva','pnl-tresorerie'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
-  ['nav-dashboard','nav-params','nav-ca','nav-charges','nav-marge','nav-scenarios','nav-previsionnel','nav-tva','nav-tresorerie'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
+  ['pnl-dashboard','pnl-params','pnl-ca','pnl-achats','pnl-charges','pnl-marge','pnl-scenarios','pnl-previsionnel','pnl-tva','pnl-tresorerie'].forEach(id => { const e=$(id); if(e) e.style.display='none'; });
+  ['nav-dashboard','nav-params','nav-ca','nav-achats','nav-charges','nav-marge','nav-scenarios','nav-previsionnel','nav-tva','nav-tresorerie'].forEach(id => { const e=$(id); if(e) e.classList.remove('active'); });
   const p=$(panelId);
   if(p) {
     p.style.display='block';
@@ -6389,6 +6646,25 @@ document.addEventListener('DOMContentLoaded', () => {
       renderCA(); // instantané
     }
   });
+  $('nav-achats').addEventListener('click', async () => {
+    showPanel('pnl-achats','nav-achats');
+    $('ach-annee-lbl').textContent = ANNEE;
+    if(_anneeCA !== ANNEE) await loadCA();
+    // Peupler le select articles du calculateur
+    const sel = $('ach-calc-art');
+    if(sel) {
+      sel.innerHTML = '<option value="">— Choisir un article —</option>' +
+        articles.map(a => `<option value="${a.code}">${a.nom}</option>`).join('');
+    }
+    achCalcInit();
+    await renderAchats();
+    // KPI marge
+    const caHT = articles.reduce((s,a)=>(s+(qty[a.code]||[]).reduce((x,v)=>x+(v||0),0)*a.pv),0);
+    const coutTotal = articles.reduce((s,a)=>(s+Array.from({length:12},(_,m)=>(qty[a.code]?.[m]||0)*_coutMois(a.code,m)).reduce((x,v)=>x+v,0)),0);
+    const margeEl = $('ach-kpi-marge');
+    if(margeEl) margeEl.textContent = fmt(caHT - coutTotal);
+  });
+
   $('nav-charges').addEventListener('click', async () => {
     showPanel('pnl-charges','nav-charges');
     if(_anneeMts !== ANNEE) {
