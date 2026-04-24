@@ -227,6 +227,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .sb.col .theme-btn{justify-content:center;border:none;background:transparent;padding:9px}
 
 /* ── MOBILE ── */
+.mob-theme-btn{display:none}
 .mob-hdr{display:none;align-items:center;gap:12px;padding:12px 16px;background:var(--bgs);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:99}
 .mob-menu{width:36px;height:36px;border-radius:8px;background:var(--bgc);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .sb-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
@@ -654,9 +655,19 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   .sb .sb-user{flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border:none;background:transparent}
   .sb .sb-logout{display:flex!important;width:32px;height:32px;border-radius:8px;border:1px solid var(--bd);background:var(--in);align-items:center;justify-content:center;color:var(--t2)}
   .sb .sb-logout:active{color:var(--rd)}
-  /* Trial badge court */
-  #trial-badge{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;padding:4px 2px;text-align:center}
+  /* Trial badge : version courte */
+  #trial-badge{overflow:hidden;padding:4px 2px!important;text-align:center}
+  #trial-badge .trial-long{display:none!important}
+  #trial-badge .trial-short{display:block!important}
+  /* Btn pro : icône seule */
   #btn-pro{padding:6px 2px;font-size:15px}
+  /* Thème : masquer le toggle desktop, afficher bouton icône */
+  .sb .theme-btn{display:none!important}
+  .mob-theme-btn{display:flex;align-items:center;justify-content:center;
+                 width:36px;height:36px;border-radius:8px;border:1px solid var(--bd);
+                 background:var(--in);color:var(--t1);cursor:pointer;font-size:18px;
+                 margin:4px auto 0;padding:0;transition:background var(--tr)}
+  .mob-theme-btn:active{background:var(--bgc)}
 
   /* ── Main et savebar décalés de la sidebar icônes ── */
   .main{margin-left:var(--swc)!important;padding:60px 12px 80px!important}
@@ -1186,6 +1197,10 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <span class="theme-txt" id="theme-lbl">🌙 Thème sombre</span>
         <div class="tog"><div class="tog-k"></div></div>
       </div>
+      <!-- Bouton thème mobile (icône seule) — masqué sur desktop via @media -->
+      <button class="mob-theme-btn" id="mob-btn-theme" onclick="toggleTheme();mobSyncTheme()" title="Changer de thème">
+        <span id="mob-theme-ico">🌙</span>
+      </button>
     </div>
   </aside>
 
@@ -4579,13 +4594,15 @@ function applyFreemium() {
     if(!existingBadge) {
       const badge = document.createElement('div');
       badge.id = 'trial-badge';
-      badge.style.cssText = 'display:block;padding:7px 10px;background:var(--grb);border:1px solid rgba(14,165,114,.25);color:var(--gr);border-radius:var(--rs);font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;cursor:default;';
-      badge.innerHTML = `🎁 Essai Pro · <span id="trial-days">${days}</span> jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}`;
+      badge.style.cssText = 'display:block;padding:7px 10px;background:var(--grb);border:1px solid rgba(14,165,114,.25);color:var(--gr);border-radius:var(--rs);font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;cursor:default;overflow:hidden;';
+      badge.innerHTML = `<span class="trial-long">🎁 Essai Pro · <span id="trial-days">${days}</span> jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}</span><span class="trial-short" style="display:none">🎁<br><span id="trial-days-s" style="font-size:9px;line-height:1">${days}j</span></span>`;
       // Insérer avant btn-pro
       if(btnPro && btnPro.parentNode) btnPro.parentNode.insertBefore(badge, btnPro);
     } else {
       const daysEl = $('trial-days');
       if(daysEl) daysEl.textContent = days;
+      const daysElS = $('trial-days-s');
+      if(daysElS) daysElS.textContent = days + 'j';
     }
   } else if(existingBadge) {
     existingBadge.remove();
@@ -6619,6 +6636,13 @@ const MOB_TITLES = {
   'nav-tresorerie':   'Trésorerie',
   'nav-params':       'Paramètres',
 };
+function mobSyncTheme() {
+  const ico = $('mob-theme-ico');
+  if(!ico) return;
+  const theme = document.documentElement.getAttribute('data-theme');
+  ico.textContent = theme === 'light' ? '🌙' : '☀️';
+}
+
 function mobSetTitle(navId) {
   const el = $('mob-hdr-title');
   if(el) el.textContent = MOB_TITLES[navId] || 'LogPose';
@@ -6643,6 +6667,7 @@ function toggleTheme() {
     document.documentElement.setAttribute('data-theme',next);
     localStorage.setItem('lp-theme',next);
     const lbl=$('theme-lbl'); if(lbl) lbl.textContent=next==='light'?'🌙 Thème sombre':'☀️ Thème clair';
+    if(typeof mobSyncTheme === 'function') mobSyncTheme();
   } catch(e) {}
 }
 function toggleSidebar() {
