@@ -227,7 +227,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .sb.col .theme-btn{justify-content:center;border:none;background:transparent;padding:9px}
 
 /* ── MOBILE ── */
-.mob-hdr{display:none;align-items:center;gap:12px;padding:12px 16px;background:var(--bgs);border-bottom:1px solid var(--bd);position:fixed;top:0;left:0;right:0;z-index:150}
+.mob-hdr{display:none;align-items:center;gap:12px;padding:12px 16px;background:var(--bgs);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:99}
 .mob-menu{width:36px;height:36px;border-radius:8px;background:var(--bgc);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .sb-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
 
@@ -631,54 +631,48 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 @keyframes toastOut{to{opacity:0;transform:translateX(20px) scale(.95)}}
 
 /* ── RESPONSIVE ── */
-/* ════════════════════════════════════════════════════════
-   MOBILE — sidebar icônes permanente + header titre
-   ════════════════════════════════════════════════════════ */
-.mob-hdr-logo{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
-.mob-hdr-title{font-size:15px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mob-hdr-annee{display:flex;align-items:center;gap:4px;flex-shrink:0}
-
 @media(max-width:860px){
-  /* ── Sidebar : toujours visible, mode icônes ── */
-  .sb{width:var(--swc)!important;max-width:var(--swc)!important;min-width:var(--swc)!important;transform:none!important;box-shadow:none;overflow:hidden;top:0}
-  .sb-ov{display:none!important}
-  /* Masquer tout le texte, garder uniquement les icônes */
-  .sb .sb-texts,.sb .sb-lbl,.sb .sb-sect .sb-lbl,
-  .sb .sb-item span:not(.sb-ico),
-  .sb .sb-year-label,.sb .sb-year-btns,
-  .sb #sb-upgrade,
-  .sb .sb-uinfo,.sb .col-txt{display:none!important}
+  /* ── Sidebar : mode icônes permanent (54px) ── */
+  .sb{width:var(--swc)!important;max-width:var(--swc)!important;transform:none!important;overflow:hidden}
+  /* Masquer tous les textes sidebar, garder uniquement les icônes */
+  .sb .sb-texts,.sb .sb-lbl,.sb .sb-item>span:not(.sb-ico),
+  .sb .sb-year-label,.sb .sb-year-btns,.sb #sb-upgrade,
+  .sb .sb-uinfo,.sb .col-txt,
+  .sb .sb-col-btn,.sb .sb-aide-btn,.sb .theme-txt,.sb .tog{display:none!important}
+  .sb .sb-pro-btn>span{display:none!important}
   .sb .sb-sect{padding:0 4px}
-  .sb .sb-scroll{padding:2px 0}
   .sb .sb-logo{padding:14px 6px;justify-content:center}
-  .sb .sb-item{padding:11px 6px;justify-content:center;gap:0;white-space:nowrap;overflow:hidden}
+  .sb .sb-item{padding:11px 6px;justify-content:center;gap:0;overflow:hidden}
   .sb .sb-ico{opacity:.7;width:20px;height:20px;flex-shrink:0}
   .sb .sb-item.active .sb-ico{opacity:1}
   .sb .sb-bottom{padding:6px}
-  /* sb-user : avatar + logout empilés, centrés */
-  .sb .sb-user{flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border:none;background:transparent}
-  .sb .sb-logout{display:flex!important;width:32px;height:32px;border-radius:8px;border:1px solid var(--bd);background:var(--in);align-items:center;justify-content:center;color:var(--t2)}
-  .sb .sb-logout:hover{color:var(--rd);border-color:var(--rd);background:rgba(225,29,72,.08)}
-  .sb .sb-col-btn,.sb .sb-aide-btn,.sb .sb-pro-btn span,
-  .sb .theme-txt,.sb .tog{display:none!important}
-  /* Trial badge : icône + jours en mini */
-  #trial-badge{font-size:11px;padding:5px 4px;text-align:center;overflow:hidden}
-  #trial-badge .trial-full{display:none}
-  #trial-badge .trial-short{display:flex;flex-direction:column;align-items:center;line-height:1.2}
-  /* Btn pro : icône seule */
-  #btn-pro{padding:8px 4px;justify-content:center;min-width:0;font-size:16px}
-  #btn-pro span{display:none!important}
   .sb .sb-year-block{padding:8px 4px}
   .sb .sb-year-row{flex-direction:column;gap:2px;align-items:center}
-  .sb .sb-year-val{font-size:10px;font-weight:700}
+  .sb .sb-year-val{font-size:10px}
   .sb .sb-year-btn{width:20px;height:16px;font-size:11px}
+  /* Logout : visible et tactile */
+  .sb .sb-user{flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border:none;background:transparent}
+  .sb .sb-logout{display:flex!important;width:32px;height:32px;border-radius:8px;border:1px solid var(--bd);background:var(--in);align-items:center;justify-content:center;color:var(--t2)}
+  .sb .sb-logout:active{color:var(--rd)}
+  /* Trial badge court */
+  #trial-badge{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;padding:4px 2px;text-align:center}
+  #btn-pro{padding:6px 2px;font-size:15px}
 
-  /* ── Main décalé de la sidebar icônes ── */
+  /* ── Main et savebar décalés de la sidebar icônes ── */
   .main{margin-left:var(--swc)!important;padding:60px 12px 80px!important}
   .savebar{left:var(--swc)!important;margin-left:0!important}
 
-  /* ── Header mobile ── */
-  .mob-hdr{display:flex}
+  /* ── Header mobile affiché ── */
+  .mob-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;
+           background:var(--bgs);border-bottom:1px solid var(--bd);
+           position:fixed;top:0;left:var(--swc);right:0;z-index:150;height:52px}
+  .mob-hdr-logo{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+  .mob-hdr-title{font-size:15px;font-weight:700;color:var(--t1);
+                 white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mob-hdr-annee{display:flex;align-items:center;gap:4px;flex-shrink:0}
+
+  /* ── Topbar masquée (header mobile la remplace) ── */
+  .topbar{display:none!important}
 
   /* ── Grilles KPI ── */
   .g4{grid-template-columns:repeat(2,1fr)}
@@ -689,20 +683,15 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
   /* ── Tableaux scroll horizontal ── */
   .stbl,.dtbl,.pv-tbl,.tva-tbl,.tr-tbl,.sc-cmp-tbl{min-width:700px}
-  [id$="-tbl-wrap"],[style*="overflow-x:auto"]{-webkit-overflow-scrolling:touch}
+  .stbl thead,.dtbl thead{position:sticky;top:0;z-index:2}
 
   /* ── Inputs tactiles ── */
   .sinp{min-height:36px;font-size:12px}
 
   /* ── KPI ── */
   .kval{font-size:20px!important}
-  .kpi-sub{font-size:10px!important}
-
-  /* ── Topbar masquée sur mobile (remplacée par mob-hdr) ── */
-  .topbar{display:none!important}
 
   /* ── Calculateur achats ── */
-  .ach-calc-header{flex-wrap:wrap;gap:8px!important}
   #ach-calc-art,#ach-calc-mois{min-width:130px;flex:1}
 
   /* ── Savebar ── */
@@ -714,25 +703,17 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   /* ── Dashboard checklist ── */
   .db-checklist-items{grid-template-columns:1fr!important}
 
-  /* ── Marge waterfall ── */
-  #mr-tbl-wrap,#mr-chart-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-
-  /* ── Prévisionnel ── */
-  #pv-tbl-annuel{min-width:900px}
-
-  /* ── Trésorerie config ── */
-  .tr-config,.tr-params{grid-template-columns:1fr 1fr!important}
+  /* ── Trésorerie ── */
+  .tr-params{grid-template-columns:1fr 1fr!important}
 }
 
 @media(max-width:520px){
   .g4,.g3,.g2{grid-template-columns:1fr}
+  .topbar{display:none!important}
   .kval{font-size:18px!important}
   .g4 .card,.g3 .card{padding:14px}
-  .topbar{display:none!important}
-  .tr-config,.tr-params{grid-template-columns:1fr!important}
+  .tr-params{grid-template-columns:1fr!important}
   .ctrlgrid{grid-template-columns:1fr}
-  #ach-calc-art,#ach-calc-mois{font-size:13px}
-  .g4,.g3{grid-template-columns:1fr}
 }
 
 /* ════════════════════════════════════════════════════════
@@ -1095,10 +1076,10 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 <!-- APP -->
 <div id="app" style="display:none;min-height:100vh">
 
-  <!-- HEADER MOBILE -->
+  <!-- HEADER MOBILE (masqué sur desktop via CSS display:none) -->
   <header class="mob-hdr" id="mob-hdr">
     <div class="mob-hdr-logo">
-      <div class="sb-icon" style="width:26px;height:26px;min-width:26px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+      <div class="sb-icon" style="width:26px;height:26px;min-width:26px;flex-shrink:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
       <span class="mob-hdr-title" id="mob-hdr-title">Dashboard</span>
     </div>
     <div class="mob-hdr-annee">
@@ -1107,9 +1088,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <button class="sb-year-btn" onclick="changeAnnee(1)" style="width:28px;height:28px;font-size:15px">›</button>
     </div>
   </header>
-
-  <!-- OVERLAY SIDEBAR (conservé pour compatibilité desktop) -->
-  <div class="sb-ov" id="sb-ov"></div>
 
   <!-- SIDEBAR -->
   <aside class="sb" id="sb">
@@ -1611,9 +1589,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="card" style="margin-bottom:20px">
         <div class="tbl-hdr">
           <div><div class="ct">Calculateur de coût de revient</div><div class="cs">Décomposez vos coûts pour obtenir le prix de revient réel</div></div>
-          <div class="ach-calc-header" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <select class="fsel btn-sm" id="ach-calc-art" style="max-width:180px;min-width:140px"><option value="">— Choisir un article —</option></select>
-            <select class="fsel btn-sm" id="ach-calc-mois" style="max-width:140px;min-width:110px">
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="fsel btn-sm" id="ach-calc-art" style="max-width:180px"><option value="">— Choisir un article —</option></select>
+            <select class="fsel btn-sm" id="ach-calc-mois" style="max-width:140px">
               <option value="0">Janvier</option><option value="1">Février</option><option value="2">Mars</option>
               <option value="3">Avril</option><option value="4">Mai</option><option value="5">Juin</option>
               <option value="6">Juillet</option><option value="7">Août</option><option value="8">Septembre</option>
@@ -1624,9 +1602,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div style="padding:12px 0">
           <div id="ach-calc-lignes" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
           <button class="btn btn-g btn-sm" onclick="achCalcAddLigne()" style="margin-bottom:16px">+ Ajouter un composant</button>
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 16px;background:var(--ag);border-radius:var(--rs);border:1px solid var(--bd)">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--ag);border-radius:var(--rs);border:1px solid var(--bd)">
             <div style="font-size:13px;font-weight:700;color:var(--t1)">Coût de revient total</div>
-            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:16px">
               <div style="font-size:22px;font-weight:800;color:var(--rd);font-family:var(--fm)" id="ach-calc-total">0,00 €</div>
               <button class="btn btn-p btn-sm" onclick="achCalcInjecter()">↗ Injecter dans la saisie</button>
             </div>
@@ -4602,7 +4580,7 @@ function applyFreemium() {
       const badge = document.createElement('div');
       badge.id = 'trial-badge';
       badge.style.cssText = 'display:block;padding:7px 10px;background:var(--grb);border:1px solid rgba(14,165,114,.25);color:var(--gr);border-radius:var(--rs);font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;cursor:default;';
-      badge.innerHTML = `<span class="trial-full">🎁 Essai Pro · <span id="trial-days">${days}</span> jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}</span><span class="trial-short" title="Essai Pro · ${days} jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}">🎁<br><span style="font-size:9px">${days}j</span></span>`;
+      badge.innerHTML = `🎁 Essai Pro · <span id="trial-days">${days}</span> jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}`;
       // Insérer avant btn-pro
       if(btnPro && btnPro.parentNode) btnPro.parentNode.insertBefore(badge, btnPro);
     } else {
@@ -6440,9 +6418,8 @@ async function changeAnnee(n) {
 }
 
 function renderAnneesNav() {
-  // Sync header mobile
-  const mobAn = $('mob-annee-lbl'); if(mobAn) mobAn.textContent = ANNEE;
   const a = $('sb-annee'); if(a) a.textContent = ANNEE;
+  const mAn = $('mob-annee-lbl'); if(mAn) mAn.textContent = ANNEE;
   const lbl = $('params-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
   const btns = $('sb-annees');
   if(btns) {
@@ -6618,9 +6595,8 @@ function showPanel(panelId, navId) {
     p.classList.add('pnl-enter');
   }
   const n=$(navId); if(n) n.classList.add('active');
-  // Mobile : fermer sidebar + mettre à jour le titre
-  mobCloseSb();
-  mobSetTitle(navId);
+  // Mobile : mettre à jour le titre du header
+  if(typeof mobSetTitle === 'function') mobSetTitle(navId);
   // Mettre à jour l'URL sans rechargement
   try {
     const slug = PANEL_URLS[panelId] || '/dashboard';
@@ -6629,29 +6605,25 @@ function showPanel(panelId, navId) {
 }
 
 // ════════════════════════════════════════════════════════
-// MOBILE NAVIGATION
+// MOBILE
 // ════════════════════════════════════════════════════════
 const MOB_TITLES = {
-  'nav-dashboard':   'Dashboard',
-  'nav-ca':          "Chiffre d'affaires",
-  'nav-achats':      'Achats',
-  'nav-charges':     'Charges',
-  'nav-marge':       'Marge & Rentabilité',
-  'nav-scenarios':   'Scénarios',
-  'nav-previsionnel':'Prévisionnel',
-  'nav-tva':         'TVA',
-  'nav-tresorerie':  'Trésorerie',
-  'nav-params':      'Paramètres',
+  'nav-dashboard':    'Dashboard',
+  'nav-ca':           "Chiffre d'affaires",
+  'nav-achats':       'Achats',
+  'nav-charges':      'Charges',
+  'nav-marge':        'Marge & Rentabilité',
+  'nav-scenarios':    'Scénarios',
+  'nav-previsionnel': 'Prévisionnel',
+  'nav-tva':          'TVA',
+  'nav-tresorerie':   'Trésorerie',
+  'nav-params':       'Paramètres',
 };
-
-function mobOpenSb() {} // no-op sur mobile (sidebar toujours visible)
-function mobCloseSb() {} // no-op sur mobile (sidebar toujours visible)
-
 function mobSetTitle(navId) {
   const el = $('mob-hdr-title');
   if(el) el.textContent = MOB_TITLES[navId] || 'LogPose';
-  const anneeEl = $('mob-annee-lbl');
-  if(anneeEl) anneeEl.textContent = ANNEE;
+  const an = $('mob-annee-lbl');
+  if(an) an.textContent = ANNEE;
 }
 
 // ════════════════════════════════════════════════════════
