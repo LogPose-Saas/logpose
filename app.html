@@ -2870,7 +2870,10 @@ function updateCACharts() {
 
 // Charge les saisies_achats depuis Supabase pour l'année courante
 async function loadAchats() {
-  if(!UID || !articles.length) return;
+  if(!UID) return;
+  // S'assurer que les articles sont chargés
+  if(!articles.length) await loadArticles();
+  if(!articles.length) return; // toujours vide après chargement
   if(_anneeAchats === ANNEE && Object.keys(achats).length > 0) return;
 
   // Initialiser à 0 pour tous les articles
