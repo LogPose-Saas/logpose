@@ -4567,7 +4567,7 @@ function validateArticle(nom, code, pv) {
 
   // Avertissements non bloquants
   if(pv === 0) toast('warn', 'Prix à 0 €', `"${nom}" a un prix HT à 0 €. Cet article ne générera pas de CA.`, 5000);
-  if(pv > 0 && cout > pv) toast('warn', 'Marge négative', `Le coût d'achat de "${nom}" dépasse son prix HT. Votre marge sera négative.`, 6000);
+  // Note : marge vérifiée dans le module Achats
   return true;
 }
 
