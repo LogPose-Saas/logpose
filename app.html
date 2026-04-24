@@ -6266,7 +6266,7 @@ async function changeAnnee(n) {
   chartSCSens = null; chartPVMain = null; chartTR = null;
 
   // Skeleton sur le panneau actif
-  const panneauActif = ['pnl-dashboard','pnl-ca','pnl-charges','pnl-params']
+  const panneauActif = ['pnl-dashboard','pnl-ca','pnl-achats','pnl-charges','pnl-params']
     .find(id => { const e=$(id); return e && e.style.display !== 'none'; });
   if(panneauActif) showLoading(panneauActif);
 
@@ -6278,6 +6278,10 @@ async function changeAnnee(n) {
   if(panneauActif) hideLoading(panneauActif);
 
   // Re-render le panneau actif
+  if($('pnl-achats') && $('pnl-achats').style.display !== 'none') {
+    $('ach-annee-lbl').textContent = ANNEE;
+    await renderAchats();
+  }
   if($('pnl-charges') && $('pnl-charges').style.display !== 'none') {
     renderChargesData();
   }
