@@ -632,68 +632,85 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
 /* ── RESPONSIVE ── */
 /* ════════════════════════════════════════════════════════
-   MOBILE HEADER
+   MOBILE — sidebar icônes permanente + header titre
    ════════════════════════════════════════════════════════ */
-.mob-menu-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--bd);background:var(--in);color:var(--t1);cursor:pointer;flex-shrink:0;transition:background var(--tr)}
-.mob-menu-btn:hover{background:var(--bgc)}
 .mob-hdr-logo{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
 .mob-hdr-title{font-size:15px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mob-hdr-annee{display:flex;align-items:center;gap:4px;flex-shrink:0}
 
 @media(max-width:860px){
-  /* Sidebar masquée par défaut, slide-in au tap */
-  .sb{transform:translateX(-100%);width:var(--sw)!important;z-index:200}
-  .sb.mob-open{transform:translateX(0);box-shadow:4px 0 32px rgba(0,0,0,.25)}
-  .sb-ov{z-index:199}
-  .sb-ov.open{display:block}
-  /* Fermer la sidebar au clic sur un nav item */
-  .main,.savebar{margin-left:0!important;left:0!important}
-  .mob-hdr{display:flex}
-  .main{padding:72px 12px 80px}
+  /* ── Sidebar : toujours visible, mode icônes ── */
+  .sb{width:var(--swc)!important;transform:none!important;box-shadow:none}
+  .sb-ov{display:none!important}
+  /* Forcer mode col sans la classe .col */
+  .sb .sb-texts,.sb .sb-lbl,
+  .sb .sb-item span:not(.sb-ico),
+  .sb .sb-year-label,.sb .sb-year-btns,
+  .sb .sb-logout,.sb #sb-upgrade,
+  .sb .sb-uemail,.sb .col-txt{display:none!important}
+  .sb .sb-logo{padding:14px 6px;justify-content:center}
+  .sb .sb-item{padding:11px 6px;justify-content:center;gap:0}
+  .sb .sb-ico{opacity:.7;width:20px;height:20px}
+  .sb .sb-item.active .sb-ico{opacity:1}
+  .sb .sb-bottom{padding:6px}
+  .sb .sb-user{justify-content:center;padding:8px;border:none;background:transparent}
+  .sb .sb-col-btn,.sb .sb-aide-btn,.sb .sb-pro-btn span,
+  .sb .theme-txt,.sb .tog{display:none!important}
+  .sb .sb-year-block{padding:8px 4px}
+  .sb .sb-year-row{flex-direction:column;gap:2px;align-items:center}
+  .sb .sb-year-val{font-size:10px;font-weight:700}
+  .sb .sb-year-btn{width:20px;height:16px;font-size:11px}
 
-  /* Grilles KPI */
+  /* ── Main décalé de la sidebar icônes ── */
+  .main{margin-left:var(--swc)!important;padding:64px 12px 80px}
+  .savebar{left:var(--swc)!important;margin-left:0!important}
+
+  /* ── Header mobile ── */
+  .mob-hdr{display:flex}
+
+  /* ── Grilles KPI ── */
   .g4{grid-template-columns:repeat(2,1fr)}
   .g3{grid-template-columns:repeat(2,1fr)}
   .cg2,.cgeq,.cg3{grid-template-columns:1fr}
   .ctrlgrid{grid-template-columns:repeat(2,1fr)}
   .tabs{overflow-x:auto;max-width:100%}
 
-  /* Tableaux — scroll horizontal natif */
+  /* ── Tableaux scroll horizontal ── */
   .stbl,.dtbl,.pv-tbl,.tva-tbl,.tr-tbl,.sc-cmp-tbl{min-width:700px}
   [id$="-tbl-wrap"],[style*="overflow-x:auto"]{-webkit-overflow-scrolling:touch}
 
-  /* Inputs tableau tactiles */
+  /* ── Inputs tactiles ── */
   .sinp{min-height:36px;font-size:12px}
 
-  /* Cards KPI : éviter débordement texte */
+  /* ── KPI ── */
   .kval{font-size:20px!important}
   .kpi-sub{font-size:10px!important}
 
-  /* Topbar module */
+  /* ── Topbar ── */
   .topbar{flex-direction:column;align-items:flex-start;gap:8px}
   .page-actions{width:100%;display:flex;flex-wrap:wrap;gap:6px}
   .page-actions .btn{flex:1;min-width:0;font-size:11px;padding:6px 8px;text-align:center}
 
-  /* Calculateur achats */
-  .ach-calc-header{flex-direction:column;align-items:flex-start!important;gap:8px!important}
-  #ach-calc-art,#ach-calc-mois{max-width:100%!important;width:100%}
+  /* ── Calculateur achats ── */
+  .ach-calc-header{flex-wrap:wrap;gap:8px!important}
+  #ach-calc-art,#ach-calc-mois{min-width:130px;flex:1}
 
-  /* Savebar */
+  /* ── Savebar ── */
   .savebar{padding:8px 12px;flex-wrap:wrap;gap:6px}
 
-  /* Scénarios rows */
+  /* ── Scénarios ── */
   .sc-row{flex-wrap:wrap;gap:6px}
 
-  /* Dashboard checklist */
+  /* ── Dashboard checklist ── */
   .db-checklist-items{grid-template-columns:1fr!important}
 
-  /* Waterfall chart — scroll */
+  /* ── Marge waterfall ── */
   #mr-tbl-wrap,#mr-chart-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 
-  /* Prévisionnel synthèse */
+  /* ── Prévisionnel ── */
   #pv-tbl-annuel{min-width:900px}
 
-  /* Trésorerie config grid */
+  /* ── Trésorerie config ── */
   .tr-config,.tr-params{grid-template-columns:1fr 1fr!important}
 }
 
@@ -703,14 +720,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   .g4 .card,.g3 .card{padding:14px}
   .topbar{gap:6px}
   .page-title{font-size:18px}
-  .tr-config{grid-template-columns:1fr!important}
+  .tr-config,.tr-params{grid-template-columns:1fr!important}
   .ctrlgrid{grid-template-columns:1fr}
-
-  /* Calculateur coût de revient — full width */
   #ach-calc-art,#ach-calc-mois{font-size:13px}
-  .ach-calc-row{flex-direction:column;gap:4px}
-
-  /* KPI cards 1 col */
   .g4,.g3{grid-template-columns:1fr}
 }
 
@@ -1076,24 +1088,19 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
   <!-- HEADER MOBILE -->
   <header class="mob-hdr" id="mob-hdr">
-    <button class="mob-menu-btn" id="mob-menu-btn" onclick="mobOpenSb()" aria-label="Menu">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-      </svg>
-    </button>
     <div class="mob-hdr-logo">
       <div class="sb-icon" style="width:26px;height:26px;min-width:26px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
-      <span class="mob-hdr-title" id="mob-hdr-title">LogPose</span>
+      <span class="mob-hdr-title" id="mob-hdr-title">Dashboard</span>
     </div>
     <div class="mob-hdr-annee">
-      <button class="sb-year-btn" onclick="changeAnnee(-1)" style="width:24px;height:24px;font-size:14px">‹</button>
-      <span id="mob-annee-lbl" style="font-size:13px;font-weight:700;font-family:var(--fm);color:var(--t1);min-width:32px;text-align:center">2026</span>
-      <button class="sb-year-btn" onclick="changeAnnee(1)" style="width:24px;height:24px;font-size:14px">›</button>
+      <button class="sb-year-btn" onclick="changeAnnee(-1)" style="width:28px;height:28px;font-size:15px">‹</button>
+      <span id="mob-annee-lbl" style="font-size:13px;font-weight:700;font-family:var(--fm);color:var(--t1);min-width:34px;text-align:center">2026</span>
+      <button class="sb-year-btn" onclick="changeAnnee(1)" style="width:28px;height:28px;font-size:15px">›</button>
     </div>
   </header>
 
-  <!-- OVERLAY SIDEBAR MOBILE -->
-  <div class="sb-ov" id="sb-ov" onclick="mobCloseSb()"></div>
+  <!-- OVERLAY SIDEBAR (conservé pour compatibilité desktop) -->
+  <div class="sb-ov" id="sb-ov"></div>
 
   <!-- SIDEBAR -->
   <aside class="sb" id="sb">
@@ -6628,24 +6635,12 @@ const MOB_TITLES = {
   'nav-params':      'Paramètres',
 };
 
-function mobOpenSb() {
-  const sb = $('sb'), ov = $('sb-ov');
-  if(sb) sb.classList.add('mob-open');
-  if(ov) ov.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function mobCloseSb() {
-  const sb = $('sb'), ov = $('sb-ov');
-  if(sb) sb.classList.remove('mob-open');
-  if(ov) ov.classList.remove('open');
-  document.body.style.overflow = '';
-}
+function mobOpenSb() {} // no-op sur mobile (sidebar toujours visible)
+function mobCloseSb() {} // no-op sur mobile (sidebar toujours visible)
 
 function mobSetTitle(navId) {
   const el = $('mob-hdr-title');
   if(el) el.textContent = MOB_TITLES[navId] || 'LogPose';
-  // Sync année dans header mobile
   const anneeEl = $('mob-annee-lbl');
   if(anneeEl) anneeEl.textContent = ANNEE;
 }
