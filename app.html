@@ -3825,7 +3825,7 @@ async function _loadN1CA() {
     });
     const moisComm = _moisCommuns(caParMoisN, caParMoisN1);
     if(!moisComm.length) {
-      ['ca-ytd-caht','ca-ytd-txmarge'].forEach(id => { const el=$(id);if(el)el.innerHTML=''; });
+      ['ca-ytd-caht','ca-ytd-marge','ca-ytd-txmarge'].forEach(id => { const el=$(id);if(el)el.innerHTML=''; });
       return;
     }
     let caN=0, caN1=0;
@@ -3850,7 +3850,7 @@ async function _loadN1CH() {
     const { caParMoisN, chParMoisN, caParMoisN1, chParMoisN1 } = _calcVecteursN1(artMapN1, qtyN1, chMapN1, mtsN1);
     const moisComm = _moisCommuns(caParMoisN, caParMoisN1);
     if(!moisComm.length) {
-      const el=$('ch-ytd-ttc'); if(el) el.innerHTML=''; return;
+      ['ch-ytd-ttc','ch-ytd-ratio'].forEach(id => { const el=$(id);if(el)el.innerHTML=''; }); return;
     }
     let chN=0, chN1=0;
     // Charges TTC sur mois communs
