@@ -30,6 +30,13 @@
 <meta name="twitter:title" content="LogPose — Tableau de bord financier pour TPE & indépendants">
 <meta name="twitter:description" content="Pilotez votre activité comme un expert. CA, charges, marge, TVA, trésorerie et prévisionnel — tout en un seul outil. Essai Pro gratuit 14 jours, sans carte bancaire.">
 <meta name="twitter:site" content="@logpose">
+<meta name="twitter:image" content="https://logposefr.com/og-image.png">
+
+<!-- ══ OG IMAGE ══ -->
+<meta property="og:image" content="https://logposefr.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="LogPose — Tableau de bord financier pour TPE et indépendants">
 
 <!-- ══ JSON-LD SCHEMA.ORG ══ -->
 <script type="application/ld+json">
@@ -70,13 +77,16 @@
   "featureList": [
     "Suivi du chiffre d'affaires par article",
     "Gestion des charges fixes et variables",
+    "Module Achats — coûts d'achat et marge par produit",
     "Calcul de marge et point mort",
     "Module TVA (franchise et assujettissement)",
-    "Prévisionnel financier 36 mois",
-    "Simulations de scénarios A/B",
-    "Suivi de trésorerie avec décalages",
-    "Gestion multi-années",
-    "Alertes intelligentes"
+    "Prévisionnel financier 36 mois avec TVA et trésorerie",
+    "Simulations de scénarios A/B en temps réel",
+    "Suivi de trésorerie avec décalages encaissement/décaissement",
+    "6 alertes financières automatiques par email",
+    "Dashboard mobile optimisé",
+    "Comparaison N vs N-1 (badges YTD)",
+    "Gestion multi-années"
   ],
   "audience": {
     "@type": "Audience",
@@ -88,6 +98,72 @@
     "url": "https://logposefr.com",
     "email": "contact@logposefr.com"
   }
+}
+</script>
+
+<!-- ══ FAQ SCHEMA ══ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "LogPose remplace-t-il mon expert-comptable ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Non, et c'est voulu. LogPose est un outil de pilotage au quotidien — il vous aide à comprendre votre activité, anticiper les problèmes et prendre de meilleures décisions. Votre expert-comptable reste indispensable pour la comptabilité légale et fiscale."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ça marche pour une micro-entreprise ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui, c'est même le cas d'usage idéal. LogPose gère le régime franchise en base de TVA, vous alerte quand vous approchez des seuils, et s'adapte à tous les secteurs : services, commerce, artisanat, conseil, freelance."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "En quoi LogPose est-il mieux qu'un simple Excel ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Excel ne fait pas d'alertes intelligentes, ne calcule pas votre point mort, ne simule pas de scénarios en temps réel, ne gère pas votre TVA et n'est pas accessible partout sans risque de corruption de fichier. LogPose est opérationnel en 5 minutes, sans formules à maintenir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Mes données sont-elles sécurisées ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui. LogPose utilise Supabase avec authentification sécurisée et RLS (Row Level Security) — chaque utilisateur ne voit que ses propres données. L'infrastructure est hébergée en Europe."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Que se passe-t-il après les 14 jours d'essai ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Vous repassez automatiquement sur le plan gratuit — sans action de votre part, sans carte bancaire débitée. Toutes vos données sont conservées. Vous pouvez passer Pro à tout moment pour retrouver l'accès complet."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Faut-il des connaissances comptables pour utiliser LogPose ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Non. Vous renseignez vos articles, vos prix, vos quantités vendues et vos charges — LogPose calcule tout automatiquement et vous alerte si quelque chose mérite votre attention. Aucun jargon comptable requis."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "La gestion multi-années est-elle incluse dans le plan gratuit ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui. La navigation entre années (2024, 2025, 2026…) est disponible sur tous les plans, avec réplication intelligente de la configuration sur les années suivantes."
+      }
+    }
+  ]
 }
 </script>
 
@@ -349,7 +425,7 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
 <section class="hero">
   <div class="hero-badge"><span class="hero-badge-dot"></span>🎁 Essai Pro 14 jours · Aucune carte bancaire</div>
 
-  <h1>Le cockpit financier des<br>indépendants qui <span>pilotent vraiment</span></h1>
+  <h1>Le tableau de bord financier des<br>indépendants qui <span>pilotent vraiment</span></h1>
 
   <p class="hero-sub">CA, charges, marge, TVA, trésorerie et prévisionnel — tout en un seul tableau de bord. Essai Pro complet gratuit pendant 14 jours, sans carte bancaire.</p>
 
