@@ -621,6 +621,63 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .empty-title{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:6px}
 .empty-desc{font-size:13px;line-height:1.6}
 
+/* ════════════════════════════════════════════════════════
+   CAP — ASSISTANT IA (DESKTOP)
+   ════════════════════════════════════════════════════════ */
+#cap-btn{position:fixed;bottom:24px;right:24px;z-index:300;
+  display:none;align-items:center;gap:8px;
+  padding:12px 20px;border-radius:50px;
+  background:linear-gradient(135deg,var(--ac),var(--pu));
+  color:#fff;font-size:14px;font-weight:700;font-family:var(--f);
+  border:none;cursor:pointer;box-shadow:0 4px 20px rgba(59,126,255,.35);
+  transition:transform .2s,box-shadow .2s;white-space:nowrap}
+#cap-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(59,126,255,.45)}
+#cap-btn:active{transform:translateY(0)}
+#cap-btn .cap-ico{font-size:18px;line-height:1}
+#cap-btn .cap-lbl{font-size:13px}
+
+#cap-win{position:fixed;bottom:84px;right:24px;z-index:300;
+  width:360px;height:500px;
+  background:var(--bgc);border:1px solid var(--bd);border-radius:18px;
+  box-shadow:0 16px 48px rgba(0,0,0,.18);
+  display:none;flex-direction:column;overflow:hidden}
+#cap-win.open{display:flex}
+#cap-head{padding:14px 18px;background:linear-gradient(135deg,var(--ac),var(--pu));
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#cap-head-left{display:flex;align-items:center;gap:10px}
+#cap-head-ico{font-size:22px;line-height:1}
+#cap-head-name{font-size:14px;font-weight:800;color:#fff;letter-spacing:-.2px}
+#cap-head-sub{font-size:10px;color:rgba(255,255,255,.75);font-family:var(--fm)}
+#cap-close{background:rgba(255,255,255,.15);border:none;border-radius:8px;
+  width:28px;height:28px;cursor:pointer;color:#fff;font-size:16px;
+  display:flex;align-items:center;justify-content:center;transition:background .15s}
+#cap-close:hover{background:rgba(255,255,255,.25)}
+#cap-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+#cap-msgs::-webkit-scrollbar{width:4px}
+#cap-msgs::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.cap-msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.55;word-break:break-word}
+.cap-msg.cap-user{align-self:flex-end;background:var(--ac);color:#fff;border-bottom-right-radius:4px}
+.cap-msg.cap-bot{align-self:flex-start;background:var(--bgs);color:var(--t1);border:1px solid var(--bd);border-bottom-left-radius:4px}
+.cap-msg.cap-bot strong{color:var(--ac)}
+.cap-typing{align-self:flex-start;padding:10px 14px;background:var(--bgs);border:1px solid var(--bd);border-radius:14px;border-bottom-left-radius:4px;display:flex;gap:5px;align-items:center}
+.cap-dot{width:6px;height:6px;border-radius:50%;background:var(--t3);animation:capDot 1.4s infinite}
+.cap-dot:nth-child(2){animation-delay:.2s}
+.cap-dot:nth-child(3){animation-delay:.4s}
+@keyframes capDot{0%,80%,100%{transform:scale(.8);opacity:.5}40%{transform:scale(1);opacity:1}}
+#cap-foot{padding:10px 12px;border-top:1px solid var(--bd);display:flex;gap:8px;flex-shrink:0}
+#cap-inp{flex:1;padding:9px 13px;border-radius:10px;border:1px solid var(--bd);
+  background:var(--bgc);color:var(--t1);font-size:13px;font-family:var(--f);outline:none;
+  transition:border-color .2s;resize:none;height:38px;line-height:20px}
+#cap-inp:focus{border-color:var(--ac)}
+#cap-inp::placeholder{color:var(--t3)}
+#cap-send{width:38px;height:38px;border-radius:10px;border:none;flex-shrink:0;
+  background:var(--ac);color:#fff;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;transition:opacity .2s}
+#cap-send:hover{opacity:.85}
+#cap-send:disabled{opacity:.4;cursor:not-allowed}
+#cap-lock{padding:10px 14px;background:var(--amb);border-radius:10px;
+  font-size:12px;color:var(--am);text-align:center;margin:0 14px 10px;font-weight:600}
+
 /* ── TOASTS ── */
 #toast-container{position:fixed;bottom:60px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:11px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);pointer-events:all;animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);max-width:320px;border:1px solid transparent;line-height:1.4}
@@ -722,6 +779,12 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
   /* ── Trésorerie ── */
   .tr-params{grid-template-columns:1fr 1fr!important}
+
+  /* ── Cap mobile ── */
+  #cap-btn{bottom:72px;right:12px;padding:10px 14px;border-radius:50px}
+  #cap-btn .cap-lbl{display:none}
+  #cap-btn .cap-ico{font-size:20px}
+  #cap-win{width:calc(100vw - var(--swc) - 16px);right:8px;bottom:126px;height:420px;border-radius:14px}
 }
 
 @media(max-width:520px){
@@ -2193,6 +2256,30 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   <div class="save-st">
     <div class="sdot saved" id="sdot"></div>
     <span id="stxt" style="font-size:11px;color:var(--t3)">Enregistré</span>
+  </div>
+</div>
+
+<!-- CAP — ASSISTANT IA -->
+<button id="cap-btn" onclick="capToggle()" aria-label="Demandez à Cap">
+  <span class="cap-ico">🧭</span>
+  <span class="cap-lbl">Demandez à Cap</span>
+</button>
+
+<div id="cap-win" role="dialog" aria-label="Cap — Assistant LogPose">
+  <div id="cap-head">
+    <div id="cap-head-left">
+      <span id="cap-head-ico">🧭</span>
+      <div>
+        <div id="cap-head-name">Cap</div>
+        <div id="cap-head-sub">Assistant LogPose · IA</div>
+      </div>
+    </div>
+    <button id="cap-close" onclick="capToggle()" aria-label="Fermer Cap">✕</button>
+  </div>
+  <div id="cap-msgs"></div>
+  <div id="cap-foot">
+    <textarea id="cap-inp" placeholder="Posez votre question à Cap…" rows="1"></textarea>
+    <button id="cap-send" onclick="capSend()" aria-label="Envoyer">➤</button>
   </div>
 </div>
 
@@ -6610,6 +6697,7 @@ async function startApp(user) {
   await loadAchats();
   await loadProStatus();
   applyFreemium(); // Appelé après loadProStatus — _isPro est maintenant correct
+  capInit(); // Cap — initialisation après vérification Pro
 
   // Vérification périodique expiration trial — toutes les 5 minutes
   // Utile si l'user laisse l'app ouverte au moment où le trial expire
@@ -6670,6 +6758,199 @@ function showPanel(panelId, navId) {
     const slug = PANEL_URLS[panelId] || '/dashboard';
     history.pushState({ panelId, navId }, '', slug);
   } catch(e) {}
+}
+
+// ════════════════════════════════════════════════════════
+// CAP — ASSISTANT IA
+// ════════════════════════════════════════════════════════
+const CAP_URL = 'https://ppmdabvtdoaodzzjqqsc.supabase.co/functions/v1/cap-chat';
+let _capOpen = false;
+let _capHistory = []; // [{role:'user'|'assistant', content:'...'}]
+let _capTyping = false;
+
+function capInit() {
+  // Afficher le bouton uniquement si Pro ou trial
+  const btn = $('cap-btn');
+  if(!btn) return;
+  if(isPro()) {
+    btn.style.display = 'flex';
+  }
+  // Enter pour envoyer, Shift+Enter pour nouvelle ligne
+  const inp = $('cap-inp');
+  if(inp) {
+    inp.addEventListener('keydown', e => {
+      if(e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        capSend();
+      }
+    });
+    // Auto-resize textarea
+    inp.addEventListener('input', () => {
+      inp.style.height = '38px';
+      inp.style.height = Math.min(inp.scrollHeight, 90) + 'px';
+    });
+  }
+  // Message de bienvenue
+  if(_capHistory.length === 0) {
+    _capAddMsg('bot', `Bonjour 👋 Je suis **Cap**, votre assistant LogPose.
+
+Je connais vos données financières de ${ANNEE} et je suis là pour vous aider à les comprendre, les analyser, ou vous guider dans l'utilisation de LogPose.
+
+Que puis-je faire pour vous ?`);
+  }
+}
+
+function capToggle() {
+  _capOpen = !_capOpen;
+  const win = $('cap-win');
+  if(win) {
+    if(_capOpen) {
+      win.classList.add('open');
+      const inp = $('cap-inp');
+      if(inp) setTimeout(() => inp.focus(), 100);
+      capScrollBottom();
+    } else {
+      win.classList.remove('open');
+    }
+  }
+}
+
+function _capAddMsg(role, text) {
+  _capHistory.push({ role: role === 'bot' ? 'assistant' : 'user', content: text });
+  capRender();
+}
+
+function capRender() {
+  const msgs = $('cap-msgs');
+  if(!msgs) return;
+  msgs.innerHTML = '';
+  for(const m of _capHistory) {
+    const div = document.createElement('div');
+    div.className = 'cap-msg ' + (m.role === 'user' ? 'cap-user' : 'cap-bot');
+    // Rendu markdown basique : **bold** et retours à la ligne
+    div.innerHTML = m.content
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\n/g,'<br>');
+    msgs.appendChild(div);
+  }
+  if(_capTyping) {
+    const t = document.createElement('div');
+    t.className = 'cap-typing';
+    t.id = 'cap-typing-el';
+    t.innerHTML = '<div class="cap-dot"></div><div class="cap-dot"></div><div class="cap-dot"></div>';
+    msgs.appendChild(t);
+  }
+  capScrollBottom();
+}
+
+function capScrollBottom() {
+  const msgs = $('cap-msgs');
+  if(msgs) setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 50);
+}
+
+function _capBuildContext() {
+  // Snapshot des données financières en mémoire — pas de requête Supabase
+  try {
+    let caAnnuel = 0, coutAnnuel = 0, chFixHT = 0, chVarHT = 0;
+    const fmt2 = n => Math.round(n * 100) / 100;
+
+    // CA et coûts
+    articles.forEach(a => {
+      for(let m = 0; m < 12; m++) {
+        const q = (qty[a.code] || [])[m] || 0;
+        caAnnuel += q * a.pv;
+        coutAnnuel += q * _coutMois(a.code, m);
+      }
+    });
+
+    // Charges
+    charges.forEach(c => {
+      const k = String(c.code);
+      const total = (mts[k] || []).reduce((s, v) => s + (v || 0), 0);
+      const ht = total / (1 + (c.tva || 0));
+      if(c.type === 'Fixe') chFixHT += ht;
+      else chVarHT += ht;
+    });
+
+    const margeB = caAnnuel - coutAnnuel;
+    const txMarge = caAnnuel > 0 ? Math.round(margeB / caAnnuel * 1000) / 10 : 0;
+    const resultat = margeB - chFixHT - chVarHT;
+    const mcv = margeB - chVarHT;
+    const txMCV = caAnnuel > 0 ? mcv / caAnnuel : 0;
+    const seuil = txMCV > 0 ? Math.round(chFixHT / txMCV) : 0;
+    const devise = P.devise || '€';
+
+    return {
+      annee: ANNEE,
+      nomEntreprise: P.nomEnt || 'Non renseigné',
+      secteur: P.secteur || 'Non renseigné',
+      regimeTVA: P.regimeTVA || 'Non renseigné',
+      regimeFiscal: P.regimeFisc || 'Non renseigné',
+      devise,
+      caAnnuel: fmt2(caAnnuel),
+      coutAchatAnnuel: fmt2(coutAnnuel),
+      margeBreute: fmt2(margeB),
+      tauxMarge: txMarge,
+      chargesFixes: fmt2(chFixHT),
+      chargesVariables: fmt2(chVarHT),
+      resultatBrut: fmt2(resultat),
+      seuilRentabilite: seuil,
+      objectifCA: P.obj || 0,
+      nbArticles: articles.length,
+      nbCharges: charges.length,
+    };
+  } catch(e) {
+    return { annee: ANNEE, erreur: 'Données non disponibles' };
+  }
+}
+
+async function capSend() {
+  const inp = $('cap-inp');
+  const send = $('cap-send');
+  if(!inp || _capTyping) return;
+  const text = inp.value.trim();
+  if(!text) return;
+
+  // Vérif Pro
+  if(!isPro()) {
+    _capAddMsg('bot', "Cap est disponible uniquement pendant l'essai Pro ou avec un abonnement actif. 🔒");
+    return;
+  }
+
+  inp.value = '';
+  inp.style.height = '38px';
+  _capAddMsg('user', text);
+  _capTyping = true;
+  if(send) send.disabled = true;
+  capRender();
+
+  try {
+    const ctx = _capBuildContext();
+    const res = await fetch(CAP_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPA_KEY}`,
+      },
+      body: JSON.stringify({
+        message: text,
+        history: _capHistory.slice(0, -1), // sans le dernier message user déjà inclus
+        context: ctx,
+      }),
+    });
+
+    if(!res.ok) throw new Error('Erreur API');
+    const data = await res.json();
+    _capTyping = false;
+    if(send) send.disabled = false;
+    _capAddMsg('bot', data.reply || "Désolé, je n'ai pas pu répondre. Réessayez.");
+  } catch(e) {
+    _capTyping = false;
+    if(send) send.disabled = false;
+    _capAddMsg('bot', 'Une erreur est survenue. Vérifiez votre connexion et réessayez.');
+    capRender();
+  }
 }
 
 // ════════════════════════════════════════════════════════
