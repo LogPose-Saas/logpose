@@ -6899,6 +6899,24 @@ function _capBuildContext() {
       objectifCA: P.obj || 0,
       nbArticles: articles.length,
       nbCharges: charges.length,
+      // Détail par article : CA, coût, marge
+      articlesDetail: articles.map(a => {
+        let caArt = 0, coutArt = 0;
+        for(let m = 0; m < 12; m++) {
+          const q = (qty[a.code] || [])[m] || 0;
+          caArt  += q * a.pv;
+          coutArt += q * _coutMois(a.code, m);
+        }
+        const margeArt = caArt - coutArt;
+        const txArt = caArt > 0 ? Math.round(margeArt / caArt * 1000) / 10 : 0;
+        return {
+          nom: a.nom || a.code,
+          ca: fmt2(caArt),
+          cout: fmt2(coutArt),
+          marge: fmt2(margeArt),
+          tauxMarge: txArt,
+        };
+      }).sort((a, b) => b.marge - a.marge), // trié par marge décroissante
     };
   } catch(e) {
     return { annee: ANNEE, erreur: 'Données non disponibles' };
