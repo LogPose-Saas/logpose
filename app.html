@@ -6927,11 +6927,13 @@ async function capSend() {
 
   try {
     const ctx = _capBuildContext();
+    const { data: { session } } = await DB.auth.getSession();
+    const token = session?.access_token || SUPA_KEY;
     const res = await fetch(CAP_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPA_KEY}`,
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
         message: text,
