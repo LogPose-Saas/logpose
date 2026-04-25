@@ -556,6 +556,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .pv-art-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)}
 .pv-art-nom{flex:1;font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pv-tbl{width:100%;border-collapse:collapse;min-width:1200px}
+.pv-tbl-wrap{overflow-x:scroll;-webkit-overflow-scrolling:touch;padding-bottom:6px}
+.pv-tbl-wrap::-webkit-scrollbar{height:6px}
+.pv-tbl-wrap::-webkit-scrollbar-track{background:var(--bgc);border-radius:3px}
+.pv-tbl-wrap::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+.pv-tbl-wrap::-webkit-scrollbar-thumb:hover{background:var(--t3)}
 .pv-tbl th{font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);padding:8px 12px;border-bottom:2px solid var(--bd);text-align:right;white-space:nowrap}
 .pv-tbl th:first-child{text-align:left}
 .pv-tbl td{padding:9px 12px;border-bottom:1px solid var(--bd);font-size:12.5px;text-align:right;font-family:var(--fm)}
@@ -1400,7 +1405,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
             <button class="btn btn-p btn-sm" id="btn-add-art-ok">Ajouter</button>
             <button class="btn btn-g btn-sm" id="btn-add-art-cancel">Annuler</button>
           </div>
-          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pv-tbl-wrap">
             <table class="dtbl">
               <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>Prix HT</th><th>TVA</th><th></th></tr></thead>
               <tbody id="art-tbody"></tbody>
@@ -1432,7 +1437,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
             <button class="btn btn-p btn-sm" id="btn-add-ch-ok">Ajouter</button>
             <button class="btn btn-g btn-sm" id="btn-add-ch-cancel">Annuler</button>
           </div>
-          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pv-tbl-wrap">
             <table class="dtbl">
               <thead><tr><th>Code</th><th>Nom</th><th>Catégorie</th><th>TVA</th><th>Type</th><th></th></tr></thead>
               <tbody id="ch-tbody"></tbody>
@@ -1632,7 +1637,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="tbl-hdr">
           <div><div class="ct">Saisie des coûts unitaires</div><div class="cs">Coût d'achat unitaire par article et par mois · La valeur se propage aux mois suivants</div></div>
         </div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pv-tbl-wrap">
           <table class="stbl" id="ach-tbl">
             <thead><tr>
               <th>Code</th><th>Article</th><th>Prix HT</th>
@@ -1869,7 +1874,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <!-- Tableau comparatif -->
       <div class="card">
         <div class="ct" style="margin-bottom:14px">Comparaison des scénarios</div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pv-tbl-wrap">
           <table class="sc-cmp-tbl">
             <thead>
               <tr>
@@ -1989,7 +1994,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="card" style="margin-bottom:14px">
         <div class="ct" style="margin-bottom:4px">Synthèse annuelle</div>
         <div class="cs" style="margin-bottom:14px">Le taux de marge reste constant car la projection fait évoluer les <strong>quantités</strong>, pas les prix ni les coûts d'achat. Pour simuler une variation de prix, utilisez le module <strong>Scénarios</strong>. TVA et flux tréso projetés avec le régime <strong id="pv-regime-lbl">actuel</strong>.</div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pv-tbl-wrap">
           <table class="pv-tbl" id="pv-tbl-annuel">
             <thead id="pv-thead"></thead>
             <tbody id="pv-tbody"></tbody>
@@ -2064,7 +2069,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="tbl-hdr">
           <div><div class="ct" id="tva-tbl-title">Déclarations TVA</div><div class="cs" id="tva-tbl-sub"></div></div>
         </div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pv-tbl-wrap">
           <table class="tva-tbl">
             <thead id="tva-thead"></thead>
             <tbody id="tva-tbody"></tbody>
@@ -2160,7 +2165,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="card">
         <div class="ct" style="margin-bottom:4px">Détail mensuel</div>
         <div class="cs" style="margin-bottom:14px">Encaissements − Décaissements − TVA = Flux net → Solde cumulé</div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pv-tbl-wrap">
           <table class="tr-tbl">
             <thead><tr>
               <th style="text-align:left">Mois</th>
