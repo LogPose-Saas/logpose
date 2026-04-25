@@ -6557,6 +6557,7 @@ async function startApp(user) {
   await loadParams();
   await loadCA();
   await _loadMtsOnly();
+  await loadAchats();
   await loadProStatus();
   applyFreemium(); // Appelé après loadProStatus — _isPro est maintenant correct
 
