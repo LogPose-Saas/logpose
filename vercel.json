@@ -21,6 +21,9 @@
     { "source": "/tva", "destination": "/app.html" },
     { "source": "/tresorerie", "destination": "/app.html" },
     { "source": "/parametres", "destination": "/app.html" },
+    { "source": "/og-image.png", "destination": "/og-image.png" },
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
     { "source": "/", "destination": "/landing.html" }
   ]
 }
