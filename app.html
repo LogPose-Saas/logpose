@@ -1988,7 +1988,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <!-- Tableau synthétique annuel -->
       <div class="card" style="margin-bottom:14px">
         <div class="ct" style="margin-bottom:4px">Synthèse annuelle</div>
-        <div class="cs" style="margin-bottom:14px">Le taux de marge reste constant car la projection fait évoluer les <strong>quantités</strong>, pas les prix ni les coûts d'achat. Pour simuler une variation de prix, utilisez le module <strong>Scénarios</strong>.</div>
+        <div class="cs" style="margin-bottom:14px">Le taux de marge reste constant car la projection fait évoluer les <strong>quantités</strong>, pas les prix ni les coûts d'achat. Pour simuler une variation de prix, utilisez le module <strong>Scénarios</strong>. TVA et flux tréso projetés avec le régime <strong id="pv-regime-lbl">actuel</strong>.</div>
         <div style="overflow-x:auto">
           <table class="pv-tbl" id="pv-tbl-annuel">
             <thead id="pv-thead"></thead>
@@ -5640,7 +5640,30 @@ function _pvSynth(moisProj, annee) {
   const mcv = Math.round((margeB - chVar)*100)/100;
   const txMCV = ca > 0 ? mcv/ca : 0;
   const seuil = txMCV > 0 ? Math.round(chFix/txMCV*100)/100 : 0;
-  return { ca, cout, margeB, chFix, chVar, res, txM, seuil };
+
+  // TVA nette projetée (taux moyen articles 20%, taux moyen charges 20%)
+  const assujetti = _tvaIsAssujetti();
+  let tvaNette = 0;
+  if(assujetti) {
+    // Collectée : CA HT × taux TVA moyen des articles (approx. 20%)
+    const txTVAMoyArt = articles.length > 0
+      ? articles.reduce((s,a)=>s+(a.tva||0.2),0)/articles.length : 0.2;
+    const tvaCollectee = Math.round(ca * txTVAMoyArt * 100) / 100;
+    // Déductible achats : coûts × taux TVA moyen articles
+    const tvaAchats = Math.round(cout * txTVAMoyArt * 100) / 100;
+    // Déductible charges : charges TTC → TVA = TTC − HT
+    const chTTC = Math.round((chFix + chVar) * (1 + 0.2) * 100) / 100; // approx 20%
+    const tvaCharges = Math.round((chTTC - (chFix + chVar)) * 100) / 100;
+    tvaNette = Math.round((tvaCollectee - tvaAchats - tvaCharges) * 100) / 100;
+    if(tvaNette < 0) tvaNette = 0; // crédit TVA = 0 pour simplifier la projection
+  }
+
+  // Flux trésorerie projeté : CA TTC − achats TTC − charges TTC − TVA nette
+  const fluxTreso = assujetti
+    ? Math.round((ca * (1 + 0.2) - cout * (1 + 0.2) - (chFix + chVar) * (1 + 0.2) - tvaNette) * 100) / 100
+    : Math.round((ca - cout - chFix - chVar) * 100) / 100;
+
+  return { ca, cout, margeB, chFix, chVar, res, txM, seuil, tvaNette, fluxTreso, assujetti };
 }
 
 function renderPrevisionnel() {
@@ -5752,10 +5775,16 @@ function renderPrevisionnel() {
   const fmt0 = v => Math.round(Math.abs(v)).toLocaleString('fr-FR')+' €';
   const thead = $('pv-thead');
   const tbody = $('pv-tbody');
+  const isTrimestriel = (P.regimeTVA||'').includes('trimestrielle');
+  const assujTVA = _tvaIsAssujetti();
+  const regimeLbl = $('pv-regime-lbl');
+  if(regimeLbl) regimeLbl.textContent = P.regimeTVA ? P.regimeTVA.toLowerCase() : 'actuel';
   if(thead) thead.innerHTML = `<tr>
     <th style="text-align:left">Année</th>
     <th>CA HT</th><th>Coûts achat</th><th>Marge brute</th><th>Charges fixes</th><th>Charges var.</th>
     <th>Résultat</th><th>Taux marge</th><th>Seuil rent.</th>
+    <th style="color:var(--rd)">TVA nette</th>
+    <th style="color:var(--ac)">Flux tréso</th>
   </tr>`;
 
   // Recalcul réel — déclaré avant if(tbody) pour être accessible par besoin financement
@@ -5767,7 +5796,18 @@ function renderPrevisionnel() {
     const txM=ca>0?Math.round(margeB/ca*1000)/10:0;
     const mcv=Math.round((margeB-chV)*100)/100, txMCV=ca>0?mcv/ca:0;
     const seuil=txMCV>0?Math.round(chF/txMCV*100)/100:0;
-    return {ca:Math.round(ca*100)/100,cout:Math.round(cout*100)/100,margeB,chFix:Math.round(chF*100)/100,chVar:Math.round(chV*100)/100,res,txM,seuil};
+    // TVA réelle depuis _tvaCalcMois (données exactes)
+    const assujetti = _tvaIsAssujetti();
+    const tvaMois = _tvaCalcMois();
+    const tvaNette = assujetti ? Math.round(tvaMois.reduce((s,m)=>s+Math.max(m.net,0),0)*100)/100 : 0;
+    const chTTC = Math.round((chF+chV)*100)/100 + tvaMois.reduce((s,m)=>s+m.deductible,0) - tvaMois.reduce((s,m)=>{
+      // soustraire la TVA déductible achats pour garder uniquement charges
+      let dAch=0; articles.forEach(a=>{const q=(qty[a.code]||[])[m.m]||0;dAch+=q*_coutMois(a.code,m.m)*(a.tva||0.2);}); return s+dAch;
+    },0);
+    const fluxTreso = assujetti
+      ? Math.round((ca*(1.2) - cout*(1.2) - (chF+chV)*(1.2) - tvaNette)*100)/100
+      : Math.round(res*100)/100;
+    return {ca:Math.round(ca*100)/100,cout:Math.round(cout*100)/100,margeB,chFix:Math.round(chF*100)/100,chVar:Math.round(chV*100)/100,res,txM,seuil,tvaNette,fluxTreso,assujetti};
   })();
 
   if(tbody) {
@@ -5779,6 +5819,8 @@ function renderPrevisionnel() {
       <td style="color:${synthReel.res>=0?'var(--gr)':'var(--rd)'};font-weight:700">${synthReel.res<0?'−':''}${fmt(synthReel.res)}</td>
       <td style="color:var(--pu)">${synthReel.txM.toFixed(1)} %</td>
       <td>${fmt0(synthReel.seuil)}</td>
+      <td style="color:var(--rd)">${assujTVA ? fmt(synthReel.tvaNette) : '—'}</td>
+      <td style="color:var(--ac);font-weight:600">${assujTVA ? (synthReel.fluxTreso>=0?'':'-')+fmt(synthReel.fluxTreso) : fmt(synthReel.res)}</td>
     </tr>`;
 
     annees.forEach(an => {
@@ -5794,8 +5836,10 @@ function renderPrevisionnel() {
         <td style="color:${s.res>=0?'var(--gr)':'var(--rd)'};font-weight:700">${s.res<0?'−':''}${fmt(s.res)}</td>
         <td style="color:var(--pu)">${s.txM.toFixed(1)} %</td>
         <td>${fmt0(s.seuil)}</td>
+        <td style="color:var(--rd)">${s.assujetti ? fmt(s.tvaNette) : '—'}</td>
+        <td style="color:var(--ac);font-weight:600">${s.assujetti ? (s.fluxTreso>=0?'':'-')+fmt(s.fluxTreso) : fmt(s.res)}</td>
       </tr>`;
-      rows += `<tr class="pv-yr"><td colspan="9" style="padding:6px 12px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">N+${an-ANNEE} — ${an}</td></tr>`;
+      rows += `<tr class="pv-yr"><td colspan="11" style="padding:6px 12px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--t3)">N+${an-ANNEE} — ${an}</td></tr>`;
       rows += rowHyp(sC,'🔵 Conservateur','#0d9488');
       rows += rowHyp(sB,'🟢 Base','#2563eb');
       rows += rowHyp(sO,'🚀 Optimiste','#059669');
