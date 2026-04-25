@@ -568,6 +568,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .pv-conv.no{background:var(--rdb);color:var(--rd);border:1px solid rgba(225,29,72,.2)}
 .sc-tabs{display:flex;gap:4px;background:var(--bgs);border:1px solid var(--bd);border-radius:10px;padding:3px;margin-bottom:20px;width:fit-content}
 .sc-tab{padding:7px 18px;border-radius:7px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all var(--tr);white-space:nowrap}
+.sc-tab-input{background:transparent;border:none;border-bottom:2px solid var(--ac);color:inherit;font:inherit;font-weight:700;width:90px;outline:none;padding:0 2px;text-align:center}
 .sc-tab:hover{color:var(--t1)}
 .sc-tab.active{background:var(--bgc);color:var(--t1);font-weight:700;box-shadow:0 1px 5px rgba(0,0,0,.12)}
 .sc-tab.reel{color:var(--t3);cursor:default}
@@ -1829,9 +1830,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="sc-tab" id="sc-tab-a">🔵 Scénario A</div>
           <div class="sc-tab" id="sc-tab-b">🟣 Scénario B</div>
         </div>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:11px;color:var(--t3)">Double-cliquez sur un onglet pour renommer</span>
           <button class="sc-reset" id="sc-btn-reset">↺ Réinitialiser</button>
-          <button class="btn btn-g btn-sm" id="sc-btn-rename" style="font-size:11px">✏️ Renommer</button>
         </div>
       </div>
 
@@ -6921,17 +6922,42 @@ document.addEventListener('DOMContentLoaded', () => {
     renderScenarios();
   });
 
-  // Renommer scénario
-  $('sc-btn-rename').addEventListener('click', () => {
-    if(_scActif === 'reel') return;
-    const actuel = _scActif === 'a' ? (_sc.a.nom||'Scénario A') : (_sc.b.nom||'Scénario B');
-    const nouveau = prompt('Nouveau nom :', actuel);
-    if(!nouveau || !nouveau.trim()) return;
-    if(_scActif === 'a') _sc.a.nom = nouveau.trim();
-    else                 _sc.b.nom = nouveau.trim();
-    _scSave(_sc);
-    renderScenarios();
-  });
+  // Renommer scénario — double-clic inline sur l'onglet
+  function _scStartRename(scId) {
+    if(scId === 'reel') return;
+    const tabEl = $('sc-tab-' + scId);
+    if(!tabEl || tabEl.querySelector('.sc-tab-input')) return; // déjà en édition
+    const sc = scId === 'a' ? _sc.a : _sc.b;
+    const nomActuel = sc.nom || (scId === 'a' ? 'Scénario A' : 'Scénario B');
+    const emoji = scId === 'a' ? '🔵 ' : '🟣 ';
+
+    // Remplacer le contenu par un input
+    tabEl.textContent = '';
+    const inp = document.createElement('input');
+    inp.className = 'sc-tab-input';
+    inp.value = nomActuel;
+    tabEl.appendChild(inp);
+    inp.focus();
+    inp.select();
+
+    const commit = () => {
+      const val = inp.value.trim();
+      const nouveau = val || nomActuel;
+      if(scId === 'a') _sc.a.nom = nouveau;
+      else             _sc.b.nom = nouveau;
+      _scSave(_sc);
+      renderScenarios();
+    };
+
+    inp.addEventListener('keydown', e => {
+      if(e.key === 'Enter')  { e.preventDefault(); inp.blur(); }
+      if(e.key === 'Escape') { inp.value = nomActuel; inp.blur(); }
+    });
+    inp.addEventListener('blur', commit, { once: true });
+  }
+
+  $('sc-tab-a').addEventListener('dblclick', () => _scStartRename('a'));
+  $('sc-tab-b').addEventListener('dblclick', () => _scStartRename('b'));
   [['tab-articles','p-articles'],['tab-charges','p-charges'],['tab-entreprise','p-entreprise']].forEach(([tid,pid]) => {
     $(tid).addEventListener('click', () => {
       document.querySelectorAll('.tab-pnl').forEach(p => p.classList.remove('active'));
