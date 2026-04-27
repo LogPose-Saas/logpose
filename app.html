@@ -1881,7 +1881,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
             <option value="__all__">Tous les articles</option>
           </select>
         </div>
-        <div style="height:260px"><canvas id="mr-chart-evol"></canvas></div>
+        <div style="height:300px"><canvas id="mr-chart-evol"></canvas></div>
       </div>
 
       <!-- Tableau par article -->
@@ -5461,6 +5461,34 @@ function renderMargeEvol() {
     });
   }
 
+  // ── Taux de marge par période (courbe) ──
+  const txMargeData = caData.map((ca, i) => ca > 0 ? Math.round(margeData[i] / ca * 1000) / 10 : 0);
+
+  // ── Plugin étiquettes sur les barres (trimestriel et semestriel uniquement) ──
+  const labelPlugin = {
+    id: 'mrEvolLabels',
+    afterDatasetsDraw(chart) {
+      if(_mrEvolPeriode === 'm') return; // trop serré en mensuel
+      const { ctx: c } = chart;
+      c.save();
+      chart.data.datasets.forEach((ds, di) => {
+        if(ds.type === 'line') return;
+        const meta = chart.getDatasetMeta(di);
+        meta.data.forEach((bar, i) => {
+          const val = ds.data[i];
+          if(!val || val === 0) return;
+          const fmtVal = Math.round(Math.abs(val)).toLocaleString('fr-FR') + ' €';
+          c.fillStyle = ds.borderColor;
+          c.font = '600 9.5px Plus Jakarta Sans, sans-serif';
+          c.textAlign = 'center';
+          c.textBaseline = 'bottom';
+          c.fillText(fmtVal, bar.x, bar.y - 3);
+        });
+      });
+      c.restore();
+    }
+  };
+
   // ── Rendu Chart.js ──
   const ctx = $('mr-chart-evol');
   if(!ctx) return;
@@ -5468,6 +5496,7 @@ function renderMargeEvol() {
 
   chartMREvol = new Chart(ctx, {
     type: 'bar',
+    plugins: [labelPlugin],
     data: {
       labels,
       datasets: [
@@ -5498,12 +5527,26 @@ function renderMargeEvol() {
           borderRadius: 4,
           order: 2,
         },
+        {
+          label: 'Taux de marge',
+          data: txMargeData,
+          type: 'line',
+          yAxisID: 'yTx',
+          borderColor: '#9b87f5',
+          backgroundColor: 'rgba(155,135,245,0.1)',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#9b87f5',
+          fill: false,
+          tension: 0.3,
+          order: 1,
+        },
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 8 } },
+      layout: { padding: { top: 22 } },
       plugins: {
         legend: {
           position: 'top',
@@ -5511,7 +5554,11 @@ function renderMargeEvol() {
         },
         tooltip: {
           callbacks: {
-            label: ctx => ` ${ctx.dataset.label} : ${fmt(ctx.parsed.y)}`
+            label: ctx => {
+              if(ctx.dataset.label === 'Taux de marge')
+                return ` Taux de marge : ${ctx.parsed.y.toFixed(1)} %`;
+              return ` ${ctx.dataset.label} : ${fmt(ctx.parsed.y)}`;
+            }
           }
         }
       },
@@ -5522,8 +5569,18 @@ function renderMargeEvol() {
         },
         y: {
           beginAtZero: true,
+          position: 'left',
           ticks: {
             callback: v => Math.round(v).toLocaleString('fr-FR') + ' €',
+            font: { size: 11 }
+          }
+        },
+        yTx: {
+          beginAtZero: true,
+          position: 'right',
+          grid: { drawOnChartArea: false },
+          ticks: {
+            callback: v => v.toFixed(0) + ' %',
             font: { size: 11 }
           }
         }
