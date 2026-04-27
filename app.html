@@ -678,6 +678,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 #cap-lock{padding:10px 14px;background:var(--amb);border-radius:10px;
   font-size:12px;color:var(--am);text-align:center;margin:0 14px 10px;font-weight:600}
 
+/* ── Évolution marge filtres ── */
+.mr-evol-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.mr-evol-grp{display:flex;gap:4px;background:var(--bgs);border:1px solid var(--bd);border-radius:8px;padding:3px}
+.mr-evol-btn{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;font-family:var(--f);border:none;cursor:pointer;color:var(--t2);background:transparent;transition:all .15s}
+.mr-evol-btn.active{background:var(--bgc);color:var(--ac);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.mr-evol-sep{width:1px;background:var(--bd);margin:3px 4px}
+.mr-evol-sel{padding:6px 10px;border-radius:8px;border:1px solid var(--bd);background:var(--bgc);color:var(--t1);font-size:12px;font-family:var(--f);outline:none;cursor:pointer}
+
 /* ── TOASTS ── */
 #toast-container{position:fixed;bottom:60px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:11px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.18);pointer-events:all;animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);max-width:320px;border:1px solid transparent;line-height:1.4}
@@ -1852,6 +1860,28 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="ct" style="margin-bottom:4px">Cascade de rentabilité</div>
         <div class="cs" style="margin-bottom:16px">Du CA HT au résultat brut, étape par étape</div>
         <div style="height:260px"><canvas id="mr-chart-waterfall"></canvas></div>
+      </div>
+
+      <!-- Évolution mensuelle marge -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="tbl-hdr">
+          <div>
+            <div class="ct">Évolution de la marge</div>
+            <div class="cs">CA, coûts d'achat et marge brute par période</div>
+          </div>
+        </div>
+        <div class="mr-evol-filters">
+          <div class="mr-evol-grp">
+            <button class="mr-evol-btn active" id="mr-evol-m" onclick="mrEvolSetPeriode('m')">Mensuel</button>
+            <button class="mr-evol-btn" id="mr-evol-t" onclick="mrEvolSetPeriode('t')">Trimestriel</button>
+            <button class="mr-evol-btn" id="mr-evol-s" onclick="mrEvolSetPeriode('s')">Semestriel</button>
+          </div>
+          <div class="mr-evol-sep"></div>
+          <select class="mr-evol-sel" id="mr-evol-art" onchange="renderMargeEvol()">
+            <option value="__all__">Tous les articles</option>
+          </select>
+        </div>
+        <div style="height:260px"><canvas id="mr-chart-evol"></canvas></div>
       </div>
 
       <!-- Tableau par article -->
@@ -5340,8 +5370,166 @@ function renderMarge() {
       }
     }
   }
+  // Évolution marge mensuelle
+  renderMargeEvol();
   // Comparaison N-1 — asynchrone
   _loadN1MR();
+}
+
+// ════════════════════════════════════════════════════════
+// ÉVOLUTION MARGE MENSUELLE
+// ════════════════════════════════════════════════════════
+let chartMREvol = null;
+let _mrEvolPeriode = 'm'; // 'm' | 't' | 's'
+
+function mrEvolSetPeriode(p) {
+  _mrEvolPeriode = p;
+  ['m','t','s'].forEach(id => {
+    const btn = $('mr-evol-' + id);
+    if(btn) btn.classList.toggle('active', id === p);
+  });
+  renderMargeEvol();
+}
+
+function renderMargeEvol() {
+  const fmt = v => Math.round(v).toLocaleString('fr-FR') + ' €';
+  const MOIS_COURTS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
+  // ── Mettre à jour le select articles ──
+  const sel = $('mr-evol-art');
+  if(sel && sel.options.length <= 1) {
+    articles.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.code;
+      opt.textContent = a.nom || a.code;
+      sel.appendChild(opt);
+    });
+  }
+
+  const artFilter = sel ? sel.value : '__all__';
+
+  // ── Calcul CA et coûts par mois ──
+  const caParMois    = Array(12).fill(0);
+  const coutParMois  = Array(12).fill(0);
+
+  const artsToProcess = artFilter === '__all__'
+    ? articles
+    : articles.filter(a => String(a.code) === String(artFilter));
+
+  artsToProcess.forEach(a => {
+    for(let m = 0; m < 12; m++) {
+      const q = (qty[a.code] || [])[m] || 0;
+      caParMois[m]   += q * a.pv;
+      coutParMois[m] += q * _coutMois(a.code, m);
+    }
+  });
+
+  const margeParMois = caParMois.map((ca, m) => ca - coutParMois[m]);
+
+  // ── Regroupement par période ──
+  let labels = [], caData = [], coutData = [], margeData = [];
+
+  if(_mrEvolPeriode === 'm') {
+    // Mensuel : 12 barres
+    labels   = MOIS_COURTS;
+    caData   = caParMois.map(v => Math.round(v * 100) / 100);
+    coutData = coutParMois.map(v => Math.round(v * 100) / 100);
+    margeData= margeParMois.map(v => Math.round(v * 100) / 100);
+
+  } else if(_mrEvolPeriode === 't') {
+    // Trimestriel : 4 groupes de 3 mois
+    ['T1 (Jan–Mar)', 'T2 (Avr–Jun)', 'T3 (Jul–Sep)', 'T4 (Oct–Déc)'].forEach((lbl, t) => {
+      labels.push(lbl);
+      const start = t * 3;
+      const ca   = caParMois.slice(start, start+3).reduce((s,v)=>s+v,0);
+      const cout = coutParMois.slice(start, start+3).reduce((s,v)=>s+v,0);
+      caData.push(Math.round(ca*100)/100);
+      coutData.push(Math.round(cout*100)/100);
+      margeData.push(Math.round((ca-cout)*100)/100);
+    });
+
+  } else {
+    // Semestriel : 2 groupes de 6 mois
+    ['S1 (Jan–Jun)', 'S2 (Jul–Déc)'].forEach((lbl, s) => {
+      labels.push(lbl);
+      const start = s * 6;
+      const ca   = caParMois.slice(start, start+6).reduce((s,v)=>s+v,0);
+      const cout = coutParMois.slice(start, start+6).reduce((s,v)=>s+v,0);
+      caData.push(Math.round(ca*100)/100);
+      coutData.push(Math.round(cout*100)/100);
+      margeData.push(Math.round((ca-cout)*100)/100);
+    });
+  }
+
+  // ── Rendu Chart.js ──
+  const ctx = $('mr-chart-evol');
+  if(!ctx) return;
+  if(chartMREvol) chartMREvol.destroy();
+
+  chartMREvol = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'CA HT',
+          data: caData,
+          backgroundColor: 'rgba(59,126,255,0.75)',
+          borderColor: '#3b7eff',
+          borderWidth: 1.5,
+          borderRadius: 4,
+          order: 2,
+        },
+        {
+          label: 'Coûts achat',
+          data: coutData,
+          backgroundColor: 'rgba(225,29,72,0.7)',
+          borderColor: '#e11d48',
+          borderWidth: 1.5,
+          borderRadius: 4,
+          order: 2,
+        },
+        {
+          label: 'Marge brute',
+          data: margeData,
+          backgroundColor: 'rgba(5,150,105,0.75)',
+          borderColor: '#059669',
+          borderWidth: 1.5,
+          borderRadius: 4,
+          order: 2,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 8 } },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { boxWidth: 12, font: { size: 11 }, padding: 12 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label} : ${fmt(ctx.parsed.y)}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11 } }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: v => Math.round(v).toLocaleString('fr-FR') + ' €',
+            font: { size: 11 }
+          }
+        }
+      }
+    }
+  });
 }
 
 // ════════════════════════════════════════════════════════
