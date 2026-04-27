@@ -7411,6 +7411,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Navigation sidebar
   $('nav-dashboard').addEventListener('click', async () => {
     showPanel('pnl-dashboard','nav-dashboard');
+    if(_anneeCA !== ANNEE) await loadCA();
+    if(_anneeMts !== ANNEE) await _loadMtsOnly();
     if(_anneeAchats !== ANNEE) await loadAchats();
     renderDashboard();
   });
@@ -7422,6 +7424,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await loadCA();
       hideLoading('pnl-ca');
     }
+    if(_anneeMts !== ANNEE) await _loadMtsOnly();
     if(_anneeAchats !== ANNEE) await loadAchats();
     renderCA();
   });
@@ -7429,6 +7432,8 @@ document.addEventListener('DOMContentLoaded', () => {
     showPanel('pnl-achats','nav-achats');
     $('ach-annee-lbl').textContent = ANNEE;
     if(_anneeCA !== ANNEE) await loadCA();
+    if(_anneeMts !== ANNEE) await _loadMtsOnly();
+    if(_anneeAchats !== ANNEE) await loadAchats();
     // Peupler le select articles du calculateur
     const sel = $('ach-calc-art');
     if(sel) {
@@ -7441,17 +7446,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('nav-charges').addEventListener('click', async () => {
     showPanel('pnl-charges','nav-charges');
+    if(_anneeCA !== ANNEE) await loadCA();
+    if(_anneeAchats !== ANNEE) await loadAchats();
     if(_anneeMts !== ANNEE) {
       showLoading('pnl-charges');
       await loadChargesData();
       hideLoading('pnl-charges');
     } else {
-      renderChargesData(); // instantané
+      renderChargesData();
     }
   });
   $('nav-marge').addEventListener('click', async () => {
     showPanel('pnl-marge','nav-marge');
     if(!checkProGate('pnl-marge')) return;
+    if(_anneeCA !== ANNEE) await loadCA();
     if(_anneeMts !== ANNEE) await _loadMtsOnly();
     if(_anneeAchats !== ANNEE) await loadAchats();
     renderMarge();
@@ -7459,6 +7467,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('nav-scenarios').addEventListener('click', async () => {
     showPanel('pnl-scenarios','nav-scenarios');
     if(!checkProGate('pnl-scenarios')) return;
+    if(_anneeCA !== ANNEE) await loadCA();
     if(_anneeMts !== ANNEE) await _loadMtsOnly();
     if(_anneeAchats !== ANNEE) await loadAchats();
     renderScenarios();
@@ -7466,6 +7475,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('nav-previsionnel').addEventListener('click', async () => {
     showPanel('pnl-previsionnel','nav-previsionnel');
     if(!checkProGate('pnl-previsionnel')) return;
+    if(_anneeCA !== ANNEE) await loadCA();
     if(_anneeMts !== ANNEE) await _loadMtsOnly();
     if(_anneeAchats !== ANNEE) await loadAchats();
     renderPrevisionnel();
@@ -7473,6 +7483,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('nav-tva').addEventListener('click', async () => {
     showPanel('pnl-tva','nav-tva');
     if(!checkProGate('pnl-tva')) return;
+    if(_anneeCA !== ANNEE) await loadCA();
     if(_anneeMts !== ANNEE) await _loadMtsOnly();
     if(_anneeAchats !== ANNEE) await loadAchats();
     renderTVA();
@@ -7480,6 +7491,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('nav-tresorerie').addEventListener('click', async () => {
     showPanel('pnl-tresorerie','nav-tresorerie');
     if(!checkProGate('pnl-tresorerie')) return;
+    if(_anneeCA !== ANNEE) await loadCA();
     if(_anneeMts !== ANNEE) await _loadMtsOnly();
     if(_anneeAchats !== ANNEE) await loadAchats();
     renderTresorerie();
