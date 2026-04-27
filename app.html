@@ -6784,6 +6784,7 @@ async function changeAnnee(n) {
   await Promise.all([loadParams(), loadArticles(), loadCharges()]);
   await loadCA();
   await _loadMtsOnly();
+  await loadAchats(); // Indispensable — coûts d'achat nécessaires pour marge/dashboard
 
   if(panneauActif) hideLoading(panneauActif);
 
