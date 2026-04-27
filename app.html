@@ -7409,9 +7409,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Navigation sidebar
-  $('nav-dashboard').addEventListener('click', () => {
+  $('nav-dashboard').addEventListener('click', async () => {
     showPanel('pnl-dashboard','nav-dashboard');
-    renderDashboard(); // toujours instantané — données déjà en mémoire
+    if(_anneeAchats !== ANNEE) await loadAchats();
+    renderDashboard();
   });
   $('nav-params').addEventListener('click', () => showPanel('pnl-params','nav-params'));
   $('nav-ca').addEventListener('click', async () => {
@@ -7420,9 +7421,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showLoading('pnl-ca');
       await loadCA();
       hideLoading('pnl-ca');
-    } else {
-      renderCA(); // instantané
     }
+    if(_anneeAchats !== ANNEE) await loadAchats();
+    renderCA();
   });
   $('nav-achats').addEventListener('click', async () => {
     showPanel('pnl-achats','nav-achats');
@@ -7452,30 +7453,35 @@ document.addEventListener('DOMContentLoaded', () => {
     showPanel('pnl-marge','nav-marge');
     if(!checkProGate('pnl-marge')) return;
     if(_anneeMts !== ANNEE) await _loadMtsOnly();
+    if(_anneeAchats !== ANNEE) await loadAchats();
     renderMarge();
   });
   $('nav-scenarios').addEventListener('click', async () => {
     showPanel('pnl-scenarios','nav-scenarios');
     if(!checkProGate('pnl-scenarios')) return;
     if(_anneeMts !== ANNEE) await _loadMtsOnly();
+    if(_anneeAchats !== ANNEE) await loadAchats();
     renderScenarios();
   });
   $('nav-previsionnel').addEventListener('click', async () => {
     showPanel('pnl-previsionnel','nav-previsionnel');
     if(!checkProGate('pnl-previsionnel')) return;
     if(_anneeMts !== ANNEE) await _loadMtsOnly();
+    if(_anneeAchats !== ANNEE) await loadAchats();
     renderPrevisionnel();
   });
   $('nav-tva').addEventListener('click', async () => {
     showPanel('pnl-tva','nav-tva');
     if(!checkProGate('pnl-tva')) return;
     if(_anneeMts !== ANNEE) await _loadMtsOnly();
+    if(_anneeAchats !== ANNEE) await loadAchats();
     renderTVA();
   });
   $('nav-tresorerie').addEventListener('click', async () => {
     showPanel('pnl-tresorerie','nav-tresorerie');
     if(!checkProGate('pnl-tresorerie')) return;
     if(_anneeMts !== ANNEE) await _loadMtsOnly();
+    if(_anneeAchats !== ANNEE) await loadAchats();
     renderTresorerie();
   });
   // Inputs trésorerie — recalcul en temps réel
