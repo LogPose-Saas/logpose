@@ -148,7 +148,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .db-chk-ico{width:20px;height:20px;border-radius:50%;border:2px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all var(--tr)}
 .db-chk-item.done .db-chk-ico{background:var(--gr);border-color:var(--gr);color:#fff}
 .db-chk-label{flex:1;font-weight:500}
+.db-chk-why{font-size:11px;color:var(--t3);font-weight:400;margin-top:2px}
 .db-chk-item.done .db-chk-label{text-decoration:line-through;color:var(--t3)}
+.db-chk-item.done .db-chk-why{text-decoration:none}
 .db-chk-action{font-size:11px;color:var(--ac);font-weight:600}
 
 /* ═══ APP LAYOUT ═══ */
@@ -949,46 +951,63 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="onb-step-seg active" id="onb-seg-1"></div>
       <div class="onb-step-seg" id="onb-seg-2"></div>
       <div class="onb-step-seg" id="onb-seg-3"></div>
+      <div class="onb-step-seg" id="onb-seg-4"></div>
     </div>
 
     <!-- Étape 1 — Entreprise -->
     <div class="onb-pane active" id="onb-pane-1">
       <span class="onb-emoji">🏢</span>
       <div class="onb-h">Bienvenue sur LogPose !</div>
-      <div class="onb-sub">Commençons par votre entreprise. Ces informations personnalisent votre tableau de bord.</div>
+      <div class="onb-sub">Commençons par votre entreprise. Ces informations personnalisent vos calculs et votre TVA.</div>
       <div style="display:flex;flex-direction:column;gap:12px">
-        <div><label class="flbl">Nom de l'entreprise *</label>
-          <input class="finp" id="onb-nom" type="text" placeholder="Ex : JJK Commerce"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label class="flbl">Nom de l'entreprise *</label>
+            <input class="finp" id="onb-nom" type="text" placeholder="Ex : JJK Commerce"></div>
           <div><label class="flbl">Secteur</label>
             <select class="fsel" id="onb-sect">
               <option>Commerce de détail</option><option>E-commerce</option>
               <option>Prestation de service</option><option>Restauration / Food</option>
               <option>BTP / Artisanat</option><option>Autre</option>
             </select></div>
-          <div><label class="flbl">Objectif CA annuel (€)</label>
-            <input class="finp" id="onb-obj" type="number" placeholder="Ex : 50000"></div>
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label class="flbl">Régime TVA</label>
+            <select class="fsel" id="onb-tva">
+              <option value="">— Choisir —</option>
+              <option>TVA réelle mensuelle</option>
+              <option>TVA réelle trimestrielle</option>
+              <option>Franchise en base</option>
+            </select></div>
+          <div><label class="flbl">Régime fiscal</label>
+            <select class="fsel" id="onb-fisc">
+              <option value="">— Choisir —</option>
+              <option>IS — Impôt sur les sociétés</option>
+              <option>IR — Impôt sur le revenu</option>
+              <option>Micro-entreprise</option>
+            </select></div>
+        </div>
+        <div><label class="flbl">Objectif CA annuel (€)</label>
+          <input class="finp" id="onb-obj" type="number" placeholder="Ex : 50000"></div>
       </div>
       <div class="onb-row">
-        <span class="onb-counter">Étape 1 sur 3</span>
+        <span class="onb-counter">Étape 1 sur 4</span>
         <button class="btn btn-p" id="onb-next-1">Continuer →</button>
       </div>
     </div>
 
-    <!-- Étape 2 — Articles -->
+    <!-- Étape 2 — Article -->
     <div class="onb-pane" id="onb-pane-2">
       <span class="onb-emoji">📦</span>
       <div class="onb-h">Ajoutez votre premier article</div>
-      <div class="onb-sub">Un article = ce que vous vendez. Vous pourrez en ajouter autant que vous voulez ensuite.</div>
+      <div class="onb-sub">Un article = ce que vous vendez. Indispensable pour commencer à suivre votre CA.</div>
       <div style="display:flex;flex-direction:column;gap:12px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label class="flbl">Référence</label>
+            <input class="finp" id="onb-art-ref" type="text" placeholder="Ex : ART01"></div>
           <div><label class="flbl">Nom de l'article *</label>
             <input class="finp" id="onb-art-nom" type="text" placeholder="Ex : T-Shirt blanc"></div>
-          <div><label class="flbl">Catégorie</label>
-            <input class="finp" id="onb-art-cat" type="text" placeholder="Ex : Vêtements"></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div><label class="flbl">Prix HT (€)</label>
             <input class="finp" id="onb-art-pv" type="number" placeholder="29.90" step="0.01"></div>
           <div><label class="flbl">TVA</label>
@@ -1001,24 +1020,42 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="onb-row">
         <button class="onb-skip" id="onb-skip-2">Passer cette étape</button>
         <div style="display:flex;gap:8px;align-items:center">
-          <span class="onb-counter">Étape 2 sur 3</span>
+          <span class="onb-counter">Étape 2 sur 4</span>
           <button class="btn btn-p" id="onb-next-2">Continuer →</button>
         </div>
       </div>
     </div>
 
-    <!-- Étape 3 — Charges -->
+    <!-- Étape 3 — Coût d'achat -->
     <div class="onb-pane" id="onb-pane-3">
+      <span class="onb-emoji">🛒</span>
+      <div class="onb-h">Quel est son coût d'achat ?</div>
+      <div class="onb-sub">Le coût unitaire que vous payez pour produire ou acheter cet article. Nécessaire pour calculer votre vraie marge.</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="background:var(--bgs);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 14px;font-size:12.5px;color:var(--t2)">
+          Article : <strong id="onb-achat-art-nom" style="color:var(--t1)">—</strong>
+          &nbsp;·&nbsp; Prix HT : <strong id="onb-achat-art-pv" style="color:var(--t1)">—</strong>
+        </div>
+        <div><label class="flbl">Coût d'achat unitaire (€ HT)</label>
+          <input class="finp" id="onb-achat-cout" type="number" placeholder="Ex : 12.00" step="0.01"></div>
+      </div>
+      <div class="onb-row">
+        <button class="onb-skip" id="onb-skip-3">Passer cette étape</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="onb-counter">Étape 3 sur 4</span>
+          <button class="btn btn-p" id="onb-next-3">Continuer →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Étape 4 — Charge -->
+    <div class="onb-pane" id="onb-pane-4">
       <span class="onb-emoji">💸</span>
       <div class="onb-h">Ajoutez votre première charge</div>
-      <div class="onb-sub">Une charge = une dépense régulière (loyer, abonnement, salaire…). Indispensable pour calculer votre résultat.</div>
+      <div class="onb-sub">Une charge = une dépense régulière (loyer, abonnement, salaire…). Indispensable pour connaître votre résultat réel.</div>
       <div style="display:flex;flex-direction:column;gap:12px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div><label class="flbl">Nom de la charge *</label>
-            <input class="finp" id="onb-ch-nom" type="text" placeholder="Ex : Loyer"></div>
-          <div><label class="flbl">Catégorie</label>
-            <input class="finp" id="onb-ch-cat" type="text" placeholder="Ex : Immobilier"></div>
-        </div>
+        <div><label class="flbl">Nom de la charge *</label>
+          <input class="finp" id="onb-ch-nom" type="text" placeholder="Ex : Loyer"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div><label class="flbl">TVA</label>
             <select class="fsel" id="onb-ch-tva">
@@ -1032,20 +1069,20 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         </div>
       </div>
       <div class="onb-row">
-        <button class="onb-skip" id="onb-skip-3">Passer cette étape</button>
+        <button class="onb-skip" id="onb-skip-4">Passer cette étape</button>
         <div style="display:flex;gap:8px;align-items:center">
-          <span class="onb-counter">Étape 3 sur 3</span>
-          <button class="btn btn-p" id="onb-next-3">Terminer →</button>
+          <span class="onb-counter">Étape 4 sur 4</span>
+          <button class="btn btn-p" id="onb-next-4">Terminer →</button>
         </div>
       </div>
     </div>
 
-    <!-- Étape finale — succès -->
+    <!-- Étape finale — succès (uniquement si aucune étape passée) -->
     <div class="onb-pane" id="onb-pane-done">
       <div class="onb-success">
         <span class="onb-success-ico">🚀</span>
         <div class="onb-h">Vous êtes prêt !</div>
-        <div class="onb-sub" style="margin-bottom:20px">Votre espace LogPose est configuré. Commencez par saisir vos données de chiffre d'affaires pour voir votre Dashboard prendre vie.</div>
+        <div class="onb-sub" style="margin-bottom:20px">Votre espace LogPose est configuré. Commencez par saisir vos quantités vendues dans le module CA pour voir votre Dashboard prendre vie.</div>
         <button class="btn btn-p" style="width:100%;justify-content:center;padding:12px" id="onb-done">Accéder au Dashboard 🎯</button>
       </div>
     </div>
@@ -1316,27 +1353,50 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="db-checklist-items">
           <div class="db-chk-item" id="chk-entreprise" onclick="showPanel('pnl-params','nav-params');document.getElementById('tab-entreprise').click()">
             <div class="db-chk-ico">✓</div>
-            <div class="db-chk-label">🏢 Configurer votre entreprise</div>
+            <div class="db-chk-label">
+              <div>🏢 Configurer votre entreprise</div>
+              <div class="db-chk-why">Pour personnaliser vos calculs et votre TVA</div>
+            </div>
             <div class="db-chk-action">→</div>
           </div>
           <div class="db-chk-item" id="chk-articles" onclick="showPanel('pnl-params','nav-params')">
             <div class="db-chk-ico">✓</div>
-            <div class="db-chk-label">📦 Ajouter au moins un article</div>
+            <div class="db-chk-label">
+              <div>📦 Ajouter au moins un article</div>
+              <div class="db-chk-why">Pour commencer à suivre votre CA</div>
+            </div>
+            <div class="db-chk-action">→</div>
+          </div>
+          <div class="db-chk-item" id="chk-achats" onclick="showPanel('pnl-achats','nav-achats')">
+            <div class="db-chk-ico">✓</div>
+            <div class="db-chk-label">
+              <div>🛒 Saisir vos coûts d'achat</div>
+              <div class="db-chk-why">Pour calculer votre vraie marge</div>
+            </div>
             <div class="db-chk-action">→</div>
           </div>
           <div class="db-chk-item" id="chk-charges" onclick="showPanel('pnl-params','nav-params');document.getElementById('tab-charges').click()">
             <div class="db-chk-ico">✓</div>
-            <div class="db-chk-label">💸 Ajouter au moins une charge</div>
+            <div class="db-chk-label">
+              <div>💸 Ajouter au moins une charge</div>
+              <div class="db-chk-why">Pour connaître votre résultat réel</div>
+            </div>
             <div class="db-chk-action">→</div>
           </div>
           <div class="db-chk-item" id="chk-ca" onclick="showPanel('pnl-ca','nav-ca');loadCA()">
             <div class="db-chk-ico">✓</div>
-            <div class="db-chk-label">📈 Saisir votre premier chiffre d'affaires</div>
+            <div class="db-chk-label">
+              <div>📈 Saisir votre premier chiffre d'affaires</div>
+              <div class="db-chk-why">Pour voir votre Dashboard prendre vie</div>
+            </div>
             <div class="db-chk-action">→</div>
           </div>
           <div class="db-chk-item" id="chk-objectif" onclick="showPanel('pnl-params','nav-params');document.getElementById('tab-entreprise').click()">
             <div class="db-chk-ico">✓</div>
-            <div class="db-chk-label">🎯 Définir un objectif CA annuel</div>
+            <div class="db-chk-label">
+              <div>🎯 Définir un objectif CA annuel</div>
+              <div class="db-chk-why">Pour suivre votre progression</div>
+            </div>
             <div class="db-chk-action">→</div>
           </div>
         </div>
@@ -4872,13 +4932,16 @@ function validateMontant(val, nomCharge, historiqueVals) {
 // ════════════════════════════════════════════════════════
 let _onbStep = 1;
 
+let _onbSkipped = false; // true si au moins une étape optionnelle passée
+let _onbArticle = null;  // article créé à l'étape 2 du wizard
+
 function onbShowStep(n) {
   _onbStep = n;
   document.querySelectorAll('.onb-pane').forEach(p => p.classList.remove('active'));
-  const pane = $('onb-pane-' + (n === 4 ? 'done' : n));
+  const pane = $('onb-pane-' + (n === 5 ? 'done' : n));
   if(pane) pane.classList.add('active');
-  // Barre de progression
-  [1,2,3].forEach(i => {
+  // Barre de progression — 4 segments
+  [1,2,3,4].forEach(i => {
     const seg = $('onb-seg-' + i);
     if(!seg) return;
     seg.classList.remove('done','active');
@@ -4888,6 +4951,8 @@ function onbShowStep(n) {
 }
 
 function showWizard() {
+  _onbSkipped = false;
+  _onbArticle = null;
   const w = $('onb-wizard'); if(w) w.classList.add('open');
   onbShowStep(1);
 }
@@ -4900,28 +4965,32 @@ async function onbSaveStep1() {
   const nom = $('onb-nom').value.trim();
   if(!nom) { $('onb-nom').focus(); $('onb-nom').style.borderColor='var(--rd)'; return false; }
   $('onb-nom').style.borderColor='';
-  P.nomEnt  = nom;
-  P.secteur = $('onb-sect').value;
-  P.obj     = parseFloat($('onb-obj').value) || 0;
+  P.nomEnt    = nom;
+  P.secteur   = $('onb-sect').value;
+  P.regimeTVA = $('onb-tva').value || '';
+  P.regimeFisc= $('onb-fisc').value || '';
+  P.obj       = parseFloat($('onb-obj').value) || 0;
   paramsLoaded  = true;
   paramsModifie = true;
   await saveParams();
-  // saveParams affiche déjà un toast si erreur
-  const e = $('ent-nom'); if(e) e.value = P.nomEnt;
+  // Sync champs Paramètres
+  const e = $('ent-nom');  if(e) e.value = P.nomEnt;
   const s = $('ent-sect'); if(s) s.value = P.secteur;
-  const o = $('ent-obj'); if(o) o.value = P.obj || '';
+  const o = $('ent-obj');  if(o) o.value = P.obj || '';
+  const t = $('ent-tva');  if(t) t.value = P.regimeTVA;
+  const f = $('ent-fisc'); if(f) f.value = P.regimeFisc;
   return true;
 }
 
 async function onbSaveStep2() {
   const nom = $('onb-art-nom').value.trim();
-  if(!nom) return;
-  // Générer un code unique qui n'entre pas en collision avec l'existant
+  if(!nom) return null;
+  const refVal = $('onb-art-ref').value.trim();
   let n = articles.length + 1;
-  let code = 'ART' + String(n).padStart(2,'0');
+  let code = refVal || ('ART' + String(n).padStart(2,'0'));
   while(articles.some(a => a.code === code)) { n++; code = 'ART' + String(n).padStart(2,'0'); }
   const a = {
-    code, nom, cat: $('onb-art-cat').value || 'Divers',
+    code, nom, cat: 'Divers',
     pv: parseFloat($('onb-art-pv').value) || 0,
     cout: 0,
     tva: parseFloat($('onb-art-tva').value) || 0.2,
@@ -4930,14 +4999,27 @@ async function onbSaveStep2() {
   articles.push(a);
   await upsertArticle(a);
   renderArticles();
+  return a; // retourne l'article pour l'étape 3
 }
 
-async function onbSaveStep3() {
+async function onbSaveStep3(articleCode) {
+  const cout = parseFloat($('onb-achat-cout').value) || 0;
+  if(!articleCode || cout <= 0) return;
+  // Sauvegarder le coût dans saisies_achats pour le mois courant
+  const moisIdx = new Date().getMonth();
+  if(!achats[articleCode]) achats[articleCode] = [];
+  achats[articleCode][moisIdx] = cout;
+  await DB.from('saisies_achats').upsert({
+    user_id: UID, article_code: articleCode, annee: ANNEE,
+    mois: moisIdx + 1, cout_unitaire: cout
+  }, { onConflict: 'user_id,article_code,annee,mois' });
+}
+
+async function onbSaveStep4() {
   const nom = $('onb-ch-nom').value.trim();
   if(!nom) return;
   const c = {
-    code: String(Date.now()), nom,
-    cat: $('onb-ch-cat').value || 'Divers',
+    code: String(Date.now()), nom, cat: 'Divers',
     tva: parseFloat($('onb-ch-tva').value) || 0.2,
     type: $('onb-ch-type').value || 'Fixe',
     actif: true,
@@ -4954,9 +5036,16 @@ function renderChecklist() {
   const caHT = articles.reduce((s,a) =>
     s + (qty[a.code]||[]).reduce((x,v)=>x+(v||0),0) * a.pv, 0);
 
+  // Vérifie si au moins un coût d'achat a été saisi
+  const hasAchats = articles.some(a => {
+    const mois = achats[a.code] || [];
+    return mois.some(v => v > 0);
+  });
+
   const etats = {
     entreprise: !!(P.nomEnt && P.nomEnt.trim()),
     articles:   articles.length > 0,
+    achats:     hasAchats,
     charges:    charges.length > 0,
     ca:         caHT > 0,
     objectif:   P.obj > 0,
@@ -4965,6 +5054,15 @@ function renderChecklist() {
   const toutFait = Object.values(etats).every(Boolean);
   const cl = $('db-checklist');
   if(!cl) return;
+
+  // Toast de félicitations quand on passe de "pas tout fait" à "tout fait"
+  if(toutFait && cl.style.display !== 'none') {
+    cl.style.display = 'none';
+    toast('ok', '🎉 Configuration complète !', 'Explorez maintenant votre Marge & Rentabilité pour piloter votre activité.', 6000);
+    // Bouton direct dans le toast n'est pas possible, mais le message guide
+    return;
+  }
+
   cl.style.display = toutFait ? 'none' : 'block';
 
   const setChk = (id, done) => {
@@ -4978,6 +5076,7 @@ function renderChecklist() {
 
   setChk('chk-entreprise', etats.entreprise);
   setChk('chk-articles',   etats.articles);
+  setChk('chk-achats',     etats.achats);
   setChk('chk-charges',    etats.charges);
   setChk('chk-ca',         etats.ca);
   setChk('chk-objectif',   etats.objectif);
@@ -7391,17 +7490,48 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   // Wizard — Étape 2
   $('onb-next-2').addEventListener('click', async () => {
-    await onbSaveStep2();
-    onbShowStep(3);
+    _onbArticle = await onbSaveStep2();
+    if(_onbArticle) {
+      // Pré-remplir l'étape 3 avec le nom et le prix de l'article
+      const nomEl = $('onb-achat-art-nom'); if(nomEl) nomEl.textContent = _onbArticle.nom;
+      const pvEl  = $('onb-achat-art-pv');  if(pvEl)  pvEl.textContent  = (_onbArticle.pv||0).toFixed(2) + ' € HT';
+      onbShowStep(3);
+    } else {
+      onbShowStep(3); // nom vide = on passe quand même
+    }
   });
-  $('onb-skip-2').addEventListener('click', () => onbShowStep(3));
+  $('onb-skip-2').addEventListener('click', () => {
+    _onbSkipped = true;
+    _onbArticle = null;
+    onbShowStep(4); // pas d'article → on saute aussi l'étape 3 (coût d'achat)
+  });
   // Wizard — Étape 3
   $('onb-next-3').addEventListener('click', async () => {
-    await onbSaveStep3();
+    if(_onbArticle) await onbSaveStep3(_onbArticle.code);
     onbShowStep(4);
   });
-  $('onb-skip-3').addEventListener('click', () => onbShowStep(4));
-  // Wizard — Fin
+  $('onb-skip-3').addEventListener('click', () => {
+    _onbSkipped = true;
+    onbShowStep(4);
+  });
+  // Wizard — Étape 4
+  $('onb-next-4').addEventListener('click', async () => {
+    await onbSaveStep4();
+    if(_onbSkipped) {
+      hideWizard();
+      showPanel('pnl-dashboard','nav-dashboard');
+      renderDashboard();
+    } else {
+      onbShowStep(5);
+    }
+  });
+  $('onb-skip-4').addEventListener('click', () => {
+    _onbSkipped = true;
+    hideWizard();
+    showPanel('pnl-dashboard','nav-dashboard');
+    renderDashboard();
+  });
+  // Wizard — Fin (écran succès)
   $('onb-done').addEventListener('click', () => {
     hideWizard();
     showPanel('pnl-dashboard','nav-dashboard');
