@@ -963,11 +963,7 @@ async function submitLeadMagnet() {
   try {
     const res = await fetch('https://ppmdabvtdoaodzzjqqsc.supabase.co/functions/v1/subscribe-newsletter', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwbWRhYnZ0ZG9hb2R6empxcXNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NTAyMzYsImV4cCI6MjA5MTAyNjIzNn0.F7g2J386VWi588NaNLuwIgfKaiugdwqqjIUw1c3Hq-E',
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwbWRhYnZ0ZG9hb2R6empxcXNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NTAyMzYsImV4cCI6MjA5MTAyNjIzNn0.F7g2J386VWi588NaNLuwIgfKaiugdwqqjIUw1c3Hq-E'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, source: 'landing' })
     })
 
