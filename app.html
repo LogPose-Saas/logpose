@@ -6907,6 +6907,9 @@ async function changeAnnee(n) {
     $('ach-annee-lbl').textContent = ANNEE;
     await renderAchats();
   }
+  if($('pnl-ca') && $('pnl-ca').style.display !== 'none') {
+    renderCA();
+  }
   if($('pnl-charges') && $('pnl-charges').style.display !== 'none') {
     renderChargesData();
   }
