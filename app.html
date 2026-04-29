@@ -7575,6 +7575,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sidebar
   // Repositionnement dynamique des tooltips KPI
   document.addEventListener('mouseenter', e => {
+    if(!(e.target instanceof Element)) return;
     const help = e.target.closest('.kpi-help');
     if(!help) return;
     const tip = help.querySelector('.kpi-tooltip');
