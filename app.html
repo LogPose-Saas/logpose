@@ -1778,12 +1778,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
             <tbody id="ach-tbody"></tbody>
             <tfoot id="ach-tfoot"></tfoot>
           </table>
-        </div>
+        </div><!-- fin ach-tbl-wrap -->
         <div style="margin-top:10px;font-size:11px;color:var(--t3)">
           💡 Saisissez le coût unitaire d'achat pour chaque article. La valeur saisie se propage automatiquement aux mois suivants. Les cases vides utilisent la dernière valeur connue (affichée en gris).
         </div>
-        </div><!-- fin ach-tbl-wrap -->
-      </div>
+      </div><!-- fin card -->
     </div><!-- fin pnl-achats -->
 
     <!-- SAISIE CHARGES -->
@@ -2442,10 +2441,16 @@ function showLoading(panelId) {
     <circle cx="24" cy="24" r="2.5" fill="var(--t2)"/>
   </svg>`;
   main.appendChild(loader);
+  _loaderSafetyNet();
 }
 function hideLoading(panelId) {
   const e = $(panelId); if(e) e.classList.remove('pnl-loading');
   const loader = $('lp-loader'); if(loader) loader.remove();
+}
+
+// Garde de sécurité — retire le loader si encore présent après 3s
+function _loaderSafetyNet() {
+  setTimeout(() => { const l = $('lp-loader'); if(l) l.remove(); }, 3000);
 }
 
 // ── Système de toasts ──
@@ -3119,6 +3124,7 @@ function updateCACharts() {
       chartCALine.data.datasets[0].data = caParMois;
       chartCALine.update({duration:350,easing:'easeInOutQuart'});
     } else {
+      if(Chart.getChart(ctxL)) Chart.getChart(ctxL).destroy();
       chartCALine = new Chart(ctxL, {
         type: 'line',
         plugins: [dataLabelsLine],
@@ -3154,6 +3160,7 @@ function updateCACharts() {
       chartCAPie.data.datasets[0].backgroundColor = colors.slice(0, cats.length);
       chartCAPie.update({duration:400,easing:'easeInOutQuart'});
     } else if(!chartCAPie && cats.length > 0) {
+      if(Chart.getChart(ctxP)) Chart.getChart(ctxP).destroy();
       chartCAPie = new Chart(ctxP, {
         type: 'doughnut',
         plugins: [outerLabels],
@@ -3652,6 +3659,7 @@ function updateCHCharts() {
       chartCHLine.data.datasets[0].data = chParMois;
       chartCHLine.update({duration:350,easing:'easeInOutQuart'});
     } else {
+      if(Chart.getChart(ctxL)) Chart.getChart(ctxL).destroy();
       chartCHLine = new Chart(ctxL, {
         type: 'line',
         plugins: [dataLabelsCH],
@@ -3686,6 +3694,7 @@ function updateCHCharts() {
       chartCHPie.data.datasets[0].backgroundColor = colors.slice(0, cats.length);
       chartCHPie.update({duration:400,easing:'easeInOutQuart'});
     } else if(!chartCHPie && cats.length > 0) {
+      if(Chart.getChart(ctxP)) Chart.getChart(ctxP).destroy();
       chartCHPie = new Chart(ctxP, {
         type: 'doughnut',
         plugins: [outerLabelsCH],
@@ -6874,6 +6883,7 @@ function renderTresorerie() {
       }
     };
 
+    if(Chart.getChart(ctxTR)) Chart.getChart(ctxTR).destroy();
     chartTR = new Chart(ctxTR, {
       type: 'line',
       plugins: [zeroLinePlugin],
