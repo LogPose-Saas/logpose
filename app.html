@@ -19,12 +19,12 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="LogPose — Financial OS pour TPE & indépendants">
 <meta name="twitter:description" content="Pilotez votre activité comme un expert. CA, charges, marge, TVA, trésorerie et prévisionnel — tout en un seul outil.">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --f:'Plus Jakarta Sans',sans-serif;
+  --f:'Inter',sans-serif;
   --fm:'JetBrains Mono',monospace;
   --r:14px;--rs:9px;
   --tr:.2s cubic-bezier(.4,0,.2,1);
@@ -919,7 +919,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
     --bd: #dce6f5; --bds: #c2d2ea;
     --grb: rgba(5,150,105,.09); --rdb: rgba(225,29,72,.09);
     --ag: rgba(37,99,235,.08); --amb: rgba(217,119,6,.09);
-    --r: 8px; --rs: 6px; --f: 'Plus Jakarta Sans',sans-serif; --fm: 'DM Mono',monospace;
+    --r: 8px; --rs: 6px; --f: 'Inter',sans-serif; --fm: 'DM Mono',monospace;
   }
 
   @page { margin: 8mm 6mm; size: A4 landscape; }
@@ -3026,7 +3026,7 @@ function updateCACharts() {
     afterDatasetsDraw(chart) {
       const {ctx, data, scales:{x,y}, chartArea} = chart;
       ctx.save();
-      ctx.font = '600 10px Plus Jakarta Sans, sans-serif';
+      ctx.font = '600 10px Inter, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#3b7eff';
       data.datasets[0].data.forEach((val, i) => {
@@ -3054,7 +3054,7 @@ function updateCACharts() {
       const total = data.datasets[0].data.reduce((s,v) => s+v, 0);
       if(!total) return;
       ctx.save();
-      ctx.font = '600 11px Plus Jakarta Sans, sans-serif';
+      ctx.font = '600 11px Inter, sans-serif';
       meta.data.forEach((arc, i) => {
         const val  = data.datasets[0].data[i];
         const lbl  = data.labels[i];
@@ -3552,7 +3552,7 @@ function updateCHCharts() {
     afterDatasetsDraw(chart) {
       const {ctx, data, scales:{x,y}, chartArea} = chart;
       ctx.save();
-      ctx.font = '600 10px Plus Jakarta Sans, sans-serif';
+      ctx.font = '600 10px Inter, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#f43f5e';
       data.datasets[0].data.forEach((val, i) => {
@@ -3579,7 +3579,7 @@ function updateCHCharts() {
       const total = data.datasets[0].data.reduce((s,v) => s+v, 0);
       if(!total) return;
       ctx.save();
-      ctx.font = '600 11px Plus Jakarta Sans, sans-serif';
+      ctx.font = '600 11px Inter, sans-serif';
       meta.data.forEach((arc, i) => {
         const val  = data.datasets[0].data[i];
         const lbl  = data.labels[i];
@@ -3799,7 +3799,7 @@ function renderDashboard() {
           plugins: {
             legend: {
               position: 'top',
-              labels: { font: { family: 'Plus Jakarta Sans', size: 12 }, boxWidth: 12, padding: 16 }
+              labels: { font: { family: 'Inter', size: 12 }, boxWidth: 12, padding: 16 }
             },
             tooltip: {
               callbacks: {
@@ -5293,7 +5293,7 @@ function renderMarge() {
       ctx.setLineDash([]);
 
       // Étiquettes au-dessus de chaque barre
-      ctx.font = '600 10.5px Plus Jakarta Sans, sans-serif';
+      ctx.font = '600 10.5px Inter, sans-serif';
       ctx.textAlign = 'center';
       vraisVals.forEach((val, i) => {
         const px  = x.getPixelForValue(i);
@@ -5578,7 +5578,7 @@ function renderMargeEvol() {
           if(!val || val === 0) return;
           const fmtVal = Math.round(Math.abs(val)).toLocaleString('fr-FR') + ' €';
           c.fillStyle = ds.borderColor;
-          c.font = '600 9.5px Plus Jakarta Sans, sans-serif';
+          c.font = '600 9.5px Inter, sans-serif';
           c.textAlign = 'center';
           c.textBaseline = 'bottom';
           c.fillText(fmtVal, bar.x, bar.y - 3);
@@ -5920,7 +5920,7 @@ function renderScenarios() {
       options: {
         responsive:true, maintainAspectRatio:false,
         plugins: {
-          legend: { position:'top', labels:{ font:{family:'Plus Jakarta Sans',size:12}, boxWidth:12, padding:16 } },
+          legend: { position:'top', labels:{ font:{family:'Inter',size:12}, boxWidth:12, padding:16 } },
           tooltip: { callbacks: { label: ctx => ctx.dataset.label + ' : ' + ctx.parsed.y.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €' } }
         },
         scales: {
@@ -6195,7 +6195,7 @@ function renderPrevisionnel() {
       options: {
         responsive:true, maintainAspectRatio:false,
         plugins: {
-          legend: { position:'top', labels:{ font:{family:'Plus Jakarta Sans',size:12}, boxWidth:12, padding:16 } },
+          legend: { position:'top', labels:{ font:{family:'Inter',size:12}, boxWidth:12, padding:16 } },
           tooltip: { callbacks:{ label: ctx => ctx.dataset.label+' : '+Math.round(ctx.parsed.y).toLocaleString('fr-FR')+' €' } }
         },
         scales: {
@@ -6789,7 +6789,7 @@ function renderTresorerie() {
       options: {
         responsive:true, maintainAspectRatio:false,
         plugins: {
-          legend: { position:'top', labels:{ font:{family:'Plus Jakarta Sans',size:12}, boxWidth:12, padding:16 } },
+          legend: { position:'top', labels:{ font:{family:'Inter',size:12}, boxWidth:12, padding:16 } },
           tooltip: { callbacks:{ label: ctx => ctx.dataset.label+' : '+fmt(ctx.parsed.y) } }
         },
         scales: {
