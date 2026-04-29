@@ -6890,7 +6890,7 @@ async function changeAnnee(n) {
   chartSCSens = null; chartPVMain = null; chartTR = null;
 
   // Skeleton sur le panneau actif
-  const panneauActif = ['pnl-dashboard','pnl-ca','pnl-achats','pnl-charges','pnl-params']
+  const panneauActif = ['pnl-dashboard','pnl-ca','pnl-achats','pnl-charges','pnl-params','pnl-marge','pnl-scenarios','pnl-previsionnel','pnl-tva','pnl-tresorerie']
     .find(id => { const e=$(id); return e && e.style.display !== 'none'; });
   if(panneauActif) showLoading(panneauActif);
 
