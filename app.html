@@ -2063,6 +2063,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       </div>
 
       <!-- Convergence objectif -->
+      <div id="pv-empty" style="display:none" class="empty">
+        <div class="empty-ico">📈</div>
+        <div class="empty-title">Aucune donnée à projeter</div>
+        <div class="empty-desc">Le prévisionnel se construit à partir de vos ventes réelles. Saisissez vos quantités dans le module CA pour que LogPose projette votre activité sur 3 ans avec saisonnalité préservée.</div>
+        <button class="btn btn-p" style="margin-top:16px" onclick="showPanel('pnl-ca','nav-ca');loadCA()">→ Saisir mon CA</button>
+      </div>
+
+      <!-- Convergence objectif -->
       <div id="pv-conv-msg" class="pv-conv ok" style="display:none">
         <span id="pv-conv-ico">🎯</span>
         <span id="pv-conv-txt"></span>
@@ -6211,6 +6219,12 @@ function _pvSynth(moisProj, annee) {
 
 function renderPrevisionnel() {
   const lbl = $('pv-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+
+  // Empty state si aucune vente saisie
+  const caHT = articles.reduce((s,a)=>s+(qty[a.code]||[]).reduce((x,v)=>x+(v||0),0)*a.pv,0);
+  const pvEmpty = $('pv-empty');
+  if(pvEmpty) pvEmpty.style.display = (!articles.length || caHT === 0) ? 'block' : 'none';
+  if(!articles.length || caHT === 0) return;
 
   // Charger hypothèses sauvegardées
   const hyp = _pvLoadHyp();
