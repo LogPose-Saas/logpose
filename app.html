@@ -1761,7 +1761,13 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="tbl-hdr">
           <div><div class="ct">Saisie des coûts unitaires</div><div class="cs">Coût d'achat unitaire par article et par mois · La valeur se propage aux mois suivants</div></div>
         </div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pv-tbl-wrap">
+        <div id="ach-empty" style="display:none" class="empty">
+          <div class="empty-ico">🛒</div>
+          <div class="empty-title">Aucun article configuré</div>
+          <div class="empty-desc">Sans coûts d'achat, votre marge brute est fausse. Configurez vos articles d'abord, puis revenez saisir vos coûts unitaires.</div>
+          <button class="btn btn-p" style="margin-top:16px" onclick="showPanel('pnl-params','nav-params')">→ Configurer mes articles</button>
+        </div>
+        <div id="ach-tbl-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pv-tbl-wrap">
           <table class="stbl" id="ach-tbl">
             <thead><tr>
               <th>Code</th><th>Article</th><th>Prix HT</th>
@@ -3226,6 +3232,13 @@ let _achatsLoaded = false;
 async function renderAchats() {
   if(!UID) return;
   await loadAchats();
+
+  // Empty state si aucun article
+  const achEmpty = $('ach-empty');
+  const achWrap  = $('ach-tbl-wrap');
+  if(achEmpty) achEmpty.style.display = !articles.length ? 'block' : 'none';
+  if(achWrap)  achWrap.style.display  = !articles.length ? 'none'  : '';
+  if(!articles.length) return;
 
   // Formatter local
   const fmt = v => v.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
