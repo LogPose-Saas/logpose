@@ -6077,26 +6077,41 @@ function _pvSynth(moisProj, annee) {
   const txMCV = ca > 0 ? mcv/ca : 0;
   const seuil = txMCV > 0 ? Math.round(chFix/txMCV*100)/100 : 0;
 
-  // TVA nette projetée (taux moyen articles 20%, taux moyen charges 20%)
+  // TVA nette projetée — taux pondéré réel par CA article
   const assujetti = _tvaIsAssujetti();
   let tvaNette = 0;
+
+  // Taux TVA moyen pondéré par CA réel des articles (fallback 20% si aucun CA)
+  const caParArt = articles.map(a => (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0) * a.pv);
+  const caTotArt = caParArt.reduce((s,v)=>s+v, 0);
+  const txTVAMoyArt = caTotArt > 0
+    ? articles.reduce((s,a,i) => s + (a.tva||0.2) * caParArt[i], 0) / caTotArt
+    : articles.length > 0 ? articles.reduce((s,a)=>s+(a.tva||0.2),0)/articles.length : 0.2;
+
+  // Taux TVA moyen pondéré par montant HT des charges (fallback 20% si aucune charge)
+  const chTotHT = chFix + chVar;
+  const txTVAMoyCh = charges.length > 0 && chTotHT > 0
+    ? charges.reduce((s,c) => {
+        const k = String(c.code);
+        const ht = (mts[k]||[]).reduce((x,v)=>x+(v||0),0) / (1+(c.tva||0));
+        return s + (c.tva||0) * ht;
+      }, 0) / chTotHT
+    : 0.2;
+
   if(assujetti) {
-    // Collectée : CA HT × taux TVA moyen des articles (approx. 20%)
-    const txTVAMoyArt = articles.length > 0
-      ? articles.reduce((s,a)=>s+(a.tva||0.2),0)/articles.length : 0.2;
+    // TVA collectée : CA HT × taux pondéré articles
     const tvaCollectee = Math.round(ca * txTVAMoyArt * 100) / 100;
-    // Déductible achats : coûts × taux TVA moyen articles
+    // TVA déductible achats : coûts HT × taux pondéré articles
     const tvaAchats = Math.round(cout * txTVAMoyArt * 100) / 100;
-    // Déductible charges : charges TTC → TVA = TTC − HT
-    const chTTC = Math.round((chFix + chVar) * (1 + 0.2) * 100) / 100; // approx 20%
-    const tvaCharges = Math.round((chTTC - (chFix + chVar)) * 100) / 100;
+    // TVA déductible charges : charges HT × taux pondéré charges
+    const tvaCharges = Math.round(chTotHT * txTVAMoyCh * 100) / 100;
     tvaNette = Math.round((tvaCollectee - tvaAchats - tvaCharges) * 100) / 100;
     if(tvaNette < 0) tvaNette = 0; // crédit TVA = 0 pour simplifier la projection
   }
 
-  // Flux trésorerie projeté : CA TTC − achats TTC − charges TTC − TVA nette
+  // Flux trésorerie projeté avec taux pondérés réels
   const fluxTreso = assujetti
-    ? Math.round((ca * (1 + 0.2) - cout * (1 + 0.2) - (chFix + chVar) * (1 + 0.2) - tvaNette) * 100) / 100
+    ? Math.round((ca * (1 + txTVAMoyArt) - cout * (1 + txTVAMoyArt) - chTotHT * (1 + txTVAMoyCh) - tvaNette) * 100) / 100
     : Math.round((ca - cout - chFix - chVar) * 100) / 100;
 
   return { ca, cout, margeB, chFix, chVar, res, txM, seuil, tvaNette, fluxTreso, assujetti };
