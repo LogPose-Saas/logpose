@@ -1874,6 +1874,14 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         </div>
       </div>
 
+      <!-- Empty state -->
+      <div id="mr-empty" style="display:none" class="empty">
+        <div class="empty-ico">📊</div>
+        <div class="empty-title">Aucune vente saisie</div>
+        <div class="empty-desc">Saisissez vos quantités vendues dans le module CA — LogPose calculera automatiquement votre seuil de rentabilité, votre point mort et votre marge par article.</div>
+        <button class="btn btn-p" style="margin-top:16px" onclick="showPanel('pnl-ca','nav-ca');loadCA()">→ Saisir mon CA</button>
+      </div>
+
       <!-- KPIs -->
       <div class="kgrid g4" style="margin-bottom:14px;grid-template-columns:repeat(5,1fr)">
         <div class="kcard" style="text-align:center">
@@ -1948,12 +1956,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
       <div class="card">
         <div class="tbl-hdr">
           <div><div class="ct">Rentabilité par article</div><div class="cs">Marge brute et imputation des charges fixes selon la clé de répartition</div></div>
-        </div>
-        <div id="mr-empty" style="display:none" class="empty">
-          <div class="empty-ico">📊</div>
-          <div class="empty-title">Aucune vente saisie</div>
-          <div class="empty-desc">Saisissez vos quantités vendues dans le module CA — LogPose calculera automatiquement votre seuil de rentabilité, votre point mort et votre marge par article.</div>
-          <button class="btn btn-p" style="margin-top:16px" onclick="showPanel('pnl-ca','nav-ca');loadCA()">→ Saisir mon CA</button>
         </div>
         <div style="overflow-x:auto" id="mr-tbl-wrap">
           <table class="dtbl" id="mr-tbl">
