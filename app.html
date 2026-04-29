@@ -1667,7 +1667,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div id="ca-empty" style="display:none" class="empty">
           <div class="empty-ico">📦</div>
           <div class="empty-title">Aucun article configuré</div>
-          <div class="empty-desc">Ajoutez des articles dans Paramètres → Articles</div>
+          <div class="empty-desc">Sans articles, impossible de suivre votre CA ni de calculer votre marge. Ajoutez vos produits ou prestations — ça prend moins de 2 minutes.</div>
+          <button class="btn btn-p" style="margin-top:16px" onclick="showPanel('pnl-params','nav-params')">→ Configurer mes articles</button>
         </div>
         <div style="overflow-x:auto" id="ca-tbl-wrap">
           <table class="stbl" id="ca-tbl">
@@ -1709,6 +1710,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="kacc" style="background:var(--rd)"></div>
           <div class="klbl">TOTAL ACHATS ANNUEL</div>
           <div class="kval" id="ach-kpi-total">—</div>
+          <div id="ach-ytd-total"></div>
           <div style="font-size:11px;color:var(--t3);margin-top:4px">Coûts × quantités vendues</div>
           <div class="kpi-help">?<div class="kpi-tooltip">Total des coûts d'achat calculé sur la base des coûts unitaires × quantités vendues par mois.</div></div>
         </div>
@@ -1723,6 +1725,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="kacc" style="background:var(--pu)"></div>
           <div class="klbl">MARGE BRUTE ESTIMÉE</div>
           <div class="kval" id="ach-kpi-marge">—</div>
+          <div id="ach-ytd-marge"></div>
           <div style="font-size:11px;color:var(--t3);margin-top:4px" id="ach-kpi-marge-lbl">CA HT − Coûts achat</div>
           <div class="kpi-help">?<div class="kpi-tooltip">Marge brute = CA HT − total des coûts d'achat. Indépendant des charges fixes et variables.</div></div>
         </div>
@@ -1758,7 +1761,13 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div class="tbl-hdr">
           <div><div class="ct">Saisie des coûts unitaires</div><div class="cs">Coût d'achat unitaire par article et par mois · La valeur se propage aux mois suivants</div></div>
         </div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pv-tbl-wrap">
+        <div id="ach-empty" style="display:none" class="empty">
+          <div class="empty-ico">🛒</div>
+          <div class="empty-title">Aucun article configuré</div>
+          <div class="empty-desc">Sans articles, vous ne pouvez pas saisir de coûts d'achat — et sans coûts d'achat, votre marge brute est fausse. Configurez vos articles d'abord.</div>
+          <button class="btn btn-p" style="margin-top:16px" onclick="showPanel('pnl-params','nav-params')">→ Configurer mes articles</button>
+        </div>
+        <div id="ach-tbl-wrap" style="overflow-x:auto;-webkit-overflow-scrolling:touch" class="pv-tbl-wrap">
           <table class="stbl" id="ach-tbl">
             <thead><tr>
               <th>Code</th><th>Article</th><th>Prix HT</th>
@@ -1773,6 +1782,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div style="margin-top:10px;font-size:11px;color:var(--t3)">
           💡 Saisissez le coût unitaire d'achat pour chaque article. La valeur saisie se propage automatiquement aux mois suivants. Les cases vides utilisent la dernière valeur connue (affichée en gris).
         </div>
+        </div><!-- fin ach-tbl-wrap -->
       </div>
     </div><!-- fin pnl-achats -->
 
@@ -1824,7 +1834,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         <div id="ch-empty" style="display:none" class="empty">
           <div class="empty-ico">💸</div>
           <div class="empty-title">Aucune charge configurée</div>
-          <div class="empty-desc">Ajoutez des charges dans Paramètres → Charges</div>
+          <div class="empty-desc">Sans charges, votre résultat net est incomplet et votre seuil de rentabilité ne peut pas être calculé. Ajoutez vos charges fixes et variables.</div>
+          <button class="btn btn-p" style="margin-top:16px" onclick="showPanel('pnl-params','nav-params');document.getElementById('tab-charges').click()">→ Configurer mes charges</button>
         </div>
         <div style="overflow-x:auto" id="ch-tbl-wrap">
           <table class="stbl" id="ch-tbl">
@@ -1941,8 +1952,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         </div>
         <div id="mr-empty" style="display:none" class="empty">
           <div class="empty-ico">📊</div>
-          <div class="empty-title">Aucune donnée disponible</div>
-          <div class="empty-desc">Saisissez des quantités dans le module Chiffre d'affaires pour voir l'analyse de rentabilité</div>
+          <div class="empty-title">Aucune vente saisie</div>
+          <div class="empty-desc">Saisissez vos quantités vendues dans le module CA — LogPose calculera automatiquement votre seuil de rentabilité, votre point mort et votre marge par article.</div>
+          <button class="btn btn-p" style="margin-top:16px" onclick="showPanel('pnl-ca','nav-ca');loadCA()">→ Saisir mon CA</button>
         </div>
         <div style="overflow-x:auto" id="mr-tbl-wrap">
           <table class="dtbl" id="mr-tbl">
@@ -1970,8 +1982,13 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="page-sub">Simulation sans impact sur vos données réelles · Année <span id="sc-annee-lbl">2026</span></div>
         </div>
       </div>
-
-      <!-- Onglets scénarios -->
+      <div id="sc-empty" style="display:none" class="empty">
+        <div class="empty-ico">🎭</div>
+        <div class="empty-title">Aucune donnée à simuler</div>
+        <div class="empty-desc">Saisissez vos ventes dans le module CA pour débloquer les scénarios — simulez l'impact d'une hausse de prix, d'un nouveau produit ou d'une charge supplémentaire avant de décider.</div>
+        <button class="btn btn-p" style="margin-top:16px" onclick="showPanel('pnl-ca','nav-ca');loadCA()">→ Saisir mon CA</button>
+      </div>
+      <div id="sc-content">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
         <div class="sc-tabs">
           <div class="sc-tab reel active" id="sc-tab-reel">📊 Réel</div>
@@ -2032,6 +2049,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         </div>
       </div>
 
+      </div><!-- fin sc-content -->
     </div><!-- fin pnl-scenarios -->
 
     <!-- PRÉVISIONNEL -->
@@ -2230,7 +2248,13 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="page-sub">Solde bancaire prévisionnel · Année <span id="tr-annee-lbl">2026</span></div>
         </div>
       </div>
-
+      <div id="tr-empty" style="display:none" class="empty">
+        <div class="empty-ico">💰</div>
+        <div class="empty-title">Aucun article configuré</div>
+        <div class="empty-desc">La trésorerie se calcule à partir de vos ventes et de vos charges. Configurez vos articles et saisissez vos quantités vendues pour voir vos flux mois par mois.</div>
+        <button class="btn btn-p" style="margin-top:16px" onclick="showPanel('pnl-params','nav-params')">→ Configurer mes articles</button>
+      </div>
+      <div id="tr-content">
       <!-- Alertes tension -->
       <div id="tr-alerts"></div>
 
@@ -2327,6 +2351,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
         </div>
       </div>
 
+      </div><!-- fin tr-content -->
     </div><!-- fin pnl-tresorerie -->
 
 </div><!-- fin app -->
@@ -3206,6 +3231,17 @@ async function renderAchats() {
   if(!UID) return;
   await loadAchats();
 
+  // Empty state si aucun article
+  const achEmpty = $('ach-empty');
+  const achWrap  = $('ach-tbl-wrap');
+  if(!articles.length) {
+    if(achEmpty) achEmpty.style.display = 'block';
+    if(achWrap)  achWrap.style.display  = 'none';
+    return;
+  }
+  if(achEmpty) achEmpty.style.display = 'none';
+  if(achWrap)  achWrap.style.display  = '';
+
   // Formatter local
   const fmt = v => v.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
 
@@ -3286,6 +3322,7 @@ async function renderAchats() {
   const totCells = totParMois.map(v=>`<td style="font-family:var(--fm);font-size:11px;font-weight:700;color:var(--ac);text-align:right;padding:4px 6px">${v>0?v.toFixed(2):''}</td>`).join('');
   const totRow = $('ach-tfoot');
   if(totRow) totRow.innerHTML = `<tr><td colspan="3" style="font-weight:700;font-size:12px;padding:4px 8px">TOTAL</td>${totCells}<td style="font-family:var(--fm);font-size:12px;font-weight:700;color:var(--rd);text-align:right;padding:4px 8px">${grandTotal>0?fmt(grandTotal):'—'}</td></tr>`;
+  _loadN1ACH();
 }
 
 // ════════════════════════════════════════════════════════
@@ -4247,8 +4284,53 @@ async function _loadN1MR() {
   } catch(e) { console.warn('[N-1 marge]', e.message); }
 }
 
-// ════════════════════════════════════════════════════════
-// FREEMIUM
+// ── Achats YTD ──
+async function _loadN1ACH() {
+  if(!UID) return;
+  try {
+    const d = await _getN1Data(); if(!d) return;
+    const { artMapN1, qtyN1, coutsN1 } = d;
+
+    // Vecteurs CA par mois pour déterminer les mois communs
+    const caParMoisN  = Array(12).fill(0);
+    const caParMoisN1 = Array(12).fill(0);
+    articles.forEach(a => { (qty[a.code]||[]).forEach((v,m) => { caParMoisN[m] += (v||0) * a.pv; }); });
+    Object.entries(qtyN1).forEach(([code,vals]) => {
+      const a = artMapN1[code]; if(!a) return;
+      vals.forEach((v,m) => { caParMoisN1[m] += (v||0) * a.prix_ht; });
+    });
+
+    const moisComm = _moisCommuns(caParMoisN, caParMoisN1);
+    if(!moisComm.length) {
+      ['ach-ytd-total','ach-ytd-marge'].forEach(id => { const el=$(id); if(el) el.innerHTML=''; });
+      return;
+    }
+
+    // Coûts d'achat totaux N et N-1 sur mois communs
+    let coutN=0, coutN1=0, margeN=0, margeN1=0;
+    articles.forEach(a => {
+      moisComm.forEach(m => {
+        const q = qty[a.code]?.[m] || 0;
+        const cout = _coutMois(a.code, m);
+        coutN  += q * cout;
+        margeN += q * (a.pv - cout);
+      });
+    });
+    Object.entries(qtyN1).forEach(([code,vals]) => {
+      const a = artMapN1[code]; if(!a) return;
+      moisComm.forEach(m => {
+        const q = vals[m] || 0;
+        const cout = _coutMoisN1(code, m, coutsN1);
+        coutN1  += q * cout;
+        margeN1 += q * (a.prix_ht - cout);
+      });
+    });
+
+    // invert=true : hausse des coûts = rouge
+    _ytdBadge('ach-ytd-total', coutN, coutN1, moisComm, false, true);
+    _ytdBadge('ach-ytd-marge', margeN, margeN1, moisComm, false, false);
+  } catch(e) { console.warn('[N-1 achats]', e.message); }
+}
 // ════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════
 // IMPORT / EXPORT CSV
@@ -5767,6 +5849,19 @@ function _scCalc(sc) {
 
 function renderScenarios() {
   const lbl = $('sc-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+
+  // Empty state si aucun article ou aucune vente
+  const caHT = articles.reduce((s,a) => s + (qty[a.code]||[]).reduce((x,v)=>x+(v||0),0)*a.pv, 0);
+  const scEmpty = $('sc-empty');
+  const scContent = $('sc-content');
+  if(!articles.length || caHT === 0) {
+    if(scEmpty) { scEmpty.style.display='block'; }
+    if(scContent) scContent.style.display='none';
+    return;
+  }
+  if(scEmpty) scEmpty.style.display='none';
+  if(scContent) scContent.style.display='';
+
   _sc = _scLoad();
 
   const reel = _scCalc(null);
@@ -6631,6 +6726,17 @@ function _trSaveParams(p) {
 
 function renderTresorerie() {
   const lbl = $('tr-annee-lbl'); if(lbl) lbl.textContent = ANNEE;
+
+  // Empty state si aucun article configuré
+  const trEmpty = $('tr-empty');
+  const trContent = $('tr-content');
+  if(!articles.length) {
+    if(trEmpty) trEmpty.style.display='block';
+    if(trContent) trContent.style.display='none';
+    return;
+  }
+  if(trEmpty) trEmpty.style.display='none';
+  if(trContent) trContent.style.display='';
   const MOIS_LONGS  = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   const MOIS_COURTS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
   const fmt  = v => (v<0?'−':'')+Math.abs(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
@@ -7469,6 +7575,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sidebar
   // Repositionnement dynamique des tooltips KPI
   document.addEventListener('mouseenter', e => {
+    if(!(e.target instanceof Element)) return;
     const help = e.target.closest('.kpi-help');
     if(!help) return;
     const tip = help.querySelector('.kpi-tooltip');
