@@ -6997,11 +6997,25 @@ async function changeAnnee(n) {
   qty = {};
   mts = {};
   // Détruire les instances Chart.js liées à l'ancienne année
-  [chartCALine, chartCAPie, chartCHLine, chartCHPie, chartDBMain, chartMRWaterfall, chartSCSens, chartPVMain, chartTR].forEach(c => { if(c) c.destroy(); });
+  [chartCALine, chartCAPie, chartCHLine, chartCHPie, chartDBMain, chartMRWaterfall, chartMREvol, chartSCSens, chartPVMain, chartTR].forEach(c => { if(c) c.destroy(); });
   chartCALine = null; chartCAPie = null;
   chartCHLine = null; chartCHPie = null;
   chartDBMain = null; chartMRWaterfall = null;
-  chartSCSens = null; chartPVMain = null; chartTR = null;
+  chartMREvol = null; chartSCSens = null; chartPVMain = null; chartTR = null;
+
+  // Vider les tableaux HTML des modules dynamiques pour éviter l'affichage des anciennes données
+  ['pv-tbody','pv-thead','tr-tbody','sc-kpis','sc-cmp-tbody','mr-tbody',
+   'db-top-arts','db-top-chs','db-alertes',
+   'ca-alertes','ch-alertes',
+   'tva-thead','tva-tbody','tva-alerts','tva-regime-bar','tva-sim-content',
+   'sc-articles-rows','sc-charges-rows','pv-art-grid',
+   'ach-tbody','ach-tfoot',
+   'smt-thead','smt-tbody',
+   'ca-thead','ca-tbody'].forEach(id => {
+    const el = $(id); if(el) el.innerHTML = '';
+  });
+  const pvFin = $('pv-financement'); if(pvFin) pvFin.innerHTML = '';
+  const trAlerts = $('tr-alerts'); if(trAlerts) trAlerts.innerHTML = '';
 
   // Skeleton sur le panneau actif
   const panneauActif = ['pnl-dashboard','pnl-ca','pnl-achats','pnl-charges','pnl-params','pnl-marge','pnl-scenarios','pnl-previsionnel','pnl-tva','pnl-tresorerie']
