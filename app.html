@@ -159,7 +159,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 /* ── SIDEBAR ── */
 .sb{width:var(--sw);background:var(--bgs);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:width var(--tr);overflow:hidden}
 .sb.col{width:var(--swc)}
-.main{margin-left:var(--sw);flex:1;padding:24px 28px 90px;min-height:100vh;transition:margin-left var(--tr)}
+.main{margin-left:var(--sw);flex:1;padding:24px 28px 90px;min-height:100vh;transition:margin-left var(--tr);position:relative}
 .sb.col~.main,.sb.col~.savebar{margin-left:var(--swc)}
 
 .sb-logo{padding:18px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;min-height:65px}
@@ -471,20 +471,10 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .pnl-enter {
   animation: panelFadeIn .25s cubic-bezier(.4,0,.2,1) forwards;
 }
-.pnl-loading{position:relative;pointer-events:none}
-.pnl-loading::after{
-  content:'';position:absolute;inset:0;
-  background:var(--bg);opacity:.6;z-index:10;border-radius:var(--r);
-}
-.pnl-loading::before{
-  content:'';position:absolute;
-  top:50%;left:50%;transform:translate(-50%,-50%);
-  width:28px;height:28px;z-index:11;
-  border:3px solid var(--bd);
-  border-top-color:var(--ac);
-  border-radius:50%;
-  animation:spin .7s linear infinite;
-}
+.pnl-loading{pointer-events:none;opacity:.6}
+#lp-loader{position:absolute;inset:0;z-index:200;pointer-events:none;display:flex;align-items:center;justify-content:center;background:transparent}
+#lp-loader svg{width:52px;height:52px;animation:compassSpin 1.2s cubic-bezier(.4,0,.2,1) infinite;filter:drop-shadow(0 2px 8px rgba(59,126,255,.25))}
+@keyframes compassSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .sk-block{background:var(--bgs);border-radius:var(--rs);animation:shimmer 1.4s ease-in-out infinite}
 @keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
@@ -2415,9 +2405,22 @@ let _anneeMts = null; // année des données mts en mémoire
 // ── Helpers skeleton ──
 function showLoading(panelId) {
   const e = $(panelId); if(e) e.classList.add('pnl-loading');
+  const main = document.querySelector('.main');
+  if(!main || $('lp-loader')) return;
+  const loader = document.createElement('div');
+  loader.id = 'lp-loader';
+  loader.innerHTML = `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="24" cy="24" r="21" fill="none" stroke="var(--bd)" stroke-width="2"/>
+    <circle cx="24" cy="24" r="21" fill="none" stroke="var(--ac)" stroke-width="2" stroke-dasharray="33 99" stroke-linecap="round"/>
+    <polygon points="24,8 26.5,20 24,24 21.5,20" fill="var(--ac)"/>
+    <polygon points="24,40 26.5,28 24,24 21.5,28" fill="#ff6b6b"/>
+    <circle cx="24" cy="24" r="2.5" fill="var(--t2)"/>
+  </svg>`;
+  main.appendChild(loader);
 }
 function hideLoading(panelId) {
   const e = $(panelId); if(e) e.classList.remove('pnl-loading');
+  const loader = $('lp-loader'); if(loader) loader.remove();
 }
 
 // ── Système de toasts ──
