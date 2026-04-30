@@ -3215,13 +3215,24 @@ async function loadAchats() {
   // Initialiser à 0 pour tous les articles
   articles.forEach(a => { achats[a.code] = Array(12).fill(0); });
 
-  const { data } = await DB.from('saisies_achats')
-    .select('article_code,mois,cout_unitaire')
-    .eq('user_id', UID).eq('annee', ANNEE);
-
-  (data || []).forEach(r => {
-    if(achats[r.article_code]) achats[r.article_code][r.mois-1] = r.cout_unitaire || 0;
-  });
+  try {
+    const { data, error } = await sbq(
+      DB.from('saisies_achats')
+        .select('article_code,mois,cout_unitaire')
+        .eq('user_id', UID).eq('annee', ANNEE)
+    );
+    if(error) {
+      console.warn('[achats]', error.message);
+      toast('warn', 'Achats non chargés', 'Les coûts d\'achat n\'ont pas pu être récupérés.');
+    } else {
+      (data || []).forEach(r => {
+        if(achats[r.article_code]) achats[r.article_code][r.mois-1] = r.cout_unitaire || 0;
+      });
+    }
+  } catch(e) {
+    console.warn('[achats timeout]', e.message);
+    toast('warn', 'Chargement lent', 'Les coûts d\'achat mettent du temps à charger.');
+  }
 
   _anneeAchats = ANNEE;
 }
@@ -3254,8 +3265,6 @@ async function upsertAchat(code, moisIdx, cout) {
 }
 
 // Rendu du module Achats
-let _achatsLoaded = false;
-
 async function renderAchats() {
   if(!UID) return;
   await loadAchats();
@@ -4651,8 +4660,10 @@ async function printReport() {
   if(_anneeCA !== ANNEE) await loadCA();
   if(_anneeMts !== ANNEE) await _loadMtsOnly();
 
-  // 3. Afficher TEMPORAIREMENT tous les panels pour que les canvas soient visibles
-  const allPanels = ['pnl-dashboard','pnl-ca','pnl-achats','pnl-charges','pnl-marge','pnl-previsionnel','pnl-tva','pnl-tresorerie'];
+  // 3. Afficher TEMPORAIREMENT les panels accessibles pour que les canvas soient visibles
+  const freePanels = ['pnl-dashboard','pnl-ca','pnl-achats','pnl-charges'];
+  const proPanels  = ['pnl-marge','pnl-previsionnel','pnl-tva','pnl-tresorerie'];
+  const allPanels  = isPro() ? [...freePanels, ...proPanels] : freePanels;
   const panelPrevDisplay = {};
   allPanels.forEach(id => {
     const el = $(id);
@@ -7063,6 +7074,7 @@ async function changeAnnee(n) {
   });
   const pvFin = $('pv-financement'); if(pvFin) pvFin.innerHTML = '';
   const trAlerts = $('tr-alerts'); if(trAlerts) trAlerts.innerHTML = '';
+  const pvConv = $('pv-conv-msg'); if(pvConv) pvConv.style.display = 'none';
 
   // Skeleton sur le panneau actif
   const panneauActif = ['pnl-dashboard','pnl-ca','pnl-achats','pnl-charges','pnl-params','pnl-marge','pnl-scenarios','pnl-previsionnel','pnl-tva','pnl-tresorerie']
@@ -7185,6 +7197,7 @@ async function doLogout() {
   articles = []; charges = []; qty = {}; mts = {};
   achats = {}; _anneeAchats = null;
   _n1Cache = null; _n1CacheAnnee = null;
+  _capHistory = []; _capOpen = false; _capTyping = false;
   paramsLoaded = false; paramsModifie = false;
   _anneeCA = null; _anneeMts = null;
   _sc = null; _scActif = 'reel';
@@ -7704,15 +7717,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   // Wizard — Étape 2
   $('onb-next-2').addEventListener('click', async () => {
+    const btn = $('onb-next-2'); if(btn) btn.disabled = true;
     _onbArticle = await onbSaveStep2();
     if(_onbArticle) {
-      // Pré-remplir l'étape 3 avec le nom et le prix de l'article
       const nomEl = $('onb-achat-art-nom'); if(nomEl) nomEl.textContent = _onbArticle.nom;
       const pvEl  = $('onb-achat-art-pv');  if(pvEl)  pvEl.textContent  = (_onbArticle.pv||0).toFixed(2) + ' € HT';
       onbShowStep(3);
     } else {
-      onbShowStep(3); // nom vide = on passe quand même
+      onbShowStep(3);
     }
+    if(btn) btn.disabled = false;
   });
   $('onb-skip-2').addEventListener('click', () => {
     _onbSkipped = true;
@@ -7973,6 +7987,7 @@ document.addEventListener('DOMContentLoaded', () => {
       articles = []; charges = []; qty = {}; mts = {};
       achats = {}; _anneeAchats = null;
       _n1Cache = null; _n1CacheAnnee = null;
+      _capHistory = []; _capOpen = false; _capTyping = false;
       paramsLoaded = false; paramsModifie = false;
       _anneeCA = null; _anneeMts = null;
       _sc = null; _scActif = 'reel'; _isPro = false; _trialEndsAt = null;
