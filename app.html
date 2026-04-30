@@ -4798,15 +4798,23 @@ let _trialEndsAt = null; // Date de fin du trial — null si pas de trial actif
 async function loadProStatus() {
   if(!UID) return;
   try {
-    // Cherche is_pro, trial_ends_at et first_login_at sur n'importe quelle année
+    // Cherche is_pro sur TOUTES les années — Pro si au moins une ligne a is_pro = true
+    const { data: proData } = await DB.from('parametres')
+      .select('is_pro')
+      .eq('user_id', UID)
+      .eq('is_pro', true)
+      .limit(1)
+      .maybeSingle();
+
+    _isPro = !!(proData?.is_pro);
+
+    // Cherche trial_ends_at et first_login_at sur la première ligne disponible
     const { data } = await DB.from('parametres')
-      .select('is_pro, trial_ends_at, first_login_at')
+      .select('trial_ends_at, first_login_at')
       .eq('user_id', UID)
       .order('annee', { ascending: true })
       .limit(1)
       .maybeSingle();
-
-    _isPro = !!(data?.is_pro);
 
     // Gestion du trial
     if(!_isPro) {
