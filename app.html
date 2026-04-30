@@ -7183,6 +7183,8 @@ async function doLogout() {
   // Reset complet de l'état — évite que le prochain user voie les données du précédent
   UID = null;
   articles = []; charges = []; qty = {}; mts = {};
+  achats = {}; _anneeAchats = null;
+  _n1Cache = null; _n1CacheAnnee = null;
   paramsLoaded = false; paramsModifie = false;
   _anneeCA = null; _anneeMts = null;
   _sc = null; _scActif = 'reel';
@@ -7969,6 +7971,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Reset complet de l'état — garantit qu'aucune donnée du compte précédent ne persiste
       UID = null;
       articles = []; charges = []; qty = {}; mts = {};
+      achats = {}; _anneeAchats = null;
+      _n1Cache = null; _n1CacheAnnee = null;
       paramsLoaded = false; paramsModifie = false;
       _anneeCA = null; _anneeMts = null;
       _sc = null; _scActif = 'reel'; _isPro = false; _trialEndsAt = null;
