@@ -7241,8 +7241,26 @@ async function startApp(user) {
     }
   }, 5 * 60 * 1000);
 
-  // Routing : Wizard si premier accès, Dashboard si configuré, Paramètres sinon
-  if(!P.nomEnt || P.nomEnt.trim() === '') {
+  // Routing : Wizard si vrai premier utilisateur (jamais configuré sur aucune année)
+  // On vérifie toutes les années — pas seulement l'année active
+  let estNouvelUtilisateur = true;
+  try {
+    const { data: anyConfig } = await sbq(
+      DB.from('parametres')
+        .select('nom_entreprise')
+        .eq('user_id', UID)
+        .not('nom_entreprise', 'is', null)
+        .neq('nom_entreprise', '')
+        .limit(1),
+      8000
+    );
+    estNouvelUtilisateur = !anyConfig || anyConfig.length === 0;
+  } catch(e) {
+    // Fallback sur le comportement actuel si la requête échoue
+    estNouvelUtilisateur = !P.nomEnt || P.nomEnt.trim() === '';
+  }
+
+  if(estNouvelUtilisateur) {
     showPanel('pnl-params','nav-params');
     showWizard();
   } else {
