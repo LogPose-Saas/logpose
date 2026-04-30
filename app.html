@@ -780,6 +780,18 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   /* ── Trésorerie ── */
   .tr-params{grid-template-columns:1fr 1fr!important}
 
+  /* ── Modules Pro — grilles ── */
+  #pnl-marge .kgrid{grid-template-columns:repeat(2,1fr)!important}
+  .sc-kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .sc-grid{grid-template-columns:1fr}
+  .pv-hyp-grid{grid-template-columns:1fr}
+  .tva-sim-grid{grid-template-columns:1fr!important}
+
+  /* ── Modules Pro — hauteurs graphiques ── */
+  #pnl-marge [style*="height:260px"]{height:200px!important}
+  #pnl-marge [style*="height:300px"]{height:220px!important}
+  #pnl-previsionnel [style*="height:260px"]{height:200px!important}
+
   /* ── Cap mobile ── */
   #cap-btn{bottom:72px;right:12px;padding:10px 14px;border-radius:50px}
   #cap-btn .cap-lbl{display:none}
@@ -794,6 +806,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   .g4 .card,.g3 .card{padding:14px}
   .tr-params{grid-template-columns:1fr!important}
   .ctrlgrid{grid-template-columns:1fr}
+
+  /* ── Modules Pro — 520px ── */
+  #pnl-marge .kgrid{grid-template-columns:1fr!important}
+  .sc-kpi-grid{grid-template-columns:1fr}
+  .pv-hyp-grid{grid-template-columns:1fr}
 }
 
 /* ════════════════════════════════════════════════════════
@@ -6631,7 +6648,7 @@ function renderTVA() {
       const bilan = Math.round((totalDeductible - totalCollectee)*100)/100;
       const fav   = bilan >= 0;
       simContent.innerHTML = `
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+        <div class="tva-sim-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
           <div style="text-align:center;padding:14px;background:var(--bgs);border-radius:var(--rs);border:1px solid var(--bd)">
             <div style="font-size:9.5px;font-weight:700;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:6px">TVA récupérable sur achats</div>
             <div style="font-size:20px;font-weight:800;color:var(--gr)">+${fmt(totalDeductible)}</div>
