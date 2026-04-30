@@ -3265,7 +3265,18 @@ async function renderAchats() {
   const achWrap  = $('ach-tbl-wrap');
   if(achEmpty) achEmpty.style.display = !articles.length ? 'block' : 'none';
   if(achWrap)  achWrap.style.display  = !articles.length ? 'none'  : '';
-  if(!articles.length) return;
+  if(!articles.length) {
+    // Réinitialiser les KPIs pour éviter l'affichage des données de l'ancienne année
+    const _reset = (id, v) => { const e=$(id); if(e) e.textContent=v; };
+    _reset('ach-kpi-total',    '—');
+    _reset('ach-kpi-mois',     '—');
+    _reset('ach-kpi-mois-lbl', '—');
+    _reset('ach-kpi-marge',    '—');
+    _reset('ach-kpi-marge-lbl','CA HT − Coûts achat');
+    const yt1=$('ach-ytd-total'); if(yt1) yt1.innerHTML='';
+    const yt2=$('ach-ytd-marge'); if(yt2) yt2.innerHTML='';
+    return;
+  }
 
   // Formatter local
   const fmt = v => v.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
@@ -6762,7 +6773,18 @@ function renderTresorerie() {
   const trEmpty = $('tr-empty');
   const caHT = articles.reduce((s,a)=>s+(qty[a.code]||[]).reduce((x,v)=>x+(v||0),0)*a.pv,0);
   if(trEmpty) trEmpty.style.display = !articles.length ? 'block' : 'none';
-  if(!articles.length) return;
+  if(!articles.length) {
+    // Réinitialiser les KPIs pour éviter l'affichage des données de l'ancienne année
+    const _reset = (id, v) => { const e=$(id); if(e) e.textContent=v; };
+    _reset('tr-kpi-fin',     '0 €');
+    _reset('tr-kpi-fin-sub', 'Au 31 décembre');
+    _reset('tr-kpi-min',     '0 €');
+    _reset('tr-kpi-min-sub', 'Point bas de l\'année');
+    _reset('tr-kpi-enc',     '0 €');
+    _reset('tr-kpi-dec',     '0 €');
+    const ta=$('tr-alerts'); if(ta) ta.innerHTML='';
+    return;
+  }
 
   // Charger paramètres
   const trP = _trLoadParams();
