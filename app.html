@@ -1194,7 +1194,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   </div>
 
   <!-- Modales juridiques -->
-  <div id="modal-juridique" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px">
+  <div id="modal-juridique" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px">
     <div style="background:var(--bgc);border-radius:12px;border:1px solid var(--bd);max-width:640px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:var(--sh)">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--bd)">
         <div style="font-size:15px;font-weight:700;color:var(--t1)" id="modal-juridique-titre">Titre</div>
@@ -3255,11 +3255,17 @@ async function upsertAchat(code, moisIdx, cout) {
   achats[code][moisIdx] = cout;
 
   // Upsert en base
-  await DB.from('saisies_achats').upsert({
+  const {error} = await DB.from('saisies_achats').upsert({
     user_id: UID, article_code: code, annee: ANNEE,
     mois: moisIdx + 1, cout_unitaire: cout
   }, { onConflict: 'user_id,article_code,annee,mois' });
 
+  if(error) {
+    console.warn('[upsertAchat]', error.message);
+    toast('err', 'Coût non sauvegardé', 'Le coût d\'achat n\'a pas été enregistré. Vérifiez votre connexion.');
+  } else {
+    setSaved();
+  }
   // Réplication forward : effacer les mois suivants qui auraient l'ancienne valeur
   // (on laisse la logique _coutMois gérer la propagation — pas besoin d'écrire tous les mois)
 }
@@ -3596,7 +3602,6 @@ function updateCHKpis() {
   const eAl = $('ch-alertes'); if(!eAl) return;
   const alertes = [];
   const nbFix = charges.filter(c=>c.type==='Fixe').length;
-  const nbVar = charges.length - nbFix;
   if(charges.length > 0 && nbFix / charges.length > 0.8)
     alertes.push({cls:'aba', ico:'⚠️', titre:'Structure de charges rigide', desc:`${Math.round(nbFix/charges.length*100)}% de vos charges sont fixes. En cas de baisse d'activité, vos coûts restent élevés.`});
   if(ratio !== null && ratio > 80)
@@ -4490,7 +4495,7 @@ async function importArticlesCSV(file) {
 
   // Recharger les articles
   await loadArticles();
-  renderParams();
+  renderArticles();
   toast('ok', 'Import terminé', `${created} article(s) créé(s), ${updated} mis à jour${errors ? ', '+errors+' erreur(s)' : ''}.`, 5000);
 }
 
@@ -4559,7 +4564,7 @@ async function importChargesCSV(file) {
   }
 
   await loadCharges();
-  renderParams();
+  renderCharges();
   toast('ok', 'Import terminé', `${created} charge(s) créée(s), ${updated} mise(s) à jour${errors ? ', '+errors+' erreur(s)' : ''}.`, 5000);
 }
 
@@ -4659,6 +4664,7 @@ async function printReport() {
   // 2. Charger toutes les données
   if(_anneeCA !== ANNEE) await loadCA();
   if(_anneeMts !== ANNEE) await _loadMtsOnly();
+  if(_anneeAchats !== ANNEE) await loadAchats();
 
   // 3. Afficher TEMPORAIREMENT les panels accessibles pour que les canvas soient visibles
   const freePanels = ['pnl-dashboard','pnl-ca','pnl-achats','pnl-charges'];
@@ -4673,6 +4679,7 @@ async function printReport() {
   // 4. Rendre tous les modules avec les panels visibles
   updateCAKpis();
   updateCACharts();
+  await renderAchats();
   renderChargesData();
   updateCHCharts();
   if(isPro()) {
@@ -4799,7 +4806,7 @@ function achCalcInit() {
 const LEMON_URL = 'https://logpose.lemonsqueezy.com/checkout/buy/246ce9d6-683a-4db6-912f-a95437b7d1da';
 const FREE_MAX_ARTICLES = 3;
 const FREE_MAX_CHARGES  = 3;
-const FREE_MODULES = ['pnl-dashboard','pnl-ca','pnl-charges','pnl-params'];
+const FREE_MODULES = ['pnl-dashboard','pnl-ca','pnl-achats','pnl-charges','pnl-params'];
 const PRO_NAVS     = ['nav-marge','nav-scenarios','nav-previsionnel','nav-tva','nav-tresorerie'];
 
 // Cache Pro en mémoire — chargé au login, mis à jour si nécessaire
@@ -6406,12 +6413,18 @@ function renderPrevisionnel() {
     const assujetti = _tvaIsAssujetti();
     const tvaMois = _tvaCalcMois();
     const tvaNette = assujetti ? Math.round(tvaMois.reduce((s,m)=>s+Math.max(m.net,0),0)*100)/100 : 0;
-    const chTTC = Math.round((chF+chV)*100)/100 + tvaMois.reduce((s,m)=>s+m.deductible,0) - tvaMois.reduce((s,m)=>{
-      // soustraire la TVA déductible achats pour garder uniquement charges
-      let dAch=0; articles.forEach(a=>{const q=(qty[a.code]||[])[m.m]||0;dAch+=q*_coutMois(a.code,m.m)*(a.tva||0.2);}); return s+dAch;
-    },0);
+    // Taux TVA moyen pondéré réel — cohérent avec _pvSynth
+    const caParArt = articles.map(a => (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0) * a.pv);
+    const caTotArt = caParArt.reduce((s,v)=>s+v, 0);
+    const txTVAMoyArt = caTotArt > 0
+      ? articles.reduce((s,a,i) => s + (a.tva||0.2) * caParArt[i], 0) / caTotArt
+      : articles.length > 0 ? articles.reduce((s,a)=>s+(a.tva||0.2),0)/articles.length : 0.2;
+    const chTotHT = chF + chV;
+    const txTVAMoyCh = charges.length > 0 && chTotHT > 0
+      ? charges.reduce((s,c) => { const k=String(c.code); const ht=(mts[k]||[]).reduce((x,v)=>x+(v||0),0)/(1+(c.tva||0)); return s+(c.tva||0)*ht; }, 0) / chTotHT
+      : 0.2;
     const fluxTreso = assujetti
-      ? Math.round((ca*(1.2) - cout*(1.2) - (chF+chV)*(1.2) - tvaNette)*100)/100
+      ? Math.round((ca*(1+txTVAMoyArt) - cout*(1+txTVAMoyArt) - chTotHT*(1+txTVAMoyCh) - tvaNette)*100)/100
       : Math.round(res*100)/100;
     return {ca:Math.round(ca*100)/100,cout:Math.round(cout*100)/100,margeB,chFix:Math.round(chF*100)/100,chVar:Math.round(chV*100)/100,res,txM,seuil,tvaNette,fluxTreso,assujetti};
   })();
@@ -6833,11 +6846,11 @@ function renderTresorerie() {
     });
 
     // Décaissement achats : coût achat (HT ou TTC)
-    let achats = 0;
+    let achatsCout = 0;
     articles.forEach(a => {
       const q = (qty[a.code]||[])[m] || 0;
       const coutHT = q * _coutMois(a.code,m);
-      achats += inclTVA ? coutHT * (1 + (a.tva||0.2)) : coutHT;
+      achatsCout += inclTVA ? coutHT * (1 + (a.tva||0.2)) : coutHT;
     });
 
     // Décaissement charges : sommer charge par charge en HT ou TTC selon le mode
@@ -6857,7 +6870,7 @@ function renderTresorerie() {
     // TVA nette à reverser — seulement si assujetti ET flux en TTC
     const tvaNette = (assujetti && inclTVA) ? Math.max(moisData[m].net, 0) : 0;
 
-    return { enc: Math.round(enc*100)/100, achats: Math.round(achats*100)/100, charges: Math.round(chTTC*100)/100, tva: Math.round(tvaNette*100)/100 };
+    return { enc: Math.round(enc*100)/100, achats: Math.round(achatsCout*100)/100, charges: Math.round(chTTC*100)/100, tva: Math.round(tvaNette*100)/100 };
   });
 
   // ── Appliquer les décalages ──
@@ -7192,6 +7205,10 @@ function showOk(msg)  { $('auth-ok').textContent=msg;  $('auth-ok').style.displa
 async function doLogout() {
   clearTimeout(_saveTimer);
   if(window._trialCheckInterval) { clearInterval(window._trialCheckInterval); window._trialCheckInterval = null; }
+  // Détruire les instances Chart.js pour éviter les fuites mémoire sur multi-sessions
+  [chartCALine, chartCAPie, chartCHLine, chartCHPie, chartDBMain, chartMRWaterfall, chartMREvol, chartSCSens, chartPVMain, chartTR].forEach(c => { try { if(c) c.destroy(); } catch(e) {} });
+  chartCALine = null; chartCAPie = null; chartCHLine = null; chartCHPie = null;
+  chartDBMain = null; chartMRWaterfall = null; chartMREvol = null; chartSCSens = null; chartPVMain = null; chartTR = null;
   // Reset complet de l'état — évite que le prochain user voie les données du précédent
   UID = null;
   articles = []; charges = []; qty = {}; mts = {};
@@ -7200,7 +7217,8 @@ async function doLogout() {
   _capHistory = []; _capOpen = false; _capTyping = false;
   paramsLoaded = false; paramsModifie = false;
   _anneeCA = null; _anneeMts = null;
-  _sc = null; _scActif = 'reel';
+  _sc = null; _scActif = 'reel'; _isPro = false; _trialEndsAt = null;
+  _onbStep = 1; _onbSkipped = false; _onbArticle = null;
   P = { nomEnt:'', secteur:'', regimeTVA:'',
     regimeFisc:'', devise:'€ Euro',
     cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
@@ -7897,6 +7915,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Renommer scénario — double-clic inline sur l'onglet
   function _scStartRename(scId) {
     if(scId === 'reel') return;
+    if(!_sc) return; // guard : _sc peut être null si renderScenarios n'a pas encore été appelé
     const tabEl = $('sc-tab-' + scId);
     if(!tabEl || tabEl.querySelector('.sc-tab-input')) return; // déjà en édition
     const sc = scId === 'a' ? _sc.a : _sc.b;
@@ -7982,6 +8001,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await startApp(session.user);
     } else if(event==='SIGNED_OUT') {
       started = false;
+      if(window._trialCheckInterval) { clearInterval(window._trialCheckInterval); window._trialCheckInterval = null; }
       // Reset complet de l'état — garantit qu'aucune donnée du compte précédent ne persiste
       UID = null;
       articles = []; charges = []; qty = {}; mts = {};
@@ -7991,6 +8011,7 @@ document.addEventListener('DOMContentLoaded', () => {
       paramsLoaded = false; paramsModifie = false;
       _anneeCA = null; _anneeMts = null;
       _sc = null; _scActif = 'reel'; _isPro = false; _trialEndsAt = null;
+      _onbStep = 1; _onbSkipped = false; _onbArticle = null;
       P = { nomEnt:'', secteur:'', regimeTVA:'',
         regimeFisc:'', devise:'€ Euro',
         cle:'qte', obj:0, tresoInit:0, moisDeb:1, moisFin:12 };
