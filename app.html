@@ -5189,7 +5189,7 @@ function renderChecklist() {
   // Vérifie si au moins un coût d'achat a été saisi
   const hasAchats = articles.length === 0 || articles.some(a => {
     const mois = achats[a.code] || [];
-    return mois.some(v => v >= 0 && v !== undefined);
+    return mois.some(v => v > 0);
   });
 
   const etats = {
