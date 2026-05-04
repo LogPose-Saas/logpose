@@ -2576,9 +2576,10 @@ async function saveParams() {
         if(P.regimeFisc && P.regimeFisc.trim()) toUpdate.regime_fiscal = P.regimeFisc;
 
         if(Object.keys(toUpdate).length > 0) {
-          await DB.from('parametres').upsert({
+          const {error: replErr} = await DB.from('parametres').upsert({
             user_id: UID, annee: an, ...toUpdate
           }, {onConflict:'user_id,annee'});
+          if(replErr) console.warn('[replication N+1/N+2]', replErr.message);
         }
       }
     }
@@ -5159,10 +5160,11 @@ async function onbSaveStep3(articleCode) {
   const moisIdx = new Date().getMonth();
   if(!achats[articleCode]) achats[articleCode] = [];
   achats[articleCode][moisIdx] = cout;
-  await DB.from('saisies_achats').upsert({
+  const {error} = await DB.from('saisies_achats').upsert({
     user_id: UID, article_code: articleCode, annee: ANNEE,
     mois: moisIdx + 1, cout_unitaire: cout
   }, { onConflict: 'user_id,article_code,annee,mois' });
+  if(error) toast('err', 'Coût non sauvegardé', 'Le coût d\'achat n\'a pas été enregistré. Vérifiez votre connexion.');
 }
 
 async function onbSaveStep4() {
