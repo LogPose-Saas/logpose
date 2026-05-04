@@ -2756,6 +2756,7 @@ function addCh() {
     tva:parseFloat($('pc-tva').value)||0.2, type:$('pc-type').value||'Variable', actif:true,
   };
   charges.push(c);
+  mts[String(c.code)] = Array(12).fill(0);
   ['pc-nom','pc-cat'].forEach(id => $(id).value='');
   $('p-ch-add').classList.remove('open');
   upsertCharge(c);
