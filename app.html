@@ -1377,8 +1377,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="db-chk-item" id="chk-achats" onclick="showPanel('pnl-achats','nav-achats')">
             <div class="db-chk-ico">✓</div>
             <div class="db-chk-label">
-              <div>🛒 Renseigner vos coûts d'achat</div>
-              <div class="db-chk-why">Saisissez 0 si vous n'en avez pas (consultant, SaaS…)</div>
+              <div>🛒 Saisir vos coûts d'achat</div>
+              <div class="db-chk-why">Pour calculer votre vraie marge</div>
             </div>
             <div class="db-chk-action">→</div>
           </div>
@@ -3214,7 +3214,7 @@ async function loadAchats() {
   if(_anneeAchats === ANNEE && Object.keys(achats).length > 0) return;
 
   // Initialiser à 0 pour tous les articles
-  articles.forEach(a => { achats[a.code] = Array(12).fill(null); });
+  articles.forEach(a => { achats[a.code] = Array(12).fill(0); });
 
   try {
     const { data, error } = await sbq(
@@ -3227,7 +3227,7 @@ async function loadAchats() {
       toast('warn', 'Achats non chargés', 'Les coûts d\'achat n\'ont pas pu être récupérés.');
     } else {
       (data || []).forEach(r => {
-        if(achats[r.article_code]) achats[r.article_code][r.mois-1] = r.cout_unitaire ?? null;
+        if(achats[r.article_code]) achats[r.article_code][r.mois-1] = r.cout_unitaire || 0;
       });
     }
   } catch(e) {
@@ -5187,9 +5187,10 @@ function renderChecklist() {
     s + (qty[a.code]||[]).reduce((x,v)=>x+(v||0),0) * a.pv, 0);
 
   // Vérifie si au moins un coût d'achat a été saisi
-  const hasAchats = articles.length === 0 || articles.some(a =>
-    (achats[a.code] || []).some(v => v !== null)
-  );
+  const hasAchats = articles.some(a => {
+    const mois = achats[a.code] || [];
+    return mois.some(v => v > 0);
+  });
 
   const etats = {
     entreprise: !!(P.nomEnt && P.nomEnt.trim()),
