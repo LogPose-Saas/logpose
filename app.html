@@ -1377,8 +1377,8 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
           <div class="db-chk-item" id="chk-achats" onclick="showPanel('pnl-achats','nav-achats')">
             <div class="db-chk-ico">✓</div>
             <div class="db-chk-label">
-              <div>🛒 Saisir vos coûts d'achat</div>
-              <div class="db-chk-why">Pour calculer votre vraie marge</div>
+              <div>🛒 Renseigner vos coûts d'achat</div>
+              <div class="db-chk-why">Saisissez 0 si vous n'en avez pas (consultant, SaaS…)</div>
             </div>
             <div class="db-chk-action">→</div>
           </div>
@@ -5187,9 +5187,9 @@ function renderChecklist() {
     s + (qty[a.code]||[]).reduce((x,v)=>x+(v||0),0) * a.pv, 0);
 
   // Vérifie si au moins un coût d'achat a été saisi
-  const hasAchats = articles.some(a => {
+  const hasAchats = articles.length === 0 || articles.some(a => {
     const mois = achats[a.code] || [];
-    return mois.some(v => v > 0);
+    return mois.some(v => v >= 0 && v !== undefined);
   });
 
   const etats = {
