@@ -5514,7 +5514,7 @@ function renderMarge() {
   }
 
   // ── Tableau par article ──
-  const artAvecCA = articles.filter(a =>
+ const artAvecCA = articles.filter(a =>
     (qty[a.code]||[]).reduce((s,v)=>s+(v||0),0) > 0
   );
 
@@ -5523,6 +5523,7 @@ function renderMarge() {
   if(!artAvecCA.length) {
     if(mrEmpty) mrEmpty.style.display = 'block';
     if(mrWrap)  mrWrap.style.display  = 'none';
+    if(chartMRWaterfall) { chartMRWaterfall.destroy(); chartMRWaterfall = null; }
     return;
   }
   if(mrEmpty) mrEmpty.style.display = 'none';
