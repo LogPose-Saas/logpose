@@ -3214,7 +3214,7 @@ async function loadAchats() {
   if(_anneeAchats === ANNEE && Object.keys(achats).length > 0) return;
 
   // Initialiser à 0 pour tous les articles
-  articles.forEach(a => { achats[a.code] = Array(12).fill(0); });
+  articles.forEach(a => { achats[a.code] = Array(12).fill(null); });
 
   try {
     const { data, error } = await sbq(
@@ -3343,7 +3343,7 @@ async function renderAchats() {
 
   tbody.innerHTML = articles.map(a => {
     const cellules = Array.from({length:12}, (_,m) => {
-      const v = achats[a.code]?.[m] || 0;
+      const v = achats[a.code]?.[m] ?? 0;
       const inherited = v === 0 && _coutMois(a.code, m) > 0;
       return `<td style="padding:2px">
         <input class="sinp" type="number" min="0" step="0.01"
@@ -5187,10 +5187,9 @@ function renderChecklist() {
     s + (qty[a.code]||[]).reduce((x,v)=>x+(v||0),0) * a.pv, 0);
 
   // Vérifie si au moins un coût d'achat a été saisi
-  const hasAchats = articles.some(a => {
-    const mois = achats[a.code] || [];
-    return mois.some(v => v > 0);
-  });
+  const hasAchats = articles.length === 0 || articles.some(a =>
+    (achats[a.code] || []).some(v => v !== null)
+  );
 
   const etats = {
     entreprise: !!(P.nomEnt && P.nomEnt.trim()),
