@@ -37,7 +37,6 @@
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "LogPose",
-  "alternateName": "LogPose Financial OS",
   "description": "Tableau de bord financier tout-en-un pour TPE, auto-entrepreneurs et indépendants francophones. Pilotez votre CA, charges, marge, TVA, trésorerie et prévisionnel en temps réel.",
   "url": "https://logposefr.com",
   "applicationCategory": "BusinessApplication",
@@ -51,7 +50,7 @@
       "name": "Plan Gratuit",
       "price": "0",
       "priceCurrency": "EUR",
-      "description": "Dashboard, CA (3 articles), Charges (3 charges), Paramètres, Multi-années"
+      "description": "Dashboard, CA (jusqu'à 3 articles), Charges (jusqu'à 3 charges), Paramètres, Multi-années"
     },
     {
       "@type": "Offer",
@@ -327,6 +326,8 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
   .pricing-grid{grid-template-columns:1fr}
   .footer-top{flex-direction:column}
   .footer-bottom{flex-direction:column;text-align:center}
+  .cap-block{grid-template-columns:1fr !important}
+  .cap-block .cap-cta{display:none}
 }
 @media(max-width:480px){
   .features-grid{grid-template-columns:1fr}
@@ -348,7 +349,7 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
     </div>
     <div class="nav-brand-wrap">
       <span class="nav-brand">LogPose</span>
-      <span class="nav-sub">Financial OS</span>
+      <span class="nav-sub">Pilotage financier</span>
     </div>
   </a>
   <div class="nav-links">
@@ -368,9 +369,9 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
 <section class="hero">
   <div class="hero-badge"><span class="hero-badge-dot"></span>🎁 Essai Pro 14 jours · Aucune carte bancaire</div>
 
-  <h1>Le tableau de bord financier des<br>indépendants qui <span>pilotent vraiment</span></h1>
+  <h1>Enfin savoir où vous en êtes,<br><span>sans être comptable</span></h1>
 
-  <p class="hero-sub">CA, charges, marge, TVA, trésorerie et prévisionnel — tout en un seul tableau de bord. Essai Pro complet gratuit pendant 14 jours, sans carte bancaire.</p>
+  <p class="hero-sub">CA, charges, marge, TVA, trésorerie — tout est calculé automatiquement. Vous saisissez vos chiffres en quelques minutes par mois. LogPose fait le reste.</p>
 
   <div class="hero-ctas">
     <a class="btn btn-primary btn-lg" href="/app">
@@ -382,17 +383,10 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
 
   <p class="hero-note">14 jours d'essai Pro complet · Aucune carte bancaire · Données sécurisées</p>
 
-  <!-- Preuve sociale -->
+  <!-- Signal de lancement -->
   <div class="social-proof">
-    <div class="avatars">
-      <div class="avatar" style="background:#3b7eff">S</div>
-      <div class="avatar" style="background:#0ea572">M</div>
-      <div class="avatar" style="background:#9b87f5">A</div>
-      <div class="avatar" style="background:#f59e0b">L</div>
-      <div class="avatar" style="background:#f43f5e">R</div>
-    </div>
-    <div>
-      <div class="social-text">🚀 <strong>Premiers indépendants</strong> déjà en train de piloter leur activité avec LogPose</div>
+    <div class="social-text" style="font-size:12px;color:var(--t3);font-family:'JetBrains Mono',monospace;letter-spacing:.02em">
+      🚀 Produit en accès anticipé · <strong style="color:var(--t2)">Vos retours façonnent LogPose</strong>
     </div>
   </div>
 
@@ -418,7 +412,7 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
       <!-- logo sidebar -->
       <rect x="12" y="60" width="24" height="24" rx="6" fill="var(--ac)"/>
       <text x="42" y="74" font-family="Inter,sans-serif" font-size="12" font-weight="800" fill="var(--t1)">LogPose</text>
-      <text x="42" y="84" font-family="JetBrains Mono,monospace" font-size="7" fill="var(--t3)" letter-spacing="1">FINANCIAL OS</text>
+      <text x="42" y="84" font-family="JetBrains Mono,monospace" font-size="7" fill="var(--t3)" letter-spacing="1">PILOTAGE FINANCIER</text>
       <line x1="12" y1="94" x2="158" y2="94" stroke="var(--bd)" stroke-width="1"/>
       <!-- année selector -->
       <rect x="12" y="100" width="146" height="24" rx="6" fill="var(--bgc)" stroke="var(--bd)" stroke-width="1"/>
@@ -656,7 +650,30 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
       <div class="feature-card" style="--color:#22d3c8;--icon-bg:rgba(34,211,200,.1)"><div class="feature-icon">🔭</div><div class="feature-label">Prévisionnel</div><div class="feature-title">Projection sur 36 mois</div><div class="feature-desc">3 hypothèses (pessimiste/réaliste/optimiste), saisonnalité préservée, taux de marge constant.</div></div>
       <div class="feature-card" style="--color:var(--gr);--icon-bg:var(--grb)"><div class="feature-icon">🧾</div><div class="feature-label">TVA</div><div class="feature-title">Franchise et assujettissement</div><div class="feature-desc">Seuils 2026 (37 500 € services / 94 300 € commerce), déclaration mensuelle ou trimestrielle.</div></div>
       <div class="feature-card" style="--color:var(--ac);--icon-bg:var(--ag)"><div class="feature-icon">💰</div><div class="feature-label">Trésorerie</div><div class="feature-title">Flux avec décalages réels</div><div class="feature-desc">Encaissements et décaissements avec délais configurables, graphique de solde, alertes tension.</div></div>
-      <div class="feature-card" style="--color:var(--pu);--icon-bg:rgba(155,135,245,.1)"><div class="feature-icon">🧭</div><div class="feature-label">Cap — Assistant IA</div><div class="feature-title">Votre associé financier</div><div class="feature-desc">Posez vos questions en langage naturel — Cap analyse vos données réelles et vous répond avec des conseils concrets et actionnables.</div></div>
+    </div>
+
+    <!-- ── Cap : bloc dédié ── -->
+    <div class="reveal" style="margin-top:16px">
+      <div class="cap-block" style="
+        background:linear-gradient(135deg,rgba(155,135,245,.08) 0%,rgba(59,126,255,.06) 100%);
+        border:1px solid rgba(155,135,245,.28);
+        border-radius:16px;
+        padding:28px 32px;
+        display:grid;
+        grid-template-columns:auto 1fr auto;
+        align-items:center;
+        gap:28px;
+      ">
+        <div style="width:52px;height:52px;border-radius:13px;background:linear-gradient(135deg,var(--pu),var(--ac));display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">🧭</div>
+        <div>
+          <div style="font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--pu);margin-bottom:5px">Cap — Assistant IA · Inclus Pro</div>
+          <div style="font-size:16px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px">Votre associé financier, disponible à tout moment</div>
+          <div style="font-size:13px;color:var(--t2);line-height:1.65;max-width:560px">Posez vos questions en langage naturel — <em>« Suis-je rentable ce trimestre ? »</em>, <em>« Combien puis-je me verser ce mois-ci ? »</em> — Cap analyse vos données réelles et répond avec des conseils concrets, sans jargon comptable.</div>
+        </div>
+        <a class="btn btn-pro cap-cta" style="flex-shrink:0;white-space:nowrap" href="/app">
+          Essayer Cap →
+        </a>
+      </div>
     </div>
   </div>
 </section>
@@ -785,7 +802,7 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
 <section class="cta-section">
   <div class="container reveal">
     <h2>Prêt à piloter votre activité<br>avec clarté ?</h2>
-    <p>14 jours d'essai Pro complet, sans carte bancaire. Rejoignez les indépendants qui pilotent vraiment.</p>
+    <p>14 jours d'essai Pro complet, sans carte bancaire. Vos données restent les vôtres, pour toujours.</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative">
       <a class="btn btn-primary btn-lg" href="/app">
         Démarrer mon essai gratuit
@@ -808,7 +825,7 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
           </div>
           <span class="footer-logo-name">LogPose</span>
         </div>
-        <p class="footer-tagline">Financial OS pour TPE & indépendants français. Pilotez votre activité avec la clarté d'un expert.</p>
+        <p class="footer-tagline">Tableau de bord financier pour TPE & indépendants français. Pilotez votre activité avec clarté, sans jargon comptable.</p>
       </div>
       <div>
         <div class="footer-links-title">Produit</div>
@@ -855,7 +872,7 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
     <div class="modal-hdr"><span class="modal-title">Conditions Générales d'Utilisation</span><button class="modal-close" onclick="closeModal('cgu')">×</button></div>
     <div class="modal-body">
       <h3>1. Objet</h3><p>Les présentes CGU régissent l'utilisation du service LogPose, accessible à l'adresse logposefr.com.</p>
-      <h3>2. Accès au service</h3><p>L'accès nécessite la création d'un compte avec une adresse email valide. Le plan gratuit est limité à 3 articles et 3 charges. Le plan Pro (25 €/mois) offre des fonctionnalités étendues.</p>
+      <h3>2. Accès au service</h3><p>L'accès nécessite la création d'un compte avec une adresse email valide. Le plan gratuit est limité à 3 articles et 3 charges. Le plan Pro (25 €/mois) offre un accès complet à tous les modules, jusqu'à 25 articles et 25 charges.</p>
       <h3>3. Utilisation</h3><p>Le service est destiné à un usage professionnel pour le pilotage financier des TPE et indépendants. Toute utilisation frauduleuse est interdite.</p>
       <h3>4. Données</h3><p>Vos données financières sont stockées de manière sécurisée et ne sont jamais partagées avec des tiers.</p>
       <h3>5. Responsabilité</h3><p>LogPose est un outil d'aide à la décision. Il ne remplace pas les conseils d'un expert-comptable ou conseiller fiscal.</p>
