@@ -378,7 +378,9 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
       Démarrer mon essai gratuit
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
-    <a class="btn btn-ghost btn-lg" href="#features">Voir les modules</a>
+    <a class="btn btn-ghost btn-lg" href="#lead-magnet">
+      📥 Recevoir le guide gratuit
+    </a>
   </div>
 
   <p class="hero-note">14 jours d'essai Pro complet · Aucune carte bancaire · Données sécurisées</p>
@@ -645,11 +647,11 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
       <div class="features-sep-line"></div>
     </div>
     <div class="features-grid reveal">
-      <div class="feature-card" style="--color:var(--pu);--icon-bg:rgba(155,135,245,.1)"><div class="feature-icon">⚖️</div><div class="feature-label">Marge & Rentabilité</div><div class="feature-title">Waterfall et point mort</div><div class="feature-desc">Waterfall CA→marge nette, BFR, point mort mensuel, tableau de rentabilité article par article.</div></div>
+      <div class="feature-card" style="--color:var(--pu);--icon-bg:rgba(155,135,245,.1)"><div class="feature-icon">⚖️</div><div class="feature-label">Marge & Rentabilité</div><div class="feature-title">Savoir réellement si vous gagnez de l'argent</div><div class="feature-desc">Visualisez ce qu'il vous reste après chaque coût, article par article. Identifiez en un coup d'œil ce qui est rentable — et ce qui ne l'est pas.</div></div>
       <div class="feature-card" style="--color:var(--am);--icon-bg:rgba(245,158,11,.1)"><div class="feature-icon">🎭</div><div class="feature-label">Scénarios</div><div class="feature-title">Simulations A/B en temps réel</div><div class="feature-desc">3 onglets Réel/A/B, simulation prix + quantités + charges avec comparaison graphique instantanée.</div></div>
       <div class="feature-card" style="--color:#22d3c8;--icon-bg:rgba(34,211,200,.1)"><div class="feature-icon">🔭</div><div class="feature-label">Prévisionnel</div><div class="feature-title">Projection sur 36 mois</div><div class="feature-desc">3 hypothèses (pessimiste/réaliste/optimiste), saisonnalité préservée, taux de marge constant.</div></div>
       <div class="feature-card" style="--color:var(--gr);--icon-bg:var(--grb)"><div class="feature-icon">🧾</div><div class="feature-label">TVA</div><div class="feature-title">Franchise et assujettissement</div><div class="feature-desc">Seuils 2026 (37 500 € services / 94 300 € commerce), déclaration mensuelle ou trimestrielle.</div></div>
-      <div class="feature-card" style="--color:var(--ac);--icon-bg:var(--ag)"><div class="feature-icon">💰</div><div class="feature-label">Trésorerie</div><div class="feature-title">Flux avec décalages réels</div><div class="feature-desc">Encaissements et décaissements avec délais configurables, graphique de solde, alertes tension.</div></div>
+      <div class="feature-card" style="--color:var(--ac);--icon-bg:var(--ag)"><div class="feature-icon">💰</div><div class="feature-label">Trésorerie</div><div class="feature-title">Anticiper les mois difficiles avant qu'ils arrivent</div><div class="feature-desc">Visualisez votre solde semaine par semaine, en tenant compte des délais réels de paiement. LogPose vous alerte avant que la tension devienne un problème.</div></div>
     </div>
 
     <!-- ── Cap : bloc dédié ── -->
@@ -668,7 +670,24 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
         <div>
           <div style="font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--pu);margin-bottom:5px">Cap — Assistant IA · Inclus Pro</div>
           <div style="font-size:16px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px">Votre associé financier, disponible à tout moment</div>
-          <div style="font-size:13px;color:var(--t2);line-height:1.65;max-width:560px">Posez vos questions en langage naturel — <em>« Suis-je rentable ce trimestre ? »</em>, <em>« Combien puis-je me verser ce mois-ci ? »</em> — Cap analyse vos données réelles et répond avec des conseils concrets, sans jargon comptable.</div>
+          <div style="font-size:13px;color:var(--t2);line-height:1.65;max-width:560px">Posez vos questions en langage naturel — Cap analyse vos données réelles et répond avec des conseils concrets, sans jargon comptable.</div>
+
+        <!-- Échange simulé -->
+        <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px;max-width:560px">
+          <!-- Question utilisateur -->
+          <div style="display:flex;justify-content:flex-end">
+            <div style="background:var(--ag);border:1px solid rgba(59,126,255,.2);border-radius:12px 12px 4px 12px;padding:10px 14px;font-size:12.5px;color:var(--t1);max-width:85%">
+              Combien puis-je me verser ce mois-ci ?
+            </div>
+          </div>
+          <!-- Réponse Cap -->
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--pu),var(--ac));display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px">🧭</div>
+            <div style="background:var(--bgc);border:1px solid var(--bd);border-radius:4px 12px 12px 12px;padding:10px 14px;font-size:12.5px;color:var(--t2);line-height:1.6;max-width:90%">
+              Avec vos encaissements du mois et vos charges fixes, vous pouvez vous verser environ <strong style="color:var(--t1)">2 200 €</strong> tout en conservant une marge de sécurité de 3 mois. Votre trésorerie reste positive jusqu'en septembre.
+            </div>
+          </div>
+        </div>
         </div>
         <a class="btn btn-pro cap-cta" style="flex-shrink:0;white-space:nowrap" href="/app">
           Essayer Cap →
@@ -777,7 +796,7 @@ footer{background:var(--bgs);border-top:1px solid var(--bd);padding:48px 24px 32
 </section>
 
 <!-- ════ LEAD MAGNET ════ -->
-<section class="lm-section">
+<section class="lm-section" id="lead-magnet">
   <div class="lm-card reveal">
     <div class="lm-icon">📥</div>
     <div class="lm-content">
